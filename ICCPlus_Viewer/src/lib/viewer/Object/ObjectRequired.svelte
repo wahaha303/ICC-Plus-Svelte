@@ -19,7 +19,7 @@
     import type { Requireds } from '$lib/store/types';
     import { app, globalReqMap, groupMap, choiceMap, pointTypeMap, replaceText, rowMap, sanitizeArg, checkReq, checkRequirements } from '$lib/store/store.svelte';
     
-    const { isRemoved, required, scoreText }: { isRemoved?: boolean; required: Requireds; scoreText?: string; } = $props();
+    const { required, scoreText }: { required: Requireds; scoreText?: string; } = $props();
     
     let globalRequireds = $derived.by(() => {
         let globalReq = globalReqMap.get(required.reqId);
@@ -29,7 +29,7 @@
         return [];
     });
     let isShowReq = $derived.by(() => {
-        if (required.showRequired && !isRemoved) {
+        if (required.showRequired) {
             if (required.hideRequired) {
                 if (required.requireds.length > 0) {
                     return checkRequirements(required.requireds) && !checkReq(required);

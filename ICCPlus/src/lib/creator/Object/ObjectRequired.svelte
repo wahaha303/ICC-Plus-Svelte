@@ -98,7 +98,7 @@
     import type { Choice, Requireds } from '$lib/store/types';
     import { app, globalReqMap, groupMap, choiceMap, pointTypeMap, replaceText, rowMap, sanitizeArg, snackbarVariables, dlgVariables, checkReq, checkRequirements } from '$lib/store/store.svelte';
     
-    let { isEditModeOn, isRemoved, required, scoreText, choice, index }: { isEditModeOn?: boolean; isRemoved?: boolean; required: Requireds; scoreText?: string; choice?: Choice; index?: number } = $props();
+    let { isEditModeOn, required, scoreText, choice, index }: { isEditModeOn?: boolean; required: Requireds; scoreText?: string; choice?: Choice; index?: number } = $props();
     
     let width = $state(0);
     let col6 = $derived.by(() => {
@@ -113,7 +113,7 @@
         return [];
     });
     let isShowReq = $derived.by(() => {
-        if (required.showRequired && !isRemoved) {
+        if (required.showRequired) {
             if (required.hideRequired) {
                 if (required.requireds.length > 0) {
                     return checkRequirements(required.requireds) && !checkReq(required);

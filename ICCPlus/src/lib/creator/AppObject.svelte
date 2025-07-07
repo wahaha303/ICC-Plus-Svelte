@@ -1237,15 +1237,19 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#each choice.scores as score}
-                                <ObjectScore score={score} row={row} choice={choice} />
-                            {/each}
+                            {#if !row.objectScoreRemoved}
+                                {#each choice.scores as score}
+                                    <ObjectScore score={score} row={row} choice={choice} />
+                                {/each}
+                            {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#each choice.requireds as required}
-                                <ObjectRequired isRemoved={row.objectRequirementRemoved || false} required={required} scoreText={scoreText} />
-                            {/each}
+                            {#if !row.objectRequirementRemoved}
+                                {#each choice.requireds as required}
+                                    <ObjectRequired required={required} scoreText={scoreText} />
+                                {/each}
+                            {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
@@ -1305,15 +1309,19 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#each choice.scores as score}
-                                <ObjectScore score={score} row={row} choice={choice} />
-                            {/each}
+                            {#if !row.objectScoreRemoved}
+                                {#each choice.scores as score}
+                                    <ObjectScore score={score} row={row} choice={choice} />
+                                {/each}
+                            {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#each choice.requireds as required}
-                                <ObjectRequired isRemoved={row.objectRequirementRemoved || false} required={required} scoreText={scoreText} />
-                            {/each}
+                            {#if !row.objectRequirementRemoved}
+                                {#each choice.requireds as required}
+                                    <ObjectRequired required={required} scoreText={scoreText} />
+                                {/each}
+                            {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
@@ -1356,15 +1364,19 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#each choice.scores as score, i}
-                                <ObjectScore score={score} row={row} choice={choice} />
-                            {/each}
+                            {#if !row.objectScoreRemoved}
+                                {#each choice.scores as score}
+                                    <ObjectScore score={score} row={row} choice={choice} />
+                                {/each}
+                            {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#each choice.requireds as required}
-                                <ObjectRequired isRemoved={row.objectRequirementRemoved || false} required={required} scoreText={scoreText} />
-                            {/each}
+                            {#if !row.objectRequirementRemoved}
+                                {#each choice.requireds as required}
+                                    <ObjectRequired required={required} scoreText={scoreText} />
+                                {/each}
+                            {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}

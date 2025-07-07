@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.0.0-beta-0.9.3';
+export const appVersion = '2.0.0-beta-0.9.4';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
