@@ -1,0 +1,12 @@
+diff --git a/node_modules/@smui/switch/dist/Switch.svelte b/node_modules/@smui/switch/dist/Switch.svelte
+index fe1845e..a6a6e0a 100644
+--- a/node_modules/@smui/switch/dist/Switch.svelte
++++ b/node_modules/@smui/switch/dist/Switch.svelte
+@@ -33,6 +33,7 @@
+       instance.handleClick();
+     }
+     restProps.onclick?.(e);
++    e.currentTarget.blur();
+   }}
+ >
+   <div class="mdc-switch__track"></div>

@@ -1,0 +1,12 @@
+diff --git a/node_modules/@smui/list/dist/Item.svelte b/node_modules/@smui/list/dist/Item.svelte
+index d681405..7495666 100644
+--- a/node_modules/@smui/list/dist/Item.svelte
++++ b/node_modules/@smui/list/dist/Item.svelte
+@@ -55,6 +55,7 @@
+   onclick={(e: MouseEvent) => {
+     action(e);
+     restProps.onclick?.(e);
++    e.currentTarget.blur();
+   }}
+   onkeydown={(e: KeyboardEvent) => {
+     handleKeydown(e);

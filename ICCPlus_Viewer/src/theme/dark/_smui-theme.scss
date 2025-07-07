@@ -1,0 +1,57 @@
+@use 'sass:color';
+
+@use '@material/theme/color-palette';
+
+// Svelte Colors! (Dark Theme)
+@use '@material/theme/index' as theme with (
+  $primary: color.scale(#676778, $whiteness: -20%),
+  $secondary: color.scale(#1976d2, $whiteness: -20%),
+  $surface: color.adjust(color-palette.$grey-900, $blue: +4),
+  $background: #000,
+  $error: color-palette.$red-700
+);
+
+:root {
+  --mdc-text-button-label-text-color: rgba(255, 255, 255, 0.87);
+  --mdc-text-button-hover-state-layer-color: #fff;
+}
+
+html,
+body {
+  background-color: #000;
+  color: theme.$on-surface;
+}
+
+a {
+  color: #40b3ff;
+}
+a:visited {
+  color: color.scale(#40b3ff, $lightness: -35%);
+}
+
+.toolbar {
+  background-color: var(--bs-gray-600);
+  color: rgba(255, 255, 255, 0.87)
+}
+.toolbar--row {
+  background-color: var(--bs-gray-700);
+}
+.point-slot {
+  border: thin solid rgba(131,131,134,1);
+}
+.mdc-dialog .mdc-dialog__scrim {
+  background-color: rgba(0,0,0,.32) !important;
+}
+.smui-chip-input {
+  background-color: rgb(41.88, 41.88, 45.72);
+}
+.music-player {
+  background-color: theme.$surface !important;
+  color: theme.$on-surface !important;
+}
+.music-player--button {
+  color: theme.$on-surface !important;
+}
+.text-input {
+  color: var(--bs-gray-800);
+}

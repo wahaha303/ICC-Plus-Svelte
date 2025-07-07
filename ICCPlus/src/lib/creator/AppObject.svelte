@@ -1,0 +1,4932 @@
+{#if bCreatorMode && row.isEditModeOn && !row.isResultRow}
+    <div class={objectWidthClass()}>
+        <div bind:clientWidth={width} class="container-fluid gx-0">
+            <Card class="mx-1 my-2">
+                <CardContent class="p-0">
+                    <div class="toolbar justify-space-around">
+                        {#each choiceToolbarButtons as choiceButton}
+                            <Wrapper text={choiceButton.text}>
+                                <IconButton onclick={choiceButton.action}><i class={choiceButton.icon}></i></IconButton>
+                            </Wrapper>
+                        {/each}
+                    </div>
+                    <div class="py-3 px-5 col-12">
+                        {#if choice.image && !app.hideImages}
+                            <button type="button" onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} class="btn--image-background">
+                                <img src={choice.image} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
+                            </button>
+                        {/if}
+                        <Button onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} variant="raised">
+                            <Label>Change Image</Label>
+                        </Button>
+                    </div>
+                    <div class="row gx-1 p-2">
+                        <div class="col-12">
+                            <Textfield textarea bind:value={choice.text} label="Choice Text" variant="filled" input$rows={5} />
+                        </div>
+                    </div>
+                    <div class="row g-1 px-2 pb-2">
+                        <div class={col6}>
+                            <Textfield bind:value={choice.title} label="Choice Title" variant="filled" />
+                        </div>
+                        <div class={col6}>
+                            <Textfield bind:value={choice.id} onfocus={() => choiceId = choice.id} onchange={() => changeObjectId()} label="Choice Id" variant="filled" />
+                        </div>
+                    </div>
+                    {#if !app.hideChoiceDT}
+                        <div class="row g-1 px-2 pb-2">
+                            <div class="col-12">
+                                <Textfield bind:value={() => choice.debugTitle ?? '', (e) => choice.debugTitle = e} label="Debug Title" variant="filled" />
+                            </div>
+                        </div>
+                    {/if}
+                    <div class="row g-1 px-2 pb-2">
+                        <div class={col6}>
+                            <Select bind:value={choice.template} label="Template" variant="filled" alwaysFloat={true}>
+                                {#each templates as template (template.text)}
+                                    <Option value={template.value}>{template.text}</Option>
+                                {/each}
+                            </Select>
+                        </div>
+                        <div class={col6}>
+                            <Select bind:value={choice.objectWidth} label="Choices Per Row" variant="filled" alwaysFloat={true}>
+                                {#each objectWidths as objectWidth (objectWidth.text)}
+                                    <Option value={objectWidth.value}>{objectWidth.text}</Option>
+                                {/each}
+                            </Select>
+                        </div>
+                    </div>
+                    <div class="toolbar justify-space-around">
+                        {#each choiceBottomToolbarButtons as choiceButton}
+                            <Wrapper text={choiceButton.text}>
+                                <IconButton onclick={choiceButton.action}><i class={choiceButton.icon}></i></IconButton>
+                            </Wrapper>
+                        {/each}
+                    </div>
+                    <Accordion>
+                    {#if choice.scores.length > 0}                        
+                        <Panel class="bordered-panel {panelScore ? 'on-top' : ''}" bind:open={panelScore} variant="unelevated" conditionalRender={true}>
+                            <Header class="p-0">
+                                Scores: {choice.scores.length}
+                            </Header>
+                            <AcdContent style="overflow:visible">
+                                {#if panelScore}
+                                <div class="row gy-4">
+                                    {#each choice.scores as score, i}
+                                        <div class="col-12 p-0">
+                                            <ObjectScore score={score} choice={choice} isEditModeOn={true} num={i} />
+                                            <Button onclick={() => {choice.scores.splice(i, 1); scoreSet.delete(score.idx)}} class="w-100 mt-1" variant="raised">
+                                                <Label>Delete</Label>
+                                            </Button>
+                                        </div>
+                                    {/each}
+                                </div>
+                                {/if}
+                            </AcdContent>
+                        </Panel>
+                    {/if}
+                    {#if choice.addons.length > 0}
+                        <Panel class="bordered-panel {panelAddon ? 'on-top' : ''}" bind:open={panelAddon} variant="unelevated" conditionalRender={true}>
+                            <Header class="p-0">
+                                Addons: {choice.addons.length}
+                            </Header>
+                            <AcdContent style="overflow:visible">
+                                {#if panelAddon}
+                                <div class="row gy-4">
+                                    <Wrapper text="Applies only when the choice image template is left or right." innerClass="mt-3">
+                                        <FormField class="col-12 p-0">
+                                            <Checkbox bind:checked={() => choice.useSeperateAddon ?? false, (e) => choice.useSeperateAddon = e} onchange={() => {
+                                                if (!choice.useSeperateAddon) {
+                                                    delete choice.useSeperateAddon;
+                                                }
+                                            }} />
+                                            {#snippet label()}
+                                                Use Seperate Layout
+                                            {/snippet}
+                                        </FormField>
+                                    </Wrapper>
+                                    <div class="col-12 p-0 mt-0">
+                                        <Select bind:value={choice.addonJustify} label="Addon Justify" variant="filled">
+                                            {#each justifies as justify}
+                                                <Option value={justify}>{justify}</Option>
+                                            {/each}
+                                        </Select>
+                                    </div>
+                                    {#each choice.addons as addon, i}
+                                        <div class="col-12 p-0">
+                                            <ObjectAddon choice={choice} addon={addon} isEditModeOn={true} index={i} />
+                                            <Button onclick={() => choice.addons.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                                                <Label>Delete</Label>
+                                            </Button>
+                                        </div>
+                                    {/each}
+                                </div>
+                                {/if}
+                            </AcdContent>
+                        </Panel>
+                    {/if}
+                    {#if choice.requireds.length > 0}
+                        <Panel class="bordered-panel {panelReq ? 'on-top' : ''}" bind:open={panelReq} variant="unelevated" conditionalRender={true}>
+                            <Header class="p-0">
+                                Requirements: {choice.requireds.length}
+                            </Header>
+                            <AcdContent style="overflow:visible">
+                                {#if panelReq}
+                                <div class="row">
+                                    {#each choice.requireds as req, i}
+                                        <div class="{req.requireds.length > 0 ? 'col-12' : reqCol} p-2">
+                                            <ObjectRequired required={req} isEditModeOn={true} choice={choice} index={i} />
+                                            <Button onclick={() => choice.requireds.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                                                <Label>Delete</Label>
+                                            </Button>
+                                        </div>
+                                    {/each}
+                                </div>
+                                {/if}
+                            </AcdContent>
+                        </Panel>
+                    {/if}
+                    {#if choice.groups.length > 0}
+                        <Panel class="bordered-panel {panelGroup ? 'on-top' : ''}" bind:open={panelGroup} variant="unelevated" conditionalRender={true}>
+                            <Header class="p-0">
+                                Groups: {choice.groups.length}
+                            </Header>
+                            <AcdContent style="overflow:visible">
+                                {#if panelGroup}
+                                <div class="row">
+                                    {#each choice.groups, i}
+                                        <div class="col-12 p-0 pb-2">
+                                            <ObjectGroup choice={choice} index={i} />
+                                            <Button onclick={() => choice.groups.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                                                <Label>Delete</Label>
+                                            </Button>
+                                        </div>
+                                    {/each}
+                                </div>
+                                {/if}
+                            </AcdContent>
+                        </Panel>
+                    {/if}
+                    <Panel class="bordered-panel" variant="unelevated">
+                        <Header class="p-0">
+                            Functions:
+                        </Header>
+                        <AcdContent class="p-0">
+                            <Accordion class="p-0">
+                                <Panel class="bordered-panel" bind:open={panel01} variant="unelevated" conditionalRender={true}>
+                                    <Header class="p-0">
+                                        - This Choice
+                                        {#snippet icon()}
+                                            <IconButton toggle pressed={panel01} size="mini">
+                                                <Icon class="mdi mdi-chevron-up" on></Icon>
+                                                <Icon class="mdi mdi-chevron-down"></Icon>
+                                            </IconButton>
+                                        {/snippet}
+                                    </Header>
+                                    <AcdContent style="overflow:visible">
+                                        {#if panel01}
+                                        <div class="row gy-3">
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isSelectableMultiple ?? false, (e) => choice.isSelectableMultiple = e} onchange={() => {
+                                                    if (choice.isSelectableMultiple) {
+                                                        choice.numMultipleTimesMinus = 0;
+                                                        choice.numMultipleTimesPluss = 0;
+                                                        choice.isMultipleUseVariable = true;
+                                                        choice.useSlider = false;
+                                                    } else {
+                                                        delete choice.isSelectableMultiple;
+                                                        delete choice.isMultipleUseVariable;
+                                                        delete choice.multipleScoreId;
+                                                        delete choice.hideMultipleCounter;
+                                                        delete choice.numMultipleTimesMinus;
+                                                        delete choice.numMultipleTimesPluss;
+                                                        delete choice.allowSelectByClick;
+                                                        delete choice.useSlider;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Can Be Selected Multiple Times
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.isSelectableMultiple}
+                                                <Wrapper text="Disabling this checkbox will make most features unavailable.">
+                                                    <FormField class="col-12 m-1 p-0">
+                                                        <Checkbox bind:checked={() => choice.isMultipleUseVariable ?? false, (e) => choice.isMultipleUseVariable = e} onchange={() => {
+                                                            if (choice.isMultipleUseVariable) {
+                                                                delete choice.multipleScoreId;
+                                                            } else {
+                                                                delete choice.isMultipleUseVariable;
+                                                            }
+                                                        }} />
+                                                        {#snippet label()}
+                                                            Use a Simple Variable
+                                                        {/snippet}
+                                                    </FormField>
+                                                </Wrapper>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.allowSelectByClick ?? false, (e) => choice.allowSelectByClick = e} onchange={() => {
+                                                        if (!choice.allowSelectByClick) delete choice.allowSelectByClick;
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Allow First Selection by Clicking the Choice
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.allowSelectByClick}
+                                                    <FormField class="col-12 m-1 p-0">
+                                                        <Checkbox bind:checked={() => choice.hideCounterUntilSelect ?? false, (e) => choice.hideCounterUntilSelect = e} onchange={() => {
+                                                            if (!choice.hideCounterUntilSelect) delete choice.hideCounterUntilSelect;
+                                                        }} />
+                                                        {#snippet label()}
+                                                            Hide Counter Until First Selection
+                                                        {/snippet}
+                                                    </FormField>
+                                                {/if}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.hideMultipleCounter ?? false, (e) => choice.hideMultipleCounter = e} onchange={() => {
+                                                        if (!choice.hideMultipleCounter) delete choice.hideMultipleCounter;
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Hide Counter if Requirement Is Missing
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.useSlider ?? false, (e) => choice.useSlider = e} onchange={() => {
+                                                        if (!choice.useSlider) {
+                                                            delete choice.useSlider;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Enable Slider for Selection
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if !choice.isMultipleUseVariable}
+                                                    <div class="col-12 m-1">The point type used here should only be used for this choice.</div>
+                                                    <div class="col-12 m-1 px-2">
+                                                        <Autocomplete
+                                                            options={$optimizedPointTypes}
+                                                            getOptionLabel={getPointTypeLabel}
+                                                            bind:value={choice.multipleScoreId}
+                                                            label="Point Type"
+                                                            toggle={true}
+                                                            showMenuWithNoInput={true}
+                                                            textfield$variant="filled"
+                                                            class="w-100 p-0"
+                                                        />
+                                                    </div>
+                                                {/if}
+                                                <div class="col-12 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.numMultipleTimesMinus ?? 0, (e) => choice.numMultipleTimesMinus = e} label="Number at which the minus stops working" type="number" variant="filled" />
+                                                    <Textfield bind:value={() => choice.numMultipleTimesPluss ?? 0, (e) => choice.numMultipleTimesPluss = e} label="Number at which the plus stops working" type="number" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isNotSelectable ?? false, (e) => choice.isNotSelectable = e} onchange={() => {
+                                                    if (!choice.isNotSelectable) delete choice.isNotSelectable;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Selected
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.selectOnce ?? false, (e) => choice.selectOnce = e} onchange={() => {
+                                                    if (!choice.selectOnce) delete choice.selectOnce;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Deselected Manually
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.notDeselectedByClean ?? false, (e) => choice.notDeselectedByClean = e} onchange={() => {
+                                                    if (!choice.notDeselectedByClean) delete choice.notDeselectedByClean;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Reset Manually
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isNotResult ?? false, (e) => choice.isNotResult = e} onchange={() => {
+                                                    if (!choice.isNotResult) delete choice.isNotResult;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Shown in Result Row
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isImageUpload ?? false, (e) => choice.isImageUpload = e} onchange={() => {
+                                                    if (!choice.isImageUpload) delete choice.isImageUpload;
+                                                }} />
+                                                {#snippet label()}
+                                                    Allows the Player to Upload Image
+                                                {/snippet}
+                                            </FormField>
+                                        </div>
+                                        {/if}
+                                    </AcdContent>
+                                </Panel>
+                                <Panel class="bordered-panel {panel02 ? 'on-top' : ''}" bind:open={panel02} variant="unelevated" conditionalRender={true}>
+                                    <Header class="p-0">
+                                        - Other Choices
+                                        {#snippet icon()}
+                                            <IconButton toggle pressed={panel02} size="mini">
+                                                <Icon class="mdi mdi-chevron-up" on></Icon>
+                                                <Icon class="mdi mdi-chevron-down"></Icon>
+                                            </IconButton>
+                                        {/snippet}
+                                    </Header>
+                                    <AcdContent style="overflow:visible">
+                                        {#if panel02}
+                                        <div class="row gy-3">
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.cleanACtivatedOnSelect ?? false, (e) => choice.cleanACtivatedOnSelect = e} onchange={() => {
+                                                    if (!choice.cleanACtivatedOnSelect) delete choice.cleanACtivatedOnSelect;
+                                                }} />
+                                                {#snippet label()}
+                                                    Clear All Selected Choices
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.activateOtherChoice ?? false, (e) => choice.activateOtherChoice = e} onchange={() => {
+                                                    if (!choice.activateOtherChoice) {
+                                                        delete choice.activateOtherChoice;
+                                                        delete choice.isNotDeactivate;
+                                                        delete choice.isAllowDeselect;
+                                                        delete choice.isActivateRandom;
+                                                        delete choice.numActivateRandom;
+                                                        delete choice.activateThisChoice;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Force Other Choices to Be Active
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.activateOtherChoice}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.isNotDeactivate ?? false, (e) => choice.isNotDeactivate = e} onchange={() => {
+                                                        if (!choice.isNotDeactivate) delete choice.isNotDeactivate;
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Keep Other Choices Active when Deselected
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.isAllowDeselect ?? false, (e) => choice.isAllowDeselect = e} onchange={() => {
+                                                        if (!choice.isAllowDeselect) delete choice.isAllowDeselect;
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Allow Deselection of Activated Choices
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.isActivateRandom ?? false, (e) => choice.isActivateRandom = e} onchange={() => {
+                                                        if (!choice.isActivateRandom) delete choice.isActivateRandom;
+                                                        else choice.numActivateRandom = 0;
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Activate Choices at Random
+                                                    {/snippet}
+                                                </FormField>
+                                                <div class="col-12 m-1 px-4">
+                                                    Using the same ID multiple times may cause issues. You can use comma to activate multiple choices (ID,ID,ID/ON#1).
+                                                </div>
+                                                <div class="col-12 m-1 px-2">
+                                                    {#if choice.isActivateRandom}
+                                                        <Textfield bind:value={() => choice.numActivateRandom ?? 0, (e) => choice.numActivateRandom = e} label="Number of choices to activate" type="number" variant="filled" />
+                                                    {/if}
+                                                    <Textfield bind:value={() => choice.activateThisChoice ?? '', (e) => choice.activateThisChoice = e} label="Choice / Group IDs" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.deactivateOtherChoice ?? false, (e) => choice.deactivateOtherChoice = e} onchange={() => {
+                                                    if (!choice.deactivateOtherChoice) {
+                                                        delete choice.deactivateOtherChoice;
+                                                        delete choice.deactivateThisChoice;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Deactivate Other Choices
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.deactivateOtherChoice}
+                                                <div class="col-12 m-1 px-4">
+                                                    Using the same ID multiple times may cause issues. You can use comma to activate multiple choices (ID,ID,ID/ON#1).
+                                                </div>
+                                                <div class="col-12 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.deactivateThisChoice ?? '', (e) => choice.deactivateThisChoice = e} label="Choice / Group IDs" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.discountOther ?? false, (e) => choice.discountOther = e} onchange={() => {
+                                                    if (choice.discountOther) {
+                                                        choice.discountGroups = [];
+                                                        choice.discountPointTypes = [];
+                                                    } else {
+                                                        delete choice.discountOther;
+                                                        delete choice.discountLowLimitIsOn;
+                                                        delete choice.discountLowLimit;
+                                                        delete choice.discountShow;
+                                                        delete choice.discountBeforeText;
+                                                        delete choice.discountAfterText
+                                                        delete choice.isDisChoices;
+                                                        delete choice.discountGroups;
+                                                        delete choice.discountChoices;
+                                                        delete choice.discountRows;
+                                                        delete choice.discountPointTypes;
+                                                        delete choice.discountOperator;
+                                                        delete choice.discountValue;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Discount Other Choices
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.discountOther}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.stackableDiscount ?? false, (e) => choice.stackableDiscount = e} onchange={() => {
+                                                        if (!choice.stackableDiscount) delete choice.stackableDiscount;
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Allow Stacking Discounts
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.discountLowLimitIsOn ?? false, (e) => choice.discountLowLimitIsOn = e} onchange={() => {
+                                                        if (!choice.discountLowLimitIsOn) {
+                                                            delete choice.discountLowLimitIsOn;
+                                                            delete choice.discountLowLimit;
+                                                        } else {
+                                                            choice.discountLowLimit = 0;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Enable Minimum Score Cap
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.discountLowLimitIsOn}
+                                                    <div class="col-12 m-1 px-2">
+                                                        <Textfield bind:value={() => choice.discountLowLimit ?? 0, (e) => choice.discountLowLimit = e} label="Score Cap" type="number" variant="filled" />
+                                                    </div>
+                                                {/if}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.discountShow ?? false, (e) => choice.discountShow = e} onchange={() => {
+                                                        if (!choice.discountShow) {
+                                                            delete choice.discountShow;
+                                                            delete choice.discountBeforeText;
+                                                            delete choice.discountAfterText;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Display Discounted Score
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.discountShow}
+                                                    <FormField class="col-12 m-1 p-0">
+                                                        <Checkbox bind:checked={() => choice.discountTextDuplicated ?? false, (e) => choice.discountTextDuplicated = e} onchange={() => {
+                                                            if (!choice.discountTextDuplicated) delete choice.discountTextDuplicated;
+                                                        }} />
+                                                        {#snippet label()}
+                                                            Display Repeated Text Only Once
+                                                        {/snippet}
+                                                    </FormField>
+                                                    <div class={col6}>
+                                                        <Textfield bind:value={() => choice.discountBeforeText ?? '', (e) => choice.discountBeforeText = e} label="Added to Text Before" variant="filled" />
+                                                    </div>
+                                                    <div class={col6}>
+                                                        <Textfield bind:value={() => choice.discountAfterText ?? '', (e) => choice.discountAfterText = e} label="Added to Text After" variant="filled" />
+                                                    </div>
+                                                {/if}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.isDisChoices ?? false, (e) => choice.isDisChoices = e} onchange={() => {
+                                                        if (choice.isDisChoices) {
+                                                            choice.discountChoices = [];
+                                                            choice.discountRows = [];
+                                                            delete choice.discountGroups;
+                                                        } else {
+                                                            delete choice.isDisChoices;
+                                                            delete choice.discountChoices;
+                                                            delete choice.discountRows;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Select Individual Choices Instead of Groups
+                                                    {/snippet}
+                                                </FormField>
+                                                <div class="col-12 m-1 px-4">
+                                                    Do not select choices that are already included in the selected rows.
+                                                </div>
+                                                <div class="col-12 m-1 px-2">
+                                                    {#if choice.isDisChoices}
+                                                        <CustomChipInput acValue={choice.discountRows ?? []} acOptions={optimizedRowList} inputLabel="Rows to apply discount" getLabel={getRowLabel} selectProp={choice} />
+                                                        <CustomChipInput acValue={choice.discountChoices ?? []} acOptions={optimizedChoiceList} inputLabel="Choices to apply discount" getLabel={getChoiceLabel} selectProp={choice} />
+                                                    {:else}
+                                                        <CustomChipInput acValue={choice.discountGroups ?? []} acOptions={$optimizedGroups} inputLabel="Groups to apply discount" getLabel={getGroupLabel} selectProp={choice} />
+                                                    {/if}
+                                                    <CustomChipInput acValue={choice.discountPointTypes ?? []} acOptions={$optimizedPointTypes} inputLabel="Point Types to apply discount" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                </div>
+                                                <div class={col6}>
+                                                    <Select bind:value={choice.discountOperator} label="Operator" variant="filled">
+                                                        {#each discountOperators as operator (operator.text)}
+                                                            <Option value={operator.value}>{operator.text}</Option>
+                                                        {/each}
+                                                    </Select>
+                                                </div>
+                                                <div class={col6}>
+                                                    <Textfield bind:value={() => choice.discountValue ?? 0, (e) => choice.discountValue = e} label="Discount Value" type="number" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.duplicateRow ?? false, (e) => choice.duplicateRow = e} onchange={() => {
+                                                    if (!choice.duplicateRow) {
+                                                        delete choice.duplicateRow;
+                                                        delete choice.dRowAddSufReq;
+                                                        delete choice.dRowAddSufFunc;
+                                                        delete choice.duplicateRowId;
+                                                        delete choice.duplicateRowPlace;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Duplicate a Row
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.duplicateRow}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.dRowAddSufReq ?? false, (e) => choice.dRowAddSufReq = e} onchange={() => {
+                                                        if (!choice.dRowAddSufReq) {
+                                                            delete choice.dRowAddSufReq;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Do Not Add Suffix to Requirement IDs
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.dRowAddSufFunc ?? false, (e) => choice.dRowAddSufFunc = e} onchange={() => {
+                                                        if (!choice.dRowAddSufFunc) {
+                                                            delete choice.dRowAddSufFunc;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Do Not Add Suffix to Function IDs
+                                                    {/snippet}
+                                                </FormField>                                                
+                                                <div class="col-12 m-1 px-4">
+                                                    IDs in the duplicated row will have a suffix (e.g., /D#n).
+                                                </div>
+                                                <div class="col-12 m-1 px-2">
+                                                    <Autocomplete
+                                                        options={optimizedRowList}
+                                                        getOptionLabel={getRowLabel}
+                                                        bind:value={choice.duplicateRowId}
+                                                        label="Source Row (to be duplicated)"
+                                                        toggle={true}
+                                                        showMenuWithNoInput={true}
+                                                        textfield$variant="filled"
+                                                        class="w-100 p-0"
+                                                    />
+                                                    <Autocomplete
+                                                        options={optimizedRowList}
+                                                        getOptionLabel={getRowLabel}
+                                                        bind:value={choice.duplicateRowPlace}
+                                                        label="Target Placement (insert after)"
+                                                        toggle={true}
+                                                        showMenuWithNoInput={true}
+                                                        textfield$variant="filled"
+                                                        class="w-100 p-0"
+                                                    />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isContentHidden ?? false, (e) => choice.isContentHidden = e} onchange={() => {
+                                                    if (choice.isContentHidden) {
+                                                        choice.hiddenContentsRow = [];
+                                                        choice.hiddenContentsType = [];
+                                                    } else {
+                                                        delete choice.isContentHidden;
+                                                        delete choice.hiddenContentsRow;
+                                                        delete choice.hiddenContentsType;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Hide the Contents of Choices
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.isContentHidden}
+                                                <div class="col-12 m-1 px-2">
+                                                    <CustomChipInput acValue={choice.hiddenContentsRow ?? []} acOptions={optimizedRowList} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={choice.hiddenContentsType ?? []} acOptions={hideContentValue} inputLabel="Target Content" getLabel={(e) => hideContentText[parseInt(e) - 1]} selectProp={choice} />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.addToAllowChoice ?? false, (e) => choice.addToAllowChoice = e} onchange={() => {
+                                                    if (choice.addToAllowChoice) {
+                                                        choice.idOfAllowChoice = [];
+                                                    } else {
+                                                        delete choice.addToAllowChoice;
+                                                        delete choice.idOfAllowChoice;
+                                                        delete choice.numbAddToAllowChoice;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Adjust Allowed Choices for Rows
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.addToAllowChoice}
+                                                <div class="col-12 m-1 px-2">
+                                                    <CustomChipInput acValue={choice.idOfAllowChoice ?? []} acOptions={optimizedRowList} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
+                                                    <Textfield bind:value={() => choice.numbAddToAllowChoice ?? 0, (e) => choice.numbAddToAllowChoice = e} label="Number to increase or decrease" type="number" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.showAllAddons ?? false, (e) => choice.showAllAddons = e} onchange={() => {
+                                                    if (!choice.showAllAddons) {
+                                                        delete choice.showAllAddons;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Show All Addons
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.changeTemplates ?? false, (e) => choice.changeTemplates = e} onchange={() => {
+                                                    if (!choice.changeTemplates) {
+                                                        delete choice.changeTemplates;
+                                                        delete choice.changeTemplatesList;
+                                                        delete choice.changeToThisTemplate;
+                                                    } else {
+                                                        choice.changeToThisTemplate = 1;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Change Image Template
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.changeTemplates}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.changeAddonTemplate ?? false, (e) => choice.changeAddonTemplate = e} onchange={() => {
+                                                        if (!choice.changeAddonTemplate) {
+                                                            delete choice.changeAddonTemplate;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Change Addon Image Template too
+                                                    {/snippet}
+                                                </FormField>
+                                                <div class="col-12 m-1 px-4">
+                                                    Using the same ID multiple times may cause issues. You can use comma to change multiple items (ID,ID,ID).
+                                                </div>
+                                                <div class="col-12 pe-1">
+                                                    <Select bind:value={() => choice.changeToThisTemplate ?? 1, (e) => choice.changeToThisTemplate = e} label="Template" variant="filled" alwaysFloat={true}>
+                                                        {#each templates as template (template.text)}
+                                                            <Option value={template.value}>{template.text}</Option>
+                                                        {/each}
+                                                    </Select>
+                                                </div>
+                                                <div class="col-12 mt-0 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.changeTemplatesList ?? '', (e) => choice.changeTemplatesList = e} label="Row / Choice / Group IDs" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.changeWidth ?? false, (e) => choice.changeWidth = e} onchange={() => {
+                                                    if (!choice.changeWidth) {
+                                                        delete choice.changeWidth;
+                                                        delete choice.changeWidthList;
+                                                        delete choice.changeToThisWidth;
+                                                    } else {
+                                                        choice.changeToThisWidth = '';
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Change Choices Per Row
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.changeWidth}
+                                                <div class="col-12 m-1 px-4">
+                                                    Using the same ID multiple times may cause issues. You can use comma to change multiple items (ID,ID,ID).
+                                                </div>
+                                                <div class="col-12 pe-1">
+                                                    <Select bind:value={() => choice.changeToThisWidth ?? '', (e) => choice.changeToThisWidth = e} label="Template" variant="filled" alwaysFloat={true}>
+                                                        {#each objectWidths as objectWidth (objectWidth.text)}
+                                                            <Option value={objectWidth.value}>{objectWidth.text}</Option>
+                                                        {/each}
+                                                    </Select>
+                                                </div>
+                                                <div class="col-12 mt-0 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.changeWidthList ?? '', (e) => choice.changeWidthList = e} label="Row / Choice / Group IDs" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                        </div>
+                                        {/if}
+                                    </AcdContent>
+                                </Panel>
+                                <Panel class="bordered-panel {panel03 ? 'on-top' : ''}" bind:open={panel03} variant="unelevated" conditionalRender={true}>
+                                    <Header class="p-0">
+                                        - Effects
+                                        {#snippet icon()}
+                                            <IconButton toggle pressed={panel03} size="mini">
+                                                <Icon class="mdi mdi-chevron-up" on></Icon>
+                                                <Icon class="mdi mdi-chevron-down"></Icon>
+                                            </IconButton>
+                                        {/snippet}
+                                    </Header>
+                                    <AcdContent style="overflow:visible">
+                                        {#if panel03}
+                                        <div class="row gy-3">
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.scrollToRow ?? false, (e) => choice.scrollToRow = e} onchange={() => {
+                                                    if (!choice.scrollToRow) {
+                                                        delete choice.scrollToRow;
+                                                        delete choice.scrollToObject;
+                                                        delete choice.scrollObjectId;
+                                                        delete choice.scrollRowId
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Scroll to Row
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.scrollToRow}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.scrollToObject ?? false, (e) => choice.scrollToObject = e} onchange={() => {
+                                                        if (choice.scrollToObject) {
+                                                            delete choice.scrollRowId;
+                                                        } else {
+                                                            delete choice.scrollToObject;
+                                                            delete choice.scrollObjectId;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Scroll to Choice Instead
+                                                    {/snippet}
+                                                </FormField>
+                                                <div class="col-12 m-1 px-2">
+                                                    {#if choice.scrollToObject}
+                                                        <Autocomplete
+                                                            options={optimizedRowList}
+                                                            getOptionLabel={getChoiceLabel}
+                                                            bind:value={choice.scrollObjectId}
+                                                            label="Target Choice"
+                                                            toggle={true}
+                                                            showMenuWithNoInput={true}
+                                                            textfield$variant="filled"
+                                                            class="w-100 p-0"
+                                                        />
+                                                    {:else}
+                                                        <Autocomplete
+                                                            options={optimizedRowList}
+                                                            getOptionLabel={getRowLabel}
+                                                            bind:value={choice.scrollRowId}
+                                                            label="Target Row"
+                                                            toggle={true}
+                                                            showMenuWithNoInput={true}
+                                                            textfield$variant="filled"
+                                                            class="w-100 p-0"
+                                                        />
+                                                    {/if}
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.changePointBar ?? false, (e) => choice.changePointBar = e} onchange={() => {
+                                                    if (!choice.changePointBar) {
+                                                        delete choice.changePointBar;
+                                                        delete choice.changeBarBgColorIsOn;
+                                                        delete choice.changeBarTextColorIsOn;
+                                                        delete choice.changeBarIconColorIsOn;
+                                                        delete choice.changedBarBgColor;
+                                                        delete choice.changedBarTextColor;
+                                                        delete choice.changedBarIconColor;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Change Point Bar Design
+                                                {/snippet}
+                                            </FormField>
+                                                {#if choice.changePointBar}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.changeBarBgColorIsOn ?? false, (e) => choice.changeBarBgColorIsOn = e} onchange={() => {
+                                                        if (!choice.changeBarBgColorIsOn) {
+                                                            delete choice.changeBarBgColorIsOn;
+                                                            delete choice.changedBarBgColor;
+                                                        } else {
+                                                            choice.changedBarBgColor = '#000000';
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Change Point Bar Background Color
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.changeBarBgColorIsOn}
+                                                    <div class="col-12 m-1 px-4">
+                                                        <ColorPicker bind:hex={() => choice.changedBarBgColor ?? '#000000', (e) => choice.changedBarBgColor = e} components={ChromeVariant} sliderDirection="horizontal" />
+                                                    </div>
+                                                {/if}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.changeBarTextColorIsOn ?? false, (e) => choice.changeBarTextColorIsOn = e} onchange={() => {
+                                                        if (!choice.changeBarTextColorIsOn) {
+                                                            delete choice.changeBarTextColorIsOn;
+                                                            delete choice.changedBarTextColor;
+                                                        } else {
+                                                            choice.changedBarTextColor = '#000000';
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Change Point Bar Text Color
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.changeBarTextColorIsOn}
+                                                    <div class="col-12 m-1 px-4">
+                                                        <ColorPicker bind:hex={() => choice.changedBarTextColor ?? '#000000', (e) => choice.changedBarTextColor = e} components={ChromeVariant} sliderDirection="horizontal" />
+                                                    </div>
+                                                {/if}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.changeBarIconColorIsOn ?? false, (e) => choice.changeBarIconColorIsOn = e} onchange={() => {
+                                                        if (!choice.changeBarIconColorIsOn) {
+                                                            delete choice.changeBarIconColorIsOn;
+                                                            delete choice.changedBarIconColor;
+                                                        } else {
+                                                            choice.changedBarIconColor = '#000000';
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Change Point Bar Icon Color
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.changeBarIconColorIsOn}
+                                                    <div class="col-12 m-1 px-4">
+                                                        <ColorPicker bind:hex={() => choice.changedBarIconColor ?? '#000000', (e) => choice.changedBarIconColor = e} components={ChromeVariant} sliderDirection="horizontal" />
+                                                    </div>
+                                                {/if}
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.changeBackground ?? false, (e) => choice.changeBackground = e} onchange={() => {
+                                                    if (!choice.changeBackground) {
+                                                        delete choice.changeBackground;
+                                                        delete choice.changedBgColorCode;
+                                                        delete choice.changeBgImage;
+                                                        delete choice.bgImage;
+                                                    } else {
+                                                        choice.changedBgColorCode = '#000000';
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Change Background Color
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.changeBackground}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.changeBgImage ?? false, (e) => choice.changeBgImage = e} onchange={() => {
+                                                        if (choice.changeBgImage) {
+                                                            delete choice.changedBgColorCode;
+                                                        } else {
+                                                            delete choice.changeBgImage;
+                                                            delete choice.bgImage;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Use Backgrond Image
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.changeBgImage}
+                                                    <div class="col-12 px-5 py-3">
+                                                        {#if choice.bgImage && !app.hideImages}
+                                                            <button type="button" onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'bgImage'}} class="btn--image-background">
+                                                                <img src={choice.bgImage} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
+                                                            </button>
+                                                        {/if}
+                                                        <Button onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'bgImage'}} variant="raised">
+                                                            <Label>Change Image</Label>
+                                                        </Button>
+                                                    </div>
+                                                {:else}
+                                                    <div class="col-12 m-1 px-4">
+                                                        <ColorPicker bind:hex={() => choice.changedBgColorCode ?? '#000000', (e) => choice.changedBgColorCode = e} components={ChromeVariant} sliderDirection="horizontal" />
+                                                    </div>
+                                                {/if}
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.setBgmIsOn ?? false, (e) => choice.setBgmIsOn = e} onchange={() => {
+                                                    if (!choice.setBgmIsOn) {
+                                                        delete choice.setBgmIsOn;
+                                                        delete choice.bgmNoLoop;
+                                                        delete choice.bgmFadeIn;
+                                                        delete choice.bgmFadeInSec;
+                                                        delete choice.bgmFadeOut;
+                                                        delete choice.bgmFadeOutSec;
+                                                        delete choice.bgmId;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Enable Background Music
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.setBgmIsOn}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.bgmNoLoop ?? false, (e) => choice.bgmNoLoop = e} onchange={() => {
+                                                        if (!choice.bgmNoLoop) {
+                                                            delete choice.bgmNoLoop;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Do Not Loop Music
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.bgmFadeIn ?? false, (e) => choice.bgmFadeIn = e} onchange={() => {
+                                                        if (choice.bgmFadeIn) {
+                                                            choice.bgmFadeInSec = 0;
+                                                        } else {
+                                                            delete choice.bgmFadeIn;
+                                                            delete choice.bgmFadeInSec;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Enable Fade In
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.bgmFadeOut ?? false, (e) => choice.bgmFadeOut = e} onchange={() => {
+                                                        if (choice.bgmFadeOut) {
+                                                            choice.bgmFadeOutSec = 0;
+                                                        } else {
+                                                            delete choice.bgmFadeOut;
+                                                            delete choice.bgmFadeOutSec;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Enable Fade Out
+                                                    {/snippet}
+                                                </FormField>
+                                                <div class="col-12 m-1 px-4">
+                                                    Enter only the YouTube video ID (e.g., naktUDBaHuw), not the full URL.
+                                                </div>
+                                                <div class="col-12 m-1 px-2">
+                                                    {#if choice.bgmFadeIn}
+                                                        <Textfield bind:value={() => choice.bgmFadeInSec ?? 0, (e) => choice.bgmFadeInSec = e} label="Fade In Duration" type="number" suffix="ms" variant="filled" />
+                                                    {/if}
+                                                    {#if choice.bgmFadeOut}
+                                                        <Textfield bind:value={() => choice.bgmFadeOutSec ?? 0, (e) => choice.bgmFadeOutSec = e} label="Fade Out Duration" type="number" suffix="ms" variant="filled" />
+                                                    {/if}
+                                                    <Textfield bind:value={() => choice.bgmId ?? '', (e) => choice.bgmId = e} label="Youtube Video ID" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.muteBgm ?? false, (e) => choice.muteBgm = e} onchange={() => {
+                                                    if (!choice.muteBgm) {
+                                                        delete choice.muteBgm;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Mute Background Music
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isFadeTransition ?? false, (e) => choice.isFadeTransition = e} onchange={() => {
+                                                    if (choice.isFadeTransition) {
+                                                        choice.fadeTransitionColor = '#000000FF';
+                                                        choice.fadeInTransitionTime = 250;
+                                                        choice.fadeOutTransitionTime = 250;
+                                                    } else {
+                                                        delete choice.isFadeTransition;
+                                                        delete choice.fadeTransitionColor;
+                                                        delete choice.fadeInTransitionTime;
+                                                        delete choice.fadeOutTransitionTime;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Trigger Fade Transition
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.isFadeTransition}
+                                                <div class="col-12 m-1 px-4">
+                                                    <ColorPicker bind:hex={() => choice.fadeTransitionColor ?? '#000000FF', (e) => choice.fadeTransitionColor = e} components={ChromeVariant} sliderDirection="horizontal" />
+                                                </div>
+                                                <div class="col-12 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.fadeInTransitionTime ?? 0, (e) => choice.fadeInTransitionTime = e} label="Fade In Duration" type="number" suffix="ms" variant="filled" />
+                                                </div>
+                                                <div class="col-12 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.fadeOutTransitionTime ?? 0, (e) => choice.fadeOutTransitionTime = e} label="Fade Out Duration" type="number" suffix="ms" variant="filled" />
+                                                </div>
+                                            {/if}
+                                        </div>
+                                        {/if}
+                                    </AcdContent>
+                                </Panel>
+                                <Panel class="bordered-panel {panel04 ? 'on-top' : ''}" bind:open={panel04} variant="unelevated" conditionalRender={true}>
+                                    <Header class="p-0">
+                                        - Miscellaneous
+                                        {#snippet icon()}
+                                            <IconButton toggle pressed={panel04} size="mini">
+                                                <Icon class="mdi mdi-chevron-up" on></Icon>
+                                                <Icon class="mdi mdi-chevron-down"></Icon>
+                                            </IconButton>
+                                        {/snippet}
+                                    </Header>
+                                    <AcdContent style="overflow:visible">
+                                        {#if panel04}
+                                        <div class="row gy-3">
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.multiplyPointtypeIsOn ?? false, (e) => choice.multiplyPointtypeIsOn = e} onchange={() => {
+                                                    if (choice.multiplyPointtypeIsOn) {
+                                                        choice.pointTypeToMultiply = [];
+                                                    } else {
+                                                        delete choice.multiplyPointtypeIsOn;
+                                                        delete choice.multiplyPointtypeIsId;
+                                                        delete choice.pointTypeToMultiply;
+                                                        delete choice.multiplyWithThis;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Multiply into Point Types
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.multiplyPointtypeIsOn}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.multiplyPointtypeIsId ?? false, (e) => choice.multiplyPointtypeIsId = e} onchange={() => {
+                                                        if (choice.multiplyPointtypeIsId) {
+                                                            choice.multiplyWithThis = 0;
+                                                        } else {
+                                                            delete choice.multiplyPointtypeIsId;
+                                                            delete choice.multiplyWithThis;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Use a Point Type as multiplier
+                                                    {/snippet}
+                                                </FormField>
+                                                <div class="col-12 m-1 px-2">
+                                                    <CustomChipInput acValue={choice.pointTypeToMultiply ?? []} acOptions={$optimizedPointTypes} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                        {#if choice.multiplyPointtypeIsId}
+                                                            <Autocomplete
+                                                                options={$optimizedPointTypes}
+                                                                getOptionLabel={getPointTypeLabel}
+                                                                bind:value={choice.multiplyWithThis}
+                                                                label="Multiplied by"
+                                                                toggle={true}
+                                                                showMenuWithNoInput={true}
+                                                                textfield$variant="filled"
+                                                                class="w-100 p-0"
+                                                            />
+                                                        {:else}
+                                                            <Textfield bind:value={() => choice.multiplyWithThis ?? 0, (e) => choice.multiplyWithThis = e} label="Multiplied by" type="number" variant="filled" />
+                                                        {/if}
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.dividePointtypeIsOn ?? false, (e) => choice.dividePointtypeIsOn = e} onchange={() => {
+                                                    if (choice.dividePointtypeIsOn) {
+                                                        choice.pointTypeToDivide = [];
+                                                    } else {
+                                                        delete choice.dividePointtypeIsOn;
+                                                        delete choice.pointTypeToDivide;
+                                                        delete choice.divideWithThis;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Divide into Point Types
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.dividePointtypeIsOn}
+                                                <div class="col-12 m-1 px-2">
+                                                    <CustomChipInput acValue={choice.pointTypeToDivide ?? []} acOptions={$optimizedPointTypes} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                    <Textfield bind:value={() => choice.divideWithThis ?? 0, (e) => choice.divideWithThis = e} label="Divided by" type="number" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isChangeVariables ?? false, (e) => choice.isChangeVariables = e} onchange={() => {
+                                                    if (choice.isChangeVariables) {
+                                                        choice.changedVariables = [];
+                                                        choice.changeType = '1';
+                                                    } else {
+                                                        delete choice.isChangeVariables;
+                                                        delete choice.changedVariables;
+                                                        delete choice.changeType;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Set Variable Status
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.isChangeVariables}
+                                                <div class="col-12 m-1 px-2">
+                                                    <CustomChipInput acValue={choice.changedVariables ?? []} acOptions={$optimizedVariables} inputLabel="Target Variable" selectProp={choice} />
+                                                    <Select bind:value={choice.changeType} label="Value" variant="filled">
+                                                        {#each variableTypes as type (type.text)}
+                                                            <Option value={type.value}>{type.text}</Option>
+                                                        {/each}
+                                                    </Select>
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.textfieldIsOn ?? false, (e) => choice.textfieldIsOn = e} onchange={() => {
+                                                    if (choice.textfieldIsOn) {
+                                                        choice.wordChangeSelect = '';
+                                                        choice.wordChangeDeselect = '';
+                                                    } else {
+                                                        delete choice.textfieldIsOn;
+                                                        delete choice.customTextfieldIsOn;
+                                                        delete choice.idOfTheTextfieldWord;
+                                                        delete choice.wordPromptText;
+                                                        delete choice.wordChangeSelect;
+                                                        delete choice.wordChangeDeselect;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Change Word
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.textfieldIsOn}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.customTextfieldIsOn ?? false, (e) => choice.customTextfieldIsOn = e} onchange={() => {
+                                                        if (choice.customTextfieldIsOn) {
+                                                            choice.wordPromptText = '';
+                                                        } else {
+                                                            delete choice.customTextfieldIsOn;
+                                                            delete choice.wordPromptText;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Allows the Player to Set Word
+                                                    {/snippet}
+                                                </FormField>
+                                                <div class="col-12 m-1 px-2">
+                                                    <Autocomplete
+                                                        options={$optimizedWords}
+                                                        bind:value={choice.idOfTheTextfieldWord}
+                                                        label="Word ID"
+                                                        toggle={true}
+                                                        showMenuWithNoInput={true}
+                                                        textfield$variant="filled"
+                                                        class="w-100 p-0"
+                                                    />
+                                                    {#if choice.customTextfieldIsOn}
+                                                        <Textfield bind:value={() => choice.wordPromptText ?? '', (e) => choice.wordPromptText = e} label="Prompt Text" variant="filled" />
+                                                    {:else}
+                                                        <Textfield bind:value={() => choice.wordChangeSelect ?? '', (e) => choice.wordChangeSelect = e} label="Replacement Text when Selected" variant="filled" />
+                                                    {/if}
+                                                    <Textfield bind:value={() => choice.wordChangeDeselect ?? '', (e) => choice.wordChangeDeselect = e} label="Replacement Text when Deselected" variant="filled" />
+                                                </div>
+                                                <div class="b-line"></div>
+                                            {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.backpackBtnRequirement ?? false, (e) => choice.backpackBtnRequirement = e} onchange={() => {
+                                                    if (choice.backpackBtnRequirement) {
+                                                        app.hideBackpackBtn += 1;
+                                                    } else {
+                                                        delete choice.backpackBtnRequirement;
+                                                        app.hideBackpackBtn -= 1;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Must Be Selected to Show Backpack Button
+                                                {/snippet}
+                                            </FormField>
+                                        </div>
+                                        {/if}
+                                    </AcdContent>
+                                </Panel>
+                            </Accordion>
+                        </AcdContent>
+                    </Panel>
+                    </Accordion>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+{:else if !(bCreatorMode && row.isEditModeOn) && (isEnabled || !filterStyle.reqFilterVisibleIsOn)}
+    <div class={objectWidthClass()}>
+        <span class:fullHeight={fullHeight}>
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclick={() => activateObject(choice, row)}>
+                {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate}
+                    <span class="d-column w-100 p-0 align-items-center">
+                        {#if row.resultShowRowTitle}
+                            <div class="col" style={scoreText}>
+                                {@html DOMPurify.sanitize(replaceText(oriRowTitle), sanitizeArg)}
+                            </div>
+                        {/if}
+                        {#if (choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
+                            {#if choice.imageSourceTooltip}
+                                <Wrapper text={choice.imageSourceTooltip}>
+                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                </Wrapper>
+                            {:else}
+                                <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                            {/if}
+                        {/if}
+                        <span class="w-100">
+                            {#if choice.title !== '' && !row.objectTitleRemoved}
+                                <h3 class="m-0" style={objectTitle}>
+                                    {@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}
+                                </h3>
+                            {/if}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#each choice.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} />
+                            {/each}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#each choice.requireds as required}
+                                <ObjectRequired isRemoved={row.objectRequirementRemoved || false} required={required} scoreText={scoreText} />
+                            {/each}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#if choice.template === 5 && choice.image && !row.objectImageRemoved}
+                                {#if choice.imageSourceTooltip}
+                                    <Wrapper text={choice.imageSourceTooltip}>
+                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    </Wrapper>
+                                {:else}
+                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                {/if}
+                            {/if}
+                            {#if choice.text !== '' && !row.objectTextRemoved}
+                                <p style={objectText}>
+                                    {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
+                                </p>
+                            {/if}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice}  selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#if choice.template === 4 && choice.image && !row.objectImageRemoved}
+                                {#if choice.imageSourceTooltip}
+                                    <Wrapper text={choice.imageSourceTooltip}>
+                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    </Wrapper>
+                                {:else}
+                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                {/if}
+                            {/if}
+                        </span>
+                        <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                            {#each choice.addons as addon}
+                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
+                            {/each}
+                        </div>
+                        {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                            <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                        {/if}
+                    </span>
+                {:else}
+                    {#if choice.template === 2}
+                        <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
+                            {#if choice.image && !row.objectImageRemoved}
+                                {#if choice.imageSourceTooltip}
+                                    <Wrapper text={choice.imageSourceTooltip}>
+                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    </Wrapper>
+                                {:else}
+                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                {/if}
+                            {/if}
+                        </div>
+                        <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
+                            {#if choice.title !== '' && !row.objectTitleRemoved}
+                                <h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}</h2>
+                            {/if}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#each choice.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} />
+                            {/each}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#each choice.requireds as required}
+                                <ObjectRequired isRemoved={row.objectRequirementRemoved || false} required={required} scoreText={scoreText} />
+                            {/each}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#if choice.text !== '' && !row.objectTextRemoved}
+                                <p style={objectText}>
+                                    {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
+                                </p>
+                            {/if}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#if !choice.useSeperateAddon}
+                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                    {#each choice.addons as addon}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
+                                    {/each}
+                                </div>
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                {/if}
+                            {/if}
+                        </div>
+                        {#if choice.useSeperateAddon}
+                            <div class="col-12 text-center">
+                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                    {#each choice.addons as addon}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
+                                    {/each}
+                                </div>
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                {/if}
+                            </div>
+                        {/if}
+                    {:else if choice.template === 3}
+                        <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
+                            {#if choice.title !== '' && !row.objectTitleRemoved}
+                                <h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}</h2>
+                            {/if}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#each choice.scores as score, i}
+                                <ObjectScore score={score} row={row} choice={choice} />
+                            {/each}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#each choice.requireds as required}
+                                <ObjectRequired isRemoved={row.objectRequirementRemoved || false} required={required} scoreText={scoreText} />
+                            {/each}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#if choice.text !== '' && !row.objectTextRemoved}
+                                <p style={objectText}>
+                                    {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
+                                </p>
+                            {/if}
+                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            {/if}
+                            {#if !choice.useSeperateAddon}
+                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                    {#each choice.addons as addon}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
+                                    {/each}
+                                </div>
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                {/if}
+                            {/if}
+                        </div>
+                        <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
+                            {#if choice.image && !row.objectImageRemoved}
+                                {#if choice.imageSourceTooltip}
+                                    <Wrapper text={choice.imageSourceTooltip}>
+                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    </Wrapper>
+                                {:else}
+                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                {/if}
+                            {/if}
+                        </div>
+                        {#if choice.useSeperateAddon}
+                            <div class="col-12 text-center">
+                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                    {#each choice.addons as addon}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
+                                    {/each}
+                                </div>
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                {/if}
+                            </div>
+                        {/if}
+                    {/if}
+                {/if}
+            </span>
+        </span>
+    </div>
+{/if}
+{#if currentDialog === 'dlgCommon'}
+    <DlgCommon open={currentDialog === 'dlgCommon'} onclose={() => (currentDialog = 'none')} title="" context={wordDialog.context} closeHandler={(e, wordText) => {
+        if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
+            isOverDlg = true;
+            wordDialog.choice.wordChangeSelect = wordText;
+            selectObject(wordDialog.choice, wordDialog.row);
+            isOverDlg = false;
+        } else {
+            isOverDlg = false;
+        }
+    }} isWord={true} prevText={wordDialog.prevText} />
+{/if}
+
+<script lang="ts">
+    import Accordion, { Panel, Header, Content as AcdContent} from '$lib/custom/accordion';
+    import Autocomplete from '$lib/custom/autocomplete/Autocomplete.svelte';
+    import Button, { Label } from '@smui/button';
+    import Card, { Content as CardContent } from '@smui/card';
+    import Checkbox from '@smui/checkbox';
+    import ColorPicker, { ChromeVariant } from '$lib/custom/svelte-awesome-color-picker';
+    import CustomChipInput from '$lib/store/CustomChipInput.svelte';
+    import DlgCommon from './DlgCommon.svelte';
+    import DOMPurify from 'dompurify';
+    import FormField from '@smui/form-field';
+    import IconButton, { Icon } from '@smui/icon-button';
+    import ObjectAddon from './Object/ObjectAddon.svelte';
+    import ObjectGroup from './Object/ObjectGroup.svelte';
+    import ObjectMultiChoice from './Object/ObjectMultiChoice.svelte';
+    import ObjectRequired from './Object/ObjectRequired.svelte';
+    import ObjectScore from './Object/ObjectScore.svelte';
+    import Select, { Option } from '$lib/custom/select';
+    import Textfield from '$lib/custom/textfield';
+    import { Wrapper } from '$lib/custom/tooltip';
+	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, optimizedChoices, optimizedGroups, optimizedPointTypes, optimizedRows, optimizedVariables, optimizedWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, optimizedBackpackChoices, optimizedBackpackRows } from '$lib/store/store.svelte';
+    import { SvelteMap } from 'svelte/reactivity';
+	import { get } from 'svelte/store';
+    import { tick } from 'svelte';
+
+    export { activateObject };
+    
+    const { row, choice, index, windowWidth, bCreatorMode, preloadImages = false, isBackpack, mainDiv }: { row: Row, choice: Choice, index: number, windowWidth: number, bCreatorMode: boolean, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
+    const choiceToolbarButtons = [{
+        action: () => { moveChoiceLeft() },
+        text: 'Move Left',
+        icon: 'mdi mdi-chevron-left'
+    }, {
+        action: () => { deleteObject() },
+        text: 'Delete Choice',
+        icon: 'mdi mdi-delete-forever'
+    }, {
+        action: () => { dlgVariables.currentDialog = 'appObjectSettings'; dlgVariables.row = row; dlgVariables.choice = choice; },
+        text: 'Choice Settings',
+        icon: 'mdi mdi-cog'
+    }, {
+        action: () => { cloneObject() },
+        text: 'Clone Choice',
+        icon: 'mdi mdi-content-copy'
+    }, {
+        action: () => { moveChoiceRight() },
+        text: 'Move Right',
+        icon: 'mdi mdi-chevron-right'
+    }];
+    const choiceBottomToolbarButtons = [{
+        action: () => { createNewScore() },
+        text: 'Create Score',
+        icon: 'mdi mdi-numeric-9-plus-box'
+    }, {
+        action: () => { createNewAddon() },
+        text: 'Create Addon',
+        icon: 'mdi mdi-comment-plus'
+    }, {
+        action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = choice; },
+        text: 'Create Requirement',
+        icon: 'mdi mdi-key-plus'
+    }, {
+        action: () => { choice.groups.push('') },
+        text: 'Add To Group',
+        icon: 'mdi mdi-group'
+    }];
+    const templates = [{
+        text: 'Image top',
+        value: 1
+    }, {
+        text: 'Image left',
+        value: 2
+    }, {
+        text: 'Image right',
+        value: 3
+    }, {
+        text: 'Image bottom',
+        value: 4
+    }, {
+        text: 'Image center',
+        value: 5
+    }];
+    const discountOperators = [{
+        text: '+ Plus',
+        value: '1'
+    }, {
+        text: '- Minus',
+        value: '2'
+    }, {
+        text: '× Multiply',
+        value: '3'
+    }, {
+        text: '÷ Divide',
+        value: '4'
+    }];
+    const hideContentText = ['Title of Choice', 'Image of Choice', 'Text of Choice', 'Score of Choice', 'Requirement of Choice', 'Title of Addon', 'Image of Addon', 'Text of Addon'];
+    const hideContentValue = ['1', '2', '3', '4', '5', '6', '7', '8'];
+    const variableTypes = [{
+        text: 'True',
+        value: '1'
+    }, {
+        text: 'False',
+        value: '2'
+    }, {
+        text: 'Toggle',
+        value: '3'
+    }];
+    const justifies = ['start', 'center', 'end', 'space-around', 'space-between'];
+    const linkedObjects: string[] = [];
+    const wordDialog: {
+        choice: Choice | null,
+        row: Row | null,
+        context: string,
+        prevText: string
+    } = {
+        choice: null,
+        row: null,
+        context: '',
+        prevText: ''
+    };
+    let panelScore = $state(false);
+    let panelReq = $state(false);
+    let panelAddon = $state(false);
+    let panelGroup = $state(false);
+    let panel01 = $state(false);
+    let panel02 = $state(false);
+    let panel03 = $state(false);
+    let panel04 = $state(false);
+
+    let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row, choice));
+    let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
+    let multiChoiceStyle = $derived(getStyling('privateMultiChoiceIsOn', row, choice));
+    let objectImageStyle = $derived(getStyling('privateObjectImageIsOn', row, choice));
+    let objectStyle = $derived(getStyling('privateObjectIsOn', row, choice));
+    let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
+    
+    let choiceImageBoxWidth = $derived(objectImageStyle.objectImageBoxWidth ?? 50);
+    let width = $state(0);
+    let currentDialog = $state<'none' | 'dlgCommon'>('none');
+    let choiceId = '';
+    let isOverDlg = false;
+
+    let col6 = $derived.by(() => {
+        if (width > 278) return 'col-6';
+        else return 'col-12';
+    });
+    let reqCol = $derived.by(() => {
+        if (width > 400) return 'col-6';
+        else return 'col-12';
+    })
+    let isEnabled = $derived.by(() => {
+        return checkRequirements(choice.requireds);
+    });
+    let isActive = $derived(choice.isActive);
+    let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight);
+    let oriRowTitle = $derived.by(() => {
+        const cMap = choiceMap.get(choice.id);
+        if (typeof cMap !== 'undefined') {
+            return cMap.row.title;
+        }
+        return '';
+    });
+    let optimizedRowList = $derived(isBackpack ?  $optimizedBackpackRows : $optimizedRows);
+    let optimizedChoiceList = $derived(isBackpack ? $optimizedBackpackChoices : $optimizedChoices);
+
+    let objectTitle = $derived.by(() => {
+        let styles = [];
+
+        styles.push(`font-family: ${textStyle.objectTitle};font-size: ${textStyle.objectTitleTextSize}%;text-align: ${textStyle.objectTitleAlign};`);
+        if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
+            styles.push(`color: ${filterStyle.reqFilterCTitleColor};`);
+        } else if (isActive && filterStyle.selCTitleColorIsOn) {
+            styles.push(`color: ${filterStyle.selFilterCTitleColor};`);
+        } else {
+            styles.push(`color: ${textStyle.objectTitleColor};`);
+        }
+        if (objectStyle.titlePaddingIsOn) {
+            styles.push(`padding: ${objectStyle.objectTextPadding}px;`);
+        }
+
+        return styles.join(' ');
+    });
+
+    let multiChoiceText = $derived.by(() => {
+        return `font-family: ${multiChoiceStyle.multiChoiceTextFont}; color: ${textStyle.scoreTextColor}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`;
+    });
+
+    let multiChoiceButton = $derived.by(() => {
+        return `font-size: ${multiChoiceStyle.multiChoiceCounterSize}%; color: ${textStyle.scoreTextColor};`;
+    });
+
+    let multiChoiceCounter = $derived.by(() => {
+        if (choice.hideMultipleCounter) {
+            return isEnabled;
+        }
+
+        return true;
+    });
+
+    let objectText = $derived.by(() => {
+        let styles = [];
+
+        styles.push(`font-family: ${textStyle.objectText};text-align: ${textStyle.objectTextAlign};font-size: ${textStyle.objectTextTextSize}%;white-space: pre-line;`);
+        if (!isEnabled && filterStyle.reqCTextColorIsOn) {
+            styles.push(`color: ${filterStyle.reqFilterCTextColor};`);
+        } else if (isActive && filterStyle.selCTextColorIsOn) {
+            styles.push(`color: ${filterStyle.selFilterCTextColor};`);
+        } else {
+            styles.push(`color: ${textStyle.objectTextColor};`);
+        }
+        styles.push(`padding: ${objectStyle.objectTextPadding}px;`);
+
+        return styles.join(' ');
+    });
+
+    let objectBackground = $derived.by(() => {
+        const suffix = objectStyle.objectBorderRadiusIsPixels ? 'px' : '%';
+        let bgImageIndex = 0;
+        let bgColorIndex = 0;
+        let filterIndex = 0;
+        let styles = [];
+
+        if (objectStyle.objectBorderImage) {
+            styles.push(`border-image: url('${objectStyle.objectBorderImage}') ${objectStyle.objectBorderImageSliceTop} ${objectStyle.objectBorderImageSliceRight} ${objectStyle.objectBorderImageSliceBottom} ${objectStyle.objectBorderImageSliceLeft} / ${objectStyle.objectBorderImageWidth}px ${objectStyle.objectBorderImageRepeat}; border-style: solid; padding: ${objectStyle.objectBorderImageWidth}px;`);
+        }
+        if (backgroundStyle.objectBackgroundImage) {
+            styles.push(`background-image: url('${backgroundStyle.objectBackgroundImage}'); ${backgroundStyle.isObjectBackgroundRepeat? 'background-repeat: repeat;' : (backgroundStyle.isObjectBackgroundFitIn ? 'background-size: 100% 100%;' : 'background-size: cover;')}`);
+            bgImageIndex = styles.length;
+        }
+        if (backgroundStyle.objectBgColorIsOn) {
+            styles.push(`background-color: ${backgroundStyle.objectBgColor};`);
+            bgColorIndex = styles.length;
+        }
+        styles.push(`margin: ${objectStyle.objectMargin}px;`);
+        styles.push(`border-radius: ${objectStyle.objectBorderRadiusTopLeft}${suffix} ${objectStyle.objectBorderRadiusTopRight}${suffix} ${objectStyle.objectBorderRadiusBottomRight}${suffix} ${objectStyle.objectBorderRadiusBottomLeft}${suffix};`);
+        if (objectStyle.objectOverflowIsOn) {
+            styles.push(`overflow: hidden;`);
+        }
+        if (objectStyle.objectBorderIsOn || (isActive && filterStyle.selBorderColorIsOn) || (!isEnabled && filterStyle.reqBorderColorIsOn)) {
+            let borderColor = objectStyle.objectBorderColor;
+            
+            if (!isEnabled && filterStyle.reqBorderColorIsOn) {
+                borderColor = filterStyle.reqFilterBorderColor;
+            } else if (isActive && filterStyle.selBorderColorIsOn) {
+                borderColor = filterStyle.selFilterBorderColor;
+            }
+            styles.push(`border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${borderColor};`);
+        }
+        if (objectStyle.objectDropShadowIsOn) {
+            if (objectStyle.objectUseBoxShadowIsOn) {
+                styles.push(`box-shadow: ${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${objectStyle.objectDropShadowColor};`);
+            } else {
+                filterIndex = styles.length;
+                styles.push(`filter: drop-shadow(${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${objectStyle.objectDropShadowColor})`);
+            }
+        }
+        if (filterIndex === 0) {
+            styles.push(`filter:`);
+            filterIndex = styles.length;
+        }
+        if (isEnabled) {
+            if (isActive) {
+                if (filterStyle.selFilterBlurIsOn) {
+                    styles.push(` blur(${filterStyle.selFilterBlur}px)`);
+                }
+                if (filterStyle.selFilterBrightIsOn) {
+                    styles.push(` brightness(${filterStyle.selFilterBright}%)`);
+                }
+                if (filterStyle.selFilterContIsOn) {
+                    styles.push(` contrast(${filterStyle.selFilterCont}%)`);
+                }
+                if (filterStyle.selFilterGrayIsOn) {
+                    styles.push(` grayscale(${filterStyle.selFilterGray}%)`);
+                }
+                if (filterStyle.selFilterHueIsOn) {
+                    styles.push(` hue-rotate(${filterStyle.selFilterHue}deg)`);
+                }
+                if (filterStyle.selFilterInvertIsOn) {
+                    styles.push(` invert(${filterStyle.selFilterInvert}%)`);
+                }
+                if (filterStyle.selFilterOpacIsOn) {
+                    styles.push(` opacity(${filterStyle.selFilterOpac}%)`);
+                }
+                if (filterStyle.selFilterSaturIsOn) {
+                    styles.push(` saturate(${filterStyle.selFilterSatur})`);
+                }
+                if (filterStyle.selFilterSepiaIsOn) {
+                    styles.push(` sepia(${filterStyle.selFilterGray}%)`);
+                }
+                if (styles.length === filterIndex) {
+                    styles.splice(filterIndex - 1, 1);
+                } else {
+                    styles.push(`;`);
+                }
+                if (filterStyle.selBgColorIsOn) {
+                    if (bgColorIndex !== 0) {
+                        styles.splice(bgColorIndex - 1, 1);
+                    }
+                    if (!filterStyle.selOverlayOnImage) {
+                        if (bgImageIndex !== 0) {
+                            styles.splice(bgImageIndex - 1, 1);
+                        }
+                    }
+                    styles.push(`background-color: ${filterStyle.selFilterBgColor};`);
+                }
+                if (objectStyle.objectGradientIsOn) {
+                    styles.push(`background-image: linear-gradient('${objectStyle.objectGradientOnSelect}');`);
+                }
+            } else {
+                if (filterStyle.unselFilterBlurIsOn) {
+                    styles.push(` blur(${filterStyle.unselFilterBlur}px)`);
+                }
+                if (filterStyle.unselFilterBrightIsOn) {
+                    styles.push(` brightness(${filterStyle.unselFilterBright}%)`);
+                }
+                if (filterStyle.unselFilterContIsOn) {
+                    styles.push(` contrast(${filterStyle.unselFilterCont}%)`);
+                }
+                if (filterStyle.unselFilterGrayIsOn) {
+                    styles.push(` grayscale(${filterStyle.unselFilterGray}%)`);
+                }
+                if (filterStyle.unselFilterHueIsOn) {
+                    styles.push(` hue-rotate(${filterStyle.unselFilterHue}deg)`);
+                }
+                if (filterStyle.unselFilterInvertIsOn) {
+                    styles.push(` invert(${filterStyle.unselFilterInvert}%)`);
+                }
+                if (filterStyle.unselFilterOpacIsOn) {
+                    styles.push(` opacity(${filterStyle.unselFilterOpac}%)`);
+                }
+                if (filterStyle.unselFilterSaturIsOn) {
+                    styles.push(` saturate(${filterStyle.unselFilterSatur})`);
+                }
+                if (filterStyle.unselFilterSepiaIsOn) {
+                    styles.push(` sepia(${filterStyle.unselFilterGray}%)`);
+                }
+                if (styles.length === filterIndex) {
+                    styles.splice(filterIndex - 1, 1);
+                } else {
+                    styles.push(`;`);
+                }
+                if (objectStyle.objectGradientIsOn) {
+                    styles.push(`background-image: linear-gradient('${objectStyle.objectGradient}');`);
+                }
+            }
+            if (app.isPointerCursor && !choice.isNotSelectable && (!choice.isSelectableMultiple || (choice.allowSelectByClick && choice.multipleUseVariable === 0))) {
+                styles.push(`cursor: pointer;`);
+            }
+        } else {
+            if (filterStyle.reqFilterBlurIsOn) {
+                styles.push(` blur(${filterStyle.reqFilterBlur}px)`);
+            }
+            if (filterStyle.reqFilterBrightIsOn) {
+                styles.push(` brightness(${filterStyle.reqFilterBright}%)`);
+            }
+            if (filterStyle.reqFilterContIsOn) {
+                styles.push(` contrast(${filterStyle.reqFilterCont}%)`);
+            }
+            if (filterStyle.reqFilterGrayIsOn) {
+                styles.push(` grayscale(${filterStyle.reqFilterGray}%)`);
+            }
+            if (filterStyle.reqFilterHueIsOn) {
+                styles.push(` hue-rotate(${filterStyle.reqFilterHue}deg)`);
+            }
+            if (filterStyle.reqFilterInvertIsOn) {
+                styles.push(` invert(${filterStyle.reqFilterInvert}%)`);
+            }
+            if (filterStyle.reqFilterOpacIsOn) {
+                styles.push(` opacity(${filterStyle.reqFilterOpac}%)`);
+            }
+            if (filterStyle.reqFilterSaturIsOn) {
+                styles.push(` saturate(${filterStyle.reqFilterSatur})`);
+            }
+            if (filterStyle.reqFilterSepiaIsOn) {
+                styles.push(` sepia(${filterStyle.reqFilterGray}%)`);
+            }
+            if (styles.length === filterIndex) {
+                styles.splice(filterIndex - 1, 1);
+            } else {
+                styles.push(`;`);
+            }
+            if (filterStyle.reqBgColorIsOn) {
+                if (bgColorIndex !== 0) {
+                    styles.splice(bgColorIndex - 1, 1);
+                }
+                if (!filterStyle.reqOverlayOnImage) {
+                    if (bgImageIndex !== 0) {
+                        styles.splice(bgImageIndex - 1, 1);
+                    }
+                }
+                styles.push(`background-color: ${filterStyle.reqFilterBgColor};`);
+            }
+            if (objectStyle.objectGradientIsOn) {
+                styles.push(`background-image: linear-gradient('${objectStyle.objectGradientOnReq}');`);
+            }
+        }
+        return styles.join(' ');
+    });
+
+    let objectImage = $derived.by(() => {
+        let styles = [];
+        const suffix = objectImageStyle.objectImgBorderRadiusIsPixels ? 'px' : '%';
+
+        styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
+        if (objectImageStyle.objectImgObjectFillIsOn) {
+            styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row.objectImgObjectFillHeight}px;`);
+        }
+        styles.push(`border-radius: ${objectImageStyle.objectImgBorderRadiusTopLeft}${suffix} ${objectImageStyle.objectImgBorderRadiusTopRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomLeft}${suffix};`);
+        if (objectImageStyle.objectImgOverflowIsOn) {
+            styles.push(`overflow: hidden;`);
+        }
+        if (objectImageStyle.objectImgBorderIsOn) {
+            styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${objectImageStyle.objectImgBorderColor};`);
+        }
+
+        return styles.join(' ');
+    });
+
+    let scoreText = $derived.by(() => {
+        let style = [];
+
+        style.push(`font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
+        style.push(`color: ${textStyle.scoreTextColor};`);
+        if (!isEnabled) {
+            if (filterStyle.reqScoreTextColorIsOn)  {
+                style.push(`color: ${filterStyle.reqFilterSTextColor}`);
+            }
+        } else if (choice.isActive) {
+            if (filterStyle.selScoreTextColorIsOn) {
+                style.push(`color: ${filterStyle.selFilterSTextColor}`);
+            }
+        }
+
+        return style.join(' ');
+    });
+
+    let scoreUpdate:string[] = [];
+
+    function changeObjectId() {
+        if (choice.id === '') {
+            choice.id = choiceId
+        } else {
+            if (choice.id !== choiceId) {
+                choice.id = checkDupId(choice.id, choiceMap);
+                if (choice.groups) {
+                    for (let i = 0; i < choice.groups.length; i++) {
+                        let group = groupMap.get(choice.groups[i]);
+                        if (typeof group !== 'undefined') {
+                            let elementIndex = group.elements.indexOf(choiceId);
+                            if (elementIndex !== -1) group.elements[elementIndex] = choice.id;
+                        }
+                    }
+                }
+                if (choice.objectDesignGroups) {
+                    for (let i = 0; i < choice.objectDesignGroups.length; i++) {
+                        let dGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
+                        if (typeof dGroup !== 'undefined') {
+                            let elementIndex = dGroup.elements.indexOf(choiceId);
+                            if (elementIndex !== -1) dGroup.elements[elementIndex] = choice.id;
+                        }
+                    }
+                }
+                choiceMap.set(choice.id, {choice: choice, row: row});
+                choiceMap.delete(choiceId);
+                choiceId = choice.id;
+            }
+        }
+    }
+
+    function createNewAddon() {
+        choice.addons.push({
+            id: '',
+            title: app.defaultAddonTitle,
+            text: app.defaultAddonText,
+            template: 1,
+            image: '',
+            requireds: [],
+            parentId: choice.id
+        });
+    }
+
+    function createNewScore() {
+        choice.scores.push({
+            idx: generateScoreId(0, 5),
+            id: '',
+            value: 0,
+            type: '',
+            requireds: [],
+            beforeText: app.defaultBeforePoint,
+            afterText: app.defaultAfterPoint,
+            showScore: true
+        });
+    }
+
+    function cloneObject() {
+        const id = generateObjectId(0, app.objectIdLength);
+        const clone: Choice = JSON.parse(JSON.stringify(choice));
+
+        clone.id = id;
+        clone.index = index + 1;
+        clone.isActive = false;
+        delete clone.forcedActivated;
+
+        for (let i = 0; i < clone.scores.length; i++) {
+            const score = clone.scores[i];
+
+            score.idx = generateScoreId(0, 5);
+            scoreSet.add(score.idx);
+            delete score.isActive;
+            delete score.setValue;
+            delete score.discountIsOn;
+            delete score.discountShow;
+            delete score.discountBeforeText;
+            delete score.discountAfterText;
+            delete score.discountScore;
+            delete score.discountScoreCal;
+            delete score.isChangeDiscount;
+            delete score.tmpDisScore;
+            delete score.tmpDiscount;
+            delete score.discountedFrom;
+            delete score.dupTextA;
+            delete score.dupTextB;
+            delete score.discountTextA;
+            delete score.discountTextB;
+            delete score.notStackableDiscount;
+        }
+
+        for (let j = 0; j < clone.addons.length; j++) {
+            const addon = clone.addons[j];
+
+            addon.parentId = clone.id;
+        }
+
+        if (clone.backpackBtnRequirement) {
+            if (typeof app.hideBackpackBtn !== 'undefined') {
+                app.hideBackpackBtn += 1;
+            } else {
+                delete clone.backpackBtnRequirement;
+            }
+        }
+
+        row.objects.splice(index + 1, 0, clone);
+        choiceMap.set(id, {choice: row.objects[index + 1], row: row});
+
+        for (let i = index + 2; i < row.objects.length; i++) {
+            row.objects[i].index += 1;
+        }
+
+        if (clone.groups) {
+            for (let i = 0; i < clone.groups.length; i++) {
+                let group = groupMap.get(clone.groups[i]);
+                if (typeof group !== 'undefined') {
+                    let elementIndex = group.elements.indexOf(id);
+                    if (elementIndex === -1) group.elements.push(id);
+                }
+            }
+        }
+        if (clone.objectDesignGroups) {
+            for (let i = 0; i < clone.objectDesignGroups.length; i++) {
+                let dGroup = objectDesignMap.get(clone.objectDesignGroups[i]);
+                if (typeof dGroup !== 'undefined') {
+                    let elementIndex = dGroup.elements.indexOf(id);
+                    if (elementIndex === -1) dGroup.elements.push(id);
+                }
+            }
+        }
+    }
+
+    function deleteObject() {
+        function deleteProc() {
+            const idx = choice.index;
+            if (choice.backpackBtnRequirement) {
+                if (choice.isActive) {
+                    app.btnBackpackIsOn -= 1;
+                }
+                app.hideBackpackBtn -= 1;
+            }
+            if (choice.showAllAddons && choice.isActive) {
+                app.showAddons -= 1;
+            }
+            if (choice.groups) {
+                for (let i = 0; i < choice.groups.length; i++) {
+                    let group = groupMap.get(choice.groups[i]);
+                    if (typeof group !== 'undefined') {
+                        let elementIndex = group.elements.indexOf(choice.id);
+                        if (elementIndex !== -1) group.elements.splice(elementIndex, 1);
+                    }
+                }
+            }
+            if (choice.objectDesignGroups) {
+                for (let i = 0; i < choice.objectDesignGroups.length; i++) {
+                    let dGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
+                    if (typeof dGroup !== 'undefined') {
+                        let elementIndex = dGroup.elements.indexOf(choice.id);
+                        if (elementIndex !== -1) dGroup.elements.splice(elementIndex, 1);
+                    }
+                }
+            }
+
+            activatedMap.delete(choice.id);
+            tmpActivatedMap.delete(choice.id);
+            row.objects.splice(index, 1);
+            choiceMap.delete(choice.id);
+            for (let i = idx; i < row.objects.length; i++) {
+                row.objects[i].index = i;
+            }
+        }
+        if (app.checkDeleteObject) {
+            dlgVariables.currentDialog = 'dlgCommon';
+            dlgVariables.row = row;
+            dlgVariables.context = 'Are you sure you want to delete this choice?<br>Be sure to deselect this choice before delete.';
+            dlgVariables.title = '';
+            dlgVariables.cFunc = (e: CustomEvent) => {
+                if (e.detail.action === 'accept') {
+                    deleteProc();
+                }
+            }
+        } else {
+            deleteProc();
+        }
+    }
+
+    function moveChoiceLeft() {
+        if (index > 0) {
+            [row.objects[index - 1], row.objects[index]] = [row.objects[index], row.objects[index - 1]];
+            row.objects[index - 1].index -= 1;
+            row.objects[index].index += 1;
+        }
+    }
+
+    function moveChoiceRight() {
+        if (index < row.objects.length - 1) {
+            [row.objects[index], row.objects[index + 1]] = [row.objects[index + 1], row.objects[index]];
+            row.objects[index].index -= 1;
+            row.objects[index + 1].index += 1;
+        }
+    }
+
+    function objectWidthClass() {
+        let objectWidth = (choice.objectWidth || row.objectWidth);
+        let objectWidthNum = objectWidthToNum(objectWidth);
+        let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
+        if ($winWidth > 1280) {
+            return objectWidth;
+        } else if ($winWidth > 960) {
+            switch(objectWidthNum) {
+                case 1: return 'col-12';
+                case 2: return 'col-6';
+                case 3: return objectsPerRowNum > 2 ? 'col-4' : app.objectsPerRow;
+                case 4: return objectsPerRowNum > 3 ? 'col-3' : app.objectsPerRow;
+                default: return app.objectsPerRow;
+            }
+        } else if ($winWidth > 480) {
+            return objectWidthNum === 1 ? 'col-12' : 'col-6';
+        } else {
+            return 'col-12';
+        }
+    }
+
+    function selectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, num: number) {
+        let isLinked = false;
+
+        if (fChoice.activateOtherChoice && typeof fChoice.activateThisChoice !== 'undefined' && linkedObjects.indexOf(localChoice.id) === -1 && fChoice.activateThisChoice.split(',').some(item => item.split('/ON#')[0] === localChoice.id)) {
+            linkedObjects.push(localChoice.id);
+            isLinked = true;
+        }
+        if (fChoice.isSelectableMultiple) {
+            if (fChoice.isMultipleUseVariable && typeof fChoice.numMultipleTimesMinus !== 'undefined' && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
+                let count = fChoice.multipleUseVariable;
+
+                if (num > 0) {
+                    for (let i = 0; i < num; i++) {
+                        selectedOneMore(fChoice, fRow);
+                        count++;
+                        if (!localChoice.isAllowDeselect) {
+                            fChoice.numMultipleTimesMinus += 1;
+                        }
+                    }
+                } else if (num < 0) {
+                    for (let i = 0; i > (num * -1); i++) {
+                        selectedOneLess(fChoice, fRow);
+                        count--;
+                        if (!localChoice.isAllowDeselect) {
+                            fChoice.numMultipleTimesPluss -= 1;
+                        }
+                    }
+                }
+                if (fChoice.multipleUseVariable !== count) {
+                    const limitVal = Math.abs(fChoice.numMultipleTimesMinus - fChoice.numMultipleTimesPluss);
+
+                    if (fChoice.numMultipleTimesMinus > fChoice.numMultipleTimePluss) {
+                        const tmpAct = tmpActivatedMap.get(fChoice.id);
+
+                        if (num > 0) {
+                            fChoice.numMultipleTimesMinus -= limitVal;
+                            if (typeof tmpAct !== 'undefined') {
+                                tmpAct.multiple += limitVal;
+                            } else {
+                                tmpActivatedMap.set(fChoice.id, {multiple: limitVal, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+                            }
+                        } else if (num < 0) {
+                            if (typeof tmpAct !== 'undefined') {
+                                tmpAct.multiple -= limitVal;
+                            } else {
+                                tmpActivatedMap.set(fChoice.id, {multiple: -limitVal, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (!fChoice.isActive) activateObject(fChoice, fRow);
+            if (!localChoice.isAllowDeselect) fChoice.forcedActivated = true;
+            fChoice.activatedFrom ??= 0;
+            if (!isLinked) fChoice.activatedFrom++;
+        }
+        if (!fChoice.isActive) {
+            delete fChoice.forcedActivated;
+            tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+        }
+    }
+
+    function deselectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, num: number) {
+        if (fChoice.activateOtherChoice && typeof fChoice.activateThisChoice !== 'undefined' && linkedObjects.indexOf(localChoice.id) === -1 && fChoice.activateThisChoice.split(',').some(item => item.split('/ON#')[0] === localChoice.id)) {
+            linkedObjects.push(localChoice.id);
+        }
+        if (fChoice.isSelectableMultiple) {
+            if (fChoice.isMultipleUseVariable && typeof fChoice.numMultipleTimesMinus !== 'undefined' && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
+                if (fChoice.isActive) {
+                    if (num > 0) {
+                        for (let i = 0; i < num; i++) {
+                            if (!localChoice.isAllowDeselect) fChoice.numMultipleTimesMinus -= 1;
+                            if (!localChoice.isNotDeactivate) {
+                                selectedOneLess(fChoice, fRow);
+                            }
+                        }
+                    } else if (num < 0) {
+                        for (let i = 0; i > (num * -1); i++) {
+                            if (!localChoice.isAllowDeselect) fChoice.numMultipleTimesPluss += 1;
+                            if (!localChoice.isNotDeactivate) {
+                                selectedOneMore(fChoice, fRow);
+                            }
+                        }
+                    }
+                } else {
+                    const tmpAct = tmpActivatedMap.get(fChoice.id);
+                    let tmpNum = 0;
+
+                    if (typeof tmpAct !== 'undefined') {
+                        tmpNum = tmpAct.multiple - num;
+                        if (tmpNum === 0) {
+                            tmpActivatedMap.delete(fChoice.id);
+                        } else {
+                            tmpActivatedMap.set(fChoice.id, {multiple: tmpNum, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+                        }
+                    } else {
+                        tmpActivatedMap.delete(fChoice.id);
+                    }
+                }
+            }
+        } else {
+            if (typeof fChoice.activatedFrom !== 'undefined') {
+                fChoice.activatedFrom--;
+                if (fChoice.activatedFrom <= 0) {
+                    if (fChoice.isActive) {
+                        delete fChoice.activatedFrom;
+                        delete fChoice.forcedActivated;
+                        if (!localChoice.isNotDeactivate) deselectObject(fChoice, fRow);
+                    } else {
+                        tmpActivatedMap.delete(fChoice.id);
+                    }
+                }
+            } else {
+                delete fChoice.forcedActivated;
+                if (!localChoice.isNotDeactivate && fChoice.isActive) deselectObject(fChoice, fRow);
+            }
+        }
+    }
+
+    function selectForceRandomActivate(localChoice: Choice) {
+        if (typeof localChoice.activateThisChoice !== 'undefined') {
+            let forceList = localChoice.activateThisChoice.split(',');
+            let listMap = new Map<string, number>();
+            for (let i = 0; i < forceList.length; i++) {
+                let [key, val = '0'] = forceList[i].split('/ON#');
+                let num = parseInt(val);
+                let group = groupMap.get(key);
+                if (typeof group !== 'undefined') {
+                    for (let j = 0; j < group.elements.length; j++) {
+                        if (!activatedMap.has(group.elements[j])) {
+                            listMap.set(group.elements[j], num);
+                        }
+                    }
+                } else {
+                    if (!activatedMap.has(key)) {
+                        listMap.set(key, num);
+                    }
+                }
+            }
+            let listArray = [...listMap.keys()];
+            let actNum = Math.min(listArray.length, localChoice.numActivateRandom ?? 0);
+            let repeatNum = actNum;
+            for (let i = listArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [listArray[i], listArray[j]] = [listArray[j], listArray[i]];
+            }
+            let result: string[] = [];
+            for (let i = 0; i < actNum;) {
+                let id = listArray[i];
+                let cMap = choiceMap.get(id);
+                if (typeof cMap !== 'undefined') {
+                    let rndRow = cMap.row;
+                    let rndChoice = cMap.choice;
+                    selectForceActivate(localChoice, rndChoice, rndRow, listMap.get(id) ?? 0);
+                    if (!rndChoice.isActive) {
+                        if (result.length < actNum && listArray.length > repeatNum) {
+                            listArray[i] = listArray[repeatNum++];
+                            if (typeof rndChoice.activatedFrom !== 'undefined') {
+                                rndChoice.activatedFrom--;
+                                if (rndChoice.activatedFrom === 0) tmpActivatedMap.delete(rndChoice.id);
+                            }
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    result.push(id);
+                }
+                i++;
+            }
+            
+            if (localChoice.isSelectableMultiple) {
+                if (typeof localChoice.activatedRandomMul === 'undefined') localChoice.activatedRandomMul = [];
+                localChoice.activatedRandomMul[localChoice.multipleUseVariable - 1] = [...result];
+            } else {
+                localChoice.activatedRandom = [...result];
+            }
+        }
+    }
+
+    function deselectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
+        Array.from(activatedMap.entries()).forEach(([id]) => {
+            const cMap = choiceMap.get(id);
+            if (typeof cMap !== 'undefined') {
+                const aRow = cMap.row;
+                const aChoice = cMap.choice;
+                const thisTmpScores = new SvelteMap<string, number>();
+                let isChanged = false;
+                for (let i = 0; i < aChoice.scores.length; i++) {
+                    const aScore = aChoice.scores[i];
+                    if (!aScore.isNotRecalculatable) {
+                        const point = pointTypeMap.get(aScore.id);
+                        if (typeof point !== 'undefined') {
+                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
+                                if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                    if (aChoice.forcedActivated) {
+                                        delete aChoice.forcedActivated;
+                                        if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
+                                    }
+                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
+                                        for (let j = 0; j < aChoice.multipleUseVariable; j++) {
+                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                        }
+                                    } else {
+                                        if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                    }
+                                } else {
+                                    point.startingSum += aScore.tmpDisScore;
+                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                    delete aScore.isChangeDiscount;
+                                    delete aScore.tmpDisScore;
+                                }
+                                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                                isChanged = localChoice.id !== aChoice.id;
+                            }
+                            if (!changedScores.has(aScore.idx)) {
+                                const tmpScore = tmpScores.get(aScore.id) ?? 0;
+                                if (aChoice.isActive) {
+                                    const afterSelected = checkRequirements(aScore.requireds);
+                                    const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                                    tmpActivated.delete(localChoice.id);
+                                    aRow.currentChoices -= 1;
+                                    point.startingSum += tmpScore;
+                                    const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
+                                    aRow.currentChoices += 1;
+                                    point.startingSum -= tmpScore;
+                                    if (beforeSelected !== afterSelected) {
+                                        let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                                        scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
+                                        if (beforeSelected) {
+                                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                                const mul = aChoice.multipleUseVariable;
+
+                                                for (let j = mul - 1; j >= 0; j--) {
+                                                    if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[j]) {
+                                                        if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                                            if (aChoice.forcedActivated && aChoice.isActive) {
+                                                                aChoice.forcedActivated = false;
+                                                                aChoice.numMultipleTimesMinus--;
+                                                                selectedOneLess(aChoice, aRow);
+                                                                aChoice.forcedActivated = true;
+                                                            } else {
+                                                                selectedOneLess(aChoice, aRow);
+                                                            }
+                                                        } else {
+                                                            point.startingSum += scoreVal;
+                                                            thisTmpScores.set(aScore.id, scoreVal);
+                                                            aScore.isActiveMul[j] = false;
+                                                        }
+                                                    }
+                                                }
+                                            } else if (!aChoice.isSelectableMultiple) {
+                                                if (aScore.isActive) {
+                                                    if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                                        deselectObject(aChoice, aRow);
+                                                    } else {
+                                                        point.startingSum += scoreVal;
+                                                        thisTmpScores.set(aScore.id, scoreVal);
+                                                        delete aScore.isActive;
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            if (!aScore.isActive) {
+                                                if (point.belowZeroNotAllowed && point.startingSum - scoreVal < 0) {
+                                                    if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                                    deselectObject(aChoice, aRow);
+                                                } else {
+                                                    point.startingSum -= scoreVal;
+                                                    thisTmpScores.set(aScore.id, scoreVal);
+                                                    aScore.isActive = true;
+                                                }
+                                            }
+                                        }
+                                        scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                                        isChanged = localChoice.id !== aChoice.id;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (isChanged) deselectUpdateScore(aChoice, thisTmpScores, ++count, changedScores);
+            }
+        });
+        if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
+            snackbarVariables.labelText = scoreUpdate.join('');
+            snackbarVariables.isOpen = true;
+        }
+        scoreUpdate.splice(0);
+    }
+
+    function selectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
+        Array.from(activatedMap.entries()).forEach(([id]) => {
+            const cMap = choiceMap.get(id);
+            if (typeof cMap !== 'undefined') {
+                const aRow = cMap.row;
+                const aChoice = cMap.choice;
+                const thisTmpScores = new SvelteMap<string, number>();
+                let isChanged = false;
+                for (let i = 0; i < aChoice.scores.length; i++) {
+                    const aScore = aChoice.scores[i];
+                    if (!aScore.isNotRecalculatable) {
+                        const point = pointTypeMap.get(aScore.id);
+                        if (typeof point !== 'undefined') {
+                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined' && aChoice.id !== localChoice.id) {
+                                const mul = aChoice.multipleUseVariable;
+
+                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                    for (let j = mul - 1; j >= 0; j--) {
+                                        if (aChoice.isActive) {
+                                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                                if (aChoice.forcedActivated && aChoice.isActive) {
+                                                    aChoice.forcedActivated = false;
+                                                    aChoice.numMultipleTimesMinus--;
+                                                    selectedOneLess(aChoice, aRow);
+                                                    aChoice.forcedActivated = true;
+                                                } else {
+                                                    selectedOneLess(aChoice, aRow);
+                                                }
+                                            } else {
+                                                point.startingSum += aScore.tmpDisScore;
+                                            }
+                                        }
+                                    }
+
+                                    if (aChoice.isActive) {
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
+                                    }
+                                } else if (!aChoice.isSelectableMultiple) {
+                                    if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                        deselectObject(aChoice, aRow);
+                                    } else {
+                                        point.startingSum += aScore.tmpDisScore;
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
+                                    }
+                                }
+
+                                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                                isChanged = true;
+                            }
+                            if (!changedScores.has(aScore.idx)) {
+                                const tmpScore = tmpScores.get(aScore.id) ?? 0;
+                                if (aChoice.isActive && !aScore.isChanged) {
+                                    const afterSelected = checkRequirements(aScore.requireds);
+                                    const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                                    tmpActivated.delete(localChoice.id);
+                                    aRow.currentChoices -= 1;
+                                    point.startingSum += tmpScore;
+                                    const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
+                                    aRow.currentChoices += 1;
+                                    point.startingSum -= tmpScore;
+                                    if (beforeSelected !== afterSelected) {
+                                        let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                                        scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
+                                        if (beforeSelected) {
+                                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                                const mul = aChoice.multipleUseVariable;
+                                                
+                                                for (let j = mul - 1; j >= 0; j--) {
+                                                    if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[j]) {
+                                                        if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                                            if (aChoice.forcedActivated && aChoice.isActive) {
+                                                                aChoice.forcedActivated = false;
+                                                                aChoice.numMultipleTimesMinus--;
+                                                                selectedOneLess(aChoice, aRow);
+                                                                aChoice.forcedActivated = true;
+                                                            } else {
+                                                                selectedOneLess(aChoice, aRow);
+                                                            }
+                                                        } else {
+                                                            point.startingSum += scoreVal;
+                                                            thisTmpScores.set(aScore.id, scoreVal);
+                                                            aScore.isActiveMul[j] = false;
+                                                        }
+                                                    }
+                                                }
+                                            } else if (!aChoice.isSelectableMultiple) {
+                                                if (aScore.isActive) {
+                                                    if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                                        deselectObject(aChoice, aRow);
+                                                    } else {
+                                                        point.startingSum += scoreVal;
+                                                        thisTmpScores.set(aScore.id, scoreVal);
+                                                        delete aScore.isActive;
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            if (!aScore.isActive) {
+                                                if (point.belowZeroNotAllowed && point.startingSum - scoreVal < 0) {
+                                                    if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                                    deselectObject(aChoice, aRow);
+                                                } else {
+                                                    point.startingSum -= scoreVal;
+                                                    thisTmpScores.set(aScore.id, scoreVal);
+                                                    aScore.isActive = true;
+                                                }
+                                            }
+                                        }
+                                        scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                                        isChanged = true;
+                                        changedScores.add(aScore.idx);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (isChanged) selectUpdateScore(aChoice, thisTmpScores, ++count, changedScores);
+            }
+        });
+        if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
+            snackbarVariables.labelText = scoreUpdate.join('');
+            snackbarVariables.isOpen = true;
+        }
+        scoreUpdate.splice(0);
+    }
+
+    function activateTempChoices() {
+        let isActivated = false;
+        Array.from(tmpActivatedMap.entries()).forEach(([id, val]) => {
+            const cMap = choiceMap.get(id);
+            if (typeof cMap !== 'undefined') {
+                const aRow = cMap.row;
+                const aChoice = cMap.choice;
+                if (!aChoice.isActive) {
+                    activateObject(aChoice, aRow);
+                    if (aChoice.isActive) {
+                        tmpActivatedMap.delete(id);
+                        isActivated = true;
+                        if (!val.isAllowDeselect) aChoice.forcedActivated = true;
+                    }
+                }
+            }
+        });
+        if (isActivated) activateTempChoices();
+    }
+
+    function activateObject(localChoice: Choice, localRow: Row) {
+        if (localChoice.isSelectableMultiple) {
+            if (localChoice.id === choice.id && localChoice.allowSelectByClick && localChoice.multipleUseVariable === 0) {
+                selectedOneMore(localChoice, localRow);
+            }
+        } else {
+            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localRow.isResultRow && !localChoice.isNotSelectable && !localChoice.forcedActivated) {
+                if (localChoice.isActive) {
+                    if (!localChoice.selectOnce) deselectObject(localChoice, localRow);
+                } else {
+                    selectObject(localChoice, localRow);
+                }
+            }
+        }
+    }
+
+    function deselectObject(localChoice: Choice, localRow: Row) {
+        const pointCheck = checkPoints(localChoice, false);
+        if (pointCheck) {
+            const deselectProcess = () => {
+                const tmpScores = new SvelteMap<string, number>();
+                for (let i = 0; i < localChoice.scores.length; i++) {
+                    const score = localChoice.scores[i];
+                    if (checkRequirements(score.requireds) && score.isActive || score.isActive) {
+                        const point = pointTypeMap.get(score.id);
+                        if (typeof point !== 'undefined') {
+                            let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                            val = point.allowFloat ? val : Math.floor(val);
+                            point.startingSum += val;
+                            let tmpScore = tmpScores.get(score.id);
+                            if (typeof tmpScore !== 'undefined') {
+                                tmpScores.set(score.id, -val + tmpScore);
+                            } else {
+                                tmpScores.set(score.id, -val);
+                            }
+                            delete score.isActive;
+                            delete score.setValue;
+                        }
+                    }
+                }
+
+                if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
+                    if (localChoice.isActivateRandom && typeof localChoice.activatedRandom !== 'undefined') {
+                        for (let i = 0; i < localChoice.activatedRandom.length; i++) {
+                            const cMap = choiceMap.get(localChoice.activatedRandom[i]);
+                            if (typeof cMap !== 'undefined') {
+                                const fRow = cMap.row;
+                                const fChoice = cMap.choice;
+                                deselectForceActivate(localChoice, fChoice, fRow, 0);
+                            }
+                        }
+                        delete localChoice.activatedRandom;
+                    } else {
+                        const list = localChoice.activateThisChoice.split(',');
+                        for (let i = 0; i < list.length; i++) {
+                            const item = list[i].split('/ON#');
+                            const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                            const cMap = choiceMap.get(item[0]);
+                            if (typeof cMap !== 'undefined') {
+                                const fRow = cMap.row;
+                                const fChoice = cMap.choice;
+                                deselectForceActivate(localChoice, fChoice, fRow, forceNum);
+                            } else {
+                                const groupData = groupMap.get(item[0]);
+                                if (typeof groupData !== 'undefined') {
+                                    const groupEle = groupData.elements;
+                                    for (let j = 0; j < groupEle.length; j++) {
+                                        const cMap = choiceMap.get(groupEle[j]);
+                                        if (typeof cMap !== 'undefined') {
+                                            const fRow = cMap.row;
+                                            const fChoice = cMap.choice;
+                                            deselectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (localChoice.discountOther) {
+                    if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                        if (localChoice.isDisChoices) {
+                            const dList = new Set<string>();
+                            if (typeof localChoice.discountRows !== 'undefined') {
+                                for (let i = 0; i < localChoice.discountRows.length; i++) {
+                                    const dRow = rowMap.get(localChoice.discountRows[i]);
+                                    if (typeof dRow !== 'undefined') {
+                                        for (let j = 0; j < dRow.objects.length; j++) {
+                                            const dChoice = dRow.objects[j];
+                                            for (let k = 0; k < dChoice.scores.length; k++) {
+                                                const score = dChoice.scores[k];
+                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                    deselectDiscount(localChoice, score);
+                                                }
+                                            }
+                                            dList.add(dChoice.id);
+                                        }
+                                    }
+                                }
+                            }
+                            if (typeof localChoice.discountChoices !== 'undefined') {
+                                for (let i = 0; i < localChoice.discountChoices.length; i++) {
+                                    if (!dList.has(localChoice.discountChoices[i])) {
+                                        const cMap = choiceMap.get(localChoice.discountChoices[i]);
+                                        if (typeof cMap !== 'undefined') {
+                                            const dChoice = cMap.choice;
+                                            for (let j = 0; j < dChoice.scores.length; j++) {
+                                                const score = cMap.choice.scores[j];
+                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1) && !dList.has(score.idx)) {
+                                                    deselectDiscount(localChoice, score);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            if (typeof localChoice.discountGroups !== 'undefined') {
+                                for (let i = 0; i < localChoice.discountGroups.length; i++) {
+                                    const groupData = groupMap.get(localChoice.discountGroups[i]);
+                                    if (typeof groupData !== 'undefined') {
+                                        for (let j = 0; j < groupData.elements.length; j++) {
+                                            const cMap = choiceMap.get(groupData.elements[j]);
+                                            if (typeof cMap !== 'undefined') {
+                                                for (let k = 0; k < cMap.choice.scores.length; k++) {
+                                                    const score = cMap.choice.scores[k];
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                        deselectDiscount(localChoice, score);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                localChoice.isActive = false;
+                localRow.currentChoices -= 1;
+                activatedMap.delete(localChoice.id);
+
+                Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                    const cMap = choiceMap.get(id);
+                    if (typeof cMap !== 'undefined') {
+                        const aRow = cMap.row;
+                        const aChoice = cMap.choice;
+                        if (aChoice.id !== localChoice.id) {
+                            if (!checkRequirements(aChoice.requireds)) {
+                                if (aChoice.forcedActivated) {
+                                    delete aChoice.forcedActivated;
+                                    if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                }
+                                if (val.multiple === 0) {
+                                    if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                } else if (val.multiple > 0) {
+                                    for (let i = 0; i < val.multiple; i++) {
+                                        if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                if (localChoice.multiplyPointtypeIsOnCheck && typeof localChoice.pointTypeToMultiply !== 'undefined') {
+                    let idx = 0;
+                    for (let i = 0; i < localChoice.pointTypeToMultiply.length; i++) {
+                        let point = pointTypeMap.get(localChoice.pointTypeToMultiply[i]);
+
+                        if (typeof point !== 'undefined') {
+                            for (let j = mdObjects.length - 1; j >= 0; j--) {
+                                let mdChoice = mdObjects[j];
+
+                                if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                                    let val = mdChoice.startingSumAtMultiply[i].value * mdChoice.startingSumAtMultiply[i].calcVal;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    point.startingSum -= val;
+                                    point.startingSum += mdChoice.startingSumAtMultiply[i].value;
+                                }
+                                if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                                    let val = mdChoice.startingSumAtDivide[i].value / mdChoice.startingSumAtDivide[i].calcVal;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    point.startingSum -= val;
+                                    point.startingSum += mdChoice.startingSumAtDivide[i].value;
+                                }
+                                if (mdChoice.id === localChoice.id) {
+                                    idx = j;
+                                    break;
+                                }
+                            }
+                            for (let j = idx + 1;  j < mdObjects.length; j++) {
+                                let mdChoice = mdObjects[j];
+
+                                if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                                    mdChoice.startingSumAtMultiply[i].value = point.startingSum;
+                                    point.startingSum *= mdChoice.startingSumAtMultiply[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                } 
+                                if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                                    mdChoice.startingSumAtDivide[i].value = point.startingSum;
+                                    point.startingSum /= mdChoice.startingSumAtDivide[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
+                            }
+                        }
+                    }
+
+                    delete localChoice.multiplyPointtypeIsOnCheck;
+                    delete localChoice.startingSumAtMultiply;
+                    if (!localChoice.dividePointtypeIsOnCheck) mdObjects.splice(idx, 1);
+                }
+
+                if (localChoice.dividePointtypeIsOnCheck && typeof localChoice.pointTypeToDivide !== 'undefined') {
+                    let idx = 0;
+                    for (let i = 0; i < localChoice.pointTypeToDivide.length; i++) {
+                        let point = pointTypeMap.get(localChoice.pointTypeToDivide[i]);
+
+                        if (typeof point !== 'undefined') {
+                            for (let j = mdObjects.length - 1; j >= 0; j--) {
+                                let mdChoice = mdObjects[j];
+
+                                if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                                    let val = mdChoice.startingSumAtMultiply[i].value * mdChoice.startingSumAtMultiply[i].calcVal;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    point.startingSum -= val;
+                                    point.startingSum += mdChoice.startingSumAtMultiply[i].value;
+                                }
+                                if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                                    let val = mdChoice.startingSumAtDivide[i].value / mdChoice.startingSumAtDivide[i].calcVal;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    point.startingSum -= val;
+                                    point.startingSum += mdChoice.startingSumAtDivide[i].value;
+                                }
+                                if (mdChoice.id === localChoice.id) {
+                                    idx = j;
+                                    break;
+                                }
+                            }
+                            for (let j = idx + 1;  j < mdObjects.length; j++) {
+                                let mdChoice = mdObjects[j];
+
+                                if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                                    mdChoice.startingSumAtMultiply[i].value = point.startingSum;
+                                    point.startingSum *= mdChoice.startingSumAtMultiply[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
+                                if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                                    mdChoice.startingSumAtDivide[i].value = point.startingSum;
+                                    point.startingSum /= mdChoice.startingSumAtDivide[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
+                            }
+                        }
+                    }
+
+                    delete localChoice.dividePointtypeIsOnCheck;
+                    delete localChoice.startingSumAtDivide;
+                    mdObjects.splice(idx, 1);
+                }
+
+                if (localChoice.isChangeVariables && typeof localChoice.changedVariables !== 'undefined') {
+                    for (let i = 0; i < localChoice.changedVariables.length; i++) {
+                        const variable = variableMap.get(localChoice.changedVariables[i]);
+                        if (typeof variable !== 'undefined') {
+                            if (localChoice.changeType === '1') {
+                                variable.isTrue = false;
+                            } else if (localChoice.changeType === '2') {
+                                variable.isTrue = true;
+                            } else if (localChoice.changeType === '3') {
+                                variable.isTrue = !variable.isTrue;
+                            }
+                        }
+                    }
+                }
+
+                if (localChoice.addToAllowChoice && typeof localChoice.idOfAllowChoice !== 'undefined' && typeof localChoice.numbAddToAllowChoice !== 'undefined') {
+                    for (let i = 0; i < localChoice.idOfAllowChoice.length; i++) {
+                        const aRow = rowMap.get(localChoice.idOfAllowChoice[i]);
+                        if (typeof aRow !== 'undefined') {
+                            aRow.allowedChoices -= localChoice.numbAddToAllowChoice;
+                            if (aRow.allowedChoices > 0 && aRow.currentChoices >= aRow.allowedChoices) {
+                                for (let j = 0; j < aRow.objects.length; j++) {
+                                    const thisChoice = aRow.objects[j];
+                                    if (thisChoice.isActive) {
+                                        if (!thisChoice.forcedActivated) {
+                                            if (thisChoice.isSelectableMultiple) {
+                                                let counter = thisChoice.multipleUseVariable;
+                                                for (let k = 0; k < counter; k++) {
+                                                    selectedOneLess(thisChoice, aRow);
+                                                }
+                                            } else {
+                                                deselectObject(thisChoice, aRow);
+                                            }
+                                        }
+                                    }    
+                                    if (aRow.allowedChoices >= aRow.currentChoices) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+                    const word = wordMap.get(localChoice.idOfTheTextfieldWord);
+                    if (typeof word !== 'undefined') {
+                        word.replaceText = typeof localChoice.wordChangeDeselect === 'undefined' ? '' : localChoice.wordChangeDeselect;
+                    }
+                }
+
+                if (localChoice.isImageUpload) {
+                    if (typeof localChoice.defaultImage !== 'undefined') localChoice.image = localChoice.defaultImage;
+                }
+
+                if (localChoice.backpackBtnRequirement) {
+                    if (typeof app.btnBackpackIsOn !== 'undefined') {
+                        app.btnBackpackIsOn -= 1;
+                    }
+                }
+
+                if (localChoice.showAllAddons) {
+                    if (typeof app.showAllAddons !== 'undefined') {
+                        app.showAllAddons -= 1;
+                    }
+                }
+
+                if (localChoice.changeBackground) {
+                    if (localChoice.changeBgImage) {
+                        if (typeof app.bgImageStack !== 'undefined') {
+                            const idx = app.bgImageStack.findIndex(item => item.id === localChoice.id);
+                            if (idx !== -1) app.bgImageStack.splice(idx, 1);
+
+                            const leng = app.bgImageStack.length;
+                            if (leng > 0) {
+                                app.styling.backgroundImage = app.bgImageStack[leng - 1].data;
+                            } else {
+                                app.styling.backgroundImage = app.defaultBgImage ?? '';
+                                delete app.bgImageStack;
+                            }
+                        }
+                    } else {
+                        if (typeof localChoice.changedBgColorCode !== 'undefined') {
+                            if (typeof app.bgColorStack !== 'undefined') {
+                                const idx = app.bgColorStack.findIndex(item => item.id === localChoice.id);
+                                if (idx !== -1) app.bgColorStack.splice(idx, 1);
+
+                                const leng = app.bgColorStack.length;
+                                if (leng > 0) {
+                                    app.styling.backgroundColor = app.bgColorStack[leng - 1].data;
+                                } else {
+                                    app.styling.backgroundColor = app.defaultBgColor ?? '#FFFFFFFF';
+                                    delete app.bgColorStack;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (localChoice.changePointBar) {
+                    if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
+                        if (typeof app.barBgColorStack !== 'undefined') {
+                            const idx = app.barBgColorStack.findIndex(item => item.id === localChoice.id);
+                            if (idx !== -1) app.barBgColorStack.splice(idx, 1);
+
+                            const leng = app.barBgColorStack.length;
+                            if (leng > 0) {
+                                app.styling.barBackgroundColor = app.barBgColorStack[leng - 1].data;
+                            } else {
+                                app.styling.barBackgroundColor = app.defaultBarBgColor ?? '#FFFFFFFF';
+                                delete app.barBgColorStack;
+                            }
+                        }
+                    }
+                    if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
+                        if (typeof app.barIconColorStack !== 'undefined') {
+                            const idx = app.barIconColorStack.findIndex(item => item.id === localChoice.id);
+                            if (idx !== -1) app.barIconColorStack.splice(idx, 1);
+
+                            const leng = app.barIconColorStack.length;
+                            if (leng > 0) {
+                                app.styling.barIconColor = app.barIconColorStack[leng - 1].data;
+                            } else {
+                                app.styling.barIconColor = app.defaultBarIconColor ?? '#0000008A';
+                                delete app.barIconColorStack;
+                            }
+                        }
+                    }
+                    if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
+                        if (typeof app.barTextColorStack !== 'undefined') {
+                            const idx = app.barTextColorStack.findIndex(item => item.id === localChoice.id);
+                            if (idx !== -1) app.barTextColorStack.splice(idx, 1);
+
+                            const leng = app.barTextColorStack.length;
+                            if (leng > 0) {
+                                app.styling.barTextColor = app.barTextColorStack[leng - 1].data;
+                            } else {
+                                app.styling.barTextColor = app.defaultBarIconColor ?? '#000000';
+                                delete app.barTextColorStack;
+                            }
+                        }
+                    }
+                }
+
+                if (localChoice.changeTemplates) {
+                    if (localChoice.changeTemplatesList && localChoice.changeToThisTemplate) {
+                        const list = localChoice.changeTemplatesList.split(',');
+                        
+                        for (let i = 0; i < list.length; i++) {
+                            const item = list[i];
+                            const cMap = choiceMap.get(item);
+                            if (typeof cMap !== 'undefined') {
+                                const tChoice = cMap.choice;
+                                revertTemplate(tChoice, localChoice.id);
+
+                                if(localChoice.changeAddonTemplate) {
+                                    for (let j = 0; j < tChoice.addons.length; j++) {
+                                        const tAddon = tChoice.addons[j];
+                                        revertTemplate(tAddon, localChoice.id);
+                                    }
+                                }
+                                continue;
+                            }
+
+                            const tRow = rowMap.get(item);
+                            if (typeof tRow !== 'undefined') {
+                                revertTemplate(tRow, localChoice.id);
+                                continue;
+                            }
+
+                            const groupData = groupMap.get(item[0]);
+                            if (typeof groupData !== 'undefined') {
+                                const groupRowEle = groupData.rowElements;
+
+                                for (let j = 0; j < groupRowEle.length; j++) {
+                                    const gtRow = rowMap.get(groupRowEle[j]);
+                                    if (typeof gtRow !== 'undefined') {
+                                        revertTemplate(gtRow, localChoice.id);
+                                    }
+                                }
+                                const groupEle = groupData.elements;                                    
+                                for (let j = 0; j < groupEle.length; j++) {
+                                    const gcMap = choiceMap.get(groupEle[j]);
+                                    if (typeof gcMap !== 'undefined') {
+                                        const gtChoice = gcMap.choice;
+                                        revertTemplate(gtChoice, localChoice.id);
+                                    }
+                                }
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if (localChoice.changeWidth) {
+                    if (localChoice.changeWidthList && localChoice.changeToThisWidth) {
+                        const list = localChoice.changeWidthList.split(',');
+                        
+                        for (let i = 0; i < list.length; i++) {
+                            const item = list[i];
+                            const cMap = choiceMap.get(item);
+                            if (typeof cMap !== 'undefined') {
+                                const tChoice = cMap.choice;
+                                revertWidth(tChoice, localChoice.id);
+                                continue;
+                            }
+
+                            const tRow = rowMap.get(item);
+                            if (typeof tRow !== 'undefined') {
+                                revertWidth(tRow, localChoice.id);
+                                continue;
+                            }
+
+                            const groupData = groupMap.get(item[0]);
+                            if (typeof groupData !== 'undefined') {
+                                const groupRowEle = groupData.rowElements;
+
+                                for (let j = 0; j < groupRowEle.length; j++) {
+                                    const gtRow = rowMap.get(groupRowEle[j]);
+                                    if (typeof gtRow !== 'undefined') {
+                                        revertWidth(gtRow, localChoice.id);
+                                    }
+                                }
+                                const groupEle = groupData.elements;                                    
+                                for (let j = 0; j < groupEle.length; j++) {
+                                    const gcMap = choiceMap.get(groupEle[j]);
+                                    if (typeof gcMap !== 'undefined') {
+                                        const gtChoice = gcMap.choice;
+                                        revertWidth(gtChoice, localChoice.id);
+                                    }
+                                }
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if (localChoice.setBgmIsOn && bgmPlayer) {
+                    if (localChoice.bgmId) {
+                        bgmVariables.bgmIsPlaying = false;
+                        playBgm(localChoice, localChoice.bgmId, 0);
+                    }
+                }
+
+                if (localChoice.muteBgm && bgmPlayer) {
+                    const player = get(bgmPlayer);
+
+                    app.isMute = false;
+                    if (player && typeof player.unMute === 'function') {
+                        player.unMute();
+                    }
+                }
+
+                if (localChoice.isContentHidden && typeof localChoice.hiddenContentsRow !== 'undefined' && typeof localChoice.hiddenContentsType !== 'undefined') {
+                    for (let i = 0; i < localChoice.hiddenContentsRow.length; i++) {
+                        const hRow = rowMap.get(localChoice.hiddenContentsRow[i]);
+                        if (typeof hRow !== 'undefined') {
+                            for (let j = 0; j < localChoice.hiddenContentsType.length; j++) {
+                                switch (localChoice.hiddenContentsType[j]) {
+                                    case '1':
+                                        delete hRow.objectTitleRemoved;
+                                        break;
+                                    case '2':
+                                        delete hRow.objectImageRemoved;
+                                        break;
+                                    case '3':
+                                        delete hRow.objectTextRemoved;
+                                        break;
+                                    case '4':
+                                        delete hRow.objectScoreRemoved;
+                                        break;
+                                    case '5':
+                                        delete hRow.objectRequirementRemoved;
+                                        break;
+                                    case '6':
+                                        delete hRow.addonTitleRemoved;
+                                        break;
+                                    case '7':
+                                        delete hRow.addonImageRemoved;
+                                        break;
+                                    case '8':
+                                        delete hRow.addonTextRemoved;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+                delete localChoice.tempSlots;
+                deselectUpdateScore(localChoice, tmpScores, 0);
+                activateTempChoices();
+            }
+
+            if (linkedObjects.indexOf(localChoice.id) === -1) {
+                if (localChoice.isFadeTransition) {
+                    if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                        app.fadeTransitionColor = '000000FF';
+                    } else {
+                        app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                    }
+
+                    if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                        app.fadeTransitionTime = 0.25;
+                    } else {
+                        app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                    }
+
+                    app.fadeTransitionIsOn = true;
+                    window.setTimeout(() => {
+                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                        }
+                        app.fadeTransitionIsOn = false;
+                        deselectProcess();
+                    }, app.fadeTransitionTime * 1000);
+                } else {
+                    deselectProcess();
+                }
+            }
+            if (linkedObjects.indexOf(localChoice.id) === 0) {
+                linkedObjects.splice(0);
+            }
+        }
+    }
+
+    function selectObject(localChoice: Choice, localRow: Row) {
+        let selectable = true;
+
+        if (localRow.allowedChoices > 0 && localRow.currentChoices >= localRow.allowedChoices) {
+            let count = 0;
+            for (let i = 0; i < localRow.objects.length; i++) {
+                const thisChoice = localRow.objects[i];
+                if (thisChoice.isActive) {
+                    if (!thisChoice.forcedActivated) {
+                        if (thisChoice.isSelectableMultiple) {
+                            let counter = thisChoice.multipleUseVariable;
+                            for (let j = 0; j < counter; j++) {
+                                activateObject(thisChoice, localRow);
+                            }
+                        } else {
+                            activateObject(thisChoice, localRow);
+                        }
+                        break;
+                    } else {
+                        count++;
+                    }
+                }
+            }
+            if (count >= localRow.allowedChoices) {
+                selectable = false;
+            }
+        }
+
+        if (selectable) {
+            for (let i = 0; i < localChoice.scores.length; i++) {
+                const score = localChoice.scores[i];
+                const point = pointTypeMap.get(score.id);
+                if (typeof point !== 'undefined' && score.isRandom && !score.setValue && typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
+                    score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
+                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
+                    score.setValue = true;
+                }
+            }
+            const pointCheck = checkPoints(localChoice, true);
+            if (pointCheck) {
+                const selectProcess = () => {
+                    const tmpScores = new SvelteMap<string, number>();
+
+                    localChoice.isActive = true;
+                    activatedMap.set(localChoice.id, {multiple: 0});
+                    localRow.currentChoices += 1;
+
+                    if (localChoice.discountOther) {
+                        if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                            if (localChoice.isDisChoices) {
+                                const dList = new Set<string>();
+                                if (typeof localChoice.discountRows !== 'undefined') {
+                                    for (let i = 0; i < localChoice.discountRows.length; i++) {
+                                        const dRow = rowMap.get(localChoice.discountRows[i]);
+                                        if (typeof dRow !== 'undefined') {
+                                            for (let j = 0; j < dRow.objects.length; j++) {
+                                                const dChoice = dRow.objects[j];
+                                                for (let k = 0; k < dChoice.scores.length; k++) {
+                                                    const score = dChoice.scores[k];
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
+                                                        selectDiscount(localChoice, score);
+                                                    }
+                                                }
+                                                dList.add(dChoice.id);
+                                            }
+                                        }
+                                    }
+                                }
+                                if (typeof localChoice.discountChoices !== 'undefined') {
+                                    for (let i = 0; i < localChoice.discountChoices.length; i++) {
+                                        if (!dList.has(localChoice.discountChoices[i])) {
+                                            const cMap = choiceMap.get(localChoice.discountChoices[i]);
+                                            if (typeof cMap !== 'undefined') {
+                                                const dChoice = cMap.choice;
+                                                for (let j = 0; j < dChoice.scores.length; j++) {
+                                                    const score = dChoice.scores[j];
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
+                                                        selectDiscount(localChoice, score);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (typeof localChoice.discountGroups !== 'undefined') {
+                                    for (let i = 0; i < localChoice.discountGroups.length; i++) {
+                                        const groupData = groupMap.get(localChoice.discountGroups[i]);
+                                        if (typeof groupData !== 'undefined') {
+                                            for (let j = 0; j < groupData.elements.length; j++) {
+                                                const cMap = choiceMap.get(groupData.elements[j]);
+                                                if (typeof cMap !== 'undefined') {
+                                                    for (let k = 0; k < cMap.choice.scores.length; k++) {
+                                                        const score = cMap.choice.scores[k];
+                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
+                                                            selectDiscount(localChoice, score);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    for (let i = 0; i < localChoice.scores.length; i++) {
+                        const score = localChoice.scores[i];
+                        if (checkRequirements(score.requireds) && !score.isActive) {
+                            const point = pointTypeMap.get(score.id);
+                            if (typeof point !== 'undefined') {
+                                let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                val = point.allowFloat ? val : Math.floor(val);
+                                point.startingSum -= val;
+                                score.isActive = true;
+                                let tmpScore = tmpScores.get(score.id);
+                                if (typeof tmpScore !== 'undefined') {
+                                    tmpScores.set(score.id, val + tmpScore);
+                                } else {
+                                    tmpScores.set(score.id, val);
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.duplicateRow) {
+                        if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
+                            duplicateRow(localChoice, localRow);
+                        }
+                    }
+                    
+                    if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
+                        if (localChoice.isActivateRandom) {
+                            selectForceRandomActivate(localChoice);
+                        } else {
+                            const list = localChoice.activateThisChoice.split(',');
+                            for (let i = 0; i < list.length; i++) {
+                                const item = list[i].split('/ON#');
+                                const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                                const cMap = choiceMap.get(item[0]);
+                                if (typeof cMap !== 'undefined') {
+                                    const fRow = cMap.row;
+                                    const fChoice = cMap.choice;
+                                    selectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                } else {
+                                    const groupData = groupMap.get(item[0]);
+                                    if (typeof groupData !== 'undefined') {
+                                        const groupEle = groupData.elements;
+                                        for (let j = 0; j < groupEle.length; j++) {
+                                            const cMap = choiceMap.get(groupEle[j]);
+                                            if (typeof cMap !== 'undefined') {
+                                                const fRow = cMap.row;
+                                                const fChoice = cMap.choice;
+                                                selectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (localChoice.deactivateOtherChoice && typeof localChoice.deactivateThisChoice !== 'undefined') {
+                        const list = localChoice.deactivateThisChoice.split(',');
+                        for (let i = 0; i < list.length; i++) {
+                            const item = list[i].split('/ON#');
+                            const deactiveNum = item.length > 1 ? parseInt(item[1]) : 0;
+                            const cMap = choiceMap.get(item[0]);
+                            if (typeof cMap !== 'undefined') {
+                                const dRow = cMap.row;
+                                const dChoice = cMap.choice;
+                                if (dChoice.isActive) {
+                                    if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
+                                        for (let j = 0; j < deactiveNum; j++) {
+                                            selectedOneLess(dChoice, dRow);
+                                        }
+                                    } else {
+                                        deselectObject(dChoice, dRow);
+                                    }
+                                }
+                            } else {
+                                const groupData = groupMap.get(item[0]);
+                                if (typeof groupData !== 'undefined') {
+                                    const groupEle = groupData.elements;
+                                    for (let j = 0; j < groupEle.length; j++) {
+                                        const cMap = choiceMap.get(groupEle[j]);
+                                        if (typeof cMap !== 'undefined') {
+                                            const dRow = cMap.row;
+                                            const dChoice = cMap.choice;
+                                            if (dChoice.isActive) {
+                                                if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
+                                                    for (let k = 0; k < deactiveNum; k++) {
+                                                        selectedOneLess(dChoice, dRow);
+                                                    }
+                                                } else {
+                                                    deselectObject(dChoice, dRow);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                        const cMap = choiceMap.get(id);
+                        if (typeof cMap !== 'undefined') {
+                            const aRow = cMap.row;
+                            const aChoice = cMap.choice;
+                            if (aChoice.id !== localChoice.id) {
+                                if (!checkRequirements(aChoice.requireds)) {
+                                    if (aChoice.forcedActivated) {
+                                        delete aChoice.forcedActivated;
+                                        if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                    }
+                                    if (val.multiple === 0) {
+                                        if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                    } else if (val.multiple > 0) {
+                                        for (let i = 0; i < val.multiple; i++) {
+                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    if (localChoice.multiplyPointtypeIsOn && typeof localChoice.pointTypeToMultiply !== 'undefined' && typeof localChoice.multiplyWithThis !== 'undefined') {
+                        let count = 0;
+                        localChoice.multiplyPointtypeIsOnCheck = true;
+                        if (typeof localChoice.startingSumAtMultiply !== 'object') localChoice.startingSumAtMultiply = [];
+                        for (let i = 0; i < localChoice.pointTypeToMultiply.length; i++) {
+                            let point = pointTypeMap.get(localChoice.pointTypeToMultiply[i]);
+
+                            if (typeof point !== 'undefined') {
+                                if (localChoice.multiplyPointtypeIsId && typeof localChoice.multiplyWithThis === 'string') {
+                                    let calcPoint = pointTypeMap.get(localChoice.multiplyWithThis);
+
+                                    if (typeof calcPoint !== 'undefined') {
+                                        localChoice.startingSumAtMultiply[i] = {value: point.startingSum, calcVal: calcPoint.startingSum};
+                                        point.startingSum *= calcPoint.startingSum;
+                                        point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                    } else {
+                                        count++;
+                                    }
+                                } else if (typeof localChoice.multiplyWithThis === 'number') {
+                                    localChoice.startingSumAtMultiply[i] = {value: point.startingSum, calcVal: localChoice.multiplyWithThis};
+                                    point.startingSum *= localChoice.multiplyWithThis;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
+                            } else {
+                                count++;
+                            }
+                        }
+                        if (count === localChoice.pointTypeToMultiply.length) delete localChoice.multiplyPointtypeIsOnCheck;
+                        if (localChoice.multiplyPointtypeIsOnCheck) mdObjects.push(localChoice);
+                    }
+
+                    if (localChoice.dividePointtypeIsOn && typeof localChoice.pointTypeToDivide !== 'undefined' && typeof localChoice.divideWithThis !== 'undefined') {
+                        let count = 0;
+                        localChoice.dividePointtypeIsOnCheck = true;
+                        if (typeof localChoice.startingSumAtDivide !== 'object') localChoice.startingSumAtDivide = [];
+                        for (let i = 0; i < localChoice.pointTypeToDivide.length; i++) {
+                            let point = pointTypeMap.get(localChoice.pointTypeToDivide[i]);
+
+                            if (typeof point !== 'undefined') {
+                                if (localChoice.dividePointtypeIsId && typeof localChoice.divideWithThis === 'string') {
+                                    let calcPoint = pointTypeMap.get(localChoice.divideWithThis);
+
+                                    if (typeof calcPoint !== 'undefined') {
+                                        if (calcPoint.startingSum === 0) {
+                                            count++;
+                                        } else {
+                                            localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: calcPoint.startingSum};
+                                            point.startingSum /= calcPoint.startingSum;
+                                            point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                        }
+                                    } else {
+                                        count++;
+                                    }
+                                } else if (typeof localChoice.divideWithThis === 'number') {
+                                    if (localChoice.dividedWithThis === 0) {
+                                        count++;
+                                    } else {
+                                        localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: localChoice.divideWithThis};
+                                        point.startingSum /= localChoice.divideWithThis;
+                                        point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                    }
+                                }
+                            } else {
+                                count++;
+                            }
+                        }
+                        if (count === localChoice.pointTypeToDivide.length) delete localChoice.dividePointtypeIsOnCheck;
+                        if (!localChoice.multiplyPointtypeIsOnCheck && localChoice.dividePointtypeIsOnCheck) mdObjects.push(localChoice);
+                    }
+
+                    if (localChoice.isChangeVariables && typeof localChoice.changedVariables !== 'undefined') {
+                        for (let i = 0; i < localChoice.changedVariables.length; i++) {
+                            const variable = variableMap.get(localChoice.changedVariables[i]);
+                            if (typeof variable !== 'undefined') {
+                                if (localChoice.changeType === '1') {
+                                    variable.isTrue = true;
+                                } else if (localChoice.changeType === '2') {
+                                    variable.isTrue = false;
+                                } else if (localChoice.changeType === '3') {
+                                    variable.isTrue = !variable.isTrue;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.addToAllowChoice && typeof localChoice.idOfAllowChoice !== 'undefined' && typeof localChoice.numbAddToAllowChoice !== 'undefined') {
+                        for (let i = 0; i < localChoice.idOfAllowChoice.length; i++) {
+                            const aRow = rowMap.get(localChoice.idOfAllowChoice[i]);
+                            if (typeof aRow !== 'undefined') {
+                                aRow.allowedChoices += localChoice.numbAddToAllowChoice;
+                                if (aRow.allowedChoices > 0 && aRow.currentChoices >= aRow.allowedChoices) {
+                                    for (let j = 0; j < aRow.objects.length; j++) {
+                                        const thisChoice = aRow.objects[j];
+                                        if (thisChoice.isActive) {
+                                            if (!thisChoice.forcedActivated) {
+                                                if (thisChoice.isSelectableMultiple) {
+                                                    let counter = thisChoice.multipleUseVariable;
+                                                    for (let k = 0; k < counter; k++) {
+                                                        selectedOneLess(thisChoice, aRow);    
+                                                    }
+                                                } else {
+                                                    deselectObject(thisChoice, aRow);
+                                                }
+                                            }
+                                        }
+                                        if (aRow.allowedChoices >= aRow.currentChoices) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+                        const word = wordMap.get(localChoice.idOfTheTextfieldWord);
+                        if (typeof word !== 'undefined') {
+                            word.replaceText = localChoice.wordChangeSelect;
+                        }
+                    }
+
+                    if (localChoice.isImageUpload) {
+                        localChoice.defaultImage = localChoice.image;
+                        dlgVariables.currentDialog = 'appImageUpload';
+                        dlgVariables.data = localChoice;
+                        dlgVariables.imgProp = 'image';
+                    }
+
+                    if (localChoice.backpackBtnRequirement) {
+                        app.btnBackpackIsOn += 1;
+                    }
+
+                    if (localChoice.showAllAddons) {
+                        app.showAllAddons += 1;
+                    }
+
+                    if (localChoice.changeBackground) {
+                        if (localChoice.changeBgImage) {
+                            if (typeof localChoice.bgImage !== 'undefined') {
+                                if (typeof app.bgImageStack === 'undefined') {
+                                    app.bgImageStack = [];
+                                    app.defaultBgImage = app.styling.backgroundImage ?? '';
+                                }
+                                app.bgImageStack.push({id: localChoice.id, data: localChoice.bgImage});
+                                app.styling.backgroundImage = localChoice.bgImage;
+                            }
+                        } else {
+                            if (typeof localChoice.changedBgColorCode !== 'undefined') {
+                                if (typeof app.bgColorStack === 'undefined') {
+                                    app.bgColorStack = [];
+                                    app.defaultBgColor = app.styling.backgroundColor ?? '';
+                                }
+                                app.bgColorStack.push({id: localChoice.id, data: localChoice.changedBgColorCode});
+                                app.styling.backgroundColor = localChoice.changedBgColorCode;
+                            }
+                        }
+                    }
+                    
+                    if (localChoice.changePointBar) {
+                        if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
+                            if (typeof app.barBgColorStack === 'undefined') {
+                                app.barBgColorStack = [];
+                                app.defaultBarBgColor = app.styling.barBackgroundColor ?? '#FFFFFFFF';
+                            }
+                            app.barBgColorStack.push({id: localChoice.id, data: localChoice.changedBarBgColor});
+                            app.styling.barBackgroundColor = localChoice.changedBarBgColor;
+                        }
+                        if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
+                            if (typeof app.barIconColorStack === 'undefined') {
+                                app.barIconColorStack = [];
+                                app.defaultBarIconColor = app.styling.barIconColor ?? '#0000008A';
+                            }
+                            app.barIconColorStack.push({id: localChoice.id, data: localChoice.changedBarIconColor});
+                            app.styling.barIconColor = localChoice.changedBarIconColor;
+                        }
+                        if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
+                            if (typeof app.barTextColorStack === 'undefined') {
+                                app.barTextColorStack = [];
+                                app.defaultBarTextColor = app.styling.barTextColor ?? '#000000';
+                            }
+                            app.barTextColorStack.push({id: localChoice.id, data: localChoice.changedBarTextColor});
+                            app.styling.barTextColor = localChoice.changedBarTextColor;
+                        }
+                    }
+
+                    if (localChoice.changeTemplates) {
+                        if (localChoice.changeTemplatesList && localChoice.changeToThisTemplate) {
+                            const list = localChoice.changeTemplatesList.split(',');
+                            
+                            for (let i = 0; i < list.length; i++) {
+                                const item = list[i];
+                                const cMap = choiceMap.get(item);
+                                if (typeof cMap !== 'undefined') {
+                                    const tChoice = cMap.choice;
+                                    applyTemplate(tChoice, localChoice.id, localChoice.changeToThisTemplate);
+
+                                    if(localChoice.changeAddonTemplate) {
+                                        for (let j = 0; j < tChoice.addons.length; j++) {
+                                            const tAddon = tChoice.addons[j];
+                                            applyTemplate(tAddon, localChoice.id, localChoice.changeToThisTemplate);
+                                        }
+                                    }
+                                    continue;
+                                }
+
+                                const tRow = rowMap.get(item);
+                                if (typeof tRow !== 'undefined') {
+                                    applyTemplate(tRow, localChoice.id, localChoice.changeToThisTemplate);
+                                    continue;
+                                }
+
+                                const groupData = groupMap.get(item[0]);
+                                if (typeof groupData !== 'undefined') {
+                                    const groupRowEle = groupData.rowElements;
+
+                                    for (let j = 0; j < groupRowEle.length; j++) {
+                                        const gtRow = rowMap.get(groupRowEle[j]);
+                                        if (typeof gtRow !== 'undefined') {
+                                            applyTemplate(gtRow, localChoice.id, localChoice.changeToThisTemplate);
+                                        }
+                                    }
+                                    const groupEle = groupData.elements;                                    
+                                    for (let j = 0; j < groupEle.length; j++) {
+                                        const gcMap = choiceMap.get(groupEle[j]);
+                                        if (typeof gcMap !== 'undefined') {
+                                            const gtChoice = gcMap.choice;
+                                            applyTemplate(gtChoice, localChoice.id, localChoice.changeToThisTemplate);
+                                        }
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.changeWidth) {
+                        if (localChoice.changeWidthList && localChoice.changeToThisWidth) {
+                            const list = localChoice.changeWidthList.split(',');
+                            
+                            for (let i = 0; i < list.length; i++) {
+                                const item = list[i];
+                                const cMap = choiceMap.get(item);
+                                if (typeof cMap !== 'undefined') {
+                                    const tChoice = cMap.choice;
+                                    applyWidth(tChoice, localChoice.id, localChoice.changeToThisWidth);
+                                    continue;
+                                }
+
+                                const tRow = rowMap.get(item);
+                                if (typeof tRow !== 'undefined') {
+                                    applyWidth(tRow, localChoice.id, localChoice.changeToThisWidth);
+                                    continue;
+                                }
+
+                                const groupData = groupMap.get(item[0]);
+                                if (typeof groupData !== 'undefined') {
+                                    const groupRowEle = groupData.rowElements;
+
+                                    for (let j = 0; j < groupRowEle.length; j++) {
+                                        const gtRow = rowMap.get(groupRowEle[j]);
+                                        if (typeof gtRow !== 'undefined') {
+                                            applyWidth(gtRow, localChoice.id, localChoice.changeToThisWidth);
+                                        }
+                                    }
+                                    const groupEle = groupData.elements;                                    
+                                    for (let j = 0; j < groupEle.length; j++) {
+                                        const gcMap = choiceMap.get(groupEle[j]);
+                                        if (typeof gcMap !== 'undefined') {
+                                            const gtChoice = gcMap.choice;
+                                            applyWidth(gtChoice, localChoice.id, localChoice.changeToThisWidth);
+                                        }
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.setBgmIsOn) {
+                        if (localChoice.bgmId) {
+                            bgmVariables.bgmIsPlaying = true;
+                            
+                            if (bgmVariables.isBgmInit) {
+                                playBgm(localChoice, localChoice.bgmId, 0);
+                            } else {
+                                initYoutubePlayer(localChoice);
+                                bgmVariables.isBgmInit = true;
+                            }
+                        }
+                    }
+
+                    if (localChoice.muteBgm && bgmPlayer) {
+                        const player = get(bgmPlayer);
+
+                        app.isMute = true;
+                        if (player && typeof player.mute === 'function') {
+                            player.mute();
+                        }
+                    }
+
+                    if (localChoice.isContentHidden && typeof localChoice.hiddenContentsRow !== 'undefined' && typeof localChoice.hiddenContentsType !== 'undefined') {
+                        for (let i = 0; i < localChoice.hiddenContentsRow.length; i++) {
+                            const hRow = rowMap.get(localChoice.hiddenContentsRow[i]);
+                            if (typeof hRow !== 'undefined') {
+                                if (!hRow.textIsRemoved) hRow.textIsRemoved = true;
+                                for (let j = 0; j < localChoice.hiddenContentsType.length; j++) {
+                                    switch (localChoice.hiddenContentsType[j]) {
+                                        case '1':
+                                            hRow.objectTitleRemoved = true;
+                                            break;
+                                        case '2':
+                                            hRow.objectImageRemoved = true;
+                                            break;
+                                        case '3':
+                                            hRow.objectTextRemoved = true;
+                                            break;
+                                        case '4':
+                                            hRow.objectScoreRemoved = true;
+                                            break;
+                                        case '5':
+                                            hRow.objectRequirementRemoved = true;
+                                            break;
+                                        case '6':
+                                            hRow.addonTitleRemoved = true;
+                                            break;
+                                        case '7':
+                                            hRow.addonImageRemoved = true;
+                                            break;
+                                        case '8':
+                                            hRow.addonTextRemoved = true;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.scrollToRow) {
+                        tick().then(() => {
+                            setTimeout(() => {
+                                if (localChoice.scrollToObject) {
+                                    if (localChoice.scrollObjectId) {
+                                        const cMap = choiceMap.get(localChoice.scrollObjectId);
+                                        if (typeof cMap !== 'undefined') {
+                                            const sChoice = cMap.choice;
+                                            const sRow = cMap.row;
+                                            const idx = app.useToolbarBtn || !bCreatorMode ? sRow.index : sRow.index + 1;
+                                            const divs = mainDiv?.children[idx]?.children[1]?.children[1]?.children;
+                                            if (typeof divs !== 'undefined') {
+                                                if (isBackpack) {
+                                                    const thisWindow = document.getElementById('backpackDialog');
+                                                    thisWindow?.scrollTo({top: divs[sChoice.index].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                                }
+                                                window.scrollTo({top: divs[sChoice.index].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    if (localChoice.scrollRowId) {
+                                        const sRow = rowMap.get(localChoice.scrollRowId);
+                                        if (typeof sRow !== 'undefined') {
+                                            const divs = mainDiv?.children;
+                                            if (typeof divs !== 'undefined') {
+                                                console.log(mainDiv, divs);
+                                                const idx = app.useToolbarBtn || !bCreatorMode ? sRow.index : sRow.index + 1;
+                                                if (isBackpack) {
+                                                    const thisWindow = document.getElementById('backpackDialog');
+                                                    console.log(divs, idx);
+                                                    thisWindow?.scrollTo({top: divs[idx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                                } else {
+                                                    window.scrollTo({top: divs[idx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }, 10);
+                        });
+                    }
+
+                    if (localChoice.cleanACtivatedOnSelect) {
+                        cleanActivated();
+                    }
+
+                    selectUpdateScore(localChoice, tmpScores, 0);
+                    activateTempChoices();
+
+                }
+
+                if (localChoice.customTextfieldIsOn && !isOverDlg) {
+                    wordDialog.choice = localChoice;
+                    wordDialog.row = localRow;
+                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                    wordDialog.prevText = localChoice.wordChangeSelect ?? '';
+                    currentDialog = 'dlgCommon';
+                    
+                    return;
+                }
+
+                if (linkedObjects.indexOf(localChoice.id) === -1) {
+                    if (localChoice.isFadeTransition) {
+                        if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                            app.fadeTransitionColor = '000000FF';
+                        } else {
+                            app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                        }
+
+                        if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                            app.fadeTransitionTime = 0.25;
+                        } else {
+                            app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                        }
+
+                        app.fadeTransitionIsOn = true;
+                        window.setTimeout(() => {
+                            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                            }
+                            app.fadeTransitionIsOn = false;
+                            selectProcess();
+                        }, app.fadeTransitionTime * 1000);
+                    } else {
+                        selectProcess();
+                    }
+                }
+                if (linkedObjects.indexOf(localChoice.id) === 0) {
+                    linkedObjects.splice(0);
+                }
+            }
+        }
+    }
+
+    function selectedOneMore(localChoice: Choice, localRow: Row) {
+        const reqCheck = checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localRow.isResultRow && !localChoice.isNotSelectable;
+        let selectable = true;
+
+        if (reqCheck && localChoice.isMultipleUseVariable) {
+            if (localRow.allowedChoices > 0 && localRow.currentChoices >= localRow.allowedChoices) {
+                let count = 0;
+                for (let i = 0; i < localRow.objects.length; i++) {
+                    const thisChoice = localRow.objects[i];
+                    if (thisChoice.isActive) {
+                        if (!thisChoice.forcedActivated) {
+                            if (thisChoice.isSelectableMultiple) {
+                                let counter = thisChoice.multipleUseVariable;
+                                for (let j = 0; j < counter; j++) {
+                                    selectedOneLess(thisChoice, localRow);
+                                }
+                            } else {
+                                activateObject(thisChoice, localRow);
+                            }
+                            break;
+                        } else {
+                            count++;
+                        }
+                    }
+                }
+                if (count >= localRow.allowedChoices) {
+                    selectable = false;
+                }
+            }
+        }
+
+        if (selectable) {
+            for (let i = 0; i < localChoice.scores.length; i++) {
+                const score = localChoice.scores[i];
+                const point = pointTypeMap.get(score.id);
+                if (typeof point !== 'undefined' && score.isRandom && !score.setValue && typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
+                    score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
+                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
+                    score.setValue = true;
+                }
+            }
+            const pointCheck = checkPoints(localChoice, true);
+            if (pointCheck) {
+                const selectProcess = () => {
+                    const tmpScores = new SvelteMap<string, number>();
+                    const wasActive = localChoice.isActive;
+                    const isPos = localChoice.multipleUseVariable >= 0;
+                    const selNum = Math.abs(localChoice.multipleUseVariable);
+
+                    localChoice.multipleUseVariable += 1;
+
+                    if (localChoice.multipleUseVariable === 0) {
+                        activatedMap.delete(localChoice.id);
+                        localChoice.isActive = false;
+                        localRow.currentChoices -= 1;
+                    } else {
+                        if (localChoice.multipleUseVariable === 1) {
+                            localChoice.isActive = true;
+                            localRow.currentChoices += 1;
+                        }
+                        activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
+                    }
+
+                    if (isPos) {
+                        if (localChoice.discountOther) {
+                            if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                                if (localChoice.isDisChoices) {
+                                    const dList = new Set<string>();
+                                    if (typeof localChoice.discountRows !== 'undefined') {
+                                        for (let i = 0; i < localChoice.discountRows.length; i++) {
+                                            const dRow = rowMap.get(localChoice.discountRows[i]);
+                                            if (typeof dRow !== 'undefined') {
+                                                for (let j = 0; j < dRow.objects.length; j++) {
+                                                    const dChoice = dRow.objects[j];
+                                                    for (let k = 0; k < dChoice.scores.length; k++) {
+                                                        const score = dChoice.scores[k];
+                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
+                                                            selectDiscount(localChoice, score);
+                                                        }
+                                                    }
+                                                    dList.add(dChoice.id);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (typeof localChoice.discountChoices !== 'undefined') {
+                                        for (let i = 0; i < localChoice.discountChoices.length; i++) {
+                                            if (!dList.has(localChoice.discountChoices[i])) {
+                                                const cMap = choiceMap.get(localChoice.discountChoices[i]);
+                                                if (typeof cMap !== 'undefined') {
+                                                    const dChoice = cMap.choice;
+                                                    for (let j = 0; j < dChoice.scores.length; j++) {
+                                                        const score = dChoice.scores[j];
+                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
+                                                            selectDiscount(localChoice, score);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    if (typeof localChoice.discountGroups !== 'undefined') {
+                                        for (let i = 0; i < localChoice.discountGroups.length; i++) {
+                                            const groupData = groupMap.get(localChoice.discountGroups[i]);
+                                            if (typeof groupData !== 'undefined') {
+                                                for (let j = 0; j < groupData.elements.length; j++) {
+                                                    const cMap = choiceMap.get(groupData.elements[j]);
+                                                    if (typeof cMap !== 'undefined') {
+                                                        for (let k = 0; k < cMap.choice.scores.length; k++) {
+                                                            const score = cMap.choice.scores[k];
+                                                            if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
+                                                                selectDiscount(localChoice, score);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    for (let i = 0; i < localChoice.scores.length; i++) {
+                        const score = localChoice.scores[i];
+                        if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
+                        if (checkRequirements(score.requireds) && !score.isActiveMul[selNum]) {
+                            const point = pointTypeMap.get(score.id);
+                            if (typeof point !== 'undefined') {
+                                let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                val = point.allowFloat ? val : Math.floor(val);
+                                if (score.multiplyByTimes) {
+                                    val = val * (selNum + 1);
+                                }
+                                point.startingSum -= val;
+                                score.isActiveMul[selNum] = true;
+                                let tmpScore = tmpScores.get(score.id);
+                                if (typeof tmpScore !== 'undefined') {
+                                    tmpScores.set(score.id, val + tmpScore);
+                                } else {
+                                    tmpScores.set(score.id, val);
+                                }
+                            }
+                        }
+                    }
+
+                    if (isPos) {
+                        if (localChoice.duplicateRow) {
+                            if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
+                                duplicateRow(localChoice, localRow);
+                            }
+                        }
+                        
+                        if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
+                            if (localChoice.isActivateRandom) {
+                                selectForceRandomActivate(localChoice);
+                            } else {
+                                const list = localChoice.activateThisChoice.split(',');
+                                for (let i = 0; i < list.length; i++) {
+                                    const item = list[i].split('/ON#');
+                                    const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                                    const cMap = choiceMap.get(item[0]);
+                                    if (typeof cMap !== 'undefined') {
+                                        const fRow = cMap.row;
+                                        const fChoice = cMap.choice;
+                                        if (fChoice.isSelectableMultiple || !wasActive) selectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                    } else {
+                                        const groupData = groupMap.get(item[0]);
+                                        if (typeof groupData !== 'undefined') {
+                                            const groupEle = groupData.elements;
+                                            for (let j = 0; j < groupEle.length; j++) {
+                                                const cMap = choiceMap.get(groupEle[j]);
+                                                if (typeof cMap !== 'undefined') {
+                                                    const fRow = cMap.row;
+                                                    const fChoice = cMap.choice;
+                                                    if (fChoice.isSelectableMultiple || !wasActive) selectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                        const cMap = choiceMap.get(id);
+                        if (typeof cMap !== 'undefined') {
+                            const aRow = cMap.row;
+                            const aChoice = cMap.choice;
+                            if (aChoice.id !== localChoice.id) {
+                                if (!checkRequirements(aChoice.requireds)) {
+                                    if (aChoice.forcedActivated) {
+                                        delete aChoice.forcedActivated;
+                                        if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                    }
+                                    if (val.multiple === 0) {
+                                        if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                    } else if (val.multiple > 0) {
+                                        for (let i = 0; i < val.multiple; i++) {
+                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    if (localChoice.addToAllowChoice && typeof localChoice.idOfAllowChoice !== 'undefined' && typeof localChoice.numbAddToAllowChoice !== 'undefined') {
+                        for (let i = 0; i < localChoice.idOfAllowChoice.length; i++) {
+                            const aRow = rowMap.get(localChoice.idOfAllowChoice[i]);
+                            if (typeof aRow !== 'undefined') {
+                                aRow.allowedChoices += localChoice.numbAddToAllowChoice;
+                                if (aRow.allowedChoices > 0 && aRow.currentChoices >= aRow.allowedChoices) {
+                                    for (let j = 0; j < aRow.objects.length; j++) {
+                                        const thisChoice = aRow.objects[j];
+                                        if (thisChoice.isActive) {
+                                            if (!thisChoice.forcedActivated) {
+                                                if (thisChoice.isSelectableMultiple) {
+                                                    let counter = thisChoice.multipleUseVariable;
+                                                    for (let k = 0; k < counter; k++) {
+                                                        selectedOneLess(thisChoice, aRow);
+                                                    }
+                                                } else {
+                                                    if (thisChoice.isActive) deselectObject(thisChoice, aRow);
+                                                }
+                                            }
+                                        }
+                                        if (aRow.allowedChoices >= aRow.currentChoices) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!wasActive) {
+                        if (localChoice.isChangeVariables && typeof localChoice.changedVariables !== 'undefined') {
+                            for (let i = 0; i < localChoice.changedVariables.length; i++) {
+                                const variable = variableMap.get(localChoice.changedVariables[i]);
+                                if (typeof variable !== 'undefined') {
+                                    if (localChoice.changeType === '1') {
+                                        variable.isTrue = true;
+                                    } else if (localChoice.changeType === '2') {
+                                        variable.isTrue = false;
+                                    } else if (localChoice.changeType === '3') {
+                                        variable.isTrue = !variable.isTrue;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (localChoice.backpackBtnRequirement) {
+                            app.btnBackpackIsOn += 1;
+                        }
+
+                        if (localChoice.showAllAddons) {
+                            app.showAllAddons += 1;
+                        }
+
+                        if (localChoice.changeBackground) {
+                            if (localChoice.changeBgImage) {
+                                if (typeof localChoice.bgImage !== 'undefined') {
+                                    if (typeof app.bgImageStack === 'undefined') {
+                                        app.bgImageStack = [];
+                                        app.defaultBgImage = app.styling.backgroundImage ?? '';
+                                    }
+                                    app.bgImageStack.push({id: localChoice.id, data: localChoice.bgImage});
+                                    app.styling.backgroundImage = localChoice.bgImage;
+                                }
+                            } else {
+                                if (typeof localChoice.changedBgColorCode !== 'undefined') {
+                                    if (typeof app.bgColorStack === 'undefined') {
+                                        app.bgColorStack = [];
+                                        app.defaultBgColor = app.styling.backgroundColor ?? '';
+                                    }
+                                    app.bgColorStack.push({id: localChoice.id, data: localChoice.changedBgColorCode});
+                                    app.styling.backgroundColor = localChoice.changedBgColorCode;
+                                }
+                            }
+                        }
+                        
+                        if (localChoice.changePointBar) {
+                            if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
+                                if (typeof app.barBgColorStack === 'undefined') {
+                                    app.barBgColorStack = [];
+                                    app.defaultBarBgColor = app.styling.barBackgroundColor ?? '#FFFFFFFF';
+                                }
+                                app.barBgColorStack.push({id: localChoice.id, data: localChoice.changedBarBgColor});
+                                app.styling.barBackgroundColor = localChoice.changedBarBgColor;
+                            }
+                            if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
+                                if (typeof app.barIconColorStack === 'undefined') {
+                                    app.barIconColorStack = [];
+                                    app.defaultBarIconColor = app.styling.barIconColor ?? '#0000008A';
+                                }
+                                app.barIconColorStack.push({id: localChoice.id, data: localChoice.changedBarIconColor});
+                                app.styling.barIconColor = localChoice.changedBarIconColor;
+                            }
+                            if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
+                                if (typeof app.barTextColorStack === 'undefined') {
+                                    app.barTextColorStack = [];
+                                    app.defaultBarTextColor = app.styling.barTextColor ?? '#000000';
+                                }
+                                app.barTextColorStack.push({id: localChoice.id, data: localChoice.changedBarTextColor});
+                                app.styling.barTextColor = localChoice.changedBarTextColor;
+                            }
+                        }
+
+                        if (localChoice.changeTemplates) {
+                            if (localChoice.changeTemplatesList && localChoice.changeToThisTemplate) {
+                                const list = localChoice.changeTemplatesList.split(',');
+                                
+                                for (let i = 0; i < list.length; i++) {
+                                    const item = list[i];
+                                    const cMap = choiceMap.get(item);
+                                    if (typeof cMap !== 'undefined') {
+                                        const tChoice = cMap.choice;
+                                        applyTemplate(tChoice, localChoice.id, localChoice.changeToThisTemplate);
+
+                                        if(localChoice.changeAddonTemplate) {
+                                            for (let j = 0; j < tChoice.addons.length; j++) {
+                                                const tAddon = tChoice.addons[j];
+                                                applyTemplate(tAddon, localChoice.id, localChoice.changeToThisTemplate);
+                                            }
+                                        }
+                                        continue;
+                                    }
+
+                                    const tRow = rowMap.get(item);
+                                    if (typeof tRow !== 'undefined') {
+                                        applyTemplate(tRow, localChoice.id, localChoice.changeToThisTemplate);
+                                        continue;
+                                    }
+
+                                    const groupData = groupMap.get(item[0]);
+                                    if (typeof groupData !== 'undefined') {
+                                        const groupRowEle = groupData.rowElements;
+
+                                        for (let j = 0; j < groupRowEle.length; j++) {
+                                            const gtRow = rowMap.get(groupRowEle[j]);
+                                            if (typeof gtRow !== 'undefined') {
+                                                applyTemplate(gtRow, localChoice.id, localChoice.changeToThisTemplate);
+                                            }
+                                        }
+                                        const groupEle = groupData.elements;                                    
+                                        for (let j = 0; j < groupEle.length; j++) {
+                                            const gcMap = choiceMap.get(groupEle[j]);
+                                            if (typeof gcMap !== 'undefined') {
+                                                const gtChoice = gcMap.choice;
+                                                applyTemplate(gtChoice, localChoice.id, localChoice.changeToThisTemplate);
+                                            }
+                                        }
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (localChoice.changeWidth) {
+                            if (localChoice.changeWidthList && localChoice.changeToThisWidth) {
+                                const list = localChoice.changeWidthList.split(',');
+                                
+                                for (let i = 0; i < list.length; i++) {
+                                    const item = list[i];
+                                    const cMap = choiceMap.get(item);
+                                    if (typeof cMap !== 'undefined') {
+                                        const tChoice = cMap.choice;
+                                        applyWidth(tChoice, localChoice.id, localChoice.changeToThisWidth);
+                                        continue;
+                                    }
+
+                                    const tRow = rowMap.get(item);
+                                    if (typeof tRow !== 'undefined') {
+                                        applyWidth(tRow, localChoice.id, localChoice.changeToThisWidth);
+                                        continue;
+                                    }
+
+                                    const groupData = groupMap.get(item[0]);
+                                    if (typeof groupData !== 'undefined') {
+                                        const groupRowEle = groupData.rowElements;
+
+                                        for (let j = 0; j < groupRowEle.length; j++) {
+                                            const gtRow = rowMap.get(groupRowEle[j]);
+                                            if (typeof gtRow !== 'undefined') {
+                                                applyWidth(gtRow, localChoice.id, localChoice.changeToThisWidth);
+                                            }
+                                        }
+                                        const groupEle = groupData.elements;                                    
+                                        for (let j = 0; j < groupEle.length; j++) {
+                                            const gcMap = choiceMap.get(groupEle[j]);
+                                            if (typeof gcMap !== 'undefined') {
+                                                const gtChoice = gcMap.choice;
+                                                applyWidth(gtChoice, localChoice.id, localChoice.changeToThisWidth);
+                                            }
+                                        }
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (localChoice.setBgmIsOn) {
+                            if (localChoice.bgmId) {
+                                bgmVariables.bgmIsPlaying = true;
+                                
+                                if (bgmVariables.isBgmInit) {
+                                    playBgm(localChoice, localChoice.bgmId, 0);
+                                } else {
+                                    initYoutubePlayer(localChoice);
+                                    bgmVariables.isBgmInit = true;
+                                }
+                            }
+                        }
+
+                        if (localChoice.muteBgm && bgmPlayer) {
+                            const player = get(bgmPlayer);
+
+                            app.isMute = true;
+                            if (player && typeof player.mute === 'function') {
+                                player.mute();
+                            }
+                        }
+
+                        if (localChoice.isContentHidden && typeof localChoice.hiddenContentsRow !== 'undefined' && typeof localChoice.hiddenContentsType !== 'undefined') {
+                            for (let i = 0; i < localChoice.hiddenContentsRow.length; i++) {
+                                const hRow = rowMap.get(localChoice.hiddenContentsRow[i]);
+                                if (typeof hRow !== 'undefined') {
+                                    if (!hRow.textIsRemoved) hRow.textIsRemoved = true;
+                                    for (let j = 0; j < localChoice.hiddenContentsType.length; j++) {
+                                        switch (localChoice.hiddenContentsType[j]) {
+                                            case '1':
+                                                hRow.objectTitleRemoved = true;
+                                                break;
+                                            case '2':
+                                                hRow.objectImageRemoved = true;
+                                                break;
+                                            case '3':
+                                                hRow.objectTextRemoved = true;
+                                                break;
+                                            case '4':
+                                                hRow.objectScoreRemoved = true;
+                                                break;
+                                            case '5':
+                                                hRow.objectRequirementRemoved = true;
+                                                break;
+                                            case '6':
+                                                hRow.addonTitleRemoved = true;
+                                                break;
+                                            case '7':
+                                                hRow.addonImageRemoved = true;
+                                                break;
+                                            case '8':
+                                                hRow.addonTextRemoved = true;
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (localChoice.changeTemplates) {
+                            if (localChoice.changeTemplatesList && localChoice.changeToThisTemplate) {
+                                const list = localChoice.changeTemplatesList.split(',');
+                                for (let i = 0; i < list.length; i++) {
+                                    const item = list[i];
+                                    const cMap = choiceMap.get(item);
+                                    if (typeof cMap !== 'undefined') {
+                                        const tChoice = cMap.choice;
+
+                                        if (tChoice.defaultTemplate)
+                                        tChoice.defaultTemplate = tChoice.template;
+                                        tChoice.template = localChoice.changeToThisTemplate;
+
+                                        if(localChoice.changeAddonTemplate) {
+
+                                        }
+                                    } else {
+                                        const tRow = rowMap.get(item);
+
+                                        if (typeof tRow !== 'undefined') {
+                                            tRow.defaultTemplate = tRow.template;
+                                            tRow.template = localChoice.changeToThisTemplate;
+                                        } else {
+                                            const groupData = groupMap.get(item[0]);
+
+                                            if (typeof groupData !== 'undefined') {
+                                                const groupRowEle = groupData.rowElements;
+
+                                                for (let j = 0; j < groupRowEle.length; j++) {
+                                                    const gtRow = rowMap.get(groupRowEle[j]);
+
+                                                    if (typeof gtRow !== 'undefined') {
+                                                        gtRow.defaultTemplate = gtRow.template;
+                                                        gtRow.template = localChoice.changeToThisTemplate;
+                                                    }
+                                                }
+                                                const groupEle = groupData.elements;
+                                                
+                                                for (let j = 0; j < groupEle.length; j++) {
+                                                    const gcMap = choiceMap.get(groupEle[j]);
+
+                                                    if (typeof gcMap !== 'undefined') {
+                                                        const gtChoice = gcMap.choice;
+
+                                                        gtChoice.defaultTemplate = gtChoice.template;
+                                                        gtChoice.template = localChoice.changeToThisTemplate;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (localChoice.scrollToRow) {
+                            tick().then(() => {
+                                setTimeout(() => {
+                                    if (localChoice.scrollToObject) {
+                                        if (localChoice.scrollObjectId) {
+                                            const cMap = choiceMap.get(localChoice.scrollObjectId);
+                                            if (typeof cMap !== 'undefined') {
+                                                const sChoice = cMap.choice;
+                                                const sRow = cMap.row;
+                                                const idx = app.useToolbarBtn || !bCreatorMode ? sRow.index : sRow.index + 1;
+                                                const divs = mainDiv?.children[idx]?.children[1]?.children[1]?.children;
+                                                if (typeof divs !== 'undefined') {
+                                                    if (isBackpack) {
+                                                        const thisWindow = document.getElementById('backpackDialog');
+                                                        thisWindow?.scrollTo({top: divs[sChoice.index].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                                    }
+                                                    window.scrollTo({top: divs[sChoice.index].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        if (localChoice.scrollRowId) {
+                                            const sRow = rowMap.get(localChoice.scrollRowId);
+                                            if (typeof sRow !== 'undefined') {
+                                                const divs = mainDiv?.children;
+                                                if (typeof divs !== 'undefined') {
+                                                    const idx = app.useToolbarBtn || !bCreatorMode ? sRow.index : sRow.index + 1;
+                                                    if (isBackpack) {
+                                                        const thisWindow = document.getElementById('backpackDialog');
+                                                        thisWindow?.scrollTo({top: divs[idx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                                    } else {
+                                                        window.scrollTo({top: divs[idx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }, 10);
+                            });
+                        }
+                    }
+
+                    selectUpdateScore(localChoice, tmpScores, 0);
+                    activateTempChoices();
+
+                }
+
+                if (reqCheck) {
+                    if (localChoice.isMultipleUseVariable) {
+                        if (typeof localChoice.multipleUseVariable === 'undefined') localChoice.multipleUseVariable = 0;
+                        if (typeof localChoice.numMultipleTimesPluss === 'undefined') localChoice.numMultipleTimesPluss = 0;
+                        if (localChoice.numMultipleTimesPluss > localChoice.multipleUseVariable) {
+                            if (linkedObjects.indexOf(localChoice.id) === -1) {
+                                if (localChoice.isFadeTransition) {
+                                    if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                        app.fadeTransitionColor = '000000FF';
+                                    } else {
+                                        app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                    }
+
+                                    if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                        app.fadeTransitionTime = 0.25;
+                                    } else {
+                                        app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                    }
+
+                                    app.fadeTransitionIsOn = true;
+                                    window.setTimeout(() => {
+                                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                        }
+                                        app.fadeTransitionIsOn = false;
+                                        selectProcess();
+                                    }, app.fadeTransitionTime * 1000);
+                                } else {
+                                    selectProcess();
+                                }
+                            }
+                            if (linkedObjects.indexOf(localChoice.id) === 0) {
+                                linkedObjects.splice(0);
+                            }
+                        }
+                    } else if (typeof localChoice.multipleScoreId !== 'undefined') {
+                        const point = pointTypeMap.get(localChoice.multipleScoreId);
+                        if (typeof point !== 'undefined') {
+                            point.startingSum += 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function selectedOneLess(localChoice: Choice, localRow: Row) {
+        const pointCheck = checkPoints(localChoice, false);
+        
+        if (pointCheck && !localRow.isResultRow) {
+            const deselectProcess = () => {
+                const tmpScores = new SvelteMap<string, number>();
+                const isPos = localChoice.multipleUseVariable > 0;
+                const selNum = localChoice.multipleUseVariable - 1;
+
+                if (isPos) {
+                    for (let i = 0; i < localChoice.scores.length; i++) {
+                        const score = localChoice.scores[i];
+                        if (typeof score.isActiveMul !== 'undefined') {
+                            if (checkRequirements(score.requireds) && score.isActiveMul[selNum] || score.isActiveMul[selNum]) {
+                                const point = pointTypeMap.get(score.id);
+                                if (typeof point !== 'undefined') {
+                                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    if (score.multiplyByTimes) {
+                                        val = val * (selNum + 1);
+                                    }
+                                    point.startingSum += val;
+                                    let tmpScore = tmpScores.get(score.id);
+                                    if (typeof tmpScore !== 'undefined') {
+                                        tmpScores.set(score.id, -val + tmpScore);
+                                    } else {
+                                        tmpScores.set(score.id, -val);
+                                    }
+                                    delete score.isActiveMul[selNum];
+                                    if (selNum === 0) delete score.setValue;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
+                        if (localChoice.isActivateRandom && typeof localChoice.activatedRandomMul !== 'undefined' && typeof localChoice.activatedRandomMul[selNum] !== 'undefined') {
+                            for (let i = 0; i < localChoice.activatedRandomMul[selNum].length; i++) {
+                                const cMap = choiceMap.get(localChoice.activatedRandomMul[selNum][i]);
+                                if (typeof cMap !== 'undefined') {
+                                    const fRow = cMap.row;
+                                    const fChoice = cMap.choice;
+                                    deselectForceActivate(localChoice, fChoice, fRow, 0);
+                                }
+                            }
+                            localChoice.activatedRandomMul.splice(selNum, 1);
+                        } else {
+                            const list = localChoice.activateThisChoice.split(',');
+                            for (let i = 0; i < list.length; i++) {
+                                const item = list[i].split('/ON#');
+                                const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                                const cMap = choiceMap.get(item[0]);
+                                if (typeof cMap !== 'undefined') {
+                                    const fRow = cMap.row;
+                                    const fChoice = cMap.choice;
+                                    deselectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                } else {
+                                    const groupData = groupMap.get(item[0]);
+                                    if (typeof groupData !== 'undefined') {
+                                        const groupEle = groupData.elements;
+                                        for (let j = 0; j < groupEle.length; j++) {
+                                            const cMap = choiceMap.get(groupEle[j]);
+                                            if (typeof cMap !== 'undefined') {
+                                                const fRow = cMap.row;
+                                                const fChoice = cMap.choice;
+                                                deselectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.discountOther) {
+                        if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                            if (localChoice.isDisChoices) {
+                                const dList = new Set<string>();
+                                if (typeof localChoice.discountRows !== 'undefined') {
+                                    for (let i = 0; i < localChoice.discountRows.length; i++) {
+                                        const dRow = rowMap.get(localChoice.discountRows[i]);
+                                        if (typeof dRow !== 'undefined') {
+                                            for (let j = 0; j < dRow.objects.length; j++) {
+                                                const dChoice = dRow.objects[j];
+                                                for (let k = 0; k < dChoice.scores.length; k++) {
+                                                    const score = dChoice.scores[k];
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                        deselectDiscount(localChoice, score);
+                                                    }
+                                                }
+                                                dList.add(dChoice.id);
+                                            }
+                                        }
+                                    }
+                                }
+                                if (typeof localChoice.discountChoices !== 'undefined') {
+                                    for (let i = 0; i < localChoice.discountChoices.length; i++) {
+                                        if (!dList.has(localChoice.discountChoices[i])) {
+                                            const cMap = choiceMap.get(localChoice.discountChoices[i]);
+                                            if (typeof cMap !== 'undefined') {
+                                                const dChoice = cMap.choice;
+                                                for (let j = 0; j < dChoice.scores.length; j++) {
+                                                    const score = cMap.choice.scores[j];
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1) && !dList.has(score.idx)) {
+                                                        deselectDiscount(localChoice, score);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (typeof localChoice.discountGroups !== 'undefined') {
+                                    for (let i = 0; i < localChoice.discountGroups.length; i++) {
+                                        const groupData = groupMap.get(localChoice.discountGroups[i]);
+                                        if (typeof groupData !== 'undefined') {
+                                            for (let j = 0; j < groupData.elements.length; j++) {
+                                                const cMap = choiceMap.get(groupData.elements[j]);
+                                                if (typeof cMap !== 'undefined') {
+                                                    for (let k = 0; k < cMap.choice.scores.length; k++) {
+                                                        const score = cMap.choice.scores[k];
+                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                            deselectDiscount(localChoice, score);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (let i = 0; i < localChoice.scores.length; i++) {
+                        const score = localChoice.scores[i];
+                        if (typeof score.isActiveMulMinus === 'undefined') score.isActiveMulMinus = [];
+                        if (checkRequirements(score.requireds) && !score.isActiveMulMinus[selNum]) {
+                            const point = pointTypeMap.get(score.id);
+                            if (typeof point !== 'undefined') {
+                                let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                val = point.allowFloat ? val : Math.floor(val);
+                                if (score.multiplyByTimes) {
+                                    val = val * (Math.abs(selNum));
+                                }
+                                point.startingSum += val;
+                                let tmpScore = tmpScores.get(score.id);
+                                if (typeof tmpScore !== 'undefined') {
+                                    tmpScores.set(score.id, -val + tmpScore);
+                                } else {
+                                    tmpScores.set(score.id, -val);
+                                }
+                                score.isActiveMulMinus[selNum] = true;
+                            }
+                        }
+                    }
+                }
+
+                localChoice.multipleUseVariable -= 1;
+
+                if (localChoice.multipleUseVariable === 0) {
+                    localChoice.isActive = false;
+                    localRow.currentChoices -= 1;
+                    activatedMap.delete(localChoice.id);
+                } else {
+                    if (localChoice.multipleUseVariable === -1) {
+                        localChoice.isActive = true;
+                        localRow.currentChoices += 1;
+                    }
+                    activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
+                }
+
+                Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                    const cMap = choiceMap.get(id);
+                    if (typeof cMap !== 'undefined') {
+                        const aRow = cMap.row;
+                        const aChoice = cMap.choice;
+                        if (aChoice.id !== localChoice.id) {
+                            if (!checkRequirements(aChoice.requireds)) {
+                                if (aChoice.forcedActivated) {
+                                    delete aChoice.forcedActivated;
+                                    if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                }
+                                if (val.multiple === 0) {
+                                    if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                    if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                } else if (val.multiple > 0) {
+                                    for (let i = 0; i < val.multiple; i++) {
+                                        if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                if (localChoice.addToAllowChoice && typeof localChoice.idOfAllowChoice !== 'undefined' && typeof localChoice.numbAddToAllowChoice !== 'undefined') {
+                    for (let i = 0; i < localChoice.idOfAllowChoice.length; i++) {
+                        const aRow = rowMap.get(localChoice.idOfAllowChoice[i]);
+                        if (typeof aRow !== 'undefined') {
+                            aRow.allowedChoices -= localChoice.numbAddToAllowChoice;
+                            if (aRow.allowedChoices > 0 && aRow.currentChoices >= aRow.allowedChoices) {
+                                for (let j = 0; j < aRow.objects.length; j++) {
+                                    const thisChoice = aRow.objects[j];
+                                    if (thisChoice.isActive) {
+                                        if (!thisChoice.forcedActivated) {
+                                            if (thisChoice.isSelectableMultiple) {
+                                                let counter = thisChoice.multipleUseVariable;
+                                                for (let k = 0; k < counter; k++) {
+                                                    selectedOneLess(thisChoice, aRow);
+                                                }
+                                            } else {
+                                                if (thisChoice.isActive) deselectObject(thisChoice, aRow);
+                                            }
+                                        }
+                                    }    
+                                    if (aRow.allowedChoices >= aRow.currentChoices) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (selNum === 0) {
+                    if (localChoice.isChangeVariables && typeof localChoice.changedVariables !== 'undefined') {
+                        for (let i = 0; i < localChoice.changedVariables.length; i++) {
+                            const variable = variableMap.get(localChoice.changedVariables[i]);
+                            if (typeof variable !== 'undefined') {
+                                if (localChoice.changeType === '1') {
+                                    variable.isTrue = false;
+                                } else if (localChoice.changeType === '2') {
+                                    variable.isTrue = true;
+                                } else if (localChoice.changeType === '3') {
+                                    variable.isTrue = !variable.isTrue;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.backpackBtnRequirement) {
+                        if (typeof app.btnBackpackIsOn !== 'undefined') {
+                            app.btnBackpackIsOn -= 1;
+                        }
+                    }
+
+                    if (localChoice.showAllAddons) {
+                        if (typeof app.showAllAddons !== 'undefined') {
+                            app.showAllAddons -= 1;
+                        }
+                    }
+
+                    if (localChoice.changeBackground) {
+                        if (localChoice.changeBgImage) {
+                            if (typeof app.bgImageStack !== 'undefined') {
+                                const idx = app.bgImageStack.findIndex(item => item.id === localChoice.id);
+                                if (idx !== -1) app.bgImageStack.splice(idx, 1);
+
+                                const leng = app.bgImageStack.length;
+                                if (leng > 0) {
+                                    app.styling.backgroundImage = app.bgImageStack[leng - 1].data;
+                                } else {
+                                    app.styling.backgroundImage = app.defaultBgImage ?? '';
+                                    delete app.bgImageStack;
+                                }
+                            }
+                        } else {
+                            if (typeof localChoice.changedBgColorCode !== 'undefined') {
+                                if (typeof app.bgColorStack !== 'undefined') {
+                                    const idx = app.bgColorStack.findIndex(item => item.id === localChoice.id);
+                                    if (idx !== -1) app.bgColorStack.splice(idx, 1);
+
+                                    const leng = app.bgColorStack.length;
+                                    if (leng > 0) {
+                                        app.styling.backgroundColor = app.bgColorStack[leng - 1].data;
+                                    } else {
+                                        app.styling.backgroundColor = app.defaultBgColor ?? '#FFFFFFFF';
+                                        delete app.bgColorStack;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (localChoice.changePointBar) {
+                        if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
+                            if (typeof app.barBgColorStack !== 'undefined') {
+                                const idx = app.barBgColorStack.findIndex(item => item.id === localChoice.id);
+                                if (idx !== -1) app.barBgColorStack.splice(idx, 1);
+
+                                const leng = app.barBgColorStack.length;
+                                if (leng > 0) {
+                                    app.styling.barBackgroundColor = app.barBgColorStack[leng - 1].data;
+                                } else {
+                                    app.styling.barBackgroundColor = app.defaultBarBgColor ?? '#FFFFFFFF';
+                                    delete app.barBgColorStack;
+                                }
+                            }
+                        }
+                        if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
+                            if (typeof app.barIconColorStack !== 'undefined') {
+                                const idx = app.barIconColorStack.findIndex(item => item.id === localChoice.id);
+                                if (idx !== -1) app.barIconColorStack.splice(idx, 1);
+
+                                const leng = app.barIconColorStack.length;
+                                if (leng > 0) {
+                                    app.styling.barIconColor = app.barIconColorStack[leng - 1].data;
+                                } else {
+                                    app.styling.barIconColor = app.defaultBarIconColor ?? '#0000008A';
+                                    delete app.barIconColorStack;
+                                }
+                            }
+                        }
+                        if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
+                            if (typeof app.barTextColorStack !== 'undefined') {
+                                const idx = app.barTextColorStack.findIndex(item => item.id === localChoice.id);
+                                if (idx !== -1) app.barTextColorStack.splice(idx, 1);
+
+                                const leng = app.barTextColorStack.length;
+                                if (leng > 0) {
+                                    app.styling.barTextColor = app.barTextColorStack[leng - 1].data;
+                                } else {
+                                    app.styling.barTextColor = app.defaultBarIconColor ?? '#000000';
+                                    delete app.barTextColorStack;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.changeTemplates) {
+                        if (localChoice.changeTemplatesList && localChoice.changeToThisTemplate) {
+                            const list = localChoice.changeTemplatesList.split(',');
+                            
+                            for (let i = 0; i < list.length; i++) {
+                                const item = list[i];
+                                const cMap = choiceMap.get(item);
+                                if (typeof cMap !== 'undefined') {
+                                    const tChoice = cMap.choice;
+                                    revertTemplate(tChoice, localChoice.id);
+
+                                    if(localChoice.changeAddonTemplate) {
+                                        for (let j = 0; j < tChoice.addons.length; j++) {
+                                            const tAddon = tChoice.addons[j];
+                                            revertTemplate(tAddon, localChoice.id);
+                                        }
+                                    }
+                                    continue;
+                                }
+
+                                const tRow = rowMap.get(item);
+                                if (typeof tRow !== 'undefined') {
+                                    revertTemplate(tRow, localChoice.id);
+                                    continue;
+                                }
+
+                                const groupData = groupMap.get(item[0]);
+                                if (typeof groupData !== 'undefined') {
+                                    const groupRowEle = groupData.rowElements;
+
+                                    for (let j = 0; j < groupRowEle.length; j++) {
+                                        const gtRow = rowMap.get(groupRowEle[j]);
+                                        if (typeof gtRow !== 'undefined') {
+                                            revertTemplate(gtRow, localChoice.id);
+                                        }
+                                    }
+                                    const groupEle = groupData.elements;                                    
+                                    for (let j = 0; j < groupEle.length; j++) {
+                                        const gcMap = choiceMap.get(groupEle[j]);
+                                        if (typeof gcMap !== 'undefined') {
+                                            const gtChoice = gcMap.choice;
+                                            revertTemplate(gtChoice, localChoice.id);
+                                        }
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.changeWidth) {
+                        if (localChoice.changeWidthList && localChoice.changeToThisWidth) {
+                            const list = localChoice.changeWidthList.split(',');
+                            
+                            for (let i = 0; i < list.length; i++) {
+                                const item = list[i];
+                                const cMap = choiceMap.get(item);
+                                if (typeof cMap !== 'undefined') {
+                                    const tChoice = cMap.choice;
+                                    revertWidth(tChoice, localChoice.id);
+                                    continue;
+                                }
+
+                                const tRow = rowMap.get(item);
+                                if (typeof tRow !== 'undefined') {
+                                    revertWidth(tRow, localChoice.id);
+                                    continue;
+                                }
+
+                                const groupData = groupMap.get(item[0]);
+                                if (typeof groupData !== 'undefined') {
+                                    const groupRowEle = groupData.rowElements;
+
+                                    for (let j = 0; j < groupRowEle.length; j++) {
+                                        const gtRow = rowMap.get(groupRowEle[j]);
+                                        if (typeof gtRow !== 'undefined') {
+                                            revertWidth(gtRow, localChoice.id);
+                                        }
+                                    }
+                                    const groupEle = groupData.elements;                                    
+                                    for (let j = 0; j < groupEle.length; j++) {
+                                        const gcMap = choiceMap.get(groupEle[j]);
+                                        if (typeof gcMap !== 'undefined') {
+                                            const gtChoice = gcMap.choice;
+                                            revertWidth(gtChoice, localChoice.id);
+                                        }
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    if (localChoice.setBgmIsOn && bgmPlayer) {
+                        if (localChoice.bgmId) {
+                            bgmVariables.bgmIsPlaying = false;
+                            playBgm(localChoice, localChoice.bgmId, 0);
+                        }
+                    }
+
+                    if (localChoice.muteBgm && bgmPlayer) {
+                        const player = get(bgmPlayer);
+
+                        app.isMute = false;
+                        if (player && typeof player.unMute === 'function') {
+                            player.unMute();
+                        }
+                    }
+
+                    if (localChoice.isContentHidden && typeof localChoice.hiddenContentsRow !== 'undefined' && typeof localChoice.hiddenContentsType !== 'undefined') {
+                        for (let i = 0; i < localChoice.hiddenContentsRow.length; i++) {
+                            const hRow = rowMap.get(localChoice.hiddenContentsRow[i]);
+                            if (typeof hRow !== 'undefined') {
+                                for (let j = 0; j < localChoice.hiddenContentsType.length; j++) {
+                                    switch (localChoice.hiddenContentsType[j]) {
+                                        case '1':
+                                            hRow.objectTitleRemoved = false;
+                                            break;
+                                        case '2':
+                                            hRow.objectImageRemoved = false;
+                                            break;
+                                        case '3':
+                                            hRow.objectTextRemoved = false;
+                                            break;
+                                        case '4':
+                                            hRow.objectScoreRemoved = false;
+                                            break;
+                                        case '5':
+                                            hRow.objectRequirementRemoved = false;
+                                            break;
+                                        case '6':
+                                            hRow.addonTitleRemoved = false;
+                                            break;
+                                        case '7':
+                                            hRow.addonImageRemoved = false;
+                                            break;
+                                        case '8':
+                                            hRow.addonTextRemoved = false;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                deselectUpdateScore(localChoice, tmpScores, 0);
+                activateTempChoices();
+            }
+
+            if (!localRow.isInfoRow && !localChoice.isNotSelectable && !localChoice.selectOnce) {
+                if (localChoice.isMultipleUseVariable) {
+                    if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
+                    if (localChoice.multipleUseVariable > localChoice.numMultipleTimesMinus) {
+                        if (linkedObjects.indexOf(localChoice.id) === -1) {
+                            if (localChoice.isFadeTransition) {
+                                if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                    app.fadeTransitionColor = '000000FF';
+                                } else {
+                                    app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                }
+
+                                if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                    app.fadeTransitionTime = 0.25;
+                                } else {
+                                    app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                }
+
+                                app.fadeTransitionIsOn = true;
+                                window.setTimeout(() => {
+                                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                    }
+                                    app.fadeTransitionIsOn = false;
+                                    deselectProcess();
+                                }, app.fadeTransitionTime * 1000);
+                            } else {
+                                deselectProcess();
+                            }
+                        }
+                        if (linkedObjects.indexOf(localChoice.id) === 0) {
+                            linkedObjects.splice(0);
+                        }
+                    }
+                } else if (typeof localChoice.multipleScoreId !== 'undefined') {
+                    const point = pointTypeMap.get(localChoice.multipleScoreId);
+                    if (typeof point !== 'undefined') {
+                        point.startingSum -= 1;
+                    }
+                }
+            }
+        }
+    }
+
+</script>

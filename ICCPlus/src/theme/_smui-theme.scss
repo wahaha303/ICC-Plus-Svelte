@@ -1,0 +1,60 @@
+@use 'sass:color';
+
+@use '@material/theme/color-palette';
+
+// Svelte Colors!
+@use '@material/theme/index' as theme with (
+  $primary: #676778,
+  $secondary: #1976d2,
+  $surface: #fff,
+  $background: #fff,
+  $error: color-palette.$red-900
+);
+
+html,
+body {
+  background-color: theme.$surface;
+  color: theme.$on-surface;
+}
+
+a {
+  color: #40b3ff;
+}
+a:visited {
+  color: color.scale(#40b3ff, $lightness: -35%);
+}
+
+.toolbar {
+  background-color: var(--bs-gray-200);
+  color: rgba(0, 0, 0, .87);
+}
+.toolbar--row {
+  background-color: var(--bs-gray-300);
+}
+.point-slot {
+  border: thin solid rgba(0, 0, 0, .12);
+}
+.smui-chip-input {
+  background-color: rgb(244.8, 244.8, 244.8);
+}
+.music-player {
+  background-color: theme.$surface !important;
+  color: theme.$on-surface !important;
+}
+.music-player--button {
+  color: theme.$on-surface !important;
+}
+.create-box {
+  background-color: var(--bs-gray-200);
+  color: gray;
+  border: 2px grey dashed;
+}
+.create-box:hover {
+  background-color: var(--bs-gray-300);
+}
+.create-box:active {
+  background-color: var(--bs-gray-400);
+}
+.title--text {
+  color: rgba(0, 0, 0, .87);
+}

@@ -1,0 +1,12 @@
+diff --git a/node_modules/@smui-extra/accordion/dist/Header.svelte b/node_modules/@smui-extra/accordion/dist/Header.svelte
+index 918ed59..70dd780 100644
+--- a/node_modules/@smui-extra/accordion/dist/Header.svelte
++++ b/node_modules/@smui-extra/accordion/dist/Header.svelte
+@@ -28,6 +28,7 @@
+   onclick={(e) => {
+     handleClick(e);
+     restProps.onclick?.(e);
++    e.currentTarget.blur();
+   }}
+   onkeydown={(e) => {
+     handleKeyDown(e);
