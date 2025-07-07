@@ -42,7 +42,7 @@
         </Content>
     </Drawer>
     <Scrim />
-    <div class="s-main">
+    <div class="s-main" style={mainStyle}>
         {#if app.showMusicPlayer}
             <TopAppBar class="music-player" variant="fixed" >
                 <AppBarRow class="music-player--row">
@@ -224,10 +224,6 @@
     });
     let mainStyle = $derived.by(() => {
         let styles = [];
-
-        if (pointBarIsOn) {
-            styles.push(`padding-bottom: 56px;`);
-        }
 
         if (app.showMusicPlayer) {
             styles.push(`padding-top: 32px;`);

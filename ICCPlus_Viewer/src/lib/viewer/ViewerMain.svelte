@@ -196,10 +196,6 @@
     let mainStyle = $derived.by(() => {
         let styles = [];
 
-        if (pointBarIsOn) {
-            styles.push(`padding-bottom: 56px;`);
-        }
-
         if (app.showMusicPlayer) {
             styles.push(`padding-top: 32px;`);
         }

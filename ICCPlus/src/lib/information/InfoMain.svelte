@@ -86,14 +86,10 @@
             https://github.com/wahaha303/ICCPlus/releases/latest
         `
     }, {
-        title: 'I saved builds from a CYOA created with ICC Plus 1.x.x, but now they\'re gone! What should I do?',
-        text: `Don't worry! You can still retrieve your old build code from ICC Plus 1.x.x by following these steps:
-
-        1. Access a CYOA created using ICC Plus 2.x.x by the same creator.
-
-        2. Open the Save/Load Build window and enable the "Load from Legacy Version" switch.
-
-        3. Find the build you want, then click the button on the right side of that build to copy the code to your clipboard.`
+        title: 'I am a retro enthusiast. Can I use ICC Plus 1.x.x?',
+        text: `ICC Plus 1.x.x is no longer supported. However, if you have a compelling reason to use the legacy version, it is still accessible at the following link.
+        
+        <a href="https://hikawasisters.neocities.org/ICCPlus_legacy/" target="_blank">https://hikawasisters.neocities.org/ICCPlus_legacy/</a>`
     }, {
         title: 'Can I create static Image CYOA\'s with this?',
         text: `Yes, yes you can!

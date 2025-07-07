@@ -1,7 +1,7 @@
 {
   "name": "iccplus",
   "private": true,
-  "version": "2.0.0-beta-0.9.3",
+  "version": "2.0.0-beta-0.9.5",
   "type": "module",
   "scripts": {
     "dev": "vite",

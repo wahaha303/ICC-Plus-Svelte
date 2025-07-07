@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.0.0-beta-0.9.4';
+export const appVersion = '2.0.0-beta-0.9.5';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3032,6 +3032,16 @@ export function cleanActivated() {
     delete app.barTextColorStack;
     app.btnBackpackIsOn = 0;
     app.showAllAddons = 0;
+    app.isMute = false;
+    app.curVolume = 100;
+
+    if (bgmPlayer) {
+        const player = get(bgmPlayer);
+
+        if (player && typeof player.unMute === 'function') {
+            player.unMute();
+        }
+    }
 
     mdObjects.splice(0);
 
@@ -3336,6 +3346,15 @@ export function cleanActivated() {
                                 continue;
                             }
                         }
+                    }
+                }
+                
+                if (aChoice.muteBgm && bgmPlayer) {
+                    const player = get(bgmPlayer);
+
+                    app.isMute = true;
+                    if (player && typeof player.mute === 'function') {
+                        player.mute();
                     }
                 }
 
@@ -5826,6 +5845,11 @@ export function initializeApp(tempApp: any) {
         buildAutoSave();
     }
 
+    if (typeof app.isMute !== 'boolean') {
+        app.curVolume = 100;
+        app.isMute = false;
+    }
+
     window.removeEventListener('keydown', setShortcut);
     if (app.enableShortcut) {
         window.addEventListener('keydown', setShortcut);
@@ -5997,6 +6021,8 @@ function waitForRenderFrames(frames = 2): Promise<void> {
 export async function downloadAsImage(printDiv?: HTMLDivElement) {
     if (printDiv) {
         try {
+            snackbarVariables.labelText = 'Downloading image...';
+            snackbarVariables.isOpen = true;
             forceEagerImageLoading(printDiv);
             await waitForImagesToLoad(printDiv);
 
@@ -6008,10 +6034,14 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
             if (divHeight > maxHeight) {
                 let offset = 0;
                 let part = 1;
+                const maxPart = Math.ceil(divHeight / maxHeight);
 
                 while (offset < divHeight) {
                     const currentHeight = Math.min(maxHeight, divHeight - offset);
                     const wrapper = document.createElement('div');
+
+                    snackbarVariables.labelText = `Splitting large image...(${part} / ${maxPart})`;
+                    snackbarVariables.isOpen = true;
 
                     wrapper.style.width = `${divWidth}px`;
                     wrapper.style.height = `${currentHeight}px`;
@@ -6053,7 +6083,7 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
 
                         URL.revokeObjectURL(url);
                     } catch (error) {
-                        snackbarVariables.labelText = 'Failed to download the image. Please try again with a different browser.'
+                        snackbarVariables.labelText = 'Download failed: Restricted content detected.';
                         snackbarVariables.isOpen = true;
                         console.error(error);
                     } finally {
@@ -6062,6 +6092,8 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
 
                     offset += maxHeight;
                 }
+                snackbarVariables.labelText = 'Image downloads complete.';
+                snackbarVariables.isOpen = true;
             } else {
                 const blob = await toBlob(printDiv, { filter: (node) => {return !node.classList?.contains('mdc-top-app-bar') && !node.classList?.contains('hidden')}});
                 if (!blob) {
@@ -6076,14 +6108,17 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
                 a.click();
 
                 URL.revokeObjectURL(url);
+
+                snackbarVariables.labelText = 'Image download complete.';
+                snackbarVariables.isOpen = true;
             }
         } catch (error) {
-            snackbarVariables.labelText = 'Failed to download the image. Please try again with a different browser.'
+            snackbarVariables.labelText = 'Download failed: Restricted content detected.';
             snackbarVariables.isOpen = true;
             console.error(error);
         }
     } else {
-        snackbarVariables.labelText = 'Failed to download the image. Please try again with a different browser.'
+        snackbarVariables.labelText = 'Download failed: Restricted content detected.';
         snackbarVariables.isOpen = true;
     }
 }

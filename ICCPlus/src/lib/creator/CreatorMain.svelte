@@ -313,6 +313,10 @@
 
         styles.push(`margin-left: 56px;`);
 
+        if (app.showMusicPlayer) {
+            styles.push(`padding-top: 32px;`);
+        }
+
         return styles.join('');
     });
     let bgmTime = $derived.by(() => {
