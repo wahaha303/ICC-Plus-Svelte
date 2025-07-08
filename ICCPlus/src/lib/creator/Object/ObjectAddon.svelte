@@ -106,9 +106,11 @@
                         {@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}
                     </h3>
                 {/if}
-                {#each addon.requireds as required}
-                    <ObjectRequired isRemoved={row?.addonRequirementRemoved} required={required} scoreText={scoreText} />
-                {/each}
+                {#if !row?.objectRequirementRemoved}
+                    {#each addon.requireds as required}
+                        <ObjectRequired required={required} scoreText={scoreText} />
+                    {/each}
+                {/if}
                 {#if addon.template === 5 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <Wrapper text={addon.imageSourceTooltip}>
@@ -151,9 +153,11 @@
                         {#if addon.title !== '' && !row?.addonTitleRemoved}
                             <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
                         {/if}
-                        {#each addon.requireds as required}
-                            <ObjectRequired isRemoved={row?.addonRequirementRemoved} required={required} scoreText={scoreText} />
-                        {/each}
+                        {#if !row?.objectRequirementRemoved}
+                            {#each addon.requireds as required}
+                                <ObjectRequired required={required} scoreText={scoreText} />
+                            {/each}
+                        {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
                             <p style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
@@ -165,9 +169,11 @@
                         {#if addon.title !== '' && !row?.addonTitleRemoved}
                             <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
                         {/if}
-                        {#each addon.requireds as required}
-                            <ObjectRequired isRemoved={row?.addonRequirementRemoved} required={required} scoreText={scoreText} />
-                        {/each}
+                        {#if !row?.objectRequirementRemoved}
+                            {#each addon.requireds as required}
+                                <ObjectRequired required={required} scoreText={scoreText} />
+                            {/each}
+                        {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
                             <p style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}

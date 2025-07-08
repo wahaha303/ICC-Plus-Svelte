@@ -62,6 +62,14 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
+                                    <Switch bind:checked={viewerSettings.allowDeselect} onSMUISwitchChange={allowDeselectInBackpack} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Allow Deselecting Choices in Backpack
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
                                     <Switch bind:checked={() => app.showMusicPlayer?? false, (e) => app.showMusicPlayer = e} color="secondary" class="switch-scale" onchange={() => {
                                         if (app.showMusicPlayer) {
                                             const player = get(bgmPlayer);
@@ -169,7 +177,7 @@
     import Tab, { Label as TabLabel } from '@smui/tab';
     import TabBar from '@smui/tab-bar';
     import Textfield from '$lib/custom/textfield';
-	import { app, bgmPlayer, bgmVariables, choiceMap, buildAutoSave, buildAbortController, appVersion } from '$lib/store/store.svelte';
+	import { app, bgmPlayer, bgmVariables, choiceMap, buildAutoSave, buildAbortController, appVersion, viewerSettings } from '$lib/store/store.svelte';
 	import { get } from 'svelte/store';
 
     let { open, onclose }: { open: boolean; onclose: () => void; } = $props();
@@ -190,5 +198,16 @@
             buildAbortController.abort();
         }
         buildAutoSave();
+    }
+
+    function allowDeselectInBackpack() {
+        const check = viewerSettings.allowDeselect;
+        for (let i = 0; i < app.backpack.length; i++) {
+            const row = app.backpack[i];
+
+            if (row.isResultRow) {
+                row.isInfoRow = !check;
+            }
+        }
     }
 </script>

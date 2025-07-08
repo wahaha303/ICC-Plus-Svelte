@@ -1,11 +1,11 @@
 import { get, readable, writable } from 'svelte/store';
-import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon } from './types';
+import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting } from './types';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.0.0-beta-0.9.5';
+export const appVersion = '2.0.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -646,6 +646,9 @@ export const snackbarVariables = $state<SnackBarVariables>({
     labelText: '',
     timeoutMs: 4000,
     isOpen: false
+});
+export const viewerSettings = $state<ViewerSetting>({
+    allowDeselect: false,
 });
 export const buildAutoSaveSlot = $state<SaveSlot>({
    stored: false,
@@ -2712,9 +2715,11 @@ export function cleanActivated() {
         
         cRow.isEditModeOn = false;
         cRow.currentChoices = 0;
+        cRow.index = i;
 
         for (let j = 0; j < cRow.objects.length; j++) {
-            const cChoice = cRow.objects[j];
+            const cChoice = cRow.objects[j];            
+            cChoice.index = j;
 
             if (typeof cChoice.defaultTemplate !== 'undefined') {
                 cChoice.template = cChoice.defaultTemplate
@@ -2746,9 +2751,11 @@ export function cleanActivated() {
 
         cRow.isEditModeOn = false;
         cRow.currentChoices = 0;
+        cRow.index = i;
 
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
+            cChoice.index = j;
 
             if (typeof cChoice.defaultTemplate !== 'undefined') {
                 cChoice.template = cChoice.defaultTemplate

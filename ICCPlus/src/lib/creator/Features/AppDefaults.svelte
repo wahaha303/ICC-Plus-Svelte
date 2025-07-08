@@ -97,7 +97,7 @@
             }
             for (let j = 0; j < appRow.objects.length; j++) {
                 let appChoice = appRow.objects[j];
-                if (appChoice.length > 2 && appChoice.title !== app.defaultChoiceTitle) {
+                if (appChoice.id.length > 2 && appChoice.title !== app.defaultChoiceTitle) {
                     let choiceTitle = appChoice.title.replaceAll(' ', '_');
                     let id = checkDupId(choiceTitle, choiceMap);
                     let data = choiceMap.get(appChoice.id);
@@ -123,7 +123,7 @@
             }
             for (let j = 0; j < appRow.objects.length; j++) {
                 let appChoice = appRow.objects[j];
-                if (appChoice.length > 2 && appChoice.title !== app.defaultChoiceTitle) {
+                if (appChoice.id.length > 2 && appChoice.title !== app.defaultChoiceTitle) {
                     let choiceTitle = appChoice.title.replaceAll(' ', '_');
                     let id = checkDupId(choiceTitle, choiceMap);
                     let data = choiceMap.get(appChoice.id);

@@ -926,4 +926,7 @@ export type SnackBarVariables = {
     labelText: string,
     timeoutMs: number,
     isOpen: boolean
-}
+};
+export type ViewerSetting = {
+    allowDeselect: boolean
+};

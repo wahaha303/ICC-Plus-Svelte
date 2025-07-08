@@ -86,11 +86,6 @@
             https://github.com/wahaha303/ICCPlus/releases/latest
         `
     }, {
-        title: 'I am a retro enthusiast. Can I use ICC Plus 1.x.x?',
-        text: `ICC Plus 1.x.x is no longer supported. However, if you have a compelling reason to use the legacy version, it is still accessible at the following link.
-        
-        <a href="https://hikawasisters.neocities.org/ICCPlus_legacy/" target="_blank">https://hikawasisters.neocities.org/ICCPlus_legacy/</a>`
-    }, {
         title: 'Can I create static Image CYOA\'s with this?',
         text: `Yes, yes you can!
                 In the top menu of the Viewer Mode, you will see a button labeled "Download image". Click this button to start downloading the image of your project. The larger your project is, the longer it may take for the download to begin, and the bigger the resulting file will be.
@@ -169,39 +164,39 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.0.0 / ${getDate('2025-07-06T14:00:00Z')}`,
+        title: `v2.0.0 / ${getDate('2025-07-08T15:00:00Z')}`,
         text: `<span style="color: green">Framework Migration</span>
-        - Rebuilt the entire codebase by transitioning from Vue 2.6.11 to Svelte 5.
+        - Rebuilt the entire codebase and migrated from Vue 2.6.11 to Svelte 5.
         - Enhanced overall performance and responsiveness.
 
         <span style="color: green">Save System</span>
         - Added support for manual project saving via IndexedDB (Up to 99 save slots + 1 autosave slot).
     
         <span style="color: green">Dark Mode</span>
-        - Dark mode preference is now stored per user in IndexedDB, not per project.
+        - Dark mode preference is now stored in IndexedDB.
 
         <span style="color: green">UI Renewal</span>
-        - Added button to insert new Rows between existing ones.
-        - Added button to add new Choices after the last one within a Row.
+        - Added button to insert new Row between existing ones.
+        - Added button to add new Choice after the last one within Row.
         - Removed the Alternate Menu option.
 
         <span style="color: green">Point Type</span>
         - Added option to choose between integer and floating-point values for points.
-        - Added option to set a custom icon for negative point values.
+        - Added option to set custom icon for negative point values.
         - '<i>Id Needed to Show</i>' now also tracks variable IDs.
 
         <span style="color: green">Point Bar</span>
-        - When the number of points increases, the bar becomes scrollable instead of compressed.
+        - When the number of points increases, the bar becomes scrollable instead of being compressed.
 
         <span style="color: green">Backpack</span>
         - Moved the enable/disable switch for build save/load to Global Settings.
         - Images are now preloaded automatically for download, even if not yet visible via scroll.
         - Fixed issue where image downloads were forcefully downscaled.
         - Fixed issue with segmented image downloads not working correctly.
-        - Fixed issue where image downloads would fail.
+        - Fixed issue where image downloads would fail in the Firefox browser.
 
         <span style="color: green">Manage Design</span>
-        - Separated the design management UI into a dedicated dialog, instead of displaying it at the top of the page.
+        - Separated the design management UI into dedicated dialog, instead of displaying it at the top of the page.
         - Added option to use box-shadow instead of drop-shadow.
         - Fixed issue where Border Radius values were applied at 10× the intended value.
 
@@ -210,11 +205,11 @@
 
         <span style="color: green">Global Settings</span>
         - Organized settings into categorized groups.
-        - Added option to shrink Row add buttons into toolbar icons.
+        - Added option to move Row addition buttons into toolbar buttons.
         - Added option to set autosave interval.
         - Added option to disable image rendering in Edit Mode.
-        - Added option to inject custom CSS directly into a project.
-        - Added option to import external CSS via URL, including font files (CORS support required — e.g., Neocities requires a supporter account for CORS).
+        - Added option to inject custom CSS directly into project.
+        - Added option to import external CSS via URL for custom fonts (CORS support required — e.g., Neocities requires supporter account to enable CORS).
 
         <span style="color: green">BGM Player</span>
         - Improved slider responsiveness.
@@ -228,21 +223,22 @@
         - Organized Choice functions into categories.
         - Added option for Addons to ignore Image Template Left/Right of Choice.
         - Added option to enable slider support when using Multiple Select.
-        - Added option to specify the Row for applying discount.
+        - Added option to specify Rows for applying discount.
         - Added option to force-show all Addons, ignoring requirements.
         - Added option to change Image Template per Row/Choice/Group.
         - Added option to change Choice Per Row per Row/Choice/Group.
         - Added option to set Fade-in times for screen transitions.
         - Choice selection is delayed, and the cursor is automatically hidden until the fade-in completes.
         - Fixed issue where overlapping change image/background function would erase default values upon cancel.
-        - Fixed issue where point requirements triggered by selecting a choice were not properly applied.
+        - Fixed issue where point requirements triggered by selecting choice were not properly applied.
 
         <span style="color: green">Viewer</span>
         - Separated the build save feature into its own dialog.
         - Builds are now saved per CYOA link.
         - Added autosave for builds.
         - Added option to adjust Choices per Row for screens between 960px and 1280px.
-        - Displayed the ICC Plus version used to build the current CYOA.`
+        - Added option to allow deselecting choices in the backpack.
+        - Displayed the viewer version used for the current CYOA.`
     }, {
         open: false,
         title: getDate('2025-01-25T10:00:00Z'),

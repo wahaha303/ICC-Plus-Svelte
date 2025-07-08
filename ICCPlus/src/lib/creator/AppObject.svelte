@@ -1216,7 +1216,7 @@
                     <span class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
                             <div class="col" style={scoreText}>
-                                {@html DOMPurify.sanitize(replaceText(oriRowTitle), sanitizeArg)}
+                                {@html DOMPurify.sanitize(replaceText(oriRow.title), sanitizeArg)}
                             </div>
                         {/if}
                         {#if (choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
@@ -1235,7 +1235,7 @@
                                 </h3>
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !row.objectScoreRemoved}
                                 {#each choice.scores as score}
@@ -1243,7 +1243,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !row.objectRequirementRemoved}
                                 {#each choice.requireds as required}
@@ -1251,7 +1251,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.template === 5 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
@@ -1268,7 +1268,7 @@
                                 </p>
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice}  selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice}  selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.template === 4 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
@@ -1286,7 +1286,7 @@
                             {/each}
                         </div>
                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                            <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                            <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                         {/if}
                     </span>
                 {:else}
@@ -1307,7 +1307,7 @@
                                 <h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}</h2>
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !row.objectScoreRemoved}
                                 {#each choice.scores as score}
@@ -1315,7 +1315,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !row.objectRequirementRemoved}
                                 {#each choice.requireds as required}
@@ -1323,7 +1323,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
                                 <p style={objectText}>
@@ -1331,7 +1331,7 @@
                                 </p>
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
                                 <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
@@ -1340,7 +1340,7 @@
                                     {/each}
                                 </div>
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
                             {/if}
                         </div>
@@ -1352,7 +1352,7 @@
                                     {/each}
                                 </div>
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
                             </div>
                         {/if}
@@ -1362,7 +1362,7 @@
                                 <h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}</h2>
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !row.objectScoreRemoved}
                                 {#each choice.scores as score}
@@ -1370,7 +1370,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !row.objectRequirementRemoved}
                                 {#each choice.requireds as required}
@@ -1378,7 +1378,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
                                 <p style={objectText}>
@@ -1386,7 +1386,7 @@
                                 </p>
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
                                 <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
@@ -1395,7 +1395,7 @@
                                     {/each}
                                 </div>
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
                             {/if}
                         </div>
@@ -1418,7 +1418,7 @@
                                     {/each}
                                 </div>
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !row.isResultRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
                             </div>
                         {/if}
@@ -1597,12 +1597,14 @@
     });
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight);
-    let oriRowTitle = $derived.by(() => {
-        const cMap = choiceMap.get(choice.id);
-        if (typeof cMap !== 'undefined') {
-            return cMap.row.title;
+    let oriRow = $derived.by(() => {
+        if (row.isResultRow) {
+            const cMap = choiceMap.get(choice.id);
+            if (typeof cMap !== 'undefined') {
+                return cMap.row;
+            }
         }
-        return '';
+        return row;
     });
     let optimizedRowList = $derived(isBackpack ?  $optimizedBackpackRows : $optimizedRows);
     let optimizedChoiceList = $derived(isBackpack ? $optimizedBackpackChoices : $optimizedChoices);
@@ -2549,16 +2551,24 @@
     }
 
     function activateObject(localChoice: Choice, localRow: Row) {
+        let origRow = localRow;
+        if (localRow.isResultRow) {
+            const cMap = choiceMap.get(localChoice.id);
+
+            if (typeof cMap !== 'undefined') {
+                origRow = cMap.row;
+            }
+        }
         if (localChoice.isSelectableMultiple) {
             if (localChoice.id === choice.id && localChoice.allowSelectByClick && localChoice.multipleUseVariable === 0) {
-                selectedOneMore(localChoice, localRow);
+                selectedOneMore(localChoice, origRow);
             }
         } else {
-            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localRow.isResultRow && !localChoice.isNotSelectable && !localChoice.forcedActivated) {
+            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localChoice.isNotSelectable && !localChoice.forcedActivated) {
                 if (localChoice.isActive) {
-                    if (!localChoice.selectOnce) deselectObject(localChoice, localRow);
+                    if (!localChoice.selectOnce) deselectObject(localChoice, origRow);
                 } else {
-                    selectObject(localChoice, localRow);
+                    selectObject(localChoice, origRow);
                 }
             }
         }
@@ -3802,23 +3812,31 @@
     }
 
     function selectedOneMore(localChoice: Choice, localRow: Row) {
-        const reqCheck = checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localRow.isResultRow && !localChoice.isNotSelectable;
+        const reqCheck = checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localChoice.isNotSelectable;
         let selectable = true;
+        let origRow = localRow;
+        if (localRow.isResultRow) {
+            const cMap = choiceMap.get(localChoice.id);
+
+            if (typeof cMap !== 'undefined') {
+                origRow = cMap.row;
+            }
+        }
 
         if (reqCheck && localChoice.isMultipleUseVariable) {
-            if (localRow.allowedChoices > 0 && localRow.currentChoices >= localRow.allowedChoices) {
+            if (origRow.allowedChoices > 0 && origRow.currentChoices >= origRow.allowedChoices) {
                 let count = 0;
-                for (let i = 0; i < localRow.objects.length; i++) {
-                    const thisChoice = localRow.objects[i];
+                for (let i = 0; i < origRow.objects.length; i++) {
+                    const thisChoice = origRow.objects[i];
                     if (thisChoice.isActive) {
                         if (!thisChoice.forcedActivated) {
                             if (thisChoice.isSelectableMultiple) {
                                 let counter = thisChoice.multipleUseVariable;
                                 for (let j = 0; j < counter; j++) {
-                                    selectedOneLess(thisChoice, localRow);
+                                    selectedOneLess(thisChoice, origRow);
                                 }
                             } else {
-                                activateObject(thisChoice, localRow);
+                                activateObject(thisChoice, origRow);
                             }
                             break;
                         } else {
@@ -3826,7 +3844,7 @@
                         }
                     }
                 }
-                if (count >= localRow.allowedChoices) {
+                if (count >= origRow.allowedChoices) {
                     selectable = false;
                 }
             }
@@ -3855,11 +3873,11 @@
                     if (localChoice.multipleUseVariable === 0) {
                         activatedMap.delete(localChoice.id);
                         localChoice.isActive = false;
-                        localRow.currentChoices -= 1;
+                        origRow.currentChoices -= 1;
                     } else {
                         if (localChoice.multipleUseVariable === 1) {
                             localChoice.isActive = true;
-                            localRow.currentChoices += 1;
+                            origRow.currentChoices += 1;
                         }
                         activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
                     }
@@ -3952,7 +3970,7 @@
                     if (isPos) {
                         if (localChoice.duplicateRow) {
                             if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
-                                duplicateRow(localChoice, localRow);
+                                duplicateRow(localChoice, origRow);
                             }
                         }
                         
@@ -4417,8 +4435,16 @@
 
     function selectedOneLess(localChoice: Choice, localRow: Row) {
         const pointCheck = checkPoints(localChoice, false);
+        let origRow = localRow;
+        if (localRow.isResultRow) {
+            const cMap = choiceMap.get(localChoice.id);
+
+            if (typeof cMap !== 'undefined') {
+                origRow = cMap.row;
+            }
+        }
         
-        if (pointCheck && !localRow.isResultRow) {
+        if (pointCheck) {
             const deselectProcess = () => {
                 const tmpScores = new SvelteMap<string, number>();
                 const isPos = localChoice.multipleUseVariable > 0;
@@ -4577,12 +4603,12 @@
 
                 if (localChoice.multipleUseVariable === 0) {
                     localChoice.isActive = false;
-                    localRow.currentChoices -= 1;
+                    origRow.currentChoices -= 1;
                     activatedMap.delete(localChoice.id);
                 } else {
                     if (localChoice.multipleUseVariable === -1) {
                         localChoice.isActive = true;
-                        localRow.currentChoices += 1;
+                        origRow.currentChoices += 1;
                     }
                     activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
                 }
