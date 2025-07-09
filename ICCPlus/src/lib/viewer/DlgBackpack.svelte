@@ -14,7 +14,7 @@
         </div>
     </Title>
     <Content id="backpackDialog" class="p-0">
-        <div bind:this={printDiv} bind:clientWidth={width} class="container-fluid p-0" style={background}>
+        <div bind:this={printDiv} bind:clientWidth={width} class="container-fluid p-0 h-100" style={background}>
             <div bind:this={mainDiv} class="row gx-0">
                 {#each app.backpack as row}
                     <div class={row.width ? 'col-6': 'col-12'}>
@@ -46,16 +46,31 @@
 
         styles.push(`overflow-wrap: break-word;`);
         styles.push(`white-space: normal;`);
-        if (app.styling.backgroundImage) {
-            styles.push(`background-image: url('${app.styling.backgroundImage}');`);
-        }
-        styles.push(`background-color: ${app.styling.backgroundColor};`);
-        if (app.styling.isBackgroundRepeat) {
-            styles.push(`background-repeat: repeat;`);
-        } else if (app.styling.isBackgroundFitIn) {
-            styles.push(`background-size: 100% 100%;`);
+        
+        if (app.styling.useBackpackDesign) {
+            if (app.styling.backpackBgImage) {
+                styles.push(`background-image: url('${app.styling.backpackBgImage}');`);
+            }
+            styles.push(`background-color: ${app.styling.backpackBgColor};`);
+            if (app.styling.isBackgroundRepeat) {
+                styles.push(`background-repeat: repeat;`);
+            } else if (app.styling.isBackpackBgFitIn) {
+                styles.push(`background-size: 100% 100%;`);
+            } else {
+                styles.push(`background-size: cover;`);
+            }
         } else {
-            styles.push(`background-size: cover;`);
+            if (app.styling.backgroundImage) {
+                styles.push(`background-image: url('${app.styling.backgroundImage}');`);
+            }
+            styles.push(`background-color: ${app.styling.backgroundColor};`);
+            if (app.styling.isBackgroundRepeat) {
+                styles.push(`background-repeat: repeat;`);
+            } else if (app.styling.isBackgroundFitIn) {
+                styles.push(`background-size: 100% 100%;`);
+            } else {
+                styles.push(`background-size: cover;`);
+            }
         }
         
         return styles.join(' '); 

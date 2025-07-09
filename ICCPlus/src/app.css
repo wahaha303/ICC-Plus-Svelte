@@ -5,7 +5,7 @@ html, body {
     height: 100%;
 }
 #backpackDialog {
-    min-height: calc(90vh - 100px);
+    max-height: calc(90vh - 100px);
 }
 img {
     padding-right: 0px !important;

@@ -164,13 +164,19 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.0.1 / ${getDate('2025-07-09T03:00:00Z')}`,
+        title: `v2.0.1 & v2.0.2 / ${getDate('2025-07-09T05:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where score didn't update correctly when lower limit set to negative value in Multiple Select.
         - Fixed issue where score value didn't display if point-type not assigned.
 
         <span style="color: green">Global Settings & Viewer</span>
         - Changed minimum screen width for applying maximum choices per row from 960px to 760px.
+
+        <span style="color: green">Backpack</span>
+        - Fixed issue where separate background was not displayed in Viewer mode even when 'Use Separate Design' was enabled for Backpack.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where <a> tags with target="_blank" were not working.
         `
     }, {
         open: false,
