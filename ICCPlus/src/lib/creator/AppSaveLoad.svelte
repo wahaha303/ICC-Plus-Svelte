@@ -251,7 +251,7 @@
                                 const addon = choice.addons[k];
 
                                 if (addon.image && isDataURL(addon.image)) {
-                                    const mime = getMime(choice.image);
+                                    const mime = getMime(addon.image);
                                     const ext = getExt(mime);
                                     const path = `images/R${i + 1}C${j + 1}A${k + 1}.${ext}`;
 
@@ -338,7 +338,7 @@
                                     const addon = choice.addons[k];
 
                                     if (addon.image && isDataURL(addon.image)) {
-                                        const mime = getMime(choice.image);
+                                        const mime = getMime(addon.image);
                                         const ext = getExt(mime);
                                         const path = `images/BR${i + 1}C${j + 1}A${k + 1}.${ext}`;
 
