@@ -562,7 +562,7 @@
         let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
         if ($winWidth > 1280) {
             return objectWidth;
-        } else if ($winWidth > 960) {
+        } else if ($winWidth > 720) {
             switch(objectWidthNum) {
                 case 1: return 'col-12';
                 case 2: return 'col-6';
@@ -2413,26 +2413,49 @@
                                 }
                             }
                         }
-                    }
 
-                    for (let i = 0; i < localChoice.scores.length; i++) {
-                        const score = localChoice.scores[i];
-                        if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
-                        if (checkRequirements(score.requireds) && !score.isActiveMul[selNum]) {
-                            const point = pointTypeMap.get(score.id);
-                            if (typeof point !== 'undefined') {
-                                let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
-                                val = point.allowFloat ? val : Math.floor(val);
-                                if (score.multiplyByTimes) {
-                                    val = val * (selNum + 1);
+                        for (let i = 0; i < localChoice.scores.length; i++) {
+                            const score = localChoice.scores[i];
+                            if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
+                            if (checkRequirements(score.requireds) && !score.isActiveMul[selNum]) {
+                                const point = pointTypeMap.get(score.id);
+                                if (typeof point !== 'undefined') {
+                                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    if (score.multiplyByTimes) {
+                                        val = val * (selNum + 1);
+                                    }
+                                    point.startingSum -= val;
+                                    score.isActiveMul[selNum] = true;
+                                    let tmpScore = tmpScores.get(score.id);
+                                    if (typeof tmpScore !== 'undefined') {
+                                        tmpScores.set(score.id, val + tmpScore);
+                                    } else {
+                                        tmpScores.set(score.id, val);
+                                    }
                                 }
-                                point.startingSum -= val;
-                                score.isActiveMul[selNum] = true;
-                                let tmpScore = tmpScores.get(score.id);
-                                if (typeof tmpScore !== 'undefined') {
-                                    tmpScores.set(score.id, val + tmpScore);
-                                } else {
-                                    tmpScores.set(score.id, val);
+                            }
+                        }
+                    } else {
+                        for (let i = 0; i < localChoice.scores.length; i++) {
+                            const score = localChoice.scores[i];
+                            if (typeof score.isActiveMulMinus === 'undefined') score.isActiveMulMinus = [];
+                            if (checkRequirements(score.requireds) && score.isActiveMulMinus[selNum] || score.isActiveMulMinus[selNum]) {
+                                const point = pointTypeMap.get(score.id);
+                                if (typeof point !== 'undefined') {
+                                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    if (score.multiplyByTimes) {
+                                        val = val * (Math.abs(selNum));
+                                    }
+                                    point.startingSum -= val;
+                                    let tmpScore = tmpScores.get(score.id);
+                                    if (typeof tmpScore !== 'undefined') {
+                                        tmpScores.set(score.id, val + tmpScore);
+                                    } else {
+                                        tmpScores.set(score.id, val);
+                                    }
+                                    delete score.isActiveMulMinus[selNum];
                                 }
                             }
                         }
@@ -2895,7 +2918,10 @@
                     } else if (typeof localChoice.multipleScoreId !== 'undefined') {
                         const point = pointTypeMap.get(localChoice.multipleScoreId);
                         if (typeof point !== 'undefined') {
-                            point.startingSum += 1;
+                            if (typeof localChoice.numMultipleTimesPluss === 'undefined') localChoice.numMultipleTimesPluss = 0;
+                            if (localChoice.numMultipleTimesPluss > point.startingSum) {
+                                point.startingSum += 1;
+                            }
                         }
                     }
                 }
@@ -2918,7 +2944,7 @@
             const deselectProcess = () => {
                 const tmpScores = new SvelteMap<string, number>();
                 const isPos = localChoice.multipleUseVariable > 0;
-                const selNum = localChoice.multipleUseVariable - 1;
+                const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
                 if (isPos) {
                     for (let i = 0; i < localChoice.scores.length; i++) {
@@ -3054,7 +3080,7 @@
                                 let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
                                 val = point.allowFloat ? val : Math.floor(val);
                                 if (score.multiplyByTimes) {
-                                    val = val * (Math.abs(selNum));
+                                    val = val * selNum;
                                 }
                                 point.startingSum += val;
                                 let tmpScore = tmpScores.get(score.id);
@@ -3430,7 +3456,10 @@
                 } else if (typeof localChoice.multipleScoreId !== 'undefined') {
                     const point = pointTypeMap.get(localChoice.multipleScoreId);
                     if (typeof point !== 'undefined') {
-                        point.startingSum -= 1;
+                        if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
+                        if (point.startingSum > localChoice.numMultipleTimesMinus) {
+                            point.startingSum -= 1;
+                        }
                     }
                 }
             }

@@ -159,7 +159,7 @@
                                         <Option value={objectWidth.value}>{objectWidth.text}</Option>
                                     {/each}
                                     {#snippet helperText()}
-                                        Maximum Number of Choices per Row for Screens Between 960px and 1280px.
+                                        Maximum Number of Choices per Row for Screens Between 720px and 1280px.
                                     {/snippet}
                                 </Select>
                             </div>

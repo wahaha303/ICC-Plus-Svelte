@@ -164,6 +164,16 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.0.1 / ${getDate('2025-07-09T03:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where score didn't update correctly when lower limit set to negative value in Multiple Select.
+        - Fixed issue where score value didn't display if point-type not assigned.
+
+        <span style="color: green">Global Settings & Viewer</span>
+        - Changed minimum screen width for applying maximum choices per row from 960px to 760px.
+        `
+    }, {
+        open: false,
         title: `v2.0.0 / ${getDate('2025-07-08T15:00:00Z')}`,
         text: `<span style="color: green">Framework Migration</span>
         - Rebuilt the entire codebase and migrated from Vue 2.6.11 to Svelte 5.
@@ -229,6 +239,7 @@
         - Added option to change Choice Per Row per Row/Choice/Group.
         - Added option to set Fade-in times for screen transitions.
         - Choice selection is delayed, and the cursor is automatically hidden until the fade-in completes.
+        - When using 'Force Other Choices to Be Active', choices inactive due to unmet requirements will be automatically activated once the requirements are fulfilled.
         - Fixed issue where overlapping change image/background function would erase default values upon cancel.
         - Fixed issue where point requirements triggered by selecting choice were not properly applied.
 

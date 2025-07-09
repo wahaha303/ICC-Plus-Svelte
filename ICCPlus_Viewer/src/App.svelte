@@ -127,14 +127,18 @@
                             await loadImagesSequentially(externalImages);
                         }
                         setTimeout(() => {
-                            if (boxEl) {
-                                boxEl.style.height = '';
-                                boxEl.style.opacity = '1';
-                                boxEl.style.pointerEvents = '';
-                            }
-                            if (indicatorEl) indicatorEl.remove();
-                            if (sizeEl) sizeEl.remove();
-                            document.styleSheets[0].insertRule('body::before{opacity:0;transition:opacity 2s}', 0);
+                            const styleEl = document.createElement('style');
+                            document.head.appendChild(styleEl);
+                            setTimeout(() => {
+                                if (boxEl) {
+                                    boxEl.style.height = '';
+                                    boxEl.style.opacity = '1';
+                                    boxEl.style.pointerEvents = '';
+                                }
+                                if (indicatorEl) indicatorEl.remove();
+                                if (sizeEl) sizeEl.remove();
+                                if (styleEl.sheet) styleEl.sheet.insertRule("body::before{opacity:0;transition:opacity 2s}", 0);
+                            }, 1000);
                         }, 1000);
                         await checkAvifSupport();
                     } else {
@@ -154,14 +158,18 @@
                     await loadImagesSequentially(externalImages);
                 }
                 setTimeout(() => {
-                    if (boxEl) {
-                        boxEl.style.height = '';
-                        boxEl.style.opacity = '1';
-                        boxEl.style.pointerEvents = '';
-                    }
-                    if (indicatorEl) indicatorEl.remove();
-                    if (sizeEl) sizeEl.remove();
-                    document.styleSheets[0].insertRule('body::before{opacity:0;transition:opacity 2s}', 0);
+                    const styleEl = document.createElement('style');
+                    document.head.appendChild(styleEl);
+                    setTimeout(() => {
+                        if (boxEl) {
+                            boxEl.style.height = '';
+                            boxEl.style.opacity = '1';
+                            boxEl.style.pointerEvents = '';
+                        }
+                        if (indicatorEl) indicatorEl.remove();
+                        if (sizeEl) sizeEl.remove();
+                        if (styleEl.sheet) styleEl.sheet.insertRule("body::before{opacity:0;transition:opacity 2s}", 0);
+                    }, 1000);
                 }, 1000);
                 await checkAvifSupport();
             }
@@ -197,14 +205,18 @@
 					initializeApp(json);
 				}
 				setTimeout(() => {
-                    if (boxEl) {
-                        boxEl.style.height = '';
-                        boxEl.style.opacity = '1';
-                        boxEl.style.pointerEvents = '';
-                    }
-                    if (indicatorEl) indicatorEl.remove();
-                    if (sizeEl) sizeEl.remove();
-                    document.styleSheets[0].insertRule('body::before{opacity:0;transition:opacity 2s}', 0);
+                    const styleEl = document.createElement('style');
+                    document.head.appendChild(styleEl);
+                    setTimeout(() => {
+                        if (boxEl) {
+                            boxEl.style.height = '';
+                            boxEl.style.opacity = '1';
+                            boxEl.style.pointerEvents = '';
+                        }
+                        if (indicatorEl) indicatorEl.remove();
+                        if (sizeEl) sizeEl.remove();
+                        if (styleEl.sheet) styleEl.sheet.insertRule("body::before{opacity:0;transition:opacity 2s}", 0);
+                    }, 1000);
                 }, 1000);
                 await checkAvifSupport();
 			};
@@ -214,6 +226,7 @@
     }
 
     onMount(() => {
+        window.debugApp = app;
         autoModeWatcher();
         initBuildSaves();
         loadProject();

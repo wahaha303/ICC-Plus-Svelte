@@ -83,6 +83,7 @@
 	}
 
     onMount(() => {
+        window.debugApp = app;
         autoModeWatcher();
         initStoreSaves();
         initBuildSaves();

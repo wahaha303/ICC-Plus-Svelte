@@ -21,6 +21,7 @@ declare global {
 	}
 	interface Window {
 		onYouTubeIframeAPIReady: () => void;
+		debugApp: any;
 	}
 }
 

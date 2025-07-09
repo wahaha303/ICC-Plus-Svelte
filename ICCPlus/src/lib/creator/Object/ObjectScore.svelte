@@ -144,9 +144,7 @@
                     {#if iconBeforeTextR}
                         <img src={iconImage} class="mx-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">
                     {/if}
-                    {#if score.id !== ''}
-                        {@html DOMPurify.sanitize(scoreValueText, sanitizeArg)}
-                    {/if}
+                    {@html DOMPurify.sanitize(scoreValueText, sanitizeArg)}
                     {#if iconAfterTextL}
                         <img src={iconImage} class="mx-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">
                     {/if}
@@ -155,7 +153,7 @@
                         <img src={iconImage} class="ms-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">
                     {/if}
                 {:else}
-                    {@html DOMPurify.sanitize(`${scoreBeforeText} ${score.id !== '' ? scoreValueText : ''} ${scoreAfterText}`, sanitizeArg)}
+                    {@html DOMPurify.sanitize(`${scoreBeforeText} ${scoreValueText} ${scoreAfterText}`, sanitizeArg)}
                 {/if}
             </p>
         </div>

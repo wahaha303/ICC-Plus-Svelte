@@ -96,7 +96,7 @@
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
     import type { Choice, Requireds } from '$lib/store/types';
-    import { app, globalReqMap, groupMap, choiceMap, pointTypeMap, replaceText, rowMap, sanitizeArg, snackbarVariables, dlgVariables, checkReq, checkRequirements } from '$lib/store/store.svelte';
+    import { app, globalReqMap, replaceText, sanitizeArg, snackbarVariables, dlgVariables, checkReq, checkRequirements, getChoiceTitle } from '$lib/store/store.svelte';
     
     let { isEditModeOn, required, scoreText, choice, index }: { isEditModeOn?: boolean; required: Requireds; scoreText?: string; choice?: Choice; index?: number } = $props();
     
@@ -143,95 +143,5 @@
         if (typeof choice !== 'undefined' && typeof index !== 'undefined' && index < choice.requireds.length - 1) {
             choice.requireds.splice(index, 2, choice.requireds[index + 1], choice.requireds[index]);
         }
-    }
-
-    function getChoiceTitle(req: Requireds) {
-        if (req.customTextIsOn) {
-            return typeof req.customText !== 'undefined' ? req.customText : '';
-        }
-
-        switch (req.type) {
-            case 'id': {
-                let id = req.reqId.split('/ON#');
-                let cMap = choiceMap.get(id[0]);
-                if (typeof cMap !== 'undefined') {
-                    let thisChoice = cMap.choice;
-
-                    return `${req.beforeText} ${id.length > 1 ? `${id[1]} ` : ''} ${thisChoice.title} ${req.afterText}`;
-                }
-                break;
-            }
-            case 'point': {
-                let thisPoint = pointTypeMap.get(req.reqId);
-                if (typeof thisPoint !== 'undefined') {
-                    
-                    return `${req.beforeText} ${req.reqPoints} ${thisPoint.name} ${req.afterText}`;
-                }
-                break;
-            }
-            case 'or': {
-                let val = [];
-                for (let i = 0; i < req.orRequired.length; i++) {
-                    let orReq = req.orRequired[i].req;
-                    if (typeof orReq !== 'undefined') {
-                        let id = orReq.split('/ON#');
-                        let cMap = choiceMap.get(id[0]);
-                        let num = '';
-                        if (typeof cMap !== 'undefined') {
-                            let thisChoice = cMap.choice;
-                            num = id.length > 1 ? `${id[1]} ` : '';
-                            val.push(`${num}${thisChoice.title}`);
-                        }
-                        if (app.orderOrReqText === '1') {
-                            return `${req.beforeText} ${val.join(', ')} ${typeof req.orNum !== 'undefined' ? `${app.defaultOrReq} ${req.orNum}` : `${app.defaultOrReq} 1`} ${req.afterText}`;
-                        } else {
-                            return `${req.beforeText} ${typeof req.orNum !== 'undefined' ? `${req.orNum} ${app.defaultOrReq}` : `1 ${app.defaultOrReq}`} ${val.join(', ')} ${req.afterText}`;
-                        }
-                    }
-                }
-            }
-            case 'selFromGroups': {
-                if (typeof req.selGroups !== 'undefined') {
-                    let val = [];
-                    for (let i = 0; i < req.selGroups.length; i++) {
-                        let id = req.selGroups[i];
-                        let thisGroup = groupMap.get(id);
-                        if (typeof thisGroup !== 'undefined') {
-                            val.push(thisGroup.name);
-                        }
-                    }
-                    if (app.orderSelReqText === '1') {
-                        return `${req.beforeText} ${val.join(', ')} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
-                    } else {
-                        return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${val.join(', ')} ${req.afterText}`;
-                    }
-                }
-            }
-            case 'selFromRows': {
-                if (typeof req.selRows !== 'undefined') {
-                    let val = [];
-                    for (let i = 0; i < req.selRows.length; i++) {
-                        let id = req.selRows[i];
-                        let thisRow = rowMap.get(id);
-                        if (typeof thisRow !== 'undefined') {
-                            val.push(thisRow.title);
-                        }
-                    }
-                    if (app.orderSelReqText === '1') {
-                        return `${req.beforeText} ${val.join(', ')} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
-                    } else {
-                        return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${val.join(', ')} ${req.afterText}`;
-                    }
-                }
-            }
-            case 'selFromWhole': {
-                if (app.orderSelReqText === '1') {
-                    return `${req.beforeText} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
-                } else {
-                    return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${req.afterText}`;
-                }
-            }
-        }
-        return `${req.beforeText} ${req.afterText}`;
     }
 </script>

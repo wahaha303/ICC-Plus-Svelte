@@ -735,7 +735,7 @@
         let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
         if ($winWidth > 1280) {
             return objectWidth;
-        } else if ($winWidth > 960) {
+        } else if ($winWidth > 720) {
             switch(objectWidthNum) {
                 case 1: return 'col-12';
                 case 2: return 'col-6';

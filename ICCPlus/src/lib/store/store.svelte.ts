@@ -1,4 +1,4 @@
-import { derived, get, readable, readonly, writable } from 'svelte/store';
+import { derived, get, readable, writable } from 'svelte/store';
 import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting } from './types';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { promise, z } from 'zod';
@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.0.0';
+export const appVersion = '2.0.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1360,6 +1360,95 @@ export function getGlobalReqLabel(str: string) {
         return `${globalReq.id} | ${globalReq.name}`;
     }
     return '';
+};
+export function getChoiceTitle(req: Requireds) {
+    if (req.customTextIsOn) {
+        return typeof req.customText !== 'undefined' ? req.customText : '';
+    }
+
+    switch (req.type) {
+        case 'id': {
+            let id = req.reqId.split('/ON#');
+            let cMap = choiceMap.get(id[0]);
+            if (typeof cMap !== 'undefined') {
+                let thisChoice = cMap.choice;
+
+                return `${req.beforeText} ${id.length > 1 ? `${id[1]} ` : ''} ${thisChoice.title} ${req.afterText}`;
+            }
+            break;
+        }
+        case 'point': {
+            let thisPoint = pointTypeMap.get(req.reqId);
+            if (typeof thisPoint !== 'undefined') {
+                
+                return `${req.beforeText} ${req.reqPoints} ${thisPoint.name} ${req.afterText}`;
+            }
+            break;
+        }
+        case 'or': {
+            let val = [];
+            for (let i = 0; i < req.orRequired.length; i++) {
+                let orReq = req.orRequired[i].req;
+                if (typeof orReq !== 'undefined') {
+                    let id = orReq.split('/ON#');
+                    let cMap = choiceMap.get(id[0]);
+                    let num = '';
+                    if (typeof cMap !== 'undefined') {
+                        let thisChoice = cMap.choice;
+                        num = id.length > 1 ? `${id[1]} ` : '';
+                        val.push(`${num}${thisChoice.title}`);
+                    }
+                }
+            }
+            if (app.orderOrReqText === '1') {
+                return `${req.beforeText} ${val.join(', ')} ${typeof req.orNum !== 'undefined' ? `${app.defaultOrReq} ${req.orNum}` : `${app.defaultOrReq} 1`} ${req.afterText}`;
+            } else {
+                return `${req.beforeText} ${typeof req.orNum !== 'undefined' ? `${req.orNum} ${app.defaultOrReq}` : `1 ${app.defaultOrReq}`} ${val.join(', ')} ${req.afterText}`;
+            }
+        }
+        case 'selFromGroups': {
+            if (typeof req.selGroups !== 'undefined') {
+                let val = [];
+                for (let i = 0; i < req.selGroups.length; i++) {
+                    let id = req.selGroups[i];
+                    let thisGroup = groupMap.get(id);
+                    if (typeof thisGroup !== 'undefined') {
+                        val.push(thisGroup.name);
+                    }
+                }
+                if (app.orderSelReqText === '1') {
+                    return `${req.beforeText} ${val.join(', ')} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
+                } else {
+                    return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${val.join(', ')} ${req.afterText}`;
+                }
+            }
+        }
+        case 'selFromRows': {
+            if (typeof req.selRows !== 'undefined') {
+                let val = [];
+                for (let i = 0; i < req.selRows.length; i++) {
+                    let id = req.selRows[i];
+                    let thisRow = rowMap.get(id);
+                    if (typeof thisRow !== 'undefined') {
+                        val.push(thisRow.title);
+                    }
+                }
+                if (app.orderSelReqText === '1') {
+                    return `${req.beforeText} ${val.join(', ')} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
+                } else {
+                    return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${val.join(', ')} ${req.afterText}`;
+                }
+            }
+        }
+        case 'selFromWhole': {
+            if (app.orderSelReqText === '1') {
+                return `${req.beforeText} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
+            } else {
+                return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${req.afterText}`;
+            }
+        }
+    }
+    return `${req.beforeText} ${req.afterText}`;
 };
 export function generateRowId(repeated: number, strLength: number) {
     let id = 'row-';
@@ -4645,7 +4734,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
 function selectedOneLess(localChoice: Choice, localRow: Row) {
     
     const tmpScores = new SvelteMap<string, number>();
-    const selNum = localChoice.multipleUseVariable - 1;
+    const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
     for (let i = 0; i < localChoice.scores.length; i++) {
         const score = localChoice.scores[i];
@@ -6157,12 +6246,16 @@ export function setShortcut(e: KeyboardEvent) {
         switch (e.key) {
             case '1':
                 currentComponent.value = 'appCyoaCreator';
+                document.body.classList.remove('mdc-dialog-scroll-lock');
                 break;
             case '2':
                 currentComponent.value = 'appCyoaViewer';
+                document.body.classList.remove('mdc-dialog-scroll-lock');
                 break;
             case '3':
                 currentComponent.value = 'appInformation';
+                document.body.classList.remove('mdc-dialog-scroll-lock');
+                break;
         }
     }
 }

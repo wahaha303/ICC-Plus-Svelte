@@ -13,24 +13,22 @@ export default defineConfig({
   base: '',
   build: {
     assetsDir: 'assets',
+    outDir: 'dist/local',
+    emptyOutDir: false,
     cssCodeSplit: true,
     rollupOptions: {
       input: 'index.html',
       output: {
-        entryFileNames: 'js/app.d3103a3b.js',
-        chunkFileNames: 'js/chunk-vendors.ae283b72.js',
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
+        format: 'iife',
+        name: 'ICCPlus',
+        entryFileNames: 'js/app.js',
         assetFileNames: (assetInfo) => {
           const name = assetInfo.names ? assetInfo.names[0] : undefined;
           if (name && name.endsWith('.css')) {
             if (name.includes('vendor') || name.includes('node_modules')) {
-              return 'css/chunk-vendors.ebaa52b5[extname]';
+              return 'css/chunk-vendors.58637379[extname]';
             }
-            return 'css/app.e7eb167a[extname]';
+            return 'css/app.df7ca14c[extname]';
           }
           return 'assets/[name][extname]';
         },
@@ -38,9 +36,9 @@ export default defineConfig({
     },
     minify: 'terser',
     terserOptions: {
-      mangle:{
+      mangle: {
         reserved: ['app'],
-      }
+      },
     }
   }
 })
