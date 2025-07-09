@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2025-07-09T05:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2025-07-09T12:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -23,7 +23,7 @@
                     </div>
                 {/each}
                 <div class="col-12">
-                    <Button href="https://github.com/wahaha303/ICCPlus/releases/tag/v{appVersion}" target="_blank">
+                    <Button href="https://github.com/wahaha303/ICCPlus/releases/latest" target="_blank">
                         <Label class="dialog-actions--btn">Download Viewer</Label>
                     </Button>
                 </div>

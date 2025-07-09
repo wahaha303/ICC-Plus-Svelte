@@ -81,8 +81,8 @@
         const row = rowMap.get(id);
         
         if (typeof row !== 'undefined') {
-            const rIdx = row.index + 1;
-            const divs = mainDiv.children[0]?.children;
+            const rIdx = app.useToolbarBtn ? row.index : row.index + 1;
+            const divs = mainDiv.children;
 
             if (typeof divs !== 'undefined' && typeof divs[rIdx] !== 'undefined') {
                 window.scrollTo({top: divs[rIdx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
@@ -94,12 +94,13 @@
         const cMap = choiceMap.get(id);
 
         if (typeof cMap !== 'undefined' && cMap.choice) {
-            const rIdx = cMap.row.index + 1;
-            const cIdx = cMap.choice.index + 1;
+            const rIdx = app.useToolbarBtn ? cMap.row.index : cMap.row.index + 1;
+            const cIdx = cMap.choice.index;
             const divs = mainDiv.children[rIdx]?.children[1]?.children[1]?.children;
+            const target = typeof divs === 'undefined' ? mainDiv.children[rIdx] : divs[cIdx];
 
-            if (typeof divs !== 'undefined' && typeof divs[cIdx] !== 'undefined') {
-                window.scrollTo({top: divs[cIdx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
+            if (typeof target !== 'undefined') {
+                window.scrollTo({top: target.getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
             }
         }
     }
