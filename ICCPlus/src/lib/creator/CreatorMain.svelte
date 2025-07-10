@@ -103,7 +103,7 @@
                                     <CardContent class="toolbar toolbar--row justify-space-between px-3 py-2">
                                             <div class="toolbar__title">{(row.debugTitle ?? '') + row.title}</div>
                                             <div class="d-row">
-                                                <Wrapper text={row.isEditModeOn ? 'Preivew' : 'Edit Row'}>
+                                                <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
                                                     <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclick={() => row.isEditModeOn = !row.isEditModeOn} />
                                                 </Wrapper>
                                                 {#if app.useToolbarBtn}

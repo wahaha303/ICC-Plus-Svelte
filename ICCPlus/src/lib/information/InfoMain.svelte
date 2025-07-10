@@ -164,8 +164,11 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.0.1 ~ v2.0.7 / ${getDate('2025-07-10T11:00:00Z')}`,
-        text: `<span style="color: green">Choice</span>
+        title: `v2.0.1 ~ v2.0.8 / ${getDate('2025-07-10T18:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where whitespace characters in Row's Title occupied space in layout.
+        
+        <span style="color: green">Choice</span>
         - Fixed issue where score didn't update correctly when lower limit set to negative value in Multiple Select.
         - Fixed issue where score value didn't display if point-type not assigned.
         - Fixed issue where canceling the discount choice caused incorrect score calculation.
@@ -174,7 +177,7 @@
         <span style="color: green">Requirement</span>
         - Fixed issue where 'X of These is Not Selected' requirement was not working properly.
 
-        <span style="color: green">Global Settings & Viewer</span>
+        <span style="color: green">Global Settings</span>
         - Changed minimum screen width for applying maximum choices per row from 960px to 760px.
         - Added option to toggle adding prefix when generating ID.
 
@@ -183,6 +186,9 @@
 
         <span style="color: green">Point Bar</span>
         - Adjusted point position on the point bar to better match the previous settings.
+
+        <span style="color: green">Word</span>
+        - Fixed issue where Word didn't work properly when one Word ID was a substring of another.
 
         <span style="color: green">Miscellaneous</span>
         - Fixed issue where <a> tags with target="_blank" were not working.

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.0.7';
+export const appVersion = '2.0.8';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1387,11 +1387,27 @@ export function objectWidthToNum(str: string) {
         default: return 1
     }
 };
+let preWords: Word[] = [];
+let cachedRegex: RegExp;
+function checkWordChange() {
+    if (preWords.length !== app.words.length) return true;
+    for (let i = 0; i < preWords.length; i++) {
+        if (preWords[i].id !== app.words[i].id) return true;
+        if (preWords[i].replaceText !== app.words[i].replaceText) return true;
+    }
+    return false;
+}
+function getCombinedRegex() {
+    if (checkWordChange()) {
+        preWords = JSON.parse(JSON.stringify(app.words));
+        cachedRegex = new RegExp(app.words.map(key => key.id).sort((a, b) => b.length - a.length).map(id => id.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')).join('|'),'g');
+    }
+    return cachedRegex;
+}
 export function replaceText(str: string) {
     let text = str;
     if (app.words) {
-        const combinedRegex = new RegExp(app.words.map(key => key.id.replace(/[-[\]/{}()*+?.\\^$|]/g, "\\$&")).join("|"), "g");
-        text = text.replace(combinedRegex, (match) => {
+        text = text.replace(getCombinedRegex(), (match) => {
             const point = pointTypeMap.get(match);
             if (typeof point !== 'undefined') {
                 const value = point.startingSum % 1 === 0 ? point.startingSum : parseFloat(point.startingSum.toFixed(point.decimalPlaces ?? 2));

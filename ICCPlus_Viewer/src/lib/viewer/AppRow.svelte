@@ -288,7 +288,7 @@
     });
 
     let rowTitle = $derived.by(() => {
-        return `white-space: pre-wrap;font-family: ${textStyle.rowTitle}; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${textStyle.rowTitleColor}`;
+        return `font-family: ${textStyle.rowTitle}; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${textStyle.rowTitleColor}`;
     });
 
     let rowText = $derived.by(() => {

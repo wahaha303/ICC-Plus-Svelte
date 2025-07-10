@@ -13,7 +13,7 @@
                 <h5>Row Design Groups</h5>
             </div>
             <div class="col-md-6 col-12">
-                <h5>Object Design Groups</h5>
+                <h5>Choice Design Groups</h5>
             </div>
         </div>
         <div class="row gy-4">

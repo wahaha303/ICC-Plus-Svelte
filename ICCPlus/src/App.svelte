@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2025-07-10T11:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2025-07-10T18:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
