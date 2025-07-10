@@ -275,7 +275,9 @@
                                                     </div>
                                                 {/if}
                                                 <div class="col-12 m-1 px-2">
-                                                    <Textfield bind:value={() => choice.numMultipleTimesMinus ?? 0, (e) => choice.numMultipleTimesMinus = e} label="Number at which the minus stops working" type="number" variant="filled" />
+                                                    <Wrapper text="Some features may not work properly if this value is set below 0.">
+                                                        <Textfield bind:value={() => choice.numMultipleTimesMinus ?? 0, (e) => choice.numMultipleTimesMinus = e} label="Number at which the minus stops working" type="number" variant="filled" />
+                                                    </Wrapper>
                                                     <Textfield bind:value={() => choice.numMultipleTimesPluss ?? 0, (e) => choice.numMultipleTimesPluss = e} label="Number at which the plus stops working" type="number" variant="filled" />
                                                 </div>
                                                 <div class="b-line"></div>
@@ -1208,7 +1210,7 @@
     </div>
 {:else if !(bCreatorMode && row.isEditModeOn) && (isEnabled || !filterStyle.reqFilterVisibleIsOn)}
     <div class={objectWidthClass()}>
-        <span class:fullHeight={fullHeight}>
+        <span class:fullHeight={fullHeight} class="d-flex">
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclick={() => activateObject(choice, row)}>
@@ -2298,23 +2300,49 @@
                         const point = pointTypeMap.get(aScore.id);
                         if (typeof point !== 'undefined') {
                             if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
-                                if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
-                                    if (aChoice.forcedActivated) {
-                                        delete aChoice.forcedActivated;
-                                        if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
+                                const mul = aChoice.multipleUseVariable;
+                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                    for (let j = mul - 1; j >= 0; j--) {
+                                        if (aChoice.isActive) {
+                                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                                if (aChoice.forcedActivated && aChoice.isActive) {
+                                                    aChoice.forcedActivated = false;
+                                                    aChoice.numMultipleTimesMinus--;
+                                                    selectedOneLess(aChoice, aRow);
+                                                    aChoice.forcedActivated = true;
+                                                } else {
+                                                    selectedOneLess(aChoice, aRow);
+                                                }
+                                            } else {
+                                                point.startingSum += aScore.tmpDisScore;
+                                            }
+                                        }
                                     }
-                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
-                                        for (let j = 0; j < aChoice.multipleUseVariable; j++) {
-                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+
+                                    if (aChoice.isActive) {
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
+                                    }
+                                } else if (!aChoice.isSelectableMultiple) {
+                                    if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                        if (aChoice.forcedActivated) {
+                                            delete aChoice.forcedActivated;
+                                            if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
+                                        }
+                                        if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
+                                            for (let j = 0; j < aChoice.multipleUseVariable; j++) {
+                                                if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                            }
+                                        } else {
+                                            if (aChoice.isActive) deselectObject(aChoice, aRow);
                                         }
                                     } else {
-                                        if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                        point.startingSum += aScore.tmpDisScore;
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
                                     }
-                                } else {
-                                    point.startingSum += aScore.tmpDisScore;
-                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                    delete aScore.isChangeDiscount;
-                                    delete aScore.tmpDisScore;
                                 }
                                 scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                                 isChanged = localChoice.id !== aChoice.id;
@@ -3742,11 +3770,9 @@
                                         if (typeof sRow !== 'undefined') {
                                             const divs = mainDiv?.children;
                                             if (typeof divs !== 'undefined') {
-                                                console.log(mainDiv, divs);
                                                 const idx = app.useToolbarBtn || !bCreatorMode ? sRow.index : sRow.index + 1;
                                                 if (isBackpack) {
                                                     const thisWindow = document.getElementById('backpackDialog');
-                                                    console.log(divs, idx);
                                                     thisWindow?.scrollTo({top: divs[idx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
                                                 } else {
                                                     window.scrollTo({top: divs[idx].getBoundingClientRect().top + window.scrollY, behavior: 'smooth'});
@@ -3884,7 +3910,7 @@
 
                     if (isPos) {
                         if (localChoice.discountOther) {
-                            if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                            if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined' && (localChoice.stackableDiscount || !localChoice.stackableDiscount && localChoice.multipleUseVariable === 1)) {
                                 if (localChoice.isDisChoices) {
                                     const dList = new Set<string>();
                                     if (typeof localChoice.discountRows !== 'undefined') {
@@ -4542,7 +4568,7 @@
                     }
 
                     if (localChoice.discountOther) {
-                        if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                        if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined' && (localChoice.stackableDiscount || !localChoice.stackableDiscount && localChoice.multipleUseVariable === 1)) {
                             if (localChoice.isDisChoices) {
                                 const dList = new Set<string>();
                                 if (typeof localChoice.discountRows !== 'undefined') {

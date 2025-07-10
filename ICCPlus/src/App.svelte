@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2025-07-09T12:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2025-07-10T06:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -47,17 +47,22 @@
 {:else if currentComponent.value === 'appInformation'}
     <InfoMain />
 {/if}
+<Snackbar bind:this={snackbar} labelText={snackbarVariables.labelText} timeoutMs={snackbarVariables.timeoutMs}>
+    <SnackbarLabel class="text-center" />
+</Snackbar>
 
 <script lang="ts">
     import Button, { Label, Icon as BtnIcon } from '@smui/button';
     import Dialog, { Title, Content} from '@smui/dialog';
     import CreatorMain from '$lib/creator/CreatorMain.svelte';
+    import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import ViewerMain from '$lib/viewer/ViewerMain.svelte';
     import InfoMain from '$lib/information/InfoMain.svelte';
-    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, appVersion, getDate } from '$lib/store/store.svelte';
+    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, snackbarVariables, appVersion, getDate } from '$lib/store/store.svelte';
     import { onDestroy, onMount } from 'svelte';
 
     let open = $state(true);
+    let snackbar: Snackbar;
 
     const menuComponentButtons = [
         { component: 'appCyoaCreator', text: 'Open Cyoa Creator (Alt + 1)'},
@@ -114,6 +119,14 @@
             window.addEventListener('keydown', setShortcut);
         } else {
             window.removeEventListener('keydown', setShortcut);
+        }
+    });
+
+    $effect(() => {
+        if (snackbarVariables.isOpen) {
+            snackbar.close();
+            snackbar.open();
+            snackbarVariables.isOpen = false;
         }
     });
 </script>

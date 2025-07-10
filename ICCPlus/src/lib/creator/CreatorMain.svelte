@@ -60,21 +60,21 @@
         {#if pointBarIsOn}
             <TopAppBar class="pointBar" style={pointBar} color="secondary" variant="fixed" >
                 <AppBarRow class="justify-space-around">
-                    {#if app.importedChoicesIsOpen}
-                        <AppBarSection class="py-0 justify-center">
+                    <AppBarSection class="py-0 justify-center">
+                        {#if app.importedChoicesIsOpen}
                             <IconButton class="pointbar-icons" onclick={() => currentDialog = 'appBuildForm'} aria-label="Open Import Window" style={pointBarIcon}>
                                 <i class="mdi mdi-format-list-checks"></i>
                             </IconButton>
-                        </AppBarSection>
-                    {/if}
-                    <AppBarSection class="pointbar-center--creator">
-                    {#each app.pointTypes as point}
-                        {#if checkPointEnable(point)}
-                            <div class="py-0 justify-center" style={pointBarText}>
-                                <AppPointBar point={point} />
-                            </div>
                         {/if}
-                    {/each}
+                    </AppBarSection>
+                    <AppBarSection class="pointbar-center--creator">
+                        {#each app.pointTypes as point}
+                            {#if checkPointEnable(point)}
+                                <div class="py-0 justify-center" style={pointBarText}>
+                                    <AppPointBar point={point} />
+                                </div>
+                            {/if}
+                        {/each}
                     </AppBarSection>
                     <AppBarSection class="py-0 justify-center">
                         {#if app.backpack.length > 0 && ((typeof app.hideBackpackBtn === "undefined" || app.hideBackpackBtn === 0) || (app.hideBackpackBtn > 0 && app.hideBackpackBtn === app.btnBackpackIsOn))}
@@ -179,9 +179,6 @@
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
 {/if}
 <Tooltip />
-<Snackbar bind:this={snackbar} labelText={snackbarVariables.labelText} timeoutMs={snackbarVariables.timeoutMs}>
-    <SnackbarLabel class="text-center" />
-</Snackbar>
 
 <script lang="ts">
     import Card, { Content as CardContent } from '@smui/card';
@@ -189,10 +186,9 @@
     import List, { Item, Text, Graphic, Separator } from '@smui/list';
     import IconButton from '@smui/icon-button';
     import Slider from '@smui/slider';
-    import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, snackbarVariables, bgmVariables, bgmPlayer,  toggleTheme, generateScoreId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer,  toggleTheme, generateScoreId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
@@ -214,6 +210,7 @@
 	import AppGlobalSettings from './AppGlobalSettings.svelte';
     import DlgCommon from './DlgCommon.svelte';
 	import { get } from 'svelte/store';
+    import { onDestroy } from 'svelte';
 
     const upperMenuCompoenet = [{
         action: () => {
@@ -278,7 +275,6 @@
     let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${app.fadeTransitionColor}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
     let width = $state(0);
     let mainDiv = $state<HTMLDivElement>();
-    let snackbar: Snackbar;
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
     let pointBar = $derived(`max-width: calc(100% - 56px); background-color: ${app.styling.barBackgroundColor}; margin:${app.styling.barMargin}px; padding:${app.styling.barPadding}px; ${pointBarPosition}`);
@@ -325,14 +321,6 @@
     let curBgmTime = $state(0);
     let curVolume = $state(100);
     let isChangingVol = $state(false);
-
-    $effect(() => {
-        if (snackbarVariables.isOpen) {
-            snackbar.close();
-            snackbar.open();
-            snackbarVariables.isOpen = false;
-        }
-    });
 
     $effect(() => {
         if (!bgmVariables.isSeeking) {

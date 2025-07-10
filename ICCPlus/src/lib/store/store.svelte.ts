@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.0.5';
+export const appVersion = '2.0.6';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1866,9 +1866,9 @@ export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> =
                 let orCount = 0;
                 for (let i = 0; i < req.orRequired.length; i++) {
                     let orReq = req.orRequired[i].req;
-                    if (typeof orReq !== 'undefined' && checkActivated(orReq, aMap)) orCount++;
+                    if (orReq === '' || typeof orReq !== 'undefined' && checkActivated(orReq, aMap)) orCount++;
                 }
-                return orNum > orCount;
+                return orCount < req.orRequired.length - orNum + 1;
             case 'gid':
                 const globalReq = globalReqMap.get(req.reqId);
                 if (typeof globalReq !== 'undefined' && typeof app.globalRequirements !== 'undefined') {
@@ -2238,12 +2238,13 @@ export function deselectDiscount(localChoice: Choice, score: Score) {
                     score.discountedFrom.splice(idx, 1);
 
                     if (typeof score.discountedFrom !== 'undefined' && score.discountedFrom.length > 0) {
+                        discountVal = scoreVal;
                         for (let i = 0; i < score.discountedFrom.length; i++) {
                             const cMap = choiceMap.get(score.discountedFrom[i]);
                             if (typeof cMap !== 'undefined') {
                                 const aChoice = cMap.choice;
                                 if (typeof aChoice.discountOperator !== 'undefined' && typeof aChoice.discountValue !== 'undefined') {
-                                    discountVal = calcStackDiscount(scoreVal, aChoice.discountOperator, aChoice.discountValue);
+                                    discountVal = calcStackDiscount(discountVal, aChoice.discountOperator, aChoice.discountValue);
                                     discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
                                     discountCal = discountVal;
                                     if (aChoice.discountLowLimitIsOn && typeof aChoice.discountLowLimit !== 'undefined') {
@@ -2410,7 +2411,8 @@ export function deselectDiscount(localChoice: Choice, score: Score) {
             }
         }
 
-        let resultVal = score.discountScore ?? point.allowFloat ? score.value : Math.floor(score.value);
+        let resultVal = typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        resultVal = point.allowFloat ? resultVal : Math.floor(resultVal);
 
         if (resultVal !== tmpDisScore) {
             score.tmpDisScore = tmpDisScore - resultVal;
@@ -2554,7 +2556,7 @@ export function selectDiscount(localChoice: Choice, score: Score) {
             }
         } else {
             score.tmpDiscount ??= [];
-        
+    
             discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
             discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
             discountCal = discountVal;

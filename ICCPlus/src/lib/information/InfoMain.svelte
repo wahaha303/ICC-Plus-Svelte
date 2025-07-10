@@ -164,10 +164,15 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.0.1 & v2.0.2 / ${getDate('2025-07-09T05:00:00Z')}`,
+        title: `v2.0.1 ~ v2.0.6 / ${getDate('2025-07-10T06:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where score didn't update correctly when lower limit set to negative value in Multiple Select.
         - Fixed issue where score value didn't display if point-type not assigned.
+        - Fixed issue where canceling the discount choice caused incorrect score calculation.
+        - Fixed issue where choices were sticking together when 'Identical Height' was disabled.
+
+        <span style="color: green">Requirement</span>
+        - Fixed issue where 'X of These is Not Selected' requirement was not working properly.
 
         <span style="color: green">Global Settings & Viewer</span>
         - Changed minimum screen width for applying maximum choices per row from 960px to 760px.

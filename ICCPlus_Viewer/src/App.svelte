@@ -1,7 +1,11 @@
 <div id="bgm-player" style="display:none"></div>
 <ViewerMain />
+<Snackbar bind:this={snackbar} labelText={snackbarVariables.labelText} timeoutMs={snackbarVariables.timeoutMs}>
+    <SnackbarLabel class="text-center" />
+</Snackbar>
 
 <script lang="ts">
+    import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import ViewerMain from '$lib/viewer/ViewerMain.svelte';
     import { app, AppSchema, bgmPlayer, currentTheme, externalImages, hasAvif, initBuildSaves, initializeApp, removeNulls, snackbarVariables } from '$lib/store/store.svelte';
     import { onDestroy, onMount } from 'svelte';
@@ -12,7 +16,16 @@
     let boxEl: HTMLElement | null;
     let indicatorEl: HTMLElement | null;
     let sizeEl: HTMLElement | null;
-    let defaultText: string = '<div>Loading</div>';
+    let defaultText: string = '<div>Loading</div>';    
+    let snackbar: Snackbar;
+
+    $effect(() => {
+        if (snackbarVariables.isOpen) {
+            snackbar.close();
+            snackbar.open();
+            snackbarVariables.isOpen = false;
+        }
+    });
 
     function autoModeWatcher() {
 		let t = localStorage.getItem('theme') as string;

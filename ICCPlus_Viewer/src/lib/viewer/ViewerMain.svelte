@@ -8,12 +8,28 @@
                     <Text class="w-100 list-text text-center">Close Menu</Text>
                 </Item>
                 <Separator class="my-3" />
-                {#each menuCompoenet as menu}
-                    <Item onSMUIAction={menu.action} class="my-0">
-                        <Graphic class={menu.icon} />
-                        <Text class="w-100 list-text text-center">{menu.text}</Text>
+                <Item onSMUIAction={toggleTheme} class="my-0">
+                    <Graphic class="mdi mdi-theme-light-dark" />
+                    <Text class="w-100 list-text text-center">Toogle Dark/Light Theme</Text>
+                </Item>
+                <Item onSMUIAction={() => topPointBar = !topPointBar} class="my-0">
+                    <Graphic class="mdi mdi-swap-vertical" />
+                    <Text class="w-100 list-text text-center">Top/Bottom Point Bar</Text>
+                </Item>
+                <Item onSMUIAction={cleanActivated} class="my-0">
+                    <Graphic class="mdi mdi-select-off" />
+                    <Text class="w-100 list-text text-center">Clean Selected Choices</Text>
+                </Item>
+                {#if app.importedChoicesIsOpen}
+                    <Item onSMUIAction={() => {currentDialog = 'appSaveLoad'; menuOpen = false;}} class="my-0">
+                        <Graphic class="mdi mdi-content-save" />
+                        <Text class="w-100 list-text text-center">Save/Load Build</Text>
                     </Item>
-                {/each}
+                {/if}
+                <Item onSMUIAction={() => {currentDialog = 'appGlobalSettings'; menuOpen = false;}} class="my-0">
+                    <Graphic class="mdi mdi-cog" />
+                    <Text class="w-100 list-text text-center">Settings</Text>
+                </Item>
             </List>
         </Content>
     </Drawer>
@@ -101,19 +117,15 @@
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
 {/if}
 <Tooltip />
-<Snackbar bind:this={snackbar} labelText={snackbarVariables.labelText} timeoutMs={snackbarVariables.timeoutMs}>
-    <SnackbarLabel class="text-center" />
-</Snackbar>
 
 <script lang="ts">
     import Drawer, { Content, Scrim } from '@smui/drawer';
     import IconButton from '@smui/icon-button';
     import List, { Item, Text, Graphic, Separator } from '@smui/list';
     import Slider from '@smui/slider';
-    import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentTheme, dlgVariables, snackbarVariables, bgmVariables, bgmPlayer, cleanActivated, checkPointEnable } from '$lib/store/store.svelte';
+    import { app, currentTheme, dlgVariables, bgmVariables, bgmPlayer, cleanActivated, checkPointEnable } from '$lib/store/store.svelte';
     import AppSaveLoad from './AppSaveLoad.svelte';
 	import AppRow from './AppRow.svelte';
     import AppPointBar from './AppPointBar.svelte';
@@ -123,39 +135,6 @@
     import DlgCommon from './DlgCommon.svelte';
 	import { get } from 'svelte/store';
     
-    const menuCompoenet = [{
-        action: () => {
-            toggleTheme();
-        },
-        text: 'Toogle Dark/Light Theme',
-        icon: 'mdi mdi-theme-light-dark'
-    }, {
-        action: () => {
-            topPointBar = !topPointBar;
-        },
-        text: 'Top/Bottom Point Bar',
-        icon: 'mdi mdi-swap-vertical'
-    }, {
-        action: () => {
-            cleanActivated();
-        },
-        text: 'Clean Selected Choices',
-        icon: 'mdi mdi-select-off'
-    }, {
-        action: () => {
-            currentDialog = 'appSaveLoad';
-            menuOpen = false;
-        },
-        text: 'Save/Load Build',
-        icon: 'mdi mdi-content-save'
-    }, {
-        action: () => {
-            currentDialog = 'appGlobalSettings';
-            menuOpen = false;
-        },
-        text: 'Settings',
-        icon: 'mdi mdi-cog'
-    }];
     let menuOpen = $state(false);
     let topPointBar = $state(false);
     let currentDialog = $state<'none' | 'appSaveLoad' | 'dlgBackpack' | 'appGlobalSettings'>('none');
@@ -163,7 +142,6 @@
     let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${app.fadeTransitionColor}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
     let width = $state(0);
     let mainDiv = $state<HTMLDivElement>()
-    let snackbar: Snackbar;
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
     let pointBar = $derived(`background-color: ${app.styling.barBackgroundColor};margin:${app.styling.barMargin}px;padding:${app.styling.barPadding}px;${pointBarPosition}`);
@@ -208,14 +186,6 @@
     let curBgmTime = $state(0);
     let curVolume = $state(100);
     let isChangingVol = $state(false);
-
-    $effect(() => {
-        if (snackbarVariables.isOpen) {
-            snackbar.close();
-            snackbar.open();
-            snackbarVariables.isOpen = false;
-        }
-    });
 
     $effect(() => {
         if (!bgmVariables.isSeeking) {
