@@ -803,6 +803,7 @@ export type App = {
     preloadImages: boolean,
     preloadExternalImages: boolean,
     useVW: boolean,
+    addPrefix?: boolean,
     mdObjects: string[],
     printThis: boolean,
     autoSaveIsOn: boolean,

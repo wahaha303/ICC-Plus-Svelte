@@ -125,6 +125,14 @@
                                     {/snippet}
                                 </FormField>
                             </div>
+                            <div class="col-12">
+                                <FormField>
+                                    <Switch bind:checked={() => app.addPrefix?? false, (e) => app.addPrefix = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Add Prefix to ID on Creation
+                                    {/snippet}
+                                </FormField>
+                            </div>
                             <div class="col-12 px-3">
                                 <Textfield bind:value={() => app.rowIdLength ?? 4, (e) => app.rowIdLength = e} label="Length of Row Id to be generated" type="number" variant="standard" input$min="4" onchange={() => {
                                     if (app.rowIdLength < 4) {

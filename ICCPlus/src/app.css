@@ -243,20 +243,22 @@ img {
     justify-content: space-between;
 }
 .pointbar-center--creator {
-    flex: 0 0 auto !important;
+    flex: 1 0 auto !important;
     max-width: calc(90vw - 152px);
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
     padding: 0;
+    justify-content: space-around;
 }
 .pointbar-center--viewer {
-    flex: 0 0 auto !important;
+    flex: 1 0 auto !important;
     max-width: calc(90vw - 96px);
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
     padding: 0;
+    justify-content: space-around;
 }
 .pointbar-icons {
     font-size: 32px;

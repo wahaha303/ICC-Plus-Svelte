@@ -164,7 +164,7 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.0.1 ~ v2.0.6 / ${getDate('2025-07-10T06:00:00Z')}`,
+        title: `v2.0.1 ~ v2.0.7 / ${getDate('2025-07-10T11:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where score didn't update correctly when lower limit set to negative value in Multiple Select.
         - Fixed issue where score value didn't display if point-type not assigned.
@@ -176,9 +176,13 @@
 
         <span style="color: green">Global Settings & Viewer</span>
         - Changed minimum screen width for applying maximum choices per row from 960px to 760px.
+        - Added option to toggle adding prefix when generating ID.
 
         <span style="color: green">Backpack</span>
         - Fixed issue where separate background was not displayed in Viewer mode even when 'Use Separate Design' was enabled for Backpack.
+
+        <span style="color: green">Point Bar</span>
+        - Adjusted point position on the point bar to better match the previous settings.
 
         <span style="color: green">Miscellaneous</span>
         - Fixed issue where <a> tags with target="_blank" were not working.

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.0.6';
+export const appVersion = '2.0.7';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -387,6 +387,7 @@ export const app = $state<App>({
     preloadImages: false,
     preloadExternalImages: false,
     useVW: false,
+    addPrefix: true,
     activated: [],
     rows: [],
     pointTypes: [],
@@ -490,6 +491,7 @@ export const defaultApp: App = {
     preloadImages: false,
     preloadExternalImages: false,
     useVW: false,
+    addPrefix: true,
     activated: [],
     rows: [],
     pointTypes: [],
@@ -1237,13 +1239,16 @@ export function getChoiceTitle(req: Requireds) {
     }
     return `${req.beforeText} ${req.afterText}`;
 }
+function checkInitId(id: string) {
+    return rowMap.has(id) || choiceMap.has(id) || wordMap.has(id) || pointTypeMap.has(id) || rowDesignMap.has(id) || objectDesignMap.has(id) || groupMap.has(id) || variableMap.has(id)
+}
 export function generateRowId(repeated: number, strLength: number) {
-    let id = 'row-';
+    let id = app.addPrefix ? 'row-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
     }
-    if (rowMap.has(id)) {
+    if (checkInitId(id)) {
         if (repeated > 2) {
             return generateRowId(0, ++strLength);
         } else {
@@ -1254,12 +1259,12 @@ export function generateRowId(repeated: number, strLength: number) {
     }
 };
 export function generateWordId(repeated: number, strLength: number) {
-    let id = 'word-';
+    let id = app.addPrefix ? 'word-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
     }
-    if (wordMap.has(id)) {
+    if (checkInitId(id)) {
         if (repeated > 2) {
             return generateWordId(0, ++strLength);
         } else {
@@ -1270,12 +1275,12 @@ export function generateWordId(repeated: number, strLength: number) {
     }
 };
 export function generateObjectId(repeated: number, strLength: number) {
-    let id = 'choice-';
+    let id = app.addPrefix ? 'choice-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
     }
-    if (choiceMap.has(id)) {
+    if (checkInitId(id)) {
         if (repeated > 2) {
             return generateObjectId(0, ++strLength);
         } else {
@@ -1286,13 +1291,12 @@ export function generateObjectId(repeated: number, strLength: number) {
     }
 };
 export function generateDesignId(repeated: number, strLength: number, isRow: boolean) {
-    let id = 'design-';
+    let id = app.addPrefix ? 'design-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
     }
-    let isDup = isRow ? rowDesignMap.has(id) : objectDesignMap.has(id);
-    if (isDup) {
+    if (checkInitId(id)) {
         if (repeated > 2) {
             return generateDesignId(0, ++strLength, isRow);
         } else {
@@ -1303,12 +1307,12 @@ export function generateDesignId(repeated: number, strLength: number, isRow: boo
     }
 };
 export function generateGroupId(repeated: number, strLength: number) {
-    let id = 'group-';
+    let id = app.addPrefix ? 'group-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
     }
-    if (groupMap.has(id)) {
+    if (checkInitId(id)) {
         if (repeated > 2) {
             return generateGroupId(0, ++strLength);
         } else {
@@ -1319,12 +1323,12 @@ export function generateGroupId(repeated: number, strLength: number) {
     }
 };
 export function generatePointTypeId(repeated: number, strLength: number) {
-    let id = 'point-';
+    let id = app.addPrefix ? 'point-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
     }
-    if (pointTypeMap.has(id)) {
+    if (checkInitId(id)) {
         if (repeated > 2) {
             return generatePointTypeId(0, ++strLength);
         } else {
@@ -1335,12 +1339,12 @@ export function generatePointTypeId(repeated: number, strLength: number) {
     }
 };
 export function generateVariableId(repeated: number, strLength: number) {
-    let id = 'variable-';
+    let id = app.addPrefix ? 'variable-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
     }
-    if (variableMap.has(id)) {
+    if (checkInitId(id)) {
         if (repeated > 2) {
             return generateVariableId(0, ++strLength);
         } else {
