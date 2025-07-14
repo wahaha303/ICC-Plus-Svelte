@@ -128,7 +128,7 @@
         getScrollElement: () => virtualListEl,
         estimateSize: () => 262,
         overscan: 2,
-        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 262)
+        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 262),
     }));
     let totalHeight = $derived.by(() => {
         return $virtualizer.getTotalSize()
@@ -139,12 +139,23 @@
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--group') as HTMLDivElement;
-        $virtualizer.setOptions({
-            getScrollElement: () => virtualListEl,
-            estimateSize: () => 262,
-            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 262)
-        });
+        setTimeout(() => {
+            $virtualizer.setOptions({
+                getScrollElement: () => virtualListEl,
+                estimateSize: (index) => estimateSize(index - 1),
+                measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 262),
+            });
+        }, 0);
     });
+
+    function estimateSize(index: number) {
+        const group = app.groups[index];
+        if (!group) {
+            return 262;
+        }
+        const height = 262 + (Math.max(group.rowElements.length, group.elements.length) * 24);
+        return height;
+    }
 
     function observeResize(el: HTMLDivElement, index: number) {
 

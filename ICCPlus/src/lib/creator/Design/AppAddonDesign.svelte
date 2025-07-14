@@ -185,19 +185,15 @@
                                     {/snippet}
                                 </FormField>
                                 <FormField class="w-100">
-                                    <Checkbox bind:checked={() => styling.removeSpaceAddonIsOn?? false, (e) => styling.removeSpaceAddonIsOn = e} />
-                                    {#snippet label()}
-                                        Remove the space below the addon text
-                                    {/snippet}
-                                </FormField>
-                                <FormField class="w-100">
                                     <Checkbox bind:checked={() => styling.addonGradientIsOn?? false, (e) => styling.addonGradientIsOn = e} />
                                     {#snippet label()}
-                                        Object Gradient is turned on
+                                        Addon Gradient is turned on
                                     {/snippet}
                                 </FormField>
                                 {#if styling.addonGradientIsOn}
-                                    <Textfield bind:value={() => styling.addonGradient?? '', (e) => styling.addonGradient = e} label="Gradient" variant="filled" input$placeholder="to left, blue, red" />
+                                    <Textfield bind:value={() => styling.addonGradient?? '', (e) => styling.addonGradient = e} label="Gradient when Not Selected" variant="filled" input$placeholder="to left, blue, red" />
+                                    <Textfield bind:value={() => styling.addonGradientOnSelect?? '', (e) => styling.addonGradientOnSelect = e} label="Gradient when Selected" variant="filled" input$placeholder="to left, blue, red" />
+                                    <Textfield bind:value={() => styling.addonGradientOnReq?? '', (e) => styling.addonGradientOnReq = e} label="Gradient when Missing Requirement" variant="filled" input$placeholder="to left, blue, red" />
                                     <div class="col-12">You might need to leave for the main menu if things stop updating, using something like (green, green) works. <a href="https://www.w3schools.com/css/css3_gradients.asp">https://www.w3schools.com/css/css3_gradients.asp</a></div>
                                 {/if}
                                 <FormField>

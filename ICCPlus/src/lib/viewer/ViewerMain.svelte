@@ -150,7 +150,7 @@
     import Slider from '@smui/slider';
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, bgmPlayer, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable } from '$lib/store/store.svelte';
+    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, bgmPlayer, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba } from '$lib/store/store.svelte';
     import AppSaveLoad from './AppSaveLoad.svelte';
 	import AppRow from './AppRow.svelte';
     import AppPointBar from './AppPointBar.svelte';
@@ -165,7 +165,7 @@
     let currentDialog = $state<'none' | 'appSaveLoad' | 'dlgBackpack' | 'appGlobalSettings'>('none');
     let pointBarPosition = $derived(topPointBar ? app.showMusicPlayer ? 'top: 32px;' : 'top: 0;' : 'bottom: 0;');
     let viewerMenuStyle = $derived(topPointBar ? app.showMusicPlayer ? 'margin-top: 88px;' : 'margin-top: 56px;' : app.showMusicPlayer ? 'margin-top: 32px;' : '');
-    let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${app.fadeTransitionColor}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
+    let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${hexToRgba(app.fadeTransitionColor)}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
     let width = $state(0);
     let thisDiv = $state<HTMLDivElement>();
     let mainDiv = $state<HTMLDivElement>();
@@ -174,16 +174,16 @@
     let fileInput = $state<HTMLInputElement>();
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
-    let pointBar = $derived(`background-color: ${app.styling.barBackgroundColor};margin:${app.styling.barMargin}px;padding:${app.styling.barPadding}px;${pointBarPosition}`);
-    let pointBarText = $derived(`color: ${app.styling.barTextColor};margin: ${app.styling.barTextMargin}px;padding: ${app.styling.barTextPadding}px;font-family: "${app.styling.barTextFont}";font-size: ${app.styling.barTextSize}px`);
-    let pointBarIcon = $derived(`color: ${app.styling.barIconColor};`);
+    let pointBar = $derived(`background-color: ${hexToRgba(app.styling.barBackgroundColor)};margin:${app.styling.barMargin}px;padding:${app.styling.barPadding}px;${pointBarPosition}`);
+    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)};margin: ${app.styling.barTextMargin}px;padding: ${app.styling.barTextPadding}px;font-family: "${app.styling.barTextFont}";font-size: ${app.styling.barTextSize}px`);
+    let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {
         let styles = [];
 
         if (app.styling.backgroundImage) {
             styles.push(`background-image: url('${app.styling.backgroundImage}');`);
         }
-        styles.push(`background-color: ${app.styling.backgroundColor};`);
+        styles.push(`background-color: ${hexToRgba(app.styling.backgroundColor)};`);
         if (app.styling.isBackgroundRepeat) {
             styles.push(`background-repeat: repeat;`);
         } else if (app.styling.isBackgroundFitIn) {

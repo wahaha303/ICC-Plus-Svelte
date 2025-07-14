@@ -1,10 +1,32 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { fileURLToPath, URL } from 'node:url'
+import legacy from '@vitejs/plugin-legacy'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [
+    svelte(),
+    legacy({
+      targets: [
+        'chrome >= 49',
+        'firefox >= 45',
+        'safari >= 10',
+        'ios_saf >= 10',
+        'edge >= 15',
+        'android >= 7',
+      ],
+      additionalLegacyPolyfills: ['core-js/features/dom-collections'],
+      modernTargets: [
+        'chrome >= 64',
+        'firefox >= 67',
+        'safari >= 12',
+        'ios_saf >= 12',
+        'edge >= 79',
+        'android >= 64'
+      ],
+    }),
+  ],
   resolve: {
     alias: {
       $lib: fileURLToPath(new URL('./src/lib', import.meta.url))
@@ -14,11 +36,12 @@ export default defineConfig({
   build: {
     assetsDir: 'assets',
     cssCodeSplit: true,
+    manifest: true,
     rollupOptions: {
-      input: 'index.html',
+      input: fileURLToPath(new URL('./index.html', import.meta.url)),
       output: {
-        entryFileNames: 'js/app.c533aa25.js',
-        chunkFileNames: 'js/chunk-vendors.59af3576.js',
+        entryFileNames: `js/app.[hash].js`,
+        chunkFileNames: `js/chunk-vendors.[hash].js`,
         manualChunks(id) {
           if (id.includes('node_modules')) {
             return 'vendor';
@@ -28,9 +51,9 @@ export default defineConfig({
           const name = assetInfo.names ? assetInfo.names[0] : undefined;
           if (name && name.endsWith('.css')) {
             if (name.includes('vendor') || name.includes('node_modules')) {
-              return 'css/chunk-vendors.58637379[extname]';
+              return 'css/chunk-vendors.[hash][extname]';
             }
-            return 'css/app.df7ca14c[extname]';
+            return 'css/app.[hash][extname]';
           }
           return 'assets/[name][extname]';
         },
@@ -38,9 +61,9 @@ export default defineConfig({
     },
     minify: 'terser',
     terserOptions: {
-      mangle: {
+      mangle:{
         reserved: ['app'],
-      },
+      }
     }
   }
 })

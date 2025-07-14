@@ -32,7 +32,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.buildAutoSaveIsOn ?? false, (e) => app.buildAutoSaveIsOn = e} onSMUISwitchChange={() => {
+                                    <Switch bind:checked={() => app.buildAutoSaveIsOn || false, (e) => app.buildAutoSaveIsOn = e} onSMUISwitchChange={() => {
                                         if (app.buildAutoSaveIsOn) {
                                             saveProcess();
                                         }
@@ -44,7 +44,7 @@
                             </div>
                             {#if app.buildAutoSaveIsOn}
                                 <div class="col-12 px-3 mt-0">
-                                    <Textfield bind:value={() => app.buildAutoSaveInterval ?? 10, (e) => app.buildAutoSaveInterval = e} label="Auto Save Interval" type="number" suffix="min" variant="standard" style="max-width: 200px" input$class="text-right" input$min="1" onchange={() => {
+                                    <Textfield bind:value={() => app.buildAutoSaveInterval || 10, (e) => app.buildAutoSaveInterval = e} label="Auto Save Interval" type="number" suffix="min" variant="standard" style="max-width: 200px" input$class="text-right" input$min="1" onchange={() => {
                                         if (app.buildAutoSaveInterval < 1) {
                                             app.buildAutoSaveInterval = 1;
                                         }
@@ -54,7 +54,7 @@
                             {/if}
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.preloadImages?? false, (e) => app.preloadImages = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.preloadImages || false, (e) => app.preloadImages = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Preload Images in Backpack
                                     {/snippet}
@@ -70,7 +70,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.showMusicPlayer?? false, (e) => app.showMusicPlayer = e} color="secondary" class="switch-scale" onchange={() => {
+                                    <Switch bind:checked={() => app.showMusicPlayer || false, (e) => app.showMusicPlayer = e} color="secondary" class="switch-scale" onchange={() => {
                                         if (app.showMusicPlayer) {
                                             const player = get(bgmPlayer);
 

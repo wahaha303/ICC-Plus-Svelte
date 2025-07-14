@@ -49,6 +49,15 @@
                         </div>
                     </div>
                 </div>
+                {#if app.styling.objectImgObjectFillIsOn}
+                    <div class="col-12 gy-2">
+                        <Textfield bind:value={() => row.objectImgObjectFillHeight ?? 0, (e) => row.objectImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} onchange={() => {
+                            if (typeof row.objectImgObjectFillHeight !== 'undefined' && row.objectImgObjectFillHeight < 0) {
+                                row.objectImgObjectFillHeight = 0;
+                            }
+                        }} class="w-100"/>
+                    </div>
+                {/if}
                 <div class="col-12 gy-2 pb-5">
                     <div class="col-12">Group Membership</div>
                     <div class="col-12">- This is for displaying in the Result Row. </div>
@@ -164,7 +173,7 @@
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, appVersion, backpackStyling, choiceMap, generateObjectId, getTimestamp, initStyling, objectWidths, pointBarStyling, rowMap, optimizedGroups, optimizedRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, groupMap, objectDesignMap } from '$lib/store/store.svelte';
+    import { app, appVersion, backpackStyling, choiceMap, generateObjectId, getTimestamp, initStyling, objectWidths, pointBarStyling, rowMap, optimizedGroups, optimizedRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, groupMap, objectDesignMap, filterStyling, textStyling, objectImageStyling, rowImageStyling, addonImageStyling, backgroundStyling, objectStyling, rowStyling, addonStyling, multiChoiceStyling } from '$lib/store/store.svelte';
     import type { Row, Styling } from '$lib/store/types';
     
     let { open, onclose, row }: { open: boolean; onclose: () => void; row: Row } = $props();
@@ -255,6 +264,7 @@
                         initStyling(parsed.data, oldVersion);
                         removeInvalidStyles(parsed.data);
                         row.styling = parsed.data;
+                        checkPrivateDesign(parsed.data);
                         snackbarVariables.labelText = 'Data loaded successfully.';
                         snackbarVariables.isOpen = true;
                     } else {
@@ -291,6 +301,19 @@
                 delete data[key];
             }
         }
+    }
+
+    function checkPrivateDesign(data: any) {
+        row.privateFilterIsOn = Object.keys(filterStyling).some(key => key in data);
+        row.privateTextIsOn = Object.keys(textStyling).some(key => key in data);
+        row.privateObjectImageIsOn = Object.keys(objectImageStyling).some(key => key in data);
+        row.privateRowImageIsOn = Object.keys(rowImageStyling).some(key => key in data);
+        row.privateAddonImageIsOn = Object.keys(addonImageStyling).some(key => key in data);
+        row.privateBackgroundIsOn = Object.keys(backgroundStyling).some(key => key in data);
+        row.privateObjectIsOn = Object.keys(objectStyling).some(key => key in data);
+        row.privateRowIsOn = Object.keys(rowStyling).some(key => key in data);
+        row.privateAddonIsOn = Object.keys(addonStyling).some(key => key in data);
+        row.privateMultiChoiceIsOn = Object.keys(multiChoiceStyling).some(key => key in data);
     }
 
     function exportDesign() {

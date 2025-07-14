@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.0.8';
+export const appVersion = '2.1.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -308,7 +308,6 @@ export const addonStyling = {
     addonBorderImageSliceBottom: 5,
     addonBorderImageSliceLeft: 5,
     addonBorderImageSliceRight: 5,
-    removeSpaceAddonIsOn: false,
     useAddonBackgroundImage: false,
     addonBackgroundImage: '',
     isAddonBackgroundFitIn: false,
@@ -361,6 +360,8 @@ export const app = $state<App>({
     btnBackpackIsOn: 0,
     showAllAddons: 0,
     tmpRequired: [],
+    tmpScore: [],
+    tmpAddon: [],
     rowIdLength: 4,
     objectIdLength: 4,
     words: [],
@@ -453,6 +454,8 @@ export const defaultApp: App = {
     btnBackpackIsOn: 0,
     showAllAddons: 0,
     tmpRequired: [],
+    tmpScore: [],
+    tmpAddon: [],
     rowIdLength: 4,
     objectIdLength: 4,
     words: [],
@@ -1128,7 +1131,7 @@ export async function loadFromSlot(key: string, storeKey: string): Promise<any |
         const tx = db.transaction(storeKey, 'readonly');
         const store = tx.objectStore(storeKey);
         const request = store.get(key);
-        request.onsuccess = () => resolve(request.result ?? null);
+        request.onsuccess = () => resolve(typeof request.result !== 'undefined' ? request.result : null);
         request.onerror = reject;
     });
 };
@@ -1157,7 +1160,7 @@ async function getOldAutoSave() {
             const getReq = store.get('1');
 
             getReq.onsuccess = () => {
-                const result = getReq.result ?? null;
+                const result = typeof getReq.result !== 'undefined' ? getReq.result : null;
                 db.close();
 
                 const deleteRequiest = indexedDB.deleteDatabase('ICCPlus');
@@ -1222,7 +1225,7 @@ export async function initStoreSaves(): Promise<void> {
                         const match = suffix.match(/^slot-(\d+)$/);
                         const index = Number(match?.[1]);
                         saveSlots[index].stored = true;
-                        saveSlots[index].name = value.name ?? `Slot ${index + 1}`;
+                        saveSlots[index].name = typeof value.name !== 'undefined' ? value.name : `Slot ${index + 1}`;
                         saveSlots[index].time = value.time;
                         saveSlots[index].app = value.app;
                     }
@@ -1268,7 +1271,7 @@ export async function initBuildSaves(): Promise<void> {
                         const match = suffix.match(/^slot-(\d+)$/);
                         const index = Number(match?.[1]);
                         buildSaveSlots[index].stored = true;
-                        buildSaveSlots[index].name = value.name ?? `Slot ${index + 1}`;
+                        buildSaveSlots[index].name = typeof value.name !== 'undefined' ? value.name : `Slot ${index + 1}`;
                         buildSaveSlots[index].time = value.time;
                         buildSaveSlots[index].app = value.app;
                     }
@@ -1292,15 +1295,15 @@ export function getSelectedObjectId() {
 
             if (val.multiple === 0) {
                 if (aChoice.isActivateRandom && aChoice.activatedRandom) {
-                    text += `/RND#${aChoice.activatedRandom.join('/AND#').replaceAll('/ON#', '/RON#')}`;
+                    text += `/RND#${aChoice.activatedRandom.join('/AND#').replace(/\/ON#/g, '/RON#')}`;
                 }
                 
                 if (aChoice.textfieldIsOn && aChoice.customTextfieldIsOn && typeof aChoice.wordChangeSelect !== 'undefined') {
-                    text += `/WORD#${aChoice.wordChangeSelect.replaceAll(',', '/CHAR#')}`;
+                    text += `/WORD#${aChoice.wordChangeSelect.replace(/,/g, '/CHAR#')}`;
                 }
                 
                 if (aChoice.isImageUpload && aChoice.image !== aChoice.defaultImage) {
-                    text += `/IMG#${aChoice.image.replaceAll(',', '/CHAR#')}`;
+                    text += `/IMG#${aChoice.image.replace(/,/g, '/CHAR#')}`;
                 }
 
                 result.push(text);
@@ -1308,7 +1311,7 @@ export function getSelectedObjectId() {
                 text += `/ON#${val.multiple}`;
                 
                 if (aChoice.isActivateRandom && aChoice.activatedRandomMul) {
-                    text += `/RND#${aChoice.activatedRandomMul.flat(2).join('/AND#').replaceAll('/ON#', '/RON#')}`;
+                    text += `/RND#${aChoice.activatedRandomMul.flat(2).join('/AND#').replace(/\/ON#/g, '/RON#')}`;
                 }
 
                 result.push(text);
@@ -1624,7 +1627,7 @@ export function replaceText(str: string) {
         text = text.replace(getCombinedRegex(), (match) => {
             const point = pointTypeMap.get(match);
             if (typeof point !== 'undefined') {
-                const value = point.startingSum % 1 === 0 ? point.startingSum : parseFloat(point.startingSum.toFixed(point.decimalPlaces ?? 2));
+                const value = point.startingSum % 1 === 0 ? point.startingSum : parseFloat(point.startingSum.toFixed(typeof point.decimalPlaces !== 'undefined' ? point.decimalPlaces : 2));
                 return value.toString();
             } else {
                 const cMap = choiceMap.get(match);
@@ -1714,7 +1717,7 @@ export function checkActivated(str: string, actMap: SvelteMap<string, ActivatedM
     const [key, val = '0'] = str.split('/ON#');
     const num = parseInt(val);
     if (num > 0) {
-        const actNum = actMap.get(key)?.multiple ?? 0;
+        const actNum = actMap.get(key)?.multiple || 0;
         return actNum >= num;
     }
     return actMap.has(key);
@@ -1874,6 +1877,17 @@ export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> =
                 const globalReq = globalReqMap.get(req.reqId);
                 if (typeof globalReq !== 'undefined' && typeof app.globalRequirements !== 'undefined') {
                     return checkRequirements(globalReq.requireds, aMap);
+                }
+                return false;
+            case 'word':
+                const word = wordMap.get(req.reqId);
+                if (typeof word !== 'undefined') {
+                    let orCount = 0;
+                    for (let i = 0; i < req.orRequired.length; i++) {
+                        let orReq = req.orRequired[i].req;
+                        if (typeof orReq !== 'undefined' && word.replaceText === orReq) orCount++;
+                    }
+                    return orCount >= 1;
                 }
                 return false;
         }
@@ -2171,7 +2185,7 @@ export async function initYoutubePlayer(localChoice: Choice) {
         events: {
             onReady: () => {
                 bgmPlayer.set(player);
-                playBgm(localChoice, localChoice.bgmId ?? '', 0);
+                playBgm(localChoice, localChoice.bgmId || '', 0);
                 if (app.isMute && !player.isMuted()) {
                     player.mute();
                 }
@@ -2180,7 +2194,7 @@ export async function initYoutubePlayer(localChoice: Choice) {
     });
 }
 
-export function initStyling(styling: any, oldVersion: boolean) {
+export function initStyling(styling: any, oldVersion: boolean, isMain = false) {
     if (typeof styling !== 'undefined') {
         if (oldVersion) {
             const keysToMultiply = ['addonBorderRadiusTopLeft', 'addonBorderRadiusTopRight', 'addonBorderRadiusBottomLeft', 'addonBorderRadiusBottomRight', 'addonImgBorderRadiusTopLeft', 'addonImgBorderRadiusTopRight', 'addonImgBorderRadiusBottomLeft', 'addonImgBorderRadiusBottomRight', 'objectBorderRadiusTopLeft', 'objectBorderRadiusTopRight', 'objectBorderRadiusBottomLeft', 'objectBorderRadiusBottomRight', 'objectImgBorderRadiusTopLeft', 'objectImgBorderRadiusTopRight', 'objectImgBorderRadiusBottomLeft', 'objectImgBorderRadiusBottomRight', 'rowBorderRadiusTopLeft', 'rowBorderRadiusTopRight', 'rowBorderRadiusBottomLeft', 'rowBorderRadiusBottomRight', 'rowImgBorderRadiusTopLeft', 'rowImgBorderRadiusTopRight', 'rowImgBorderRadiusBottomLeft', 'rowImgBorderRadiusBottomRight']
@@ -2202,6 +2216,14 @@ export function initStyling(styling: any, oldVersion: boolean) {
             if (typeof styling[key] === 'object') {
                 styling[key] = styling[key].hexa;
             }
+        }
+
+        if (isMain) {
+            if (typeof styling.customMultiTextFont === 'undefined') styling.customMultiTextFont = false;
+            if (typeof styling.multiChoiceCounterPosition === 'undefined') styling.multiChoiceCounterPosition = 0;
+            if (typeof styling.multiChoiceCounterSize === 'undefined') styling.multiChoiceCounterSize = 170;
+            if (typeof styling.multiChoiceTextFont === 'undefined') styling.multiChoiceTextFont = 'Times New Roman';
+            if (typeof styling.multiChoiceTextSize === 'undefined') styling.multiChoiceTextSize = 100;
         }
     }
 }
@@ -2275,8 +2297,8 @@ export function deselectDiscount(localChoice: Choice, score: Score) {
                         }
 
                         if (localChoice.discountShow) {
-                            let aIndex = score.discountTextA?.indexOf(localChoice.discountAfterText ?? '') ?? -1;
-                            let bIndex = score.discountTextB?.indexOf(localChoice.discountBeforeText ?? '') ?? -1;
+                            let aIndex = typeof localChoice.discountAfterText !== 'undefined' && typeof score.discountTextA !== 'undefined' ? score.discountTextA.indexOf(localChoice.discountAfterText) : -1;
+                            let bIndex = typeof localChoice.discountBeforeText !== 'undefined' && typeof score.discountTextB !== 'undefined' ? score.discountTextB.indexOf(localChoice.discountBeforeText) : -1;
                             if (localChoice.discountTextDuplicated) {
                                 if (aIndex !== -1 && typeof score.dupTextA !== 'undefined' && typeof localChoice.discountAfterText !== 'undefined') {
                                     score.dupTextA[localChoice.discountAfterText] -= 1;
@@ -2454,7 +2476,7 @@ export function selectDiscount(localChoice: Choice, score: Score) {
         let bTempStacked = false;
         let tmpNum = 0;
 
-        score.discountedFrom ??= [];
+        if (typeof score.discountedFrom === 'undefined') score.discountedFrom = [];
         
         if (localChoice.stackableDiscount) {
             if (score.notStackableDiscount) {
@@ -2483,7 +2505,7 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                         aDiscount = {
                             isStackable: false,
                             discountedFrom: score.discountedFrom,
-                            calcValue: score.discountScoreCal ?? score.discountScore,
+                            calcValue: typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.discountScore,
                             discountedValue: score.discountScore,
                             showDiscount: false
                         };
@@ -2527,18 +2549,18 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                             score.tmpDiscount[tmpNum].discountedValue = discountVal;
                         } else {
                             aDiscount = {
-                                isStackable: localChoice.stackableDiscount ?? false,
+                                isStackable: localChoice.stackableDiscount || false,
                                 discountedFrom: discountedFrom,
                                 calcValue: discountCal,
                                 discountedValue: discountVal,
-                                showDiscount: localChoice.discountShow ?? false
+                                showDiscount: localChoice.discountShow || false
                             };
                             score.tmpDiscount.push(aDiscount);
                         }
                     }
                 }
             } else {
-                scoreVal = score.discountIsOn ? (score.discountScoreCal ?? score.value) : score.value;
+                scoreVal = score.discountIsOn ? (typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.value) : score.value;
                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
                 tmpDisScore = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
                 tmpDisScore = point.allowFloat ? tmpDisScore : Math.floor(tmpDisScore);
@@ -2547,7 +2569,7 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                 discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
                 discountCal = discountVal;
             
-                if (localChoice.discountLowLimitIsOn && localChoice.discountLowLimit !== undefined) {
+                if (localChoice.discountLowLimitIsOn && typeof localChoice.discountLowLimit !== 'undefined') {
                     discountVal = Math.max(discountVal, localChoice.discountLowLimit);
                 }
             
@@ -2575,7 +2597,7 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                 if (typeof score.discountTextB !== 'undefined') score.discountBeforeText = score.discountTextB.join('');
             }
         } else {
-            score.tmpDiscount ??= [];
+            if (typeof score.tmpDiscount === 'undefined') score.tmpDiscount = [];
     
             discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
             discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
@@ -2591,9 +2613,9 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                         aDiscount = {
                             isStackable: !score.notStackableDiscount,
                             discountedFrom: score.discountedFrom,
-                            calcValue: score.discountScoreCal ?? score.discountScore,
+                            calcValue: typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.discountScore,
                             discountedValue: score.discountScore,
-                            showDiscount: score.discountShow ?? false
+                            showDiscount: score.discountShow || false
                         }
                         
                         if (score.discountShow) {
@@ -2611,11 +2633,11 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                         score.notStackableDiscount = true;
                     } else {
                         aDiscount = {
-                            isStackable: localChoice.stackableDiscount ?? false,
+                            isStackable: localChoice.stackableDiscount || false,
                             discountedFrom: [localChoice.id],
                             calcValue: discountCal,
                             discountedValue: discountVal,
-                            showDiscount: localChoice.discountShow ?? false
+                            showDiscount: localChoice.discountShow || false
                         }
 
                         if (localChoice.discountShow) {
@@ -2651,15 +2673,15 @@ export function selectDiscount(localChoice: Choice, score: Score) {
 };
 
 function updateDiscountTexts(localChoice: Choice, score: Score) {
-    score.discountTextA ??= [];
-    score.discountTextB ??= [];
-    score.dupTextA ??= {};
-    score.dupTextB ??= {};
+    if (typeof score.discountTextA === 'undefined') score.discountTextA = [];
+    if (typeof score.discountTextB === 'undefined') score.discountTextB = [];
+    if (typeof score.dupTextA === 'undefined') score.dupTextA = {};
+    if (typeof score.dupTextB === 'undefined') score.dupTextB = {};
 
     if (localChoice.discountTextDuplicated) {
         if (typeof localChoice.discountAfterText !== 'undefined' ) {
             if (score.discountTextA.indexOf(localChoice.discountAfterText) !== -1) {
-                score.dupTextA[localChoice.discountAfterText] = (score.dupTextA[localChoice.discountAfterText] ?? 0) + 1;
+                score.dupTextA[localChoice.discountAfterText] = (score.dupTextA[localChoice.discountAfterText] || 0) + 1;
             } else {
                 score.dupTextA[localChoice.discountAfterText] = 1;
                 score.discountTextA.push(localChoice.discountAfterText);
@@ -2668,7 +2690,7 @@ function updateDiscountTexts(localChoice: Choice, score: Score) {
         
         if (typeof localChoice.discountBeforeText !== 'undefined') {
             if (score.discountTextB.indexOf(localChoice.discountBeforeText) !== -1) {
-                score.dupTextB[localChoice.discountBeforeText] = (score.dupTextB[localChoice.discountBeforeText] ?? 0) + 1;
+                score.dupTextB[localChoice.discountBeforeText] = (score.dupTextB[localChoice.discountBeforeText] || 0) + 1;
             } else {
                 score.dupTextB[localChoice.discountBeforeText] = 1;
                 score.discountTextB.push(localChoice.discountBeforeText);
@@ -2809,7 +2831,7 @@ export function cleanActivated() {
                                         if (typeof tChoice !== 'undefined') {
                                             if (val.length > 1) tChoice.multiple += parseInt(val[1]);
                                         } else {
-                                            tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: fChoice.isAllowDeselect ?? false});
+                                            tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: fChoice.isAllowDeselect || false});
                                         }
                                     }
                                 }
@@ -2843,7 +2865,7 @@ export function cleanActivated() {
                                     if (typeof tChoice !== 'undefined') {
                                         if (val.length > 1) tChoice.multiple += parseInt(val[1]);
                                     } else {
-                                        tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: fChoice.isAllowDeselect ?? false});
+                                        tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: fChoice.isAllowDeselect || false});
                                     }
                                 }
                             }
@@ -2878,7 +2900,7 @@ export function cleanActivated() {
                             if (typeof tChoice !== 'undefined') {
                                 if (val.length > 1) tChoice.multiple += parseInt(val[1]);
                             } else {
-                                tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: fChoice.isAllowDeselect ?? false});
+                                tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: fChoice.isAllowDeselect || false});
                             }
                         }
                     }
@@ -3331,7 +3353,7 @@ export function cleanActivated() {
                         if (typeof aChoice.bgImage !== 'undefined') {
                             if (typeof app.bgImageStack === 'undefined') {
                                 app.bgImageStack = [];
-                                app.defaultBgImage = app.styling.backgroundImage ?? '';
+                                app.defaultBgImage = app.styling.backgroundImage || '';
                             }
                             app.bgImageStack.push({id: aChoice.id, data: aChoice.bgImage});
                             app.styling.backgroundImage = aChoice.bgImage;
@@ -3340,7 +3362,7 @@ export function cleanActivated() {
                         if (typeof aChoice.changedBgColorCode !== 'undefined') {
                             if (typeof app.bgColorStack === 'undefined') {
                                 app.bgColorStack = [];
-                                app.defaultBgColor = app.styling.backgroundColor ?? '';
+                                app.defaultBgColor = app.styling.backgroundColor || '';
                             }
                             app.bgColorStack.push({id: aChoice.id, data: aChoice.changedBgColorCode});
                             app.styling.backgroundColor = aChoice.changedBgColorCode;
@@ -3352,7 +3374,7 @@ export function cleanActivated() {
                     if (aChoice.changeBarBgColorIsOn && typeof aChoice.changedBarBgColor !== 'undefined') {
                         if (typeof app.barBgColorStack === 'undefined') {
                             app.barBgColorStack = [];
-                            app.defaultBarBgColor = app.styling.barBackgroundColor ?? '#FFFFFFFF';
+                            app.defaultBarBgColor = app.styling.barBackgroundColor || '#FFFFFFFF';
                         }
                         app.barBgColorStack.push({id: aChoice.id, data: aChoice.changedBarBgColor});
                         app.styling.barBackgroundColor = aChoice.changedBarBgColor;
@@ -3360,7 +3382,7 @@ export function cleanActivated() {
                     if (aChoice.changeBarIconColorIsOn && typeof aChoice.changedBarIconColor !== 'undefined') {
                         if (typeof app.barIconColorStack === 'undefined') {
                             app.barIconColorStack = [];
-                            app.defaultBarIconColor = app.styling.barIconColor ?? '#0000008A';
+                            app.defaultBarIconColor = app.styling.barIconColor || '#0000008A';
                         }
                         app.barIconColorStack.push({id: aChoice.id, data: aChoice.changedBarIconColor});
                         app.styling.barIconColor = aChoice.changedBarIconColor;
@@ -3368,7 +3390,7 @@ export function cleanActivated() {
                     if (aChoice.changeBarTextColorIsOn && typeof aChoice.changedBarTextColor !== 'undefined') {
                         if (typeof app.barTextColorStack === 'undefined') {
                             app.barTextColorStack = [];
-                            app.defaultBarTextColor = app.styling.barTextColor ?? '#000000';
+                            app.defaultBarTextColor = app.styling.barTextColor || '#000000';
                         }
                         app.barTextColorStack.push({id: aChoice.id, data: aChoice.changedBarTextColor});
                         app.styling.barTextColor = aChoice.changedBarTextColor;
@@ -3581,7 +3603,7 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number) 
                                     delete aScore.tmpDisScore;
                             }
                         }
-                        const tmpScore = tmpScores.get(aScore.id) ?? 0;
+                        const tmpScore = tmpScores.get(aScore.id) || 0;
                         if (aChoice.isActive) {
                             const afterSelected = checkRequirements(aScore.requireds);
                             const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
@@ -3633,7 +3655,7 @@ function selectObject(str: string, newActivatedList: string[]) {
     let cStr = str.split('/IMG#');
     const strImg = cStr.length > 1 ? cStr[1] : '';
     cStr = cStr[0].split('/WORD#');
-    const strWord = cStr.length > 1 ? cStr[1].replaceAll('/CHAR#', ',') : '';
+    const strWord = cStr.length > 1 ? cStr[1].replace(/\/CHAR#/g, ',') : '';
     cStr = cStr[0].split('/RND#');
     const strRnd = cStr.length > 1 ? cStr[1].split('/AND#') : '';
     const strId = cStr[0];
@@ -4009,12 +4031,12 @@ function selectObject(str: string, newActivatedList: string[]) {
         }
 
         if (localChoice.backpackBtnRequirement) {
-            app.btnBackpackIsOn ??= 0;
+            if (typeof app.btnBackpackIsOn === 'undefined') app.btnBackpackIsOn = 0;
             app.btnBackpackIsOn += 1;
         }
 
         if (localChoice.showAllAddons) {
-            app.showAllAddons ??= 0;
+            if (typeof app.showAllAddons === 'undefined') app.showAllAddons = 0;
             app.showAllAddons += 1;
         }
 
@@ -4023,7 +4045,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                 if (typeof localChoice.bgImage !== 'undefined') {
                     if (typeof app.bgImageStack === 'undefined') {
                         app.bgImageStack = [];
-                        app.defaultBgImage = app.styling.backgroundImage ?? '';
+                        app.defaultBgImage = app.styling.backgroundImage || '';
                     }
                     app.bgImageStack.push({id: localChoice.id, data: localChoice.bgImage});
                     app.styling.backgroundImage = localChoice.bgImage;
@@ -4032,7 +4054,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                 if (typeof localChoice.changedBgColorCode !== 'undefined') {
                     if (typeof app.bgColorStack === 'undefined') {
                         app.bgColorStack = [];
-                        app.defaultBgColor = app.styling.backgroundColor ?? '';
+                        app.defaultBgColor = app.styling.backgroundColor || '';
                     }
                     app.bgColorStack.push({id: localChoice.id, data: localChoice.changedBgColorCode});
                     app.styling.backgroundColor = localChoice.changedBgColorCode;
@@ -4044,7 +4066,7 @@ function selectObject(str: string, newActivatedList: string[]) {
             if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
                 if (typeof app.barBgColorStack === 'undefined') {
                     app.barBgColorStack = [];
-                    app.defaultBarBgColor = app.styling.barBackgroundColor ?? '#FFFFFFFF';
+                    app.defaultBarBgColor = app.styling.barBackgroundColor || '#FFFFFFFF';
                 }
                 app.barBgColorStack.push({id: localChoice.id, data: localChoice.changedBarBgColor});
                 app.styling.barBackgroundColor = localChoice.changedBarBgColor;
@@ -4052,7 +4074,7 @@ function selectObject(str: string, newActivatedList: string[]) {
             if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
                 if (typeof app.barIconColorStack === 'undefined') {
                     app.barIconColorStack = [];
-                    app.defaultBarIconColor = app.styling.barIconColor ?? '#0000008A';
+                    app.defaultBarIconColor = app.styling.barIconColor || '#0000008A';
                 }
                 app.barIconColorStack.push({id: localChoice.id, data: localChoice.changedBarIconColor});
                 app.styling.barIconColor = localChoice.changedBarIconColor;
@@ -4060,7 +4082,7 @@ function selectObject(str: string, newActivatedList: string[]) {
             if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
                 if (typeof app.barTextColorStack === 'undefined') {
                     app.barTextColorStack = [];
-                    app.defaultBarTextColor = app.styling.barTextColor ?? '#000000';
+                    app.defaultBarTextColor = app.styling.barTextColor || '#000000';
                 }
                 app.barTextColorStack.push({id: localChoice.id, data: localChoice.changedBarTextColor});
                 app.styling.barTextColor = localChoice.changedBarTextColor;
@@ -4551,7 +4573,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                     if (typeof localChoice.bgImage !== 'undefined') {
                         if (typeof app.bgImageStack === 'undefined') {
                             app.bgImageStack = [];
-                            app.defaultBgImage = app.styling.backgroundImage ?? '';
+                            app.defaultBgImage = app.styling.backgroundImage || '';
                         }
                         app.bgImageStack.push({id: localChoice.id, data: localChoice.bgImage});
                         app.styling.backgroundImage = localChoice.bgImage;
@@ -4560,7 +4582,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                     if (typeof localChoice.changedBgColorCode !== 'undefined') {
                         if (typeof app.bgColorStack === 'undefined') {
                             app.bgColorStack = [];
-                            app.defaultBgColor = app.styling.backgroundColor ?? '';
+                            app.defaultBgColor = app.styling.backgroundColor || '';
                         }
                         app.bgColorStack.push({id: localChoice.id, data: localChoice.changedBgColorCode});
                         app.styling.backgroundColor = localChoice.changedBgColorCode;
@@ -4572,7 +4594,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                 if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
                     if (typeof app.barBgColorStack === 'undefined') {
                         app.barBgColorStack = [];
-                        app.defaultBarBgColor = app.styling.barBackgroundColor ?? '#FFFFFFFF';
+                        app.defaultBarBgColor = app.styling.barBackgroundColor || '#FFFFFFFF';
                     }
                     app.barBgColorStack.push({id: localChoice.id, data: localChoice.changedBarBgColor});
                     app.styling.barBackgroundColor = localChoice.changedBarBgColor;
@@ -4580,7 +4602,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                 if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
                     if (typeof app.barIconColorStack === 'undefined') {
                         app.barIconColorStack = [];
-                        app.defaultBarIconColor = app.styling.barIconColor ?? '#0000008A';
+                        app.defaultBarIconColor = app.styling.barIconColor || '#0000008A';
                     }
                     app.barIconColorStack.push({id: localChoice.id, data: localChoice.changedBarIconColor});
                     app.styling.barIconColor = localChoice.changedBarIconColor;
@@ -4588,7 +4610,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                 if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
                     if (typeof app.barTextColorStack === 'undefined') {
                         app.barTextColorStack = [];
-                        app.defaultBarTextColor = app.styling.barTextColor ?? '#000000';
+                        app.defaultBarTextColor = app.styling.barTextColor || '#000000';
                     }
                     app.barTextColorStack.push({id: localChoice.id, data: localChoice.changedBarTextColor});
                     app.styling.barTextColor = localChoice.changedBarTextColor;
@@ -5740,7 +5762,7 @@ export function initializeApp(tempApp: any) {
             }
         } else if (typeof tempApp[key] === 'object') {
             if (key === 'styling') {
-                initStyling(tempApp[key], typeof tempApp.version === 'undefined' || tempApp.version === '2.0.0-beta');
+                initStyling(tempApp[key], typeof tempApp.version === 'undefined' || tempApp.version === '2.0.0-beta', true);
             }
         }
     }
@@ -5809,7 +5831,7 @@ export function initializeApp(tempApp: any) {
     }
 
     for (let i = 0; i < app.googleFonts.length; i++) {
-        const fontId = app.googleFonts[i].replaceAll(' ', '+');
+        const fontId = app.googleFonts[i].replace(/ /g, '+');
         const url = `https://fonts.googleapis.com/css2?family=${fontId}&display=swap`;
         const link = document.createElement('link');
 
@@ -5973,6 +5995,7 @@ export function initializeApp(tempApp: any) {
     if (app.enableShortcut) {
         window.addEventListener('keydown', setShortcut);
     }
+
 }
 function replaceFields(obj: any, keysToReplace: string[], imgMap: Map<string, string>) {
     for (let i = 0; i < keysToReplace.length; i++) {
@@ -6241,25 +6264,54 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
         snackbarVariables.isOpen = true;
     }
 }
+export function isMediaSupport() {
+    if (!window.matchMedia) return false;
+
+    try {
+        const mq = window.matchMedia('(prefers-color-scheme: dark)').media;
+        return mq !== 'not all';
+    } catch (e) {
+        return false;
+    }
+}
 export function toggleTheme() {
     const t = localStorage.getItem('theme') as string;
     currentTheme.value = t === 'dark' ? 'light' : 'dark';
     let themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
     let themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
+    let isSupport = isMediaSupport();
 
     if (currentTheme.value === 'dark') {
-        if (themeDarkLink) {
-            themeDarkLink.media='screen and (prefers-color-scheme: light)';
-        }
-        if (themeLightLink) {
-            themeLightLink.media='screen and (prefers-color-scheme: dark)';
+        if (isSupport) {
+            if (themeDarkLink) {
+                themeDarkLink.media = 'screen and (prefers-color-scheme: light)';
+            }
+            if (themeLightLink) {
+                themeLightLink.media = 'screen and (prefers-color-scheme: dark)';
+            }
+        } else {
+            if (themeDarkLink) {
+                themeDarkLink.media = 'all';
+            }
+            if (themeLightLink) {
+                themeLightLink.media = 'not all';
+            }
         }
     } else {
-        if (themeDarkLink) {
-            themeDarkLink.media='screen and (prefers-color-scheme: dark)';
-        }
-        if (themeLightLink) {
-            themeLightLink.media='screen and (prefers-color-scheme: light)';
+        if (isSupport) {
+            if (themeDarkLink) {
+                themeDarkLink.media = 'screen and (prefers-color-scheme: dark)';
+            }
+            if (themeLightLink) {
+                themeLightLink.media = 'screen and (prefers-color-scheme: light)';
+            }
+        } else {
+            if (themeDarkLink) {
+                themeDarkLink.media = 'not all';
+            }
+            if (themeLightLink) {
+                themeLightLink.media = 'all';
+            }
         }
     }
     localStorage.setItem('theme', currentTheme.value);
@@ -6285,7 +6337,7 @@ export function setShortcut(e: KeyboardEvent) {
 export function applyTemplate(target: Row | Choice | Addon, id: string, template: number) {
     if (typeof target.templateStack === 'undefined') {
         target.templateStack = [];
-        target.defaultTemplate = target.template ?? 1;
+        target.defaultTemplate = typeof target.template !== 'undefined' ? target.template : 1;
     }
     target.templateStack.push({ id: id, data: template });
     target.template = template;
@@ -6299,7 +6351,7 @@ export function revertTemplate(target: Row | Choice | Addon, id: string) {
         if (leng > 0) {
             target.template = target.templateStack[leng - 1].data;
         } else {
-            target.template = target.defaultTemplate ?? 1;
+            target.template = typeof target.defaultTemplate !== 'undefined' ? target.defaultTemplate : 1;
             delete target.templateStack;
         }
     }
@@ -6307,7 +6359,7 @@ export function revertTemplate(target: Row | Choice | Addon, id: string) {
 export function applyWidth(target: Row | Choice, id: string, width: string) {
     if (typeof target.widthStack === 'undefined') {
         target.widthStack = [];
-        target.defaultWidth = target.width ?? 'col-md-3';
+        target.defaultWidth = typeof target.width !== 'undefined' ? target.width : 'col-md-3';
     }
     target.widthStack.push({ id: id, data: width });
     target.width = width;
@@ -6321,7 +6373,7 @@ export function revertWidth(target: Row | Choice, id: string) {
         if (leng > 0) {
             target.width = target.widthStack[leng - 1].data;
         } else {
-            target.width = target.defaultWidth ?? 'col-md-3';
+            target.width = typeof target.defaultWidth !== 'undefined' ? target.defaultWidth : 'col-md-3';
             delete target.widthStack;
         }
     }
@@ -6373,4 +6425,16 @@ export function applyCustomCSS(text: string) {
        app.customCSS = text;
        document.head.appendChild(style);
     }
+}
+const isSupport8DigitHex = CSS.supports('color', '#00000080');
+export function hexToRgba(hex?: string) {
+    if (typeof hex === 'undefined') return '';
+    if (isSupport8DigitHex || !/^#([\da-f]{8})$/i.test(hex)) return hex;
+
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const a = parseInt(hex.slice(7, 9), 16) / 255;
+
+    return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
 }

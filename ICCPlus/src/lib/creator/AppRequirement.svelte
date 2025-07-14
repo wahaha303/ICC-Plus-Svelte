@@ -12,14 +12,19 @@
                 <div class="col-12 px-0">Requirements are conditions that will decide if the player can select the choice or not, these use the ID of choices and variables, and the design of the filter placed on non-selectable choices can be changed in filter design.</div>
             </div>
             <div class="row pb-2">
+                <div class="col-12 pb-3">
+                    <Button variant="raised" class="w-100" onclick={() => pasteRequired()}>
+                        <Label>Paste the copied requirement</Label>
+                    </Button>
+                </div>
                 <div class="col-sm-6 col-12 pb-3">
                     <Button variant="raised" class="w-100" onclick={() => addNewRequired('gid', true, '')}>
                         <Label>Add Global Requirement</Label>
                     </Button>
                 </div>
                 <div class="col-sm-6 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => pasteRequired()}>
-                        <Label>Paste the copied requirement</Label>
+                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('word', true, '')}>
+                        <Label>Add Word Requirement</Label>
                     </Button>
                 </div>
             </div>
@@ -123,7 +128,7 @@
     
     let { open, onclose, data }: { open: boolean; onclose: () => void; data: Row | Choice | Addon | Score | Requireds | GlobalRequirement; } = $props();
     const pointRequireList = [{
-        text: '+ More than',
+        text: '> More than',
         value: '1'
     }, {
         text: '≥ More or equal',
@@ -135,7 +140,7 @@
         text: '≤ Less or equal',
         value: '4'
     }, {
-        text: '- Less than',
+        text: '< Less than',
         value: '5'
     }];
     let pointRequire = $state('1');
@@ -145,7 +150,8 @@
 
     function addNewRequired(type: string, bType: boolean, operator: string) {
         let orReq = [];
-        for (let i = 0; i < numberOfOrRequireds; i++) {
+        let number = type === 'word' ? 1 : numberOfOrRequireds;
+        for (let i = 0; i < number; i++) {
             orReq.push({req: ''});
         }
         data.requireds.push({
@@ -181,10 +187,10 @@
                     data.requireds.push(tmpRequired[i]);
                 }
             } else {
-                if ('text' in data || 'titleText' in data) {
+                if ('reqId' in data) {
+                    tmpRequired[0].requireds = [];
                     data.requireds.push(tmpRequired[0]);
                 } else {
-                    tmpRequired[0].requireds = [];
                     data.requireds.push(tmpRequired[0]);
                 }
             }

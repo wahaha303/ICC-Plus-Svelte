@@ -445,7 +445,8 @@
             const idx = app.googleFonts.indexOf(importField);
             if (importField !== '') {
                 if (idx === -1) {
-                    const fontId = importField.replaceAll(' ', '+');
+                    const fontId = importField.replace(/ /g, '+');
+                    console.log(fontId);
                     const url = `https://fonts.googleapis.com/css2?family=${fontId}&display=swap`;
 
                     try {
@@ -498,7 +499,7 @@
                 tag.remove();
             }
         } else {
-            const fontId = fontName.replaceAll(' ', '+');
+            const fontId = fontName.replace(/ /g, '+');
             const gIdx = app.googleFonts.indexOf(fontName);
             const tIdx = textFonts.indexOf(fontName);
             const tag = document.getElementById(fontId);

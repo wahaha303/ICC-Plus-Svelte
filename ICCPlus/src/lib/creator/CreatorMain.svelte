@@ -101,7 +101,7 @@
                             <div class="p-2 col-12">
                                 <Card>
                                     <CardContent class="toolbar toolbar--row justify-space-between px-3 py-2">
-                                            <div class="toolbar__title">{(row.debugTitle ?? '') + row.title}</div>
+                                            <div class="toolbar__title">{(typeof row.debugTitle !== 'undefined' ? row.debugTitle : '') + row.title}</div>
                                             <div class="d-row">
                                                 <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
                                                     <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclick={() => row.isEditModeOn = !row.isEditModeOn} />
@@ -188,7 +188,7 @@
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer,  toggleTheme, generateScoreId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer,  toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
@@ -272,21 +272,21 @@
     let currentDialog = $state<'none' | 'appFeature' | 'appDesign' | 'appSaveLoad' | 'appBuildForm' | 'appIdSearch' | 'dlgBackpack' | 'appRowList' | 'appGlobalSettings'>('none');
     let { bCreatorMode }: { bCreatorMode: boolean } = $props();
     let pointBarPosition = $state('bottom:0');
-    let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${app.fadeTransitionColor}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
+    let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${hexToRgba(app.fadeTransitionColor)}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
     let width = $state(0);
     let mainDiv = $state<HTMLDivElement>();
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
-    let pointBar = $derived(`max-width: calc(100% - 56px); background-color: ${app.styling.barBackgroundColor}; margin:${app.styling.barMargin}px; padding:${app.styling.barPadding}px; ${pointBarPosition}`);
-    let pointBarText = $derived(`color: ${app.styling.barTextColor}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: "${app.styling.barTextFont}"; font-size: ${app.styling.barTextSize}px`);
-    let pointBarIcon = $derived(`color: ${app.styling.barIconColor};`);
+    let pointBar = $derived(`max-width: calc(100% - 56px); background-color: ${hexToRgba(app.styling.barBackgroundColor)}; margin:${app.styling.barMargin}px; padding:${app.styling.barPadding}px; ${pointBarPosition}`);
+    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: "${app.styling.barTextFont}"; font-size: ${app.styling.barTextSize}px`);
+    let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {
         let styles = [];
 
         if (app.styling.backgroundImage) {
             styles.push(`background-image: url('${app.styling.backgroundImage}');`);
         }
-        styles.push(`background-color: ${app.styling.backgroundColor};`);
+        styles.push(`background-color: ${hexToRgba(app.styling.backgroundColor)};`);
         if (app.styling.isBackgroundRepeat) {
             styles.push(`background-repeat: repeat;`);
         } else if (app.styling.isBackgroundFitIn) {
@@ -356,6 +356,7 @@
             const cChoice = clone.objects[i];
 
             cChoice.id = generateObjectId(0, app.objectIdLength);
+            console.log(cChoice.id);
             cChoice.index = i;
             cChoice.isActive = false;
             delete cChoice.forcedActivated;
@@ -582,23 +583,6 @@
             }
         } else {
             deleteProc();
-        }
-    }
-
-    function generateObjectId(repeated: number, strLength: number) {
-        let id = 'choice-';
-        let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        for (var o = 0; o < strLength; o++) {
-            id += str.charAt(Math.floor(Math.random() * str.length));
-        }
-        if (choiceMap.has(id)) {
-            if (repeated > 2) {
-                return generateObjectId(0, ++strLength);
-            } else {
-                return generateObjectId(++repeated, strLength);
-            }
-        } else {
-            return id;
         }
     }
 

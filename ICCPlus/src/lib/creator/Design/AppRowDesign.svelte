@@ -182,7 +182,7 @@
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.rowGradientIsOn ?? false, (e) => styling.rowGradientIsOn = e} />
                                 {#snippet label()}
-                                    Object Gradient is turned on
+                                    Row Gradient is turned on
                                 {/snippet}
                             </FormField>
                             {#if styling.rowGradientIsOn}

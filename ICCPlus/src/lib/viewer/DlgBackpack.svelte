@@ -2,7 +2,7 @@
     bind:open
     escapeKeyAction={dlgVariables.currentDialog !== 'dlgBackpack' ? 'close' : ''}
     scrimClickAction={dlgVariables.currentDialog !== 'dlgBackpack' ? 'close' : ''}
-    surface$style="width: {app.styling.backPackWidth ?? 1200}px; max-width: calc(100vw - 32px);"
+    surface$style="width: {typeof app.styling.backPackWidth !== 'undefined' ? app.styling.backPackWidth : 1200}px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
     <Title class="p-0 m-0 row" tabindex={0} autofocus>
@@ -33,7 +33,7 @@
 <script lang="ts">
     import Button, { Label, Icon as BtnIcon } from '@smui/button';
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
-    import { app, dlgVariables, downloadAsImage } from '$lib/store/store.svelte';
+    import { app, dlgVariables, downloadAsImage, hexToRgba } from '$lib/store/store.svelte';
     import AppRow from './AppRow.svelte';
     
     let { open, onclose }: { open: boolean; onclose: () => void } = $props();
@@ -51,7 +51,7 @@
             if (app.styling.backpackBgImage) {
                 styles.push(`background-image: url('${app.styling.backpackBgImage}');`);
             }
-            styles.push(`background-color: ${app.styling.backpackBgColor};`);
+            styles.push(`background-color: ${hexToRgba(app.styling.backpackBgColor)};`);
             if (app.styling.isBackgroundRepeat) {
                 styles.push(`background-repeat: repeat;`);
             } else if (app.styling.isBackpackBgFitIn) {
@@ -63,7 +63,7 @@
             if (app.styling.backgroundImage) {
                 styles.push(`background-image: url('${app.styling.backgroundImage}');`);
             }
-            styles.push(`background-color: ${app.styling.backgroundColor};`);
+            styles.push(`background-color: ${hexToRgba(app.styling.backgroundColor)};`);
             if (app.styling.isBackgroundRepeat) {
                 styles.push(`background-repeat: repeat;`);
             } else if (app.styling.isBackgroundFitIn) {

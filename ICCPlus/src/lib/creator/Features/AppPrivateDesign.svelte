@@ -83,7 +83,7 @@
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, appVersion, backpackStyling, getTimestamp, initStyling, pointBarStyling, rowImageStyling, rowStyling, snackbarVariables, StylingSchema } from '$lib/store/store.svelte';
+    import { appVersion, backpackStyling, getTimestamp, initStyling, pointBarStyling, rowImageStyling, rowStyling, filterStyling, textStyling, objectImageStyling, addonImageStyling, backgroundStyling, objectStyling, addonStyling, multiChoiceStyling, snackbarVariables, StylingSchema } from '$lib/store/store.svelte';
     import type { RowDesignGroup, ObjectDesignGroup, Styling } from '$lib/store/types';
     
     let { open, onclose, data, isRow }: { open: boolean; onclose: () => void; data: RowDesignGroup | ObjectDesignGroup; isRow: boolean } = $props();
@@ -136,19 +136,20 @@
             const file = new FileReader;
             file.onload = () => {
                 try {
-                    const data = JSON.parse(file.result as string);
+                    const jData = JSON.parse(file.result as string);
                     const oldVersion = (typeof data.version === 'undefined' || data.version === '2.0.0-beta');
                     let parsed;
 
                     if (typeof data.styling === 'undefined') {
-                        parsed = StylingSchema.safeParse(data);
+                        parsed = StylingSchema.safeParse(jData);
                     } else {
-                        parsed = StylingSchema.safeParse(data.styling);
+                        parsed = StylingSchema.safeParse(jData.styling);
                     }
                     if (parsed.success) {
                         initStyling(parsed.data, oldVersion);
                         removeInvalidStyles(parsed.data);
                         data.styling = parsed.data;
+                        checkPrivateDesign(parsed.data, isRow);
                         snackbarVariables.labelText = 'Data loaded successfully.';
                         snackbarVariables.isOpen = true;
                     } else {
@@ -198,6 +199,21 @@
                 delete style[key];
             }
         }
+    }
+
+    function checkPrivateDesign(styling: any, isRow: boolean) {
+        if (isRow) {
+            data.privateRowImageIsOn = Object.keys(rowImageStyling).some(key => key in styling);
+            data.privateRowIsOn = Object.keys(rowStyling).some(key => key in styling);
+        }
+        data.privateFilterIsOn = Object.keys(filterStyling).some(key => key in styling);
+        data.privateTextIsOn = Object.keys(textStyling).some(key => key in styling);
+        data.privateObjectImageIsOn = Object.keys(objectImageStyling).some(key => key in styling);
+        data.privateAddonImageIsOn = Object.keys(addonImageStyling).some(key => key in styling);
+        data.privateBackgroundIsOn = Object.keys(backgroundStyling).some(key => key in styling);
+        data.privateObjectIsOn = Object.keys(objectStyling).some(key => key in styling);
+        data.privateAddonIsOn = Object.keys(addonStyling).some(key => key in styling);
+        data.privateMultiChoiceIsOn = Object.keys(multiChoiceStyling).some(key => key in styling);
     }
 
     function exportDesign() {

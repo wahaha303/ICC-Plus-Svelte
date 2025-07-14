@@ -1,5 +1,5 @@
 <div style={pointBarText}>
-    <span style={point.pointPrivateColorIsOn ? `color: ${point.startingSum >= 0 ? point.privateColor : point.privateNegativeColor}` : ""}>
+    <span style={point.pointPrivateColorIsOn ? `color: ${point.startingSum >= 0 ? hexToRgba(point.privateColor) : hexToRgba(point.privateNegativeColor)}` : ""}>
         {#if point.iconIsOn}
             {#if point.negativeIconIsOn && point.startingSum < 0}
                 {#if !point.negativeImageOnSide && !point.negativeImageSidePlacement}
@@ -23,7 +23,7 @@
                 {/if}
             {/if}
         {/if}
-        <span translate="no" style={pointSumText}>{point.startingSum % 1 === 0 ? point.startingSum : parseFloat(point.startingSum.toFixed(point.decimalPlaces ?? 2))}</span>
+        <span translate="no" style={pointSumText}>{point.startingSum % 1 === 0 ? point.startingSum : parseFloat(point.startingSum.toFixed(typeof point.decimalPlaces !== 'undefined' ? point.decimalPlaces : 2))}</span>
         {#if point.iconIsOn}
             {#if point.negativeIconIsOn && point.startingSum < 0}
                 {#if !point.negativeImageOnSide && point.negativeImageSidePlacement}
@@ -51,16 +51,16 @@
 </div>
 
 <script lang="ts">
-    import { app } from "$lib/store/store.svelte";
+    import { app, hexToRgba } from "$lib/store/store.svelte";
     import type { PointType } from "$lib/store/types";
 
     let { point }: { point: PointType } = $props();
 
-    let pointBarText = $derived(`color: ${app.styling.barTextColor};margin: ${app.styling.barTextMargin}px;padding: ${app.styling.barTextPadding}px;font-family: "${app.styling.barTextFont}";font-size: ${app.styling.barTextSize}px`);
+    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)};margin: ${app.styling.barTextMargin}px;padding: ${app.styling.barTextPadding}px;font-family: "${app.styling.barTextFont}";font-size: ${app.styling.barTextSize}px`);
     let pointSumText = $derived.by(() => {
         if (point.startingSum >= 0) {
-            if (typeof app.styling.barPointPos !== 'undefined') return `color: ${app.styling.barPointPos};`;
-        } else if (typeof app.styling.barPointNeg !== 'undefined') return `color: ${app.styling.barPointNeg};`;
+            if (typeof app.styling.barPointPos !== 'undefined') return `color: ${hexToRgba(app.styling.barPointPos)};`;
+        } else if (typeof app.styling.barPointNeg !== 'undefined') return `color: ${hexToRgba(app.styling.barPointNeg)};`;
         
         return '';
     });

@@ -258,6 +258,12 @@
         clone.id = id;
         app.pointTypes.splice(num + 1, 0, clone);
         pointTypeMap.set(id, app.pointTypes[num + 1]);
+
+        $virtualizer.setOptions({
+            count: pointCount()
+        });
+
+        scrollToLastRow($virtualizer, virtualListEl, Math.floor(num / 3) + (num % 3 === 2 ? 1 : 0));
     }
 
     function createNewPointType() {

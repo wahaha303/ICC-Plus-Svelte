@@ -5,8 +5,8 @@
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || windowWidth <= 960)}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && activatedMap.has(row.buttonId ?? '') || isButtonPressable} style={rowButton} variant="raised" >
-                                <Label>{@html row.buttonText ?? 'Click'}</Label>
+                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                                <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
@@ -23,8 +23,8 @@
                     {/if}
                     {#if row.template === 5}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && activatedMap.has(row.buttonId ?? '') || isButtonPressable} style={rowButton} variant="raised" >
-                                <Label>{@html row.buttonText ?? 'Click'}</Label>
+                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                                <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
@@ -43,8 +43,8 @@
                     {/if}
                     {#if row.template === 4}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && activatedMap.has(row.buttonId ?? '') || isButtonPressable} style={rowButton} variant="raised" >
-                                <Label>{@html row.buttonText ?? 'Click'}</Label>
+                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                                <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
@@ -64,15 +64,15 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p style={rowText}>
+                            <p class="mb-0" style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}
                     </div>
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && activatedMap.has(row.buttonId ?? '') || isButtonPressable} style={rowButton} variant="raised" >
-                                <Label>{@html row.buttonText ?? 'Click'}</Label>
+                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                                <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
@@ -87,8 +87,8 @@
                 {:else if row.template === 3}
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && activatedMap.has(row.buttonId ?? '') || isButtonPressable} style={rowButton} variant="raised" >
-                                <Label>{@html row.buttonText ?? 'Click'}</Label>
+                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                                <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
@@ -105,7 +105,7 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p style={rowText}>
+                            <p class="mb-0" style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}
@@ -133,7 +133,7 @@
     import Button, { Label } from '@smui/button';
     import DOMPurify from 'dompurify';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap } from '$lib/store/store.svelte';
+    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
 
     const { row, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row:Row, windowWidth:number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
@@ -144,7 +144,7 @@
     let rowStyle = $derived(getStyling('privateRowIsOn', row));
     let textStyle = $derived(getStyling('privateTextIsOn', row));
     let width = $state(0);
-    let rowImageBoxWidth = $derived(rowImageStyle.rowImageBoxWidth ?? 50);
+    let rowImageBoxWidth = $derived(typeof rowImageStyle.rowImageBoxWidth !== 'undefined' ? rowImageStyle.rowImageBoxWidth : 50);
     let isEnabled = $derived(checkRequirements(row.requireds));
     let isButtonPressable = $derived(row.onlyIfNoChoices && row.currentChoices !== 0);
 
@@ -247,7 +247,7 @@
             styles.push(`background-image: url('${rowBodyBgImage.backgroundImage}'); ${rowBodyBgImage.isBackgroundRepeat ? 'background-repeat: repeat;' : (rowBodyBgImage.isBackgroundFitIn ? 'background-size: 100% 100%;' : 'background-size: cover;')}`);
         }
         if (rowBodyBgColor) {
-            styles.push(`background-color: ${rowBodyBgColor.backgroundColor};`);
+            styles.push(`background-color: ${hexToRgba(rowBodyBgColor.backgroundColor)};`);
         }
         return styles.join(' ');
     });
@@ -263,24 +263,24 @@
             styles.push(`background-image: url('${backgroundStyle.rowBackgroundImage}'); ${backgroundStyle.isRowBackgroundRepeat? 'background-repeat: repeat;' : (backgroundStyle.isRowBackgroundFitIn ? 'background-size: 100% 100%;' : 'background-size: cover;')}`);
         }
         if (backgroundStyle.rowBgColorIsOn) {
-            styles.push(`background-color: ${backgroundStyle.rowBgColor};`);
+            styles.push(`background-color: ${hexToRgba(backgroundStyle.rowBgColor)};`);
         }
         styles.push(`margin-left: ${rowStyle.rowMargin}%; margin-right: ${rowStyle.rowMargin}%;`);        
         if (rowStyle.rowGradientIsOn) {
-            styles.push(`background-image: linear-gradient('${rowStyle.rowGradient}');`);
+            styles.push(`background-image: linear-gradient(${rowStyle.rowGradient});`);
         }
         styles.push(`border-radius: ${rowStyle.rowBorderRadiusTopLeft}${suffix} ${rowStyle.rowBorderRadiusTopRight}${suffix} ${rowStyle.rowBorderRadiusBottomRight}${suffix} ${rowStyle.rowBorderRadiusBottomLeft}${suffix};`);
         if (rowStyle.rowOverflowIsOn) {
             styles.push(`overflow: hidden;`);
         }
         if (rowStyle.rowBorderIsOn) {
-            styles.push(`border: ${rowStyle.rowBorderWidth}px ${rowStyle.rowBorderStyle} ${rowStyle.rowBorderColor};`);
+            styles.push(`border: ${rowStyle.rowBorderWidth}px ${rowStyle.rowBorderStyle} ${hexToRgba(rowStyle.rowBorderColor)};`);
         }
         if (rowStyle.rowDropShadowIsOn) {
             if (rowStyle.rowUseBoxShadowIsOn) {
-                styles.push(`box-shadow: ${rowStyle.rowDropShadowH}px ${rowStyle.rowDropShadowV}px ${rowStyle.rowDropShadowBlur}px ${rowStyle.rowDropShadowColor};`);
+                styles.push(`box-shadow: ${rowStyle.rowDropShadowH}px ${rowStyle.rowDropShadowV}px ${rowStyle.rowDropShadowBlur}px ${hexToRgba(rowStyle.rowDropShadowColor)};`);
             } else {
-                styles.push(`filter: drop-shadow(${rowStyle.rowDropShadowH}px ${rowStyle.rowDropShadowV}px ${rowStyle.rowDropShadowBlur}px ${rowStyle.rowDropShadowColor});`);
+                styles.push(`filter: drop-shadow(${rowStyle.rowDropShadowH}px ${rowStyle.rowDropShadowV}px ${rowStyle.rowDropShadowBlur}px ${hexToRgba(rowStyle.rowDropShadowColor)});`);
             }
         }
 
@@ -288,11 +288,11 @@
     });
 
     let rowTitle = $derived.by(() => {
-        return `font-family: ${textStyle.rowTitle}; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${textStyle.rowTitleColor}`;
+        return `font-family: ${textStyle.rowTitle}; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${hexToRgba(textStyle.rowTitleColor)}`;
     });
 
     let rowText = $derived.by(() => {
-        return `white-space: pre-wrap; font-family: ${textStyle.rowText}; font-size: ${textStyle.rowTextTextSize}%; text-align: ${textStyle.rowTextAlign}; color: ${textStyle.rowTextColor}; padding: ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}% ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}%;`;
+        return `white-space: pre-wrap; font-family: ${textStyle.rowText}; font-size: ${textStyle.rowTextTextSize}%; text-align: ${textStyle.rowTextAlign}; color: ${hexToRgba(textStyle.rowTextColor)}; padding: ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}% ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}%;`;
     });
 
     let rowImage = $derived.by(() => {
@@ -305,7 +305,7 @@
             styles.push(`overflow: hidden;`);
         }
         if (rowImageStyle.rowImgBorderIsOn) {
-            styles.push(`border: ${rowImageStyle.rowImgBorderWidth}px ${rowImageStyle.rowImgBorderStyle} ${rowImageStyle.rowImgBorderColor};`);
+            styles.push(`border: ${rowImageStyle.rowImgBorderWidth}px ${rowImageStyle.rowImgBorderStyle} ${hexToRgba(rowImageStyle.rowImgBorderColor)};`);
         }
         
         return styles.join(' ');
@@ -327,8 +327,8 @@
 
     function buttonActivate() {
         if (row.btnPointAddon && row.buttonTypeRadio === 'sumaddon' && typeof row.pointTypeRandom !== 'undefined') {
-            const rndMax = row.randomMax ?? 0;
-            const rndMin = row.randomMin ?? 0;
+            const rndMax = row.randomMax || 0;
+            const rndMin = row.randomMin || 0;
             const rnd = Math.floor(Math.random() * (rndMax - rndMin) + rndMin);
             const point = pointTypeMap.get(row.pointTypeRandom);
 

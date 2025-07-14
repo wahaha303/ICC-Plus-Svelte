@@ -116,7 +116,7 @@
         text: 'In Design Groups, you can manage Private Styling in a granular way.'
     }, {
         action: () => { currentDialog = 'appGlobalRequirements' },
-        name: 'Manage Golbal Requirements',
+        name: 'Manage Global Requirements',
         text: 'In Global Requirements, You can define requirements that are common to multiple choices.'
     }];
     let currentDialog = $state<'none' | 'appPoints' | 'appVariables' | 'appGroups' | 'appBackpack' | 'appTemplates' | 'appDefaults' | 'appSymbols' | 'appWords' | 'appIdSearch' | 'appDesignGroups' | 'appGlobalRequirements'>('none');

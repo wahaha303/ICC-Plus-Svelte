@@ -119,13 +119,13 @@ img {
     flex-direction: row;
 }
 .justify-start {
-    justify-content: start;
+    justify-content: flex-start;
 }
 .justify-center {
     justify-content: center;
 }
 .justify-end {
-    justify-content: end;
+    justify-content: flex-end;
 }
 .justify-space-around {
     justify-content: space-around;
@@ -497,6 +497,9 @@ img {
     font-size: 200%;
     padding: 5px;
     line-height: 2rem;
+}
+.smui-chip-input__chip-set {
+    overflow-x: hidden;
 }
 #dnd-action-dragged-el {
     opacity: 0.5 !important;

@@ -22,7 +22,7 @@
             <div class="row">
                 {#if imgIsUrl}
                     <div class="col col-lg-4">
-                        <Textfield bind:value={() => imgObject?.imageLink ?? '', (e) => {imgObject.imageLink = e}} label="External Image URL" variant="filled" />
+                        <Textfield bind:value={() => imgObject.imageLink || '', (e) => {imgObject.imageLink = e}} label="External Image URL" variant="filled" />
                         <Button onclick={() => {setImage(imgObject, imgProp, imgObject.imageLink)}} variant="raised">
                             <Label>Convert URL to Image</Label>
                         </Button>
@@ -33,7 +33,7 @@
                             <Button onclick={() => {setImage(imgObject, imgProp, ''); delete imgObject.imageLink}} variant="raised" class="my-3">
                                 <Label>Remove Photo</Label>
                             </Button>
-                            <Textfield bind:value={() => imgObject?.imageSourceTooltip ?? '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
+                            <Textfield bind:value={() => imgObject.imageSourceTooltip || '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
                         {/if}
                     </div>
                 {:else}
@@ -54,7 +54,7 @@
                         <div class:hidden={!(getImage(imgObject, imgProp))} class="pa-4">
                             <b>Before:</b>{originalSize} kB|<b>After:</b>{compressedSize} kB
                         </div>
-                        <Textfield bind:value={() => imgObject?.imageSourceTooltip ?? '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
+                        <Textfield bind:value={() => imgObject.imageSourceTooltip || '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
                     </div>
                     <div class="col-lg-8">
                         <TabBar tabs={['Cropper', 'Compress']} bind:active>

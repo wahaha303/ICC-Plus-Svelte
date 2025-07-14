@@ -29,6 +29,15 @@
                         </Button>
                     </div>
                 </div>
+                {#if app.styling.useAddonDesign && app.styling.addonImgObjectFillIsOn}
+                    <div class="col-12 gy-2">
+                        <Textfield bind:value={() => choice.addonImgObjectFillHeight ?? 0, (e) => choice.addonImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} onchange={() => {
+                            if (typeof choice.addonImgObjectFillHeight !== 'undefined' && choice.addonImgObjectFillHeight < 0) {
+                                choice.addonImgObjectFillHeight = 0;
+                            }
+                        }} class="w-100"/>
+                    </div>
+                {/if}
                 <div class="col-12 gy-2">
                     <FormField class="ml-4 mb-2">
                         <Switch bind:checked={() => choice.isPrivateStyling?? false, (e) => choice.isPrivateStyling = e} onSMUISwitchChange={() => {
@@ -120,7 +129,7 @@
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, choiceMap, initStyling, appVersion, getTimestamp, rowStyling, rowImageStyling, backpackStyling, pointBarStyling, rowMap, generateObjectId, optimizedRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, objectDesignMap, groupMap } from '$lib/store/store.svelte';
+    import { app, choiceMap, initStyling, appVersion, getTimestamp, filterStyling, textStyling, objectImageStyling, addonImageStyling, objectStyling, addonStyling, backgroundStyling, multiChoiceStyling,rowStyling, rowImageStyling, backpackStyling, pointBarStyling, rowMap, generateObjectId, optimizedRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, objectDesignMap, groupMap } from '$lib/store/store.svelte';
     import type { Choice, Styling } from '$lib/store/types';
     
     let { open, onclose, choice }: { open: boolean; onclose: () => void; choice: Choice } = $props();
@@ -190,6 +199,7 @@
                         initStyling(parsed.data, oldVersion);
                         removeInvalidStyles(parsed.data);
                         choice.styling = parsed.data;
+                        checkPrivateDesign(parsed.data);
                         snackbarVariables.labelText = 'Data loaded successfully.';
                         snackbarVariables.isOpen = true;
                     } else {
@@ -236,6 +246,17 @@
                 delete data[key];
             }
         }
+    }
+
+    function checkPrivateDesign(data: any) {
+        choice.privateFilterIsOn = Object.keys(filterStyling).some(key => key in data);
+        choice.privateTextIsOn = Object.keys(textStyling).some(key => key in data);
+        choice.privateObjectImageIsOn = Object.keys(objectImageStyling).some(key => key in data);
+        choice.privateAddonImageIsOn = Object.keys(addonImageStyling).some(key => key in data);
+        choice.privateBackgroundIsOn = Object.keys(backgroundStyling).some(key => key in data);
+        choice.privateObjectIsOn = Object.keys(objectStyling).some(key => key in data);
+        choice.privateAddonIsOn = Object.keys(addonStyling).some(key => key in data);
+        choice.privateMultiChoiceIsOn = Object.keys(multiChoiceStyling).some(key => key in data);
     }
 
     function exportDesign() {

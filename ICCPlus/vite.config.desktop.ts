@@ -1,32 +1,10 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { fileURLToPath, URL } from 'node:url'
-import legacy from '@vitejs/plugin-legacy'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    svelte(),
-    legacy({
-      targets: [
-        'chrome >= 49',
-        'firefox >= 45',
-        'safari >= 10',
-        'ios_saf >= 10',
-        'edge >= 15',
-        'android >= 7',
-      ],
-      additionalLegacyPolyfills: ['core-js/features/dom-collections'],
-      modernTargets: [
-        'chrome >= 64',
-        'firefox >= 67',
-        'safari >= 12',
-        'ios_saf >= 12',
-        'edge >= 79',
-        'android >= 64'
-      ],
-    }),
-  ],
+  plugins: [svelte()],
   resolve: {
     alias: {
       $lib: fileURLToPath(new URL('./src/lib', import.meta.url))
@@ -35,12 +13,13 @@ export default defineConfig({
   base: './',
   build: {
     assetsDir: 'assets',
+    outDir: 'dist/desktop',
     cssCodeSplit: true,
     rollupOptions: {
-      input: fileURLToPath(new URL('./index.html', import.meta.url)),
+      input: 'index.html',
       output: {
-        entryFileNames: `js/app.[hash].js`,
-        chunkFileNames: `js/chunk-vendors.[hash].js`,
+        entryFileNames: 'js/app.d3103a3b.js',
+        chunkFileNames: 'js/chunk-vendors.ae283b72.js',
         manualChunks(id) {
           if (id.includes('node_modules')) {
             return 'vendor';
@@ -50,9 +29,9 @@ export default defineConfig({
           const name = assetInfo.names ? assetInfo.names[0] : undefined;
           if (name && name.endsWith('.css')) {
             if (name.includes('vendor') || name.includes('node_modules')) {
-              return 'css/chunk-vendors.[hash][extname]';
+              return 'css/chunk-vendors.ebaa52b5[extname]';
             }
-            return 'css/app.[hash][extname]';
+            return 'css/app.e7eb167a[extname]';
           }
           return 'assets/[name][extname]';
         },

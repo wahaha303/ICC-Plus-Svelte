@@ -32,7 +32,7 @@
                     {/if}
                 {/if}
                 {#if addon.text !== '' && !row?.addonTextRemoved}
-                    <p style={addonText}>
+                    <p class="mb-0" style={addonText}>
                         {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                     </p>
                 {/if}
@@ -70,7 +70,7 @@
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p style={addonText}>
+                            <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}
@@ -86,7 +86,7 @@
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p style={addonText}>
+                            <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}
@@ -112,7 +112,7 @@
     import DOMPurify from 'dompurify';
     import ObjectRequired from './ObjectRequired.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkRequirements, getStyling, replaceText, sanitizeArg } from '$lib/store/store.svelte';
+    import { app, checkRequirements, getStyling, hexToRgba, replaceText, sanitizeArg } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
 
     let { addon, row, choice, isEnabled, isActive, windowWidth = 0, preloadImages = false }: { addon: Addon; row?: Row; choice?: Choice; isEnabled?: boolean, isActive?: boolean, windowWidth?: number, preloadImages?: boolean } = $props();
@@ -125,7 +125,7 @@
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let addonEnabled = $derived(checkRequirements(addon.requireds))
     
-    let addonImageBoxWidth = $derived(addonImageStyle.addonImageBoxWidth ?? 50);
+    let addonImageBoxWidth = $derived(typeof addonImageStyle.addonImageBoxWidth !== 'undefined' ? addonImageStyle.addonImageBoxWidth : 50);
 
     let addonBackground = $derived.by(() => {
         let useDesign = addonStyle.useAddonDesign; 
@@ -144,7 +144,7 @@
                 bgImageIndex = styles.length;
             }
             if (addonStyle.addonBgColorIsOn) {
-                styles.push(`background-color: ${addonStyle.addonBgColor};`);
+                styles.push(`background-color: ${hexToRgba(addonStyle.addonBgColor)};`);
                 bgColorIndex = styles.length;
             }
             styles.push(`margin: ${addonStyle.addonMargin}px;`);
@@ -160,14 +160,14 @@
                 } else if (isActive && filterStyle.selBorderColorIsOn) {
                     borderColor = filterStyle.selFilterBorderColor;
                 }
-                styles.push(`border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${borderColor};`);
+                styles.push(`border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(borderColor)};`);
             }
             if (addonStyle.addonDropShadowIsOn) {
                 if (addonStyle.addonUseBoxShadowIsOn) {
-                    styles.push(`box-shadow: ${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${addonStyle.addonDropShadowColor};`);
+                    styles.push(`box-shadow: ${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${hexToRgba(addonStyle.addonDropShadowColor)};`);
                 } else {
                     filterIndex = styles.length;
-                    styles.push(`filter: drop-shadow(${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${addonStyle.addonDropShadowColor})`);
+                    styles.push(`filter: drop-shadow(${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${hexToRgba(addonStyle.addonDropShadowColor)})`);
                 }
             }            
             if (filterIndex === 0) {
@@ -240,7 +240,7 @@
                 }
             }
             if (addonStyle.addonGradientIsOn) {
-                styles.push(`background-image: linear-gradient('${addonStyle.addonGradient}');`);
+                styles.push(`background-image: linear-gradient(${addonStyle.addonGradient});`);
             }
         }
         if ((app.showAllAddons > 0 || addon.showAddon) && isEnabled && !addonEnabled) {
@@ -289,10 +289,10 @@
                         styles.splice(bgImageIndex - 1, 1);
                     }
                 }
-                styles.push(`background-color: ${filterStyle.reqFilterBgColor};`);
+                styles.push(`background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`);
             }
             if (addonStyle.addonGradientIsOn) {
-                styles.push(`background-image: linear-gradient('${addonStyle.addonGradientOnReq}');`);
+                styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnReq});`);
             }
         }
 
@@ -304,11 +304,11 @@
 
         styles.push(`font-family: ${textStyle.addonTitle};font-size: ${textStyle.addonTitleTextSize}%;text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
-            styles.push(`color: ${filterStyle.reqFilterATitleColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.reqFilterATitleColor)};`);
         } else if (isActive && filterStyle.selATitleColorIsOn) {
-            styles.push(`color: ${filterStyle.selFilterATitleColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.selFilterATitleColor)};`);
         } else {
-            styles.push(`color: ${textStyle.addonTitleColor};`);
+            styles.push(`color: ${hexToRgba(textStyle.addonTitleColor)};`);
         }
         if (addonStyle.useAddonDesign) {
             if (addonStyle.titlePaddingIsOn) {
@@ -326,11 +326,11 @@
 
         styles.push(`font-family: ${textStyle.addonText};text-align: ${textStyle.addonTextAlign};font-size: ${textStyle.addonTextTextSize}%;white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
-            styles.push(`color: ${filterStyle.reqFilterATextColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.reqFilterATextColor)};`);
         } else if (isActive && filterStyle.selATextColorIsOn) {
-            styles.push(`color: ${filterStyle.selFilterATextColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.selFilterATextColor)};`);
         } else {
-            styles.push(`color: ${textStyle.addonTextColor};`);
+            styles.push(`color: ${hexToRgba(textStyle.addonTextColor)};`);
         }
         if (addonStyle.useAddonDesign) {
             styles.push(`padding: ${addonStyle.addonTextPadding}px;`);
@@ -348,27 +348,27 @@
 
         if (useDesign) {
             styles.push(`width: ${addonImageStyle.addonImageWidth}%; margin-top: ${addonImageStyle.addonImageMarginTop}%; margin-bottom: ${addonImageStyle.addonImageMarginBottom}%;`);
-            if (addonImageStyle.addonImgObjectFillIsOn) {
-                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice?.addonImgObjectFillHeight ?? 200}px;`);
+            if (addonImageStyle.addonImgObjectFillIsOn && choice?.addonImgObjectFillHeight) {
+                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice?.addonImgObjectFillHeight}px;`);
             }
             styles.push(`border-radius: ${addonImageStyle.addonImgBorderRadiusTopLeft}${suffix} ${addonImageStyle.addonImgBorderRadiusTopRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomLeft}${suffix};`);
             if (addonImageStyle.addonImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (addonImageStyle.addonImgBorderIsOn) {
-                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${addonImageStyle.addonImgBorderColor};`);
+                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${hexToRgba(addonImageStyle.addonImgBorderColor)};`);
             }    
         } else {
             styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
-            if (objectImageStyle.objectImgObjectFillIsOn) {
-                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row?.objectImgObjectFillHeight ?? 200}px;`);
+            if (objectImageStyle.objectImgObjectFillIsOn && row?.objectImgObjectFillHeight) {
+                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row?.objectImgObjectFillHeight}px;`);
             }
             styles.push(`border-radius: ${objectImageStyle.objectImgBorderRadiusTopLeft}${suffix} ${objectImageStyle.objectImgBorderRadiusTopRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomLeft}${suffix};`);
             if (objectImageStyle.objectImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (objectImageStyle.objectImgBorderIsOn) {
-                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${objectImageStyle.objectImgBorderColor};`);
+                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(objectImageStyle.objectImgBorderColor)};`);
             }
         }
 
@@ -376,7 +376,7 @@
     });
 
     let scoreText = $derived.by(() => {
-        return `font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${textStyle.scoreTextColor};`;
+        return `font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
     });
 
 </script>

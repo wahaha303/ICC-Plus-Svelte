@@ -668,7 +668,7 @@
         },
 
         // getInputAdapterMethods_
-        getNativeInput: () => input?.getElement() ?? null,
+        getNativeInput: () => typeof input?.getElement() !== 'undefined' ? input.getElement() : null,
         setInputAttr: (name, value) => {
           input?.addAttr(name, value);
         },
@@ -769,7 +769,7 @@
 
   function hasClass(className: string) {
     return className in internalClasses
-      ? (internalClasses[className] ?? null)
+      ? (typeof internalClasses[className] !== 'undefined' ? internalClasses[className] : null)
       : getElement().classList.contains(className);
   }
 

@@ -8,8 +8,8 @@
                 <Wrapper text="Create New Reqruirement">
                     <IconButton onclick={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'}}><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
-                <Wrapper text="Copy Requirement">
-                    <IconButton onclick={copyRequirement}><i class="mdi mdi-clipboard-outline"></i></IconButton>
+                <Wrapper text="Copy Addon">
+                    <IconButton onclick={copyAddon}><i class="mdi mdi-clipboard-outline"></i></IconButton>
                 </Wrapper>
             </div>
             <Wrapper text="Move Down">
@@ -45,42 +45,8 @@
         </div>
         <div class="row gy-3 p-2">
             {#each addon.requireds as required, i}
-                <div class={col6}>
-                    <FormField class="w-100">
-                        <Checkbox bind:checked={required.showRequired} onchange={() => {
-                            if (!required.showRequired) {
-                                delete required.hideRequired;
-                            }
-                        }} class="check-scale" />
-                        {#snippet label()}
-                            Show Requirement
-                        {/snippet}
-                    </FormField>
-                    {#if required.showRequired}
-                        <FormField class="w-100">
-                            <Checkbox bind:checked={() => required.hideRequired?? false, (e) => required.hideRequired = e} class="check-scale" />
-                            {#snippet label()}
-                                Hide when Requirement is met
-                            {/snippet}
-                        </FormField>
-                        <FormField class="w-100">
-                            <Checkbox bind:checked={() => required.customTextIsOn?? false, (e) => required.customTextIsOn = e} onchange={() => {
-                                if (!required.customTextIsOn) {
-                                    delete required.customText;
-                                }
-                            }} class="check-scale" />
-                            {#snippet label()}
-                                Use custom requirement text
-                            {/snippet}
-                        </FormField>
-                        {#if required.customTextIsOn}
-                            <Textfield bind:value={() => required.customText?? '', (e) => required.customText = e} label="Custom Text" variant="filled" />
-                        {:else}
-                            <Textfield bind:value={required.beforeText} label="Text Before" variant="filled" />
-                            <Textfield bind:value={required.afterText} label="Text After" variant="filled" />
-                        {/if}
-                    {/if}
-                    <ObjectInnerReq required={required} />
+                <div class="{required.requireds.length > 0 ? 'col-12' : reqCol} p-2">
+                    <ObjectRequired required={required} isEditModeOn={true} data={addon} index={i} />
                     <Button onclick={() => addon.requireds.splice(i, 1)} class="mt-1" variant="raised">
                         <Label>Delete</Label>
                     </Button>
@@ -121,7 +87,7 @@
                     {/if}
                 {/if}
                 {#if addon.text !== '' && !row?.addonTextRemoved}
-                    <p style={addonText}>
+                    <p class="mb-0" style={addonText}>
                         {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                     </p>
                 {/if}
@@ -159,7 +125,7 @@
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p style={addonText}>
+                            <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}
@@ -175,7 +141,7 @@
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p style={addonText}>
+                            <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}
@@ -203,12 +169,11 @@
     import DOMPurify from 'dompurify';
     import FormField from '@smui/form-field';
     import IconButton from '@smui/icon-button';
-    import ObjectInnerReq from './ObjectInnerReq.svelte';
     import ObjectRequired from './ObjectRequired.svelte';
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables } from '$lib/store/store.svelte';
+    import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
 
     let { isEditModeOn = false, addon, row, choice, isEnabled, isActive, windowWidth = 0, preloadImages = false, index }: { isEditModeOn?: boolean; addon: Addon; row?: Row; choice?: Choice; isEnabled?: boolean, isActive?: boolean, windowWidth?: number, preloadImages?: boolean, index?: number } = $props();
@@ -230,10 +195,10 @@
         value: 5
     }];
     let width = $state(0);
-    let col6 = $derived.by(() => {
-        if (width > 300) return 'col-6';
+    let reqCol = $derived.by(() => {
+        if (width > 400) return 'col-6';
         else return 'col-12';
-    });
+    })
     let addonImageStyle = $derived(getStyling('privateAddonImageIsOn', row, choice));
     let addonStyle = $derived(getStyling('privateAddonIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
@@ -242,7 +207,7 @@
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let addonEnabled = $derived(checkRequirements(addon.requireds))
     
-    let addonImageBoxWidth = $derived(addonImageStyle.addonImageBoxWidth ?? 50);
+    let addonImageBoxWidth = $derived(typeof addonImageStyle.addonImageBoxWidth !== 'undefined' ? addonImageStyle.addonImageBoxWidth : 50);
     
     let addonBackground = $derived.by(() => {
         let useDesign = addonStyle.useAddonDesign; 
@@ -261,7 +226,7 @@
                 bgImageIndex = styles.length;
             }
             if (addonStyle.addonBgColorIsOn) {
-                styles.push(`background-color: ${addonStyle.addonBgColor};`);
+                styles.push(`background-color: ${hexToRgba(addonStyle.addonBgColor)};`);
                 bgColorIndex = styles.length;
             }
             styles.push(`margin: ${addonStyle.addonMargin}px;`);
@@ -277,14 +242,14 @@
                 } else if (isActive && filterStyle.selBorderColorIsOn) {
                     borderColor = filterStyle.selFilterBorderColor;
                 }
-                styles.push(`border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${borderColor};`);
+                styles.push(`border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(borderColor)};`);
             }
             if (addonStyle.addonDropShadowIsOn) {
                 if (addonStyle.addonUseBoxShadowIsOn) {
-                    styles.push(`box-shadow: ${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${addonStyle.addonDropShadowColor};`);
+                    styles.push(`box-shadow: ${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${hexToRgba(addonStyle.addonDropShadowColor)};`);
                 } else {
                     filterIndex = styles.length;
-                    styles.push(`filter: drop-shadow(${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${addonStyle.addonDropShadowColor})`);
+                    styles.push(`filter: drop-shadow(${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${hexToRgba(addonStyle.addonDropShadowColor)})`);
                 }
             }            
             if (filterIndex === 0) {
@@ -357,7 +322,7 @@
                 }
             }
             if (addonStyle.addonGradientIsOn) {
-                styles.push(`background-image: linear-gradient('${addonStyle.addonGradient}');`);
+                styles.push(`background-image: linear-gradient(${addonStyle.addonGradient});`);
             }
         }
         if ((app.showAllAddons > 0 || addon.showAddon) && isEnabled && !addonEnabled) {
@@ -406,10 +371,10 @@
                         styles.splice(bgImageIndex - 1, 1);
                     }
                 }
-                styles.push(`background-color: ${filterStyle.reqFilterBgColor};`);
+                styles.push(`background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`);
             }
             if (addonStyle.addonGradientIsOn) {
-                styles.push(`background-image: linear-gradient('${addonStyle.addonGradientOnReq}');`);
+                styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnReq});`);
             }
         }
 
@@ -421,11 +386,11 @@
 
         styles.push(`font-family: ${textStyle.addonTitle};font-size: ${textStyle.addonTitleTextSize}%;text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
-            styles.push(`color: ${filterStyle.reqFilterATitleColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.reqFilterATitleColor)};`);
         } else if (isActive && filterStyle.selATitleColorIsOn) {
-            styles.push(`color: ${filterStyle.selFilterATitleColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.selFilterATitleColor)};`);
         } else {
-            styles.push(`color: ${textStyle.addonTitleColor};`);
+            styles.push(`color: ${hexToRgba(textStyle.addonTitleColor)};`);
         }
         if (addonStyle.useAddonDesign) {
             if (addonStyle.titlePaddingIsOn) {
@@ -443,11 +408,11 @@
 
         styles.push(`font-family: ${textStyle.addonText};text-align: ${textStyle.addonTextAlign};font-size: ${textStyle.addonTextTextSize}%;white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
-            styles.push(`color: ${filterStyle.reqFilterATextColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.reqFilterATextColor)};`);
         } else if (isActive && filterStyle.selATextColorIsOn) {
-            styles.push(`color: ${filterStyle.selFilterATextColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.selFilterATextColor)};`);
         } else {
-            styles.push(`color: ${textStyle.addonTextColor};`);
+            styles.push(`color: ${hexToRgba(textStyle.addonTextColor)};`);
         }
         if (addonStyle.useAddonDesign) {
             styles.push(`padding: ${addonStyle.addonTextPadding}px;`);
@@ -465,27 +430,27 @@
 
         if (useDesign) {
             styles.push(`width: ${addonImageStyle.addonImageWidth}%; margin-top: ${addonImageStyle.addonImageMarginTop}%; margin-bottom: ${addonImageStyle.addonImageMarginBottom}%;`);
-            if (addonImageStyle.addonImgObjectFillIsOn) {
-                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice?.addonImgObjectFillHeight ?? 200}px;`);
+            if (addonImageStyle.addonImgObjectFillIsOn && choice?.addonImgObjectFillHeight) {
+                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice?.addonImgObjectFillHeight}px;`);
             }
             styles.push(`border-radius: ${addonImageStyle.addonImgBorderRadiusTopLeft}${suffix} ${addonImageStyle.addonImgBorderRadiusTopRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomLeft}${suffix};`);
             if (addonImageStyle.addonImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (addonImageStyle.addonImgBorderIsOn) {
-                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${addonImageStyle.addonImgBorderColor};`);
+                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${hexToRgba(addonImageStyle.addonImgBorderColor)};`);
             }    
         } else {
             styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
-            if (objectImageStyle.objectImgObjectFillIsOn) {
-                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row?.objectImgObjectFillHeight ?? 200}px;`);
+            if (objectImageStyle.objectImgObjectFillIsOn && row?.objectImgObjectFillHeight) {
+                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row?.objectImgObjectFillHeight}px;`);
             }
             styles.push(`border-radius: ${objectImageStyle.objectImgBorderRadiusTopLeft}${suffix} ${objectImageStyle.objectImgBorderRadiusTopRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomLeft}${suffix};`);
             if (objectImageStyle.objectImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (objectImageStyle.objectImgBorderIsOn) {
-                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${objectImageStyle.objectImgBorderColor};`);
+                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(objectImageStyle.objectImgBorderColor)};`);
             }
         }
 
@@ -493,12 +458,12 @@
     });
 
     let scoreText = $derived.by(() => {
-        return `font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${textStyle.scoreTextColor};`;
+        return `font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
     });
 
-    function copyRequirement() {
-        app.tmpRequired.length = 0;
-        app.tmpRequired.push(...addon.requireds);
+    function copyAddon() {
+        app.tmpAddon.length = 0;
+        app.tmpAddon.push(addon);
         snackbarVariables.labelText = 'Copied to clipboard.';
         snackbarVariables.isOpen = true;
     }

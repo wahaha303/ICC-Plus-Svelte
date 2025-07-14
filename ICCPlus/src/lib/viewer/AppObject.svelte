@@ -55,7 +55,7 @@
                                 {/if}
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p style={objectText}>
+                                <p class="mb-0" style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -118,7 +118,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p style={objectText}>
+                                <p class="mb-0" style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -173,7 +173,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p style={objectText}>
+                                <p class="mb-0" style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -224,13 +224,13 @@
     <DlgCommon open={currentDialog === 'dlgCommon'} onclose={() => (currentDialog = 'none')} title="" context={wordDialog.context} closeHandler={(e, wordText) => {
         if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
             isOverDlg = true;
-            wordDialog.choice.wordChangeSelect = wordText;
+            if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
             selectObject(wordDialog.choice, wordDialog.row);
             isOverDlg = false;
         } else {
             isOverDlg = false;
         }
-    }} isWord={true} prevText={wordDialog.prevText} />
+    }} isWord={wordDialog.isWord} prevText={wordDialog.prevText} />
 {/if}
 
 <script lang="ts">
@@ -242,7 +242,7 @@
     import ObjectScore from './Object/ObjectScore.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
-	import { app, choiceMap, groupMap, getStyling, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, winWidth, applyWidth, applyTemplate, revertTemplate, revertWidth } from '$lib/store/store.svelte';
+	import { app, choiceMap, groupMap, getStyling, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, winWidth, applyWidth, applyTemplate, revertTemplate, revertWidth, hexToRgba } from '$lib/store/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
@@ -255,12 +255,14 @@
         choice: Choice | null,
         row: Row | null,
         context: string,
-        prevText: string
+        prevText: string,
+        isWord: boolean
     } = {
         choice: null,
         row: null,
         context: '',
-        prevText: ''
+        prevText: '',
+        isWord: true
     };
     let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
@@ -269,7 +271,7 @@
     let objectStyle = $derived(getStyling('privateObjectIsOn', row, choice));
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     
-    let choiceImageBoxWidth = $derived(objectImageStyle.objectImageBoxWidth ?? 50);
+    let choiceImageBoxWidth = $derived(typeof objectImageStyle.objectImageBoxWidth !== 'undefined' ? objectImageStyle.objectImageBoxWidth : 50);
     let currentDialog = $state<'none' | 'dlgCommon'>('none');
     let isOverDlg = false;
 
@@ -292,11 +294,11 @@
 
         styles.push(`font-family: ${textStyle.objectTitle};font-size: ${textStyle.objectTitleTextSize}%;text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
-            styles.push(`color: ${filterStyle.reqFilterCTitleColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTitleColor)};`);
         } else if (isActive && filterStyle.selCTitleColorIsOn) {
-            styles.push(`color: ${filterStyle.selFilterCTitleColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.selFilterCTitleColor)};`);
         } else {
-            styles.push(`color: ${textStyle.objectTitleColor};`);
+            styles.push(`color: ${hexToRgba(textStyle.objectTitleColor)};`);
         }
         if (objectStyle.titlePaddingIsOn) {
             styles.push(`padding: ${objectStyle.objectTextPadding}px;`);
@@ -305,9 +307,9 @@
         return styles.join(' ');
     });
 
-    let multiChoiceText = $derived(`font-family: ${multiChoiceStyle.multiChoiceTextFont}; color: ${textStyle.scoreTextColor}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`);
+    let multiChoiceText = $derived(`font-family: ${multiChoiceStyle.multiChoiceTextFont}; color: ${hexToRgba(textStyle.scoreTextColor)}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`);
 
-    let multiChoiceButton = $derived(`font-size: ${multiChoiceStyle.multiChoiceCounterSize}%; color: ${textStyle.scoreTextColor};`);
+    let multiChoiceButton = $derived(`font-size: ${multiChoiceStyle.multiChoiceCounterSize}%; color: ${hexToRgba(textStyle.scoreTextColor)};`);
 
     let multiChoiceCounter = $derived.by(() => {
         if (choice.hideMultipleCounter) {
@@ -322,11 +324,11 @@
 
         styles.push(`font-family: ${textStyle.objectText};text-align: ${textStyle.objectTextAlign};font-size: ${textStyle.objectTextTextSize}%;white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
-            styles.push(`color: ${filterStyle.reqFilterCTextColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTextColor)};`);
         } else if (isActive && filterStyle.selCTextColorIsOn) {
-            styles.push(`color: ${filterStyle.selFilterCTextColor};`);
+            styles.push(`color: ${hexToRgba(filterStyle.selFilterCTextColor)};`);
         } else {
-            styles.push(`color: ${textStyle.objectTextColor};`);
+            styles.push(`color: ${hexToRgba(textStyle.objectTextColor)};`);
         }
         styles.push(`padding: ${objectStyle.objectTextPadding}px;`);
 
@@ -348,7 +350,7 @@
             bgImageIndex = styles.length;
         }
         if (backgroundStyle.objectBgColorIsOn) {
-            styles.push(`background-color: ${backgroundStyle.objectBgColor};`);
+            styles.push(`background-color: ${hexToRgba(backgroundStyle.objectBgColor)};`);
             bgColorIndex = styles.length;
         }
         styles.push(`margin: ${objectStyle.objectMargin}px;`);
@@ -364,14 +366,14 @@
             } else if (isActive && filterStyle.selBorderColorIsOn) {
                 borderColor = filterStyle.selFilterBorderColor;
             }
-            styles.push(`border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${borderColor};`);
+            styles.push(`border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(borderColor)};`);
         }
         if (objectStyle.objectDropShadowIsOn) {
             if (objectStyle.objectUseBoxShadowIsOn) {
-                styles.push(`box-shadow: ${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${objectStyle.objectDropShadowColor};`);
+                styles.push(`box-shadow: ${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${hexToRgba(objectStyle.objectDropShadowColor)};`);
             } else {
                 filterIndex = styles.length;
-                styles.push(`filter: drop-shadow(${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${objectStyle.objectDropShadowColor})`);
+                styles.push(`filter: drop-shadow(${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${hexToRgba(objectStyle.objectDropShadowColor)})`);
             }
         }
         if (filterIndex === 0) {
@@ -421,10 +423,10 @@
                             styles.splice(bgImageIndex - 1, 1);
                         }
                     }
-                    styles.push(`background-color: ${filterStyle.selFilterBgColor};`);
+                    styles.push(`background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`);
                 }
                 if (objectStyle.objectGradientIsOn) {
-                    styles.push(`background-image: linear-gradient('${objectStyle.objectGradientOnSelect}');`);
+                    styles.push(`background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`);
                 }
             } else {
                 if (filterStyle.unselFilterBlurIsOn) {
@@ -460,7 +462,7 @@
                     styles.push(`;`);
                 }
                 if (objectStyle.objectGradientIsOn) {
-                    styles.push(`background-image: linear-gradient('${objectStyle.objectGradient}');`);
+                    styles.push(`background-image: linear-gradient(${objectStyle.objectGradient});`);
                 }
             }
             if (app.isPointerCursor && !choice.isNotSelectable && (!choice.isSelectableMultiple || (choice.allowSelectByClick && choice.multipleUseVariable === 0))) {
@@ -508,10 +510,10 @@
                         styles.splice(bgImageIndex - 1, 1);
                     }
                 }
-                styles.push(`background-color: ${filterStyle.reqFilterBgColor};`);
+                styles.push(`background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`);
             }
             if (objectStyle.objectGradientIsOn) {
-                styles.push(`background-image: linear-gradient('${objectStyle.objectGradientOnReq}');`);
+                styles.push(`background-image: linear-gradient(${objectStyle.objectGradientOnReq});`);
             }
         }
         return styles.join(' ');
@@ -530,7 +532,7 @@
             styles.push(`overflow: hidden;`);
         }
         if (objectImageStyle.objectImgBorderIsOn) {
-            styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${objectImageStyle.objectImgBorderColor};`);
+            styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(objectImageStyle.objectImgBorderColor)};`);
         }
 
         return styles.join(' ');
@@ -540,14 +542,14 @@
         let style = [];
 
         style.push(`font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
-        style.push(`color: ${textStyle.scoreTextColor};`);
+        style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         if (!isEnabled) {
             if (filterStyle.reqScoreTextColorIsOn)  {
-                style.push(`color: ${filterStyle.reqFilterSTextColor}`);
+                style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
             }
         } else if (choice.isActive) {
             if (filterStyle.selScoreTextColorIsOn) {
-                style.push(`color: ${filterStyle.selFilterSTextColor}`);
+                style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
             }
         }
 
@@ -616,13 +618,13 @@
                             if (typeof tmpAct !== 'undefined') {
                                 tmpAct.multiple += limitVal;
                             } else {
-                                tmpActivatedMap.set(fChoice.id, {multiple: limitVal, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+                                tmpActivatedMap.set(fChoice.id, {multiple: limitVal, isAllowDeselect: localChoice.isAllowDeselect || false});
                             }
                         } else if (num < 0) {
                             if (typeof tmpAct !== 'undefined') {
                                 tmpAct.multiple -= limitVal;
                             } else {
-                                tmpActivatedMap.set(fChoice.id, {multiple: -limitVal, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+                                tmpActivatedMap.set(fChoice.id, {multiple: -limitVal, isAllowDeselect: localChoice.isAllowDeselect || false});
                             }
                         }
                     }
@@ -631,12 +633,12 @@
         } else {
             if (!fChoice.isActive) activateObject(fChoice, fRow);
             if (!localChoice.isAllowDeselect) fChoice.forcedActivated = true;
-            fChoice.activatedFrom ??= 0;
+            if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
             if (!isLinked) fChoice.activatedFrom++;
         }
         if (!fChoice.isActive) {
             delete fChoice.forcedActivated;
-            tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+            tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect || false});
         }
     }
 
@@ -671,7 +673,7 @@
                         if (tmpNum === 0) {
                             tmpActivatedMap.delete(fChoice.id);
                         } else {
-                            tmpActivatedMap.set(fChoice.id, {multiple: tmpNum, isAllowDeselect: localChoice.isAllowDeselect ?? false});
+                            tmpActivatedMap.set(fChoice.id, {multiple: tmpNum, isAllowDeselect: localChoice.isAllowDeselect || false});
                         }
                     } else {
                         tmpActivatedMap.delete(fChoice.id);
@@ -718,7 +720,7 @@
                 }
             }
             let listArray = [...listMap.keys()];
-            let actNum = Math.min(listArray.length, localChoice.numActivateRandom ?? 0);
+            let actNum = Math.min(listArray.length, localChoice.numActivateRandom || 0);
             let repeatNum = actNum;
             for (let i = listArray.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -731,7 +733,7 @@
                 if (typeof cMap !== 'undefined') {
                     let rndRow = cMap.row;
                     let rndChoice = cMap.choice;
-                    selectForceActivate(localChoice, rndChoice, rndRow, listMap.get(id) ?? 0);
+                    selectForceActivate(localChoice, rndChoice, rndRow, listMap.get(id) || 0);
                     if (!rndChoice.isActive) {
                         if (result.length < actNum && listArray.length > repeatNum) {
                             listArray[i] = listArray[repeatNum++];
@@ -820,20 +822,20 @@
                                 isChanged = localChoice.id !== aChoice.id;
                             }
                             if (!changedScores.has(aScore.idx)) {
-                                const tmpScore = tmpScores.get(aScore.id) ?? 0;
+                                const tmpScore = tmpScores.get(aScore.id) || 0;
                                 if (aChoice.isActive) {
-                                    const afterSelected = checkRequirements(aScore.requireds);
+                                    const afterDeselected = checkRequirements(aScore.requireds);
                                     const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
-                                    tmpActivated.delete(localChoice.id);
-                                    aRow.currentChoices -= 1;
-                                    point.startingSum += tmpScore;
-                                    const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
+                                    tmpActivated.set(localChoice.id, {multiple : localChoice.multipleUseVariable});
                                     aRow.currentChoices += 1;
                                     point.startingSum -= tmpScore;
-                                    if (beforeSelected !== afterSelected) {
+                                    const beforeDeselected = checkRequirements(aScore.requireds, tmpActivated);
+                                    aRow.currentChoices -= 1;
+                                    point.startingSum += tmpScore;
+                                    if (beforeDeselected !== afterDeselected) {
                                         let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                         scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
-                                        if (beforeSelected) {
+                                        if (beforeDeselected) {
                                             if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                 const mul = aChoice.multipleUseVariable;
 
@@ -952,7 +954,7 @@
                                 isChanged = true;
                             }
                             if (!changedScores.has(aScore.idx)) {
-                                const tmpScore = tmpScores.get(aScore.id) ?? 0;
+                                const tmpScore = tmpScores.get(aScore.id) || 0;
                                 if (aChoice.isActive && !aScore.isChanged) {
                                     const afterSelected = checkRequirements(aScore.requireds);
                                     const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
@@ -1140,6 +1142,7 @@
 
                 if (localChoice.discountOther) {
                     if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                        if (typeof localChoice.discountPointTypes === 'undefined') localChoice.discountPointTypes = [];
                         if (localChoice.isDisChoices) {
                             const dList = new Set<string>();
                             if (typeof localChoice.discountRows !== 'undefined') {
@@ -1150,7 +1153,7 @@
                                             const dChoice = dRow.objects[j];
                                             for (let k = 0; k < dChoice.scores.length; k++) {
                                                 const score = dChoice.scores[k];
-                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
                                                     deselectDiscount(localChoice, score);
                                                 }
                                             }
@@ -1167,7 +1170,7 @@
                                             const dChoice = cMap.choice;
                                             for (let j = 0; j < dChoice.scores.length; j++) {
                                                 const score = cMap.choice.scores[j];
-                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1) && !dList.has(score.idx)) {
+                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1) && !dList.has(score.idx)) {
                                                     deselectDiscount(localChoice, score);
                                                 }
                                             }
@@ -1185,7 +1188,7 @@
                                             if (typeof cMap !== 'undefined') {
                                                 for (let k = 0; k < cMap.choice.scores.length; k++) {
                                                     const score = cMap.choice.scores[k];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
                                                         deselectDiscount(localChoice, score);
                                                     }
                                                 }
@@ -1398,7 +1401,7 @@
                             if (leng > 0) {
                                 app.styling.backgroundImage = app.bgImageStack[leng - 1].data;
                             } else {
-                                app.styling.backgroundImage = app.defaultBgImage ?? '';
+                                app.styling.backgroundImage = typeof app.defaultBgImage !== 'undefined' ? app.defaultBgImage : '';
                                 delete app.bgImageStack;
                             }
                         }
@@ -1412,7 +1415,7 @@
                                 if (leng > 0) {
                                     app.styling.backgroundColor = app.bgColorStack[leng - 1].data;
                                 } else {
-                                    app.styling.backgroundColor = app.defaultBgColor ?? '#FFFFFFFF';
+                                    app.styling.backgroundColor = typeof app.defaultBgColor !== 'undefined' ? app.defaultBgColor : '#FFFFFFFF';
                                     delete app.bgColorStack;
                                 }
                             }
@@ -1430,7 +1433,7 @@
                             if (leng > 0) {
                                 app.styling.barBackgroundColor = app.barBgColorStack[leng - 1].data;
                             } else {
-                                app.styling.barBackgroundColor = app.defaultBarBgColor ?? '#FFFFFFFF';
+                                app.styling.barBackgroundColor = typeof app.defaultBarBgColor !== 'undefined' ? app.defaultBarBgColor : '#FFFFFFFF';
                                 delete app.barBgColorStack;
                             }
                         }
@@ -1444,7 +1447,7 @@
                             if (leng > 0) {
                                 app.styling.barIconColor = app.barIconColorStack[leng - 1].data;
                             } else {
-                                app.styling.barIconColor = app.defaultBarIconColor ?? '#0000008A';
+                                app.styling.barIconColor = typeof app.defaultBarIconColor !== 'undefined' ? app.defaultBarIconColor : '#0000008A';
                                 delete app.barIconColorStack;
                             }
                         }
@@ -1458,7 +1461,7 @@
                             if (leng > 0) {
                                 app.styling.barTextColor = app.barTextColorStack[leng - 1].data;
                             } else {
-                                app.styling.barTextColor = app.defaultBarIconColor ?? '#000000';
+                                app.styling.barTextColor = typeof app.defaultBarIconColor !== 'undefined' ? app.defaultBarIconColor : '#000000';
                                 delete app.barTextColorStack;
                             }
                         }
@@ -2018,7 +2021,7 @@
                             if (typeof localChoice.bgImage !== 'undefined') {
                                 if (typeof app.bgImageStack === 'undefined') {
                                     app.bgImageStack = [];
-                                    app.defaultBgImage = app.styling.backgroundImage ?? '';
+                                    app.defaultBgImage = typeof app.styling.backgroundImage !== 'undefined' ? app.styling.backgroundImage : '';
                                 }
                                 app.bgImageStack.push({id: localChoice.id, data: localChoice.bgImage});
                                 app.styling.backgroundImage = localChoice.bgImage;
@@ -2027,7 +2030,7 @@
                             if (typeof localChoice.changedBgColorCode !== 'undefined') {
                                 if (typeof app.bgColorStack === 'undefined') {
                                     app.bgColorStack = [];
-                                    app.defaultBgColor = app.styling.backgroundColor ?? '';
+                                    app.defaultBgColor = typeof app.styling.backgroundColor !== 'undefined' ? app.styling.backgroundColor : '';
                                 }
                                 app.bgColorStack.push({id: localChoice.id, data: localChoice.changedBgColorCode});
                                 app.styling.backgroundColor = localChoice.changedBgColorCode;
@@ -2039,7 +2042,7 @@
                         if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
                             if (typeof app.barBgColorStack === 'undefined') {
                                 app.barBgColorStack = [];
-                                app.defaultBarBgColor = app.styling.barBackgroundColor ?? '#FFFFFFFF';
+                                app.defaultBarBgColor = typeof app.styling.barBackgroundColor !== 'undefined' ? app.styling.barBackgroundColor : '#FFFFFFFF';
                             }
                             app.barBgColorStack.push({id: localChoice.id, data: localChoice.changedBarBgColor});
                             app.styling.barBackgroundColor = localChoice.changedBarBgColor;
@@ -2047,7 +2050,7 @@
                         if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
                             if (typeof app.barIconColorStack === 'undefined') {
                                 app.barIconColorStack = [];
-                                app.defaultBarIconColor = app.styling.barIconColor ?? '#0000008A';
+                                app.defaultBarIconColor = typeof app.styling.barIconColor !== 'undefined' ? app.styling.barIconColor : '#0000008A';
                             }
                             app.barIconColorStack.push({id: localChoice.id, data: localChoice.changedBarIconColor});
                             app.styling.barIconColor = localChoice.changedBarIconColor;
@@ -2055,7 +2058,7 @@
                         if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
                             if (typeof app.barTextColorStack === 'undefined') {
                                 app.barTextColorStack = [];
-                                app.defaultBarTextColor = app.styling.barTextColor ?? '#000000';
+                                app.defaultBarTextColor = typeof app.styling.barTextColor !== 'undefined' ? app.styling.barTextColor : '#000000';
                             }
                             app.barTextColorStack.push({id: localChoice.id, data: localChoice.changedBarTextColor});
                             app.styling.barTextColor = localChoice.changedBarTextColor;
@@ -2269,7 +2272,18 @@
                     wordDialog.choice = localChoice;
                     wordDialog.row = localRow;
                     wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                    wordDialog.prevText = localChoice.wordChangeSelect ?? '';
+                    wordDialog.prevText = typeof localChoice.wordChangeSelect !== 'undefined' ? localChoice.wordChangeSelect : '';
+                    wordDialog.isWord = true;
+                    currentDialog = 'dlgCommon';
+                    
+                    return;
+                }
+
+                if (localChoice.confirmIsOn && !isOverDlg) {
+                    wordDialog.choice = localChoice;
+                    wordDialog.row = localRow;
+                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                    wordDialog.isWord = false;
                     currentDialog = 'dlgCommon';
                     
                     return;
@@ -2607,7 +2621,7 @@
                                 if (typeof localChoice.bgImage !== 'undefined') {
                                     if (typeof app.bgImageStack === 'undefined') {
                                         app.bgImageStack = [];
-                                        app.defaultBgImage = app.styling.backgroundImage ?? '';
+                                        app.defaultBgImage = typeof app.styling.backgroundImage !== 'undefined' ? app.styling.backgroundImage : '';
                                     }
                                     app.bgImageStack.push({id: localChoice.id, data: localChoice.bgImage});
                                     app.styling.backgroundImage = localChoice.bgImage;
@@ -2616,7 +2630,7 @@
                                 if (typeof localChoice.changedBgColorCode !== 'undefined') {
                                     if (typeof app.bgColorStack === 'undefined') {
                                         app.bgColorStack = [];
-                                        app.defaultBgColor = app.styling.backgroundColor ?? '';
+                                        app.defaultBgColor = typeof app.styling.backgroundColor !== 'undefined' ? app.styling.backgroundColor : '';
                                     }
                                     app.bgColorStack.push({id: localChoice.id, data: localChoice.changedBgColorCode});
                                     app.styling.backgroundColor = localChoice.changedBgColorCode;
@@ -2628,7 +2642,7 @@
                             if (localChoice.changeBarBgColorIsOn && typeof localChoice.changedBarBgColor !== 'undefined') {
                                 if (typeof app.barBgColorStack === 'undefined') {
                                     app.barBgColorStack = [];
-                                    app.defaultBarBgColor = app.styling.barBackgroundColor ?? '#FFFFFFFF';
+                                    app.defaultBarBgColor = typeof app.styling.barBackgroundColor !== 'undefined' ? app.styling.barBackgroundColor : '#FFFFFFFF';
                                 }
                                 app.barBgColorStack.push({id: localChoice.id, data: localChoice.changedBarBgColor});
                                 app.styling.barBackgroundColor = localChoice.changedBarBgColor;
@@ -2636,7 +2650,7 @@
                             if (localChoice.changeBarIconColorIsOn && typeof localChoice.changedBarIconColor !== 'undefined') {
                                 if (typeof app.barIconColorStack === 'undefined') {
                                     app.barIconColorStack = [];
-                                    app.defaultBarIconColor = app.styling.barIconColor ?? '#0000008A';
+                                    app.defaultBarIconColor = typeof app.styling.barIconColor !== 'undefined' ? app.styling.barIconColor : '#0000008A';
                                 }
                                 app.barIconColorStack.push({id: localChoice.id, data: localChoice.changedBarIconColor});
                                 app.styling.barIconColor = localChoice.changedBarIconColor;
@@ -2644,7 +2658,7 @@
                             if (localChoice.changeBarTextColorIsOn && typeof localChoice.changedBarTextColor !== 'undefined') {
                                 if (typeof app.barTextColorStack === 'undefined') {
                                     app.barTextColorStack = [];
-                                    app.defaultBarTextColor = app.styling.barTextColor ?? '#000000';
+                                    app.defaultBarTextColor = typeof app.styling.barTextColor !== 'undefined' ? app.styling.barTextColor : '#000000';
                                 }
                                 app.barTextColorStack.push({id: localChoice.id, data: localChoice.changedBarTextColor});
                                 app.styling.barTextColor = localChoice.changedBarTextColor;
@@ -3018,7 +3032,7 @@
                                 if (typeof cMap !== 'undefined') {
                                     const fRow = cMap.row;
                                     const fChoice = cMap.choice;
-                                    deselectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                    if (selNum === 0 || fChoice.isSelectableMultiple) deselectForceActivate(localChoice, fChoice, fRow, forceNum);
                                 } else {
                                     const groupData = groupMap.get(item[0]);
                                     if (typeof groupData !== 'undefined') {
@@ -3028,7 +3042,7 @@
                                             if (typeof cMap !== 'undefined') {
                                                 const fRow = cMap.row;
                                                 const fChoice = cMap.choice;
-                                                deselectForceActivate(localChoice, fChoice, fRow, forceNum);
+                                                if (selNum === 0 || fChoice.isSelectableMultiple) deselectForceActivate(localChoice, fChoice, fRow, forceNum);
                                             }
                                         }
                                     }
@@ -3039,6 +3053,7 @@
 
                     if (localChoice.discountOther) {
                         if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined' && (localChoice.stackableDiscount || !localChoice.stackableDiscount && localChoice.multipleUseVariable === 1)) {
+                            if (typeof localChoice.discountPointTypes === 'undefined') localChoice.discountPointTypes = [];
                             if (localChoice.isDisChoices) {
                                 const dList = new Set<string>();
                                 if (typeof localChoice.discountRows !== 'undefined') {
@@ -3049,7 +3064,7 @@
                                                 const dChoice = dRow.objects[j];
                                                 for (let k = 0; k < dChoice.scores.length; k++) {
                                                     const score = dChoice.scores[k];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
                                                         deselectDiscount(localChoice, score);
                                                     }
                                                 }
@@ -3066,7 +3081,7 @@
                                                 const dChoice = cMap.choice;
                                                 for (let j = 0; j < dChoice.scores.length; j++) {
                                                     const score = cMap.choice.scores[j];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1) && !dList.has(score.idx)) {
+                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1) && !dList.has(score.idx)) {
                                                         deselectDiscount(localChoice, score);
                                                     }
                                                 }
@@ -3084,7 +3099,7 @@
                                                 if (typeof cMap !== 'undefined') {
                                                     for (let k = 0; k < cMap.choice.scores.length; k++) {
                                                         const score = cMap.choice.scores[k];
-                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || (localChoice.discountPointTypes?.indexOf(score.id) ?? -1) !== -1)) {
+                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
                                                             deselectDiscount(localChoice, score);
                                                         }
                                                     }
@@ -3226,7 +3241,7 @@
                                 if (leng > 0) {
                                     app.styling.backgroundImage = app.bgImageStack[leng - 1].data;
                                 } else {
-                                    app.styling.backgroundImage = app.defaultBgImage ?? '';
+                                    app.styling.backgroundImage = typeof app.defaultBgImage !== 'undefined' ? app.defaultBgImage : '';
                                     delete app.bgImageStack;
                                 }
                             }
@@ -3240,7 +3255,7 @@
                                     if (leng > 0) {
                                         app.styling.backgroundColor = app.bgColorStack[leng - 1].data;
                                     } else {
-                                        app.styling.backgroundColor = app.defaultBgColor ?? '#FFFFFFFF';
+                                        app.styling.backgroundColor = typeof app.defaultBgColor !== 'undefined' ? app.defaultBgColor : '#FFFFFFFF';
                                         delete app.bgColorStack;
                                     }
                                 }
@@ -3258,7 +3273,7 @@
                                 if (leng > 0) {
                                     app.styling.barBackgroundColor = app.barBgColorStack[leng - 1].data;
                                 } else {
-                                    app.styling.barBackgroundColor = app.defaultBarBgColor ?? '#FFFFFFFF';
+                                    app.styling.barBackgroundColor = typeof app.defaultBarBgColor !== 'undefined' ? app.defaultBarBgColor : '#FFFFFFFF';
                                     delete app.barBgColorStack;
                                 }
                             }
@@ -3272,7 +3287,7 @@
                                 if (leng > 0) {
                                     app.styling.barIconColor = app.barIconColorStack[leng - 1].data;
                                 } else {
-                                    app.styling.barIconColor = app.defaultBarIconColor ?? '#0000008A';
+                                    app.styling.barIconColor = typeof app.defaultBarIconColor !== 'undefined' ? app.defaultBarIconColor : '#0000008A';
                                     delete app.barIconColorStack;
                                 }
                             }
@@ -3286,7 +3301,7 @@
                                 if (leng > 0) {
                                     app.styling.barTextColor = app.barTextColorStack[leng - 1].data;
                                 } else {
-                                    app.styling.barTextColor = app.defaultBarIconColor ?? '#000000';
+                                    app.styling.barTextColor = typeof app.defaultBarIconColor !== 'undefined' ? app.defaultBarIconColor : '#000000';
                                     delete app.barTextColorStack;
                                 }
                             }

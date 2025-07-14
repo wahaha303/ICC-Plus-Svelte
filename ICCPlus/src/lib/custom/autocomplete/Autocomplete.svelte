@@ -347,7 +347,7 @@
   let focusedIndex = $state(-1);
   let focusedItem: SMUIListItemAccessor | undefined = $state();
   let menuId: string =
-    restProps['menu$id'] ?? 'SMUI-autocomplete-' + counter++ + '-menu';
+    typeof restProps['menu$id'] !== 'undefined' ? restProps['menu$id'] : 'SMUI-autocomplete-' + counter++ + '-menu';
   let isOpen = $state(false);
   let visibleCounter = $state(24);
   let isAllSelected = $state(false);

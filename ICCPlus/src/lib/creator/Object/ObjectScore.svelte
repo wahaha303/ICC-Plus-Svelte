@@ -8,8 +8,8 @@
                 <Wrapper text="Create New Reqruirement">
                     <IconButton onclick={() => {dlgVariables.data = score; dlgVariables.currentDialog = 'appRequirement'}} ><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
-                <Wrapper text="Copy Requirement">
-                    <IconButton onclick={copyRequirement}><i class="mdi mdi-clipboard-outline"></i></IconButton>
+                <Wrapper text="Copy Score">
+                    <IconButton onclick={copyScore}><i class="mdi mdi-clipboard-outline"></i></IconButton>
                 </Wrapper>
             </div>
             <Wrapper text="Move Down">
@@ -105,8 +105,8 @@
         </div>
         <div class="row gy-3 p-2">
             {#each score.requireds as required, i}
-                <div class={col6}>
-                    <ObjectInnerReq required={required} />
+                <div class="{required.requireds.length > 0 ? 'col-12' : reqCol} p-2">
+                    <ObjectRequired required={required} isEditModeOn={true} data={score} index={i} isNotShown={true} />
                     <Button onclick={() => score.requireds.splice(i, 1)} class="w-100" variant="raised">
                         <Label>Delete</Label>
                     </Button>
@@ -167,10 +167,10 @@
     import DOMPurify from 'dompurify';
     import FormField from '@smui/form-field';
     import IconButton from '@smui/icon-button';
-    import ObjectInnerReq from './ObjectInnerReq.svelte';
+    import ObjectRequired from './ObjectRequired.svelte';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, optimizedPointTypes, snackbarVariables, dlgVariables, variableMap } from '$lib/store/store.svelte';
+    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, optimizedPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba } from '$lib/store/store.svelte';
     import type { Choice, Row, Score } from '$lib/store/types';
 
     let { isEditModeOn = false, score, row, choice, num = 0 }: { isEditModeOn?: boolean; score: Score; row?: Row; choice: Choice; num?: number } = $props();
@@ -179,6 +179,10 @@
         if (width > 300) return 'col-6';
         else return 'col-12';
     });
+    let reqCol = $derived.by(() => {
+        if (width > 400) return 'col-6';
+        else return 'col-12';
+    })
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let pointType = $derived(pointTypeMap.get(score.id));
@@ -215,12 +219,12 @@
         return '';
     });
     let scoreValue = $derived.by(() => {
-        let value = score.discountShow ? (score.discountScore ?? score.value) : score.value;
+        let value = score.discountShow ? (typeof score.discountScore !== 'undefined' ? score.discountScore : score.value) : score.value;
         value = Math.abs(value);
         if (!pointType?.allowFloat) {
             value = Math.floor(value);
         } else {
-            value = value % 1 === 0 ? value : parseFloat(value.toFixed(pointType.decimalPlaces ?? 2));
+            value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
         }
         if (pointType?.plussOrMinusAdded) {
             let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
@@ -235,7 +239,7 @@
             if (!pointType?.allowFloat) {
                 value = Math.floor(value);
             } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(pointType.decimalPlaces ?? 2));
+                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
@@ -252,7 +256,7 @@
             if (!pointType?.allowFloat) {
                 value = Math.floor(value);
             } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(pointType.decimalPlaces ?? 2));
+                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
@@ -264,7 +268,7 @@
     });
     let checkNegative = $derived.by(() => {
         if (score.discountShow) {
-            return (score.discountScore ?? score.value) < 0;
+            return (typeof score.discountScore !== 'undefined' ? score.discountScore : score.value) < 0;
         }
         return score.value < 0;
     });
@@ -274,20 +278,20 @@
         style.push(`font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (pointType?.pointColorsIsOn) {
             if (checkNegative) {
-                style.push(`color: ${pointType.positiveColor};`);
+                style.push(`color: ${hexToRgba(pointType.positiveColor)};`);
             } else {
-                style.push(`color: ${pointType.negativeColor};`);
+                style.push(`color: ${hexToRgba(pointType.negativeColor)};`);
             }
         } else {
-            style.push(`color: ${textStyle.scoreTextColor};`);
+            style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         }
         if (!isEnabled) {
             if (filterStyle.reqScoreTextColorIsOn)  {
-                style.push(`color: ${filterStyle.reqFilterSTextColor}`);
+                style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
             }
         } else if (choice.isActive) {
             if (filterStyle.selScoreTextColorIsOn) {
-                style.push(`color: ${filterStyle.selFilterSTextColor}`);
+                style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
             }
         }
 
@@ -296,9 +300,9 @@
     let isNegIcon = $derived(pointType?.negativeIconIsOn && checkNegative);
     let imageSidePlacement = $derived(isNegIcon ? pointType?.negativeImageSidePlacement : pointType?.imageSidePlacement);
     let imageOnSide = $derived(isNegIcon ? pointType?.negativeImageOnSide : pointType?.imageOnSide);
-    let iconImage = $derived((isNegIcon ? pointType?.negativeImage : pointType?.image) ?? '');
-    let iconWidth = $derived((isNegIcon ? pointType?.negativeIconWidth : pointType?.iconWidth) ?? 0);
-    let iconHeight = $derived((isNegIcon ? pointType?.negativeIconHeight : pointType?.iconHeight) ?? 0);
+    let iconImage = $derived((isNegIcon ? pointType?.negativeImage : pointType?.image) || '');
+    let iconWidth = $derived((isNegIcon ? pointType?.negativeIconWidth : pointType?.iconWidth) || 0);
+    let iconHeight = $derived((isNegIcon ? pointType?.negativeIconHeight : pointType?.iconHeight) || 0);
     let iconBeforeTextL = $derived(!imageSidePlacement && !imageOnSide);
     let iconBeforeTextR = $derived(!imageSidePlacement && imageOnSide);
     let iconAfterTextL = $derived(imageSidePlacement && !imageOnSide);
@@ -306,9 +310,7 @@
 
     function moveScoreDown() {
         if (num < choice.scores.length - 1) {
-            console.log(score.id, score);
             choice.scores.splice(num, 2, choice.scores[num + 1], choice.scores[num]);
-            console.log(score.id, score);
         }
     }
 
@@ -317,10 +319,10 @@
             choice.scores.splice(num - 1, 2, choice.scores[num], choice.scores[num - 1]);
         }
     }
-    
-    function copyRequirement() {
-        app.tmpRequired.length = 0;
-        app.tmpRequired.push(...score.requireds);
+
+    function copyScore() {
+        app.tmpScore.length = 0;
+        app.tmpScore.push(score);
         snackbarVariables.labelText = 'Copied to clipboard.';
         snackbarVariables.isOpen = true;
     }

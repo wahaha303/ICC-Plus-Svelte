@@ -92,7 +92,7 @@
 
   export function getAttr(name: string) {
     return name in internalAttrs
-      ? (internalAttrs[name] ?? null)
+      ? (typeof internalAttrs[name] !== 'undefined' ? internalAttrs[name] : null)
       : getElement().getAttribute(name);
   }
 

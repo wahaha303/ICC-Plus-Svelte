@@ -11,6 +11,7 @@
   {placeholder}
   {...valueProp}
   {...internalAttrs}
+  {step}
   {...restProps}
   oninput={(e) => {
     if (type !== 'file') {
@@ -79,6 +80,7 @@
      * When the value of the input is "", set value prop to undefined.
      */
     emptyValueUndefined?: boolean;
+    step?: string;
   };
   let {
     use = [],
@@ -95,6 +97,7 @@
     initialInvalid = false,
     emptyValueNull = value === null,
     emptyValueUndefined = value === undefined,
+    step = "any",
     ...restProps
   }: OwnProps & SmuiAttrs<'input', keyof OwnProps> = $props();
 
@@ -149,8 +152,8 @@
             value = '0';
             e.target.value = '0';
           } else if (e.inputType === 'insertFromPaste' && !isNaN(parseInt(e.data))) { 
-            value = parseInt(e.data);
-            e.target.value = parseInt(e.data);
+            value = parseFloat(e.data);
+            e.target.value = parseFloat(e.data);
           } else {
             value = '0';
             e.target.value = '0';
@@ -181,7 +184,7 @@
 
   export function getAttr(name: string) {
     return name in internalAttrs
-      ? (internalAttrs[name] ?? null)
+      ? (typeof internalAttrs[name] !== 'undefined' ? internalAttrs[name] : null)
       : getElement().getAttribute(name);
   }
 

@@ -28,7 +28,7 @@
 
 <script lang="ts">
     import DOMPurify from 'dompurify';
-    import { checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, variableMap } from '$lib/store/store.svelte';
+    import { checkActivated, checkRequirements, getStyling, globalReqMap, hexToRgba, pointTypeMap, sanitizeArg, variableMap } from '$lib/store/store.svelte';
     import type { Choice, Row, Score } from '$lib/store/types';
 
     let { score, row, choice }: { isEditModeOn?: boolean; score: Score; row: Row; choice: Choice } = $props();
@@ -68,12 +68,12 @@
         return '';
     });
     let scoreValue = $derived.by(() => {
-        let value = score.discountShow ? (score.discountScore ?? score.value) : score.value;
+        let value = score.discountShow ? (typeof score.discountScore !== 'undefined' ? score.discountScore : score.value) : score.value;
         value = Math.abs(value);
         if (!pointType?.allowFloat) {
             value = Math.floor(value);
         } else {
-            value = value % 1 === 0 ? value : parseFloat(value.toFixed(pointType.decimalPlaces ?? 2));
+            value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
         }
         if (pointType?.plussOrMinusAdded) {
             let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
@@ -88,7 +88,7 @@
             if (!pointType?.allowFloat) {
                 value = Math.floor(value);
             } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(pointType.decimalPlaces ?? 2));
+                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
@@ -105,7 +105,7 @@
             if (!pointType?.allowFloat) {
                 value = Math.floor(value);
             } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(pointType.decimalPlaces ?? 2));
+                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
@@ -117,7 +117,7 @@
     });
     let checkNegative = $derived.by(() => {
         if (score.discountShow) {
-            return (score.discountScore ?? score.value) < 0;
+            return (typeof score.discountScore !== 'undefined' ? score.discountScore : score.value) < 0;
         }
         return score.value < 0;
     });
@@ -127,20 +127,20 @@
         style.push(`font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (pointType?.pointColorsIsOn) {
             if (checkNegative) {
-                style.push(`color: ${pointType.positiveColor};`);
+                style.push(`color: ${hexToRgba(pointType.positiveColor)};`);
             } else {
-                style.push(`color: ${pointType.negativeColor};`);
+                style.push(`color: ${hexToRgba(pointType.negativeColor)};`);
             }
         } else {
-            style.push(`color: ${textStyle.scoreTextColor};`);
+            style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         }
         if (!isEnabled) {
             if (filterStyle.reqScoreTextColorIsOn)  {
-                style.push(`color: ${filterStyle.reqFilterSTextColor}`);
+                style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
             }
         } else if (choice.isActive) {
             if (filterStyle.selScoreTextColorIsOn) {
-                style.push(`color: ${filterStyle.selFilterSTextColor}`);
+                style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
             }
         }
 
@@ -149,9 +149,9 @@
     let isNegIcon = $derived(pointType?.negativeIconIsOn && checkNegative);
     let imageSidePlacement = $derived(isNegIcon ? pointType?.negativeImageSidePlacement : pointType?.imageSidePlacement);
     let imageOnSide = $derived(isNegIcon ? pointType?.negativeImageOnSide : pointType?.imageOnSide);
-    let iconImage = $derived((isNegIcon ? pointType?.negativeImage : pointType?.image) ?? '');
-    let iconWidth = $derived((isNegIcon ? pointType?.negativeIconWidth : pointType?.iconWidth) ?? 0);
-    let iconHeight = $derived((isNegIcon ? pointType?.negativeIconHeight : pointType?.iconHeight) ?? 0);
+    let iconImage = $derived((isNegIcon ? pointType?.negativeImage : pointType?.image) || '');
+    let iconWidth = $derived((isNegIcon ? pointType?.negativeIconWidth : pointType?.iconWidth) || 0);
+    let iconHeight = $derived((isNegIcon ? pointType?.negativeIconHeight : pointType?.iconHeight) || 0);
     let iconBeforeTextL = $derived(!imageSidePlacement && !imageOnSide);
     let iconBeforeTextR = $derived(!imageSidePlacement && imageOnSide);
     let iconAfterTextL = $derived(imageSidePlacement && !imageOnSide);

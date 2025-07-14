@@ -505,7 +505,7 @@
   let selectAnchor: HTMLDivElement;
   let selectAnchorAttrs: { [k: string]: string | undefined } = $state({});
   let selectedIndex = $state(-1);
-  const menuId = $derived(restProps['menu$id'] ?? inputId + '-menu');
+  const menuId = $derived(typeof restProps['menu$id'] !== 'undefined' ? restProps['menu$id'] : inputId + '-menu');
   let helperId: string | undefined = $state();
   let addLayoutListener = getContext<AddLayoutListener | undefined>(
     'SMUI:addLayoutListener',
@@ -767,7 +767,7 @@
 
   function getSelectAnchorAttr(name: string) {
     return name in selectAnchorAttrs
-      ? (selectAnchorAttrs[name] ?? null)
+      ? (typeof selectAnchorAttrs[name] !== 'undefined' ? selectAnchorAttrs[name] : null)
       : getElement().getAttribute(name);
   }
 

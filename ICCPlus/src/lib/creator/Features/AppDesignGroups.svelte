@@ -279,14 +279,14 @@
         getScrollElement: () => rowVirtualListEl,
         estimateSize: () => 410,
         overscan: 1,
-        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 410)
+        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
     }));
     let objectVirtualizer = $state(createVirtualizer({
         count: objectCount(),
         getScrollElement: () => objectVirtualListEl,
         estimateSize: () => 410,
         overscan: 1,
-        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 410)
+        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
     }));
     let rowTotalHeight = $derived.by(() => {
         return $rowVirtualizer.getTotalSize()
@@ -304,15 +304,33 @@
     onMount(() => {
         $rowVirtualizer.setOptions({
             getScrollElement: () => rowVirtualListEl,
-            estimateSize: () => 410,
-            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 410)
+            estimateSize: (index) => rowEstimateSize(index - 1),
+            measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
         });
         $objectVirtualizer.setOptions({
             getScrollElement: () => objectVirtualListEl,
-            estimateSize: () => 410,
-            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 410)
+            estimateSize: (index) => objectEstimateSize(index - 1),
+            measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
         });
     });
+
+    function rowEstimateSize(index: number) {
+        const group = typeof app.rowDesignGroups !== 'undefined' ? app.rowDesignGroups[index] : null;
+        if (!group) {
+            return 410;
+        }
+        const height = 410 + (Math.max(group.backpackElements.length, group.elements.length) * 24);
+        return height;
+    }
+
+    function objectEstimateSize(index: number) {
+        const group = typeof app.objectDesignGroups !== 'undefined' ? app.objectDesignGroups[index] : null;
+        if (!group) {
+            return 410;
+        }
+        const height = 410 + (Math.max(group.backpackElements.length, group.elements.length) * 24);
+        return height;
+    }
 
     function rowObserveResize(el: HTMLDivElement, index: number) {
 
@@ -402,6 +420,22 @@
                         }
                     }
                 }
+            }
+        }
+
+        if (isRow) {
+            if (rowVirtualListEl) {
+                $rowVirtualizer.setOptions({
+                    count: rowCount()
+                });
+                scrollToLastRow($rowVirtualizer, rowVirtualListEl, num + 1);
+            }
+        } else {
+            if (objectVirtualListEl) {
+                $objectVirtualizer.setOptions({
+                    count: objectCount()
+                });
+                scrollToLastRow($objectVirtualizer, objectVirtualListEl, num + 1);
             }
         }
     }

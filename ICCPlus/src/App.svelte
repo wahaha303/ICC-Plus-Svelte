@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2025-07-10T18:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2025-07-14T16:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -58,7 +58,7 @@
     import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import ViewerMain from '$lib/viewer/ViewerMain.svelte';
     import InfoMain from '$lib/information/InfoMain.svelte';
-    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, snackbarVariables, appVersion, getDate } from '$lib/store/store.svelte';
+    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, snackbarVariables, appVersion, getDate, isMediaSupport } from '$lib/store/store.svelte';
     import { onDestroy, onMount } from 'svelte';
 
     let open = $state(true);
@@ -72,19 +72,36 @@
 
     function autoModeWatcher() {
 		let t = localStorage.getItem('theme') as string;
+        let themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
+        let themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
+        let isSupport = isMediaSupport();
 
 		if (t === 'dark') {
-			let themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
-            let themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
+            if (isSupport) {
+                if (themeDarkLink) {
+                    themeDarkLink.media = 'screen and (prefers-color-scheme: light)';
+                }
+                if (themeLightLink) {
+                    themeLightLink.media = 'screen and (prefers-color-scheme: dark)';
+                }
+                currentTheme.value = 'dark';
+            } else {
+                if (themeDarkLink) {
+                    themeDarkLink.media = 'all';
+                }
 
-			if (themeDarkLink) {
-				themeDarkLink.media="screen and (prefers-color-scheme: light)";
-			}
-            if (themeLightLink) {
-                themeLightLink.media="screen and (prefers-color-scheme: dark)";
+                if (themeLightLink) {
+                    themeLightLink.media = 'not all';
+                }
             }
-            currentTheme.value = 'dark';
-		}
+		} else if (!isSupport) {
+            if (themeLightLink) {
+                themeLightLink.media = 'all';
+            }
+            if (themeDarkLink) {
+                themeDarkLink.media = 'not all';
+            }
+        }
 	}
 
     onMount(() => {
@@ -92,16 +109,10 @@
         autoModeWatcher();
         initStoreSaves();
         initBuildSaves();
-
-        const handler = (e: BeforeUnloadEvent) => {
-            e.preventDefault();
-            e.returnValue = '';
-        };
-        window.addEventListener('beforeunload', handler);
+        
         if (app.enableShortcut) {
             window.addEventListener('keydown', setShortcut);
         }
-        
 
         onDestroy(() => {
             bgmPlayer.update(p => {
@@ -110,7 +121,6 @@
             });
 
             window.removeEventListener('keydown', setShortcut);
-            window.removeEventListener('beforeunload', handler);
         });
     });
 

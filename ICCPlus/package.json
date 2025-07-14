@@ -1,12 +1,12 @@
 {
   "name": "iccplus",
   "private": true,
-  "version": "2.0.8",
+  "version": "2.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "build": "vite build && vite build --config vite.config.desktop.ts",
+    "preview": "vite build && vite preview",
     "prepare": "npm run smui-theme-light && npm run smui-theme-dark",
     "smui-theme-light": "smui-theme compile public/css/smui.css -i src/theme",
     "smui-theme-dark": "smui-theme compile public/css/smui-dark.css -i src/theme/dark",
@@ -14,16 +14,18 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^5.1.0",
+    "@sveltejs/vite-plugin-svelte": "^6.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/canvas-size": "^1.2.2",
     "@types/node": "^24.0.12",
     "@types/youtube": "^0.1.2",
+    "@vitejs/plugin-legacy": "^7.0.0",
+    "core-js": "^3.44.0",
     "smui-theme": "^8.0.0-beta.3",
     "svelte-check": "^4.1.6",
     "terser": "^5.43.1",
     "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^7.0.4"
   },
   "dependencies": {
     "@smui-extra/accordion": "^8.0.0-beta.3",
@@ -56,6 +58,7 @@
     "jszip": "^3.10.1",
     "patch-package": "^8.0.0",
     "propper": "^1.0.4",
+    "resize-observer-polyfill": "^1.5.1",
     "ress": "^5.0.2",
     "svelte": "^5.34.7",
     "svelte-awesome-color-picker": "^4.0.2",

@@ -86,8 +86,14 @@
             https://github.com/wahaha303/ICCPlus/releases/latest
         `
     }, {
+        title: 'Can I use a single Viewer for multiple CYOAs?',
+        text: `Place the <b>css</b>, <b>js</b> and <b>fonts</b> folders (excluding the loading.css file) in your desired directory.
+        Then, open the <b>index.html</b> file and modify the path in <code>&lt;script src="./js/core.js"&gt;&lt;/script&gt;</code> to match the location of the <b>core.js</b> file.
+        After that, each CYOA directory only needs to contain the <b>index.html</b>, <b>css/loading.css</b>, and <b>project.json</b> files.
+        `
+    }, {
         title: 'Can I create static Image CYOA\'s with this?',
-        text: `Yes, yes you can!
+        text: `Yes, you can!
                 In the top menu of the Viewer Mode, you will see a button labeled "Download image". Click this button to start downloading the image of your project. The larger your project is, the longer it may take for the download to begin, and the bigger the resulting file will be.
 
                 If your project is too large, it will be automatically split into multiple image files. If you see <i>\'_part\'</i> at the end of the downloading file names, please do not leave the page until all parts have finished downloading.
@@ -164,6 +170,29 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.1.0 / ${getDate('2025-07-14T16:00:00Z')}`,
+        text: `<span style="color: green">Design</span>
+        - Fixed issue where gradient was not rendering.
+        - Fixed issue where importing private styling didn't work properly.
+
+        <span style="color: green">Choice</span>
+        - Added option to confirm dialog before select.
+        - Added option to copy Score. To paste, right-click Create button.
+        - Added option to copy Addon. To paste, right-click Create button.
+        - Fixed issue where score was not recalculated when choice was deselected.
+
+        <span style="color: green">Requirement</span>
+        - Added option to add requirements in Score/Addon's requirements.
+        - Added option to check Word's text.
+
+        <span style="color: green">UI</span>
+        - Fixed issue where initial UI overlapped in some dialogs.
+
+        <span style="color: green">Miscellaneous</span>
+        - Extended compatibility with older browser versions.
+        `
+    }, {
+        open: false,
         title: `v2.0.1 ~ v2.0.8 / ${getDate('2025-07-10T18:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where whitespace characters in Row's Title occupied space in layout.
@@ -192,6 +221,39 @@
 
         <span style="color: green">Miscellaneous</span>
         - Fixed issue where <a> tags with target="_blank" were not working.
+        `
+    }, {
+        open: false,
+        title: `v2.0.1 ~ v2.0. / ${getDate('2025-07-12T12:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where whitespace characters in Row's Title occupied space in layout.
+        
+        <span style="color: green">Choice</span>
+        - Fixed issue where score didn't update correctly when lower limit set to negative value in Multiple Select.
+        - Fixed issue where score value didn't display if point-type not assigned.
+        - Fixed issue where canceling the discount choice caused incorrect score calculation.
+        - Fixed issue where choices were sticking together when 'Identical Height' was disabled.
+        - Fixed issue where gradient was not rendering.
+
+        <span style="color: green">Requirement</span>
+        - Fixed issue where 'X of These is Not Selected' requirement was not working properly.
+
+        <span style="color: green">Global Settings</span>
+        - Changed minimum screen width for applying maximum choices per row from 960px to 760px.
+        - Added option to toggle adding prefix when generating ID.
+
+        <span style="color: green">Backpack</span>
+        - Fixed issue where separate background was not displayed in Viewer mode even when 'Use Separate Design' was enabled for Backpack.
+
+        <span style="color: green">Point Bar</span>
+        - Adjusted point position on the point bar to better match the previous settings.
+
+        <span style="color: green">Word</span>
+        - Fixed issue where Word didn't work properly when one Word ID was a substring of another.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where <a> tags with target="_blank" were not working.
+        - Extended compatibility with older browser versions.
         `
     }, {
         open: false,

@@ -238,6 +238,14 @@
             app.globalRequirements.splice(num + 1, 0, clone);
             globalReqMap.set(id, app.globalRequirements[num + 1]);
         }
+
+        if (app.globalRequirements!.length > 3) {
+            $virtualizer.setOptions({
+                count: rowCount()
+            });
+
+            scrollToLastRow($virtualizer, virtualListEl, num + 1);
+        }
     }
 
     function createNewGlobalReq() {

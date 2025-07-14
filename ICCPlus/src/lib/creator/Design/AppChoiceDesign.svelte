@@ -195,7 +195,9 @@
                                 {/snippet}
                             </FormField>
                             {#if styling.objectGradientIsOn}
-                                <Textfield bind:value={() => styling.objectGradient?? '', (e) => styling.objectGradient = e} label="Gradient" variant="filled" input$placeholder="to left, blue, red" />
+                                <Textfield bind:value={() => styling.objectGradient?? '', (e) => styling.objectGradient = e} label="Gradient when Not Selected" variant="filled" input$placeholder="to left, blue, red" />
+                                <Textfield bind:value={() => styling.objectGradientOnSelect?? '', (e) => styling.objectGradientOnSelect = e} label="Gradient when Selected" variant="filled" input$placeholder="to left, blue, red" />
+                                <Textfield bind:value={() => styling.objectGradientOnReq?? '', (e) => styling.objectGradientOnReq = e} label="Gradient when Missing Requirement" variant="filled" input$placeholder="to left, blue, red" />
                                 <div class="col-12">You might need to leave for the main menu if things stop updating, using something like (green, green) works. <a href="https://www.w3schools.com/css/css3_gradients.asp">https://www.w3schools.com/css/css3_gradients.asp</a></div>
                             {/if}
                         </div>

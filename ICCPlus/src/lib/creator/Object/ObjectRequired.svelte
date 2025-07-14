@@ -18,38 +18,40 @@
         </div>
         <div class="row">
             <div class="col-12">
-                <FormField class="w-100">
-                    <Checkbox bind:checked={required.showRequired} onchange={() => {
-                        if (!required.showRequired) {
-                            delete required.hideRequired;
-                        }
-                    }} class="check-scale" />
-                    {#snippet label()}
-                        Show Requirement
-                    {/snippet}
-                </FormField>
-                {#if required.showRequired}
+                {#if !isNotShown}
                     <FormField class="w-100">
-                        <Checkbox bind:checked={() => required.hideRequired?? false, (e) => required.hideRequired = e} class="check-scale" />
-                        {#snippet label()}
-                            Hide when Requirement is met
-                        {/snippet}
-                    </FormField>
-                    <FormField class="w-100">
-                        <Checkbox bind:checked={() => required.customTextIsOn?? false, (e) => required.customTextIsOn = e} onchange={() => {
-                            if (!required.customTextIsOn) {
-                                delete required.customText;
+                        <Checkbox bind:checked={required.showRequired} onchange={() => {
+                            if (!required.showRequired) {
+                                delete required.hideRequired;
                             }
                         }} class="check-scale" />
                         {#snippet label()}
-                            Use custom requirement text
+                            Show Requirement
                         {/snippet}
                     </FormField>
-                    {#if required.customTextIsOn}
-                        <Textfield bind:value={() => required.customText?? '', (e) => required.customText = e} label="Custom Text" variant="filled" />
-                    {:else}
-                        <Textfield bind:value={required.beforeText} label="Text Before" variant="filled" />
-                        <Textfield bind:value={required.afterText} label="Text After" variant="filled" />
+                    {#if required.showRequired}
+                        <FormField class="w-100">
+                            <Checkbox bind:checked={() => required.hideRequired?? false, (e) => required.hideRequired = e} class="check-scale" />
+                            {#snippet label()}
+                                Hide when Requirement is met
+                            {/snippet}
+                        </FormField>
+                        <FormField class="w-100">
+                            <Checkbox bind:checked={() => required.customTextIsOn?? false, (e) => required.customTextIsOn = e} onchange={() => {
+                                if (!required.customTextIsOn) {
+                                    delete required.customText;
+                                }
+                            }} class="check-scale" />
+                            {#snippet label()}
+                                Use custom requirement text
+                            {/snippet}
+                        </FormField>
+                        {#if required.customTextIsOn}
+                            <Textfield bind:value={() => required.customText?? '', (e) => required.customText = e} label="Custom Text" variant="filled" />
+                        {:else}
+                            <Textfield bind:value={required.beforeText} label="Text Before" variant="filled" />
+                            <Textfield bind:value={required.afterText} label="Text After" variant="filled" />
+                        {/if}
                     {/if}
                 {/if}
                 <div>
@@ -95,10 +97,10 @@
     import ObjectInnerReq from './ObjectInnerReq.svelte';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import type { Choice, Requireds } from '$lib/store/types';
+    import type { Row, Choice, Addon, Requireds, Score } from '$lib/store/types';
     import { app, globalReqMap, replaceText, sanitizeArg, snackbarVariables, dlgVariables, checkReq, checkRequirements, getChoiceTitle } from '$lib/store/store.svelte';
     
-    let { isEditModeOn, required, scoreText, choice, index }: { isEditModeOn?: boolean; required: Requireds; scoreText?: string; choice?: Choice; index?: number } = $props();
+    let { isEditModeOn, required, scoreText, data, index, isNotShown }: { isEditModeOn?: boolean; required: Requireds; scoreText?: string; data?: Row | Choice | Score | Addon; index?: number; isNotShown?: boolean } = $props();
     
     let width = $state(0);
     let col6 = $derived.by(() => {
@@ -134,14 +136,14 @@
     }
 
     function moveReqLeft() {
-        if (typeof choice !== 'undefined' && typeof index !== 'undefined' && index > 0) {
-            choice.requireds.splice(index - 1, 2, choice.requireds[index], choice.requireds[index - 1]);
+        if (typeof data !== 'undefined' && typeof index !== 'undefined' && index > 0) {
+            data.requireds.splice(index - 1, 2, data.requireds[index], data.requireds[index - 1]);
         }
     }
 
     function moveReqRight() {
-        if (typeof choice !== 'undefined' && typeof index !== 'undefined' && index < choice.requireds.length - 1) {
-            choice.requireds.splice(index, 2, choice.requireds[index + 1], choice.requireds[index]);
+        if (typeof data !== 'undefined' && typeof index !== 'undefined' && index < data.requireds.length - 1) {
+            data.requireds.splice(index, 2, data.requireds[index + 1], data.requireds[index]);
         }
     }
 </script>

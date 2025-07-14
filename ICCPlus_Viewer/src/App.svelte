@@ -7,7 +7,7 @@
 <script lang="ts">
     import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import ViewerMain from '$lib/viewer/ViewerMain.svelte';
-    import { app, AppSchema, bgmPlayer, currentTheme, externalImages, hasAvif, initBuildSaves, initializeApp, removeNulls, snackbarVariables } from '$lib/store/store.svelte';
+    import { app, AppSchema, bgmPlayer, currentTheme, externalImages, hasAvif, initBuildSaves, initializeApp, removeNulls, snackbarVariables, isMediaSupport } from '$lib/store/store.svelte';
     import { onDestroy, onMount } from 'svelte';
 
     const loadingMessage = $state('Loading');
@@ -29,19 +29,36 @@
 
     function autoModeWatcher() {
 		let t = localStorage.getItem('theme') as string;
+        let themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
+        let themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
+        let isSupport = isMediaSupport();
 
 		if (t === 'dark') {
-			let themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
-            let themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
+            if (isSupport) {
+                if (themeDarkLink) {
+                    themeDarkLink.media = 'screen and (prefers-color-scheme: light)';
+                }
+                if (themeLightLink) {
+                    themeLightLink.media = 'screen and (prefers-color-scheme: dark)';
+                }
+                currentTheme.value = 'dark';
+            } else {
+                if (themeDarkLink) {
+                    themeDarkLink.media = 'all';
+                }
 
-			if (themeDarkLink) {
-				themeDarkLink.media="screen and (prefers-color-scheme: light)";
-			}
-            if (themeLightLink) {
-                themeLightLink.media="screen and (prefers-color-scheme: dark)";
+                if (themeLightLink) {
+                    themeLightLink.media = 'not all';
+                }
             }
-            currentTheme.value = 'dark';
-		}
+		} else if (!isSupport) {
+            if (themeLightLink) {
+                themeLightLink.media = 'all';
+            }
+            if (themeDarkLink) {
+                themeDarkLink.media = 'not all';
+            }
+        }
 	}
 
     async function loadImagesSequentially(images: Set<string>) {
@@ -243,21 +260,12 @@
         autoModeWatcher();
         initBuildSaves();
         loadProject();
-
-        const handler = (e: BeforeUnloadEvent) => {
-            e.preventDefault();
-            e.returnValue = '';
-        };
-        window.addEventListener('beforeunload', handler);
         
-
         onDestroy(() => {
             bgmPlayer.update(p => {
                 p?.destroy();
                 return null;
             });
-
-            window.removeEventListener('beforeunload', handler);
         });
     });
 </script>

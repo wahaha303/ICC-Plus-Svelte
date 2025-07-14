@@ -112,7 +112,7 @@
                             </FormField>
                             <div class="col-12 px-3">How the images fit inside of the addon.</div>
                             <div class="col-12 px-3">A textfield where you can decide the Size of the container will appear in Row Settings when the switch is on.</div>
-                            <div class="col-12">                                
+                            <div class="col-12">
                                 <Select class="mb-4" bind:value={() => styling.addonImgObjectFillStyle?? '', (e) => styling.addonImgObjectFillStyle = e} label="Object Fill" variant="filled">
                                     {#each fitStyles as fitStyle}
                                         <Option value={fitStyle.value}>{fitStyle.text}</Option>

@@ -110,13 +110,13 @@ img {
     flex-direction: row;
 }
 .justify-start {
-    justify-content: start;
+    justify-content: flex-start;
 }
 .justify-center {
     justify-content: center;
 }
 .justify-end {
-    justify-content: end;
+    justify-content: flex-end;
 }
 .justify-space-around {
     justify-content: space-around;

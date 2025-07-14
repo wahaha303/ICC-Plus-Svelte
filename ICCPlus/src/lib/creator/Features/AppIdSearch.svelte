@@ -61,12 +61,12 @@
         for (let i = 0; i < app.rows.length; i++) {
             const row = app.rows[i];
 
-            result.push(fields.map(item => JSON.stringify(row[item] ?? '')).join(','));
+            result.push(fields.map(item => JSON.stringify(row[item] || '')).join(','));
 
             for (let j = 0; j < row.objects.length; j++) {
                 const choice = row.objects[j];
 
-                result.push(fields.map(item => JSON.stringify(choice[item] ?? '')).join(','));
+                result.push(fields.map(item => JSON.stringify(choice[item] || '')).join(','));
             }
             result.push('');
         }
