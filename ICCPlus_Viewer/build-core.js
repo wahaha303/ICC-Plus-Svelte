@@ -19,9 +19,9 @@ const vendorChunk = Object.values(manifest).find(f => f.file.includes('chunk-ven
 const vendorCss = Object.values(manifest).find(f => f.file.includes('chunk-vendors.') && f.file.endsWith('.css'));
 
 let coreJs = `const currentScript = document.currentScript || document.getElementsByTagName('script')[document.getElementsByTagName('script').length - 1];
-    const basePath = new URL('../', currentScript.src).pathname;
+const basePath = new URL('../', currentScript.src).pathname;
 
-    function add(tag, attrs = {}) {
+function add(tag, attrs = {}) {
     var el = document.createElement(tag);
     for (var key in attrs) {
         if (key === 'text') el.textContent = attrs[key];

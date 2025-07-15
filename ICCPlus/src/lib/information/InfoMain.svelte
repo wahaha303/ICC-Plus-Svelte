@@ -170,6 +170,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.1.1 / ${getDate('2025-07-15T02:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where self-invalidating choices were not deselected upon selection.
+
+        <span style="color: green">Addon</span>
+        - Fixed issue where text-align didn't apply to short lines.
+        `
+    }, {
+        open: false,
         title: `v2.1.0 / ${getDate('2025-07-14T16:00:00Z')}`,
         text: `<span style="color: green">Design</span>
         - Fixed issue where gradient was not rendering.

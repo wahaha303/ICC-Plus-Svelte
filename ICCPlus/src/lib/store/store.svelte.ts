@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.1.0';
+export const appVersion = '2.1.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4829,7 +4829,7 @@ function selectedOneLess(localChoice: Choice, localRow: Row) {
 
     updateScores(localChoice, tmpScores, 0);
 }
-export function loadActivated(str: string) {
+export function loadActivated(str: string, isInit: boolean = false) {
     cleanActivated();
     const strList = str.split(',');
     
@@ -5543,7 +5543,9 @@ export async function loadFromDisk(valueTypeFiles: FileList | null) {
         const file = valueTypeFiles[0];
         const ext = file.type === 'application/json' ? 'json' : file.type === 'application/x-zip-compressed' ? 'zip' : 'error';
         const reader = new FileReader;
-
+        
+        snackbarVariables.labelText = 'Loading data...';
+        snackbarVariables.isOpen = true;
         reader.onload = async () => {
             try {
                 if (!reader.result) return;
@@ -5640,6 +5642,7 @@ function getMimeFromBlob(str: string) {
 }
 export function initializeApp(tempApp: any) {
     const keys = Object.keys(tempApp);
+
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
 
@@ -5965,7 +5968,7 @@ export function initializeApp(tempApp: any) {
     }
     
     if (app.activated.length > 0) {
-        loadActivated(app.activated.join(','));
+        loadActivated(app.activated.join(','), true);
     }
 
     if (typeof app.customCSS !== 'undefined') {

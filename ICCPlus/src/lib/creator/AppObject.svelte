@@ -1308,7 +1308,7 @@
                                 {/if}
                             {/if}
                         </span>
-                        <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                        <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
                             {#each choice.addons as addon}
                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                             {/each}
@@ -1362,7 +1362,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1374,7 +1374,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1417,7 +1417,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1440,7 +1440,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column pa-0 col justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -2356,7 +2356,6 @@
 
     function deselectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
         Array.from(activatedMap.entries()).forEach(([id]) => {
-            console.log(id);
             const cMap = choiceMap.get(id);
             if (typeof cMap !== 'undefined') {
                 const aRow = cMap.row;
@@ -3861,7 +3860,10 @@
 
                     selectUpdateScore(localChoice, tmpScores, 0);
                     activateTempChoices();
-
+                    
+                    if (!checkRequirements(localChoice.requireds) && localChoice.isActive) {
+                        deselectObject(localChoice, localRow);
+                    }
                 }
 
                 if (localChoice.customTextfieldIsOn && !isOverDlg) {
@@ -4515,6 +4517,9 @@
                     selectUpdateScore(localChoice, tmpScores, 0);
                     activateTempChoices();
 
+                    if (!checkRequirements(localChoice.requireds) && localChoice.isActive) {
+                        selectedOneLess(localChoice, localRow);
+                    }
                 }
 
                 if (reqCheck) {
