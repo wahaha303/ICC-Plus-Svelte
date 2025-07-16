@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.1.2';
+export const appVersion = '2.1.3';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3094,6 +3094,11 @@ export function cleanActivated() {
                 cChoice.width = cChoice.defaultWidth;
             }
 
+            if (!cChoice.isActive) {
+                delete cChoice.forcedActivated;
+                delete cChoice.activatedFrom;
+            }
+
             delete cChoice.templateStack;
             delete cChoice.widthStack;
 
@@ -3128,6 +3133,11 @@ export function cleanActivated() {
 
             if (typeof cChoice.defaultWidth !== 'undefined') {
                 cChoice.width = cChoice.defaultWidth;
+            }
+
+            if (!cChoice.isActive) {
+                delete cChoice.forcedActivated;
+                delete cChoice.activatedFrom;
             }
 
             delete cChoice.templateStack;
@@ -3569,8 +3579,8 @@ export function cleanActivated() {
         }
     }
 };
-function updateScores(localChoice: Choice, tmpScores: TempScore, count: number) {
-    Array.from(activatedMap.entries()).forEach(([id, val]) => {
+function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
+    Array.from(activatedMap.entries()).forEach(([id]) => {
         const cMap = choiceMap.get(id);
         if (typeof cMap !== 'undefined') {
             const aRow = cMap.row;
@@ -3604,43 +3614,63 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number) 
                                     delete aScore.tmpDisScore;
                             }
                         }
-                        const tmpScore = tmpScores.get(aScore.id) || 0;
-                        if (aChoice.isActive) {
-                            const afterSelected = checkRequirements(aScore.requireds);
-                            const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
-                            tmpActivated.delete(localChoice.id);
-                            aRow.currentChoices -= 1;
-                            point.startingSum += tmpScore;
-                            const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
-                            aRow.currentChoices += 1;
-                            point.startingSum -= tmpScore;
-                            if (beforeSelected !== afterSelected) {
-                                let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
-                                if (beforeSelected) {
-                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                        const mul = aChoice.multipleUseVariable;
-                                        
-                                        for (let j = mul - 1; j >= 0; j--) {
-                                            if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[j]) {
-                                                point.startingSum += scoreVal;
-                                                thisTmpScores.set(aScore.id, scoreVal);
-                                                aScore.isActiveMul[j] = false;
+                        if (!changedScores.has(aScore.idx)) {
+                            for (let j = 0; j < localChoice.scores.length; j++) {
+                                const lScore = localChoice.scores[j];
+                                const tmpScore = tmpScores.get(lScore.id) || 0;
+                                const lPoint = pointTypeMap.get(lScore.id);
+                                if (typeof lPoint !== 'undefined') {
+                                    if (aChoice.isActive) {
+                                        const afterSelected = checkRequirements(aScore.requireds);
+                                        const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                                        tmpActivated.delete(localChoice.id);
+                                        aRow.currentChoices -= 1;
+                                        lPoint.startingSum += tmpScore;
+                                        const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
+                                        aRow.currentChoices += 1;
+                                        lPoint.startingSum -= tmpScore;
+                                        if (beforeSelected !== afterSelected) {
+                                            let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                                            if (beforeSelected) {
+                                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                                    const mul = aChoice.multipleUseVariable;
+                                                    
+                                                    for (let k = mul - 1; k >= 0; k--) {
+                                                        if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[k]) {
+                                                            point.startingSum += scoreVal;
+                                                            thisTmpScores.set(aScore.id, scoreVal);
+                                                            aScore.isActiveMul[k] = false;
+                                                        }
+                                                    }
+                                                } else if (!aChoice.isSelectableMultiple) {
+                                                    if (aScore.isActive) {
+                                                        point.startingSum += scoreVal;
+                                                        thisTmpScores.set(aScore.id, scoreVal);
+                                                        delete aScore.isActive;
+                                                    }
+                                                }
+                                            } else {
+                                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                                    const mul = aChoice.multipleUseVariable;
+                                                    if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
+                                                    for (let k = mul - 1; k >= 0; k--) {
+                                                        if (!aScore.isActiveMul[k]) {
+                                                            point.startingSum -= scoreVal;
+                                                            thisTmpScores.set(aScore.id, scoreVal);
+                                                            aScore.isActiveMul[k] = true;
+                                                        }
+                                                    }
+                                                } else if (!aChoice.isSelectableMultiple) {
+                                                    if (!aScore.isActive) {
+                                                        point.startingSum -= scoreVal;
+                                                        thisTmpScores.set(aScore.id, scoreVal);
+                                                        aScore.isActive = true;
+                                                    }
+                                                }
                                             }
-                                        }
-                                    } else if (!aChoice.isSelectableMultiple) {
-                                        if (aScore.isActive) {
                                             isChanged = true;
-                                            point.startingSum += scoreVal;
-                                            thisTmpScores.set(aScore.id, scoreVal);
-                                            delete aScore.isActive;
+                                            changedScores.add(aScore.idx);
                                         }
-                                    }
-                                } else {
-                                    if (!aScore.isActive) {
-                                        isChanged = true;
-                                        point.startingSum -= scoreVal;
-                                        thisTmpScores.set(aScore.id, scoreVal);
-                                        aScore.isActive = true;
                                     }
                                 }
                             }
@@ -3648,7 +3678,7 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number) 
                     }
                 }
             }
-            if (isChanged) updateScores(aChoice, thisTmpScores, ++count);
+            if (isChanged) updateScores(aChoice, thisTmpScores, ++count, changedScores);
         }
     });
 };
@@ -4830,7 +4860,7 @@ function selectedOneLess(localChoice: Choice, localRow: Row) {
 
     updateScores(localChoice, tmpScores, 0);
 }
-export function loadActivated(str: string, isInit: boolean = false) {
+export function loadActivated(str: string) {
     cleanActivated();
     const strList = str.split(',');
     
@@ -5973,7 +6003,7 @@ export function initializeApp(tempApp: any) {
     }
     
     if (app.activated.length > 0) {
-        loadActivated(app.activated.join(','), true);
+        loadActivated(app.activated.join(','));
     }
 
     if (typeof app.customCSS !== 'undefined') {

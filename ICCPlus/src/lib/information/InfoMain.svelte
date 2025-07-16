@@ -170,10 +170,12 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.1.1 ~ v2.1.2 / ${getDate('2025-07-16T16:00:00Z')}`,
+        title: `v2.1.1 ~ v2.1.3 / ${getDate('2025-07-16T17:30:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where self-invalidating choices were not deselected upon selection.
         - Fixed issue where Other Choices Function was not rendering properly.
+        - Fixed issue where score was not recalculated when using point requirements.
+        - Fixed issue where forcibly activated choice didn't reset state when using Clean Selected Choices.
 
         <span style="color: green">Addon</span>
         - Fixed issue where text-align didn't apply to short lines.
