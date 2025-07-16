@@ -69,6 +69,16 @@
                                 </FormField>
                             </div>
                             <div class="col-12">
+                                <Wrapper text="Enabling this option may cause image downloads to fail or reduce the image resolution.">
+                                    <FormField>
+                                        <Switch bind:checked={viewerSettings.isSingleFile} color="secondary" class="switch-scale" />
+                                        {#snippet label()}
+                                            Download Images as Single File
+                                        {/snippet}
+                                    </FormField>
+                                </Wrapper>
+                            </div>
+                            <div class="col-12">
                                 <FormField>
                                     <Switch bind:checked={() => app.showMusicPlayer || false, (e) => app.showMusicPlayer = e} color="secondary" class="switch-scale" onchange={() => {
                                         if (app.showMusicPlayer) {
@@ -179,6 +189,7 @@
     import Textfield from '$lib/custom/textfield';
 	import { app, bgmPlayer, bgmVariables, choiceMap, buildAutoSave, buildAbortController, appVersion, viewerSettings } from '$lib/store/store.svelte';
 	import { get } from 'svelte/store';
+    import { Wrapper } from '$lib/custom/tooltip';
 
     let { open, onclose }: { open: boolean; onclose: () => void; } = $props();
     const objectWidths = [{

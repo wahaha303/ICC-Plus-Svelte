@@ -36,25 +36,25 @@
                                         <div class="col-12 mb-2">
                                             <div class="d-column">
                                                 <FormField>
-                                                    <Switch bind:checked={() => point.belowZeroNotAllowed?? false, (e) => point.belowZeroNotAllowed = e} color="secondary" class="switch-scale" />
+                                                    <Switch bind:checked={() => point.belowZeroNotAllowed ?? false, (e) => point.belowZeroNotAllowed = e} color="secondary" class="switch-scale" />
                                                     {#snippet label()}
                                                         This score is not allowed to go under 0.
                                                     {/snippet}
                                                 </FormField>
                                                 <FormField>
-                                                    <Switch bind:checked={() => point.isNotShownPointBar?? false, (e) => point.isNotShownPointBar = e} color="secondary" class="switch-scale" />
+                                                    <Switch bind:checked={() => point.isNotShownPointBar ?? false, (e) => point.isNotShownPointBar = e} color="secondary" class="switch-scale" />
                                                     {#snippet label()}
                                                         This score is not shown in the Point-Bar.
                                                     {/snippet}
                                                 </FormField>
                                                 <FormField>
-                                                    <Switch bind:checked={() => point.isNotShownObjects?? false, (e) => point.isNotShownObjects = e} color="secondary" class="switch-scale" />
+                                                    <Switch bind:checked={() => point.isNotShownObjects ?? false, (e) => point.isNotShownObjects = e} color="secondary" class="switch-scale" />
                                                     {#snippet label()}
                                                         This score is not shown in the Choices.
                                                     {/snippet}
                                                 </FormField>
                                                 <FormField>
-                                                    <Switch bind:checked={() => point.allowFloat?? false, (e) => point.allowFloat = e} onSMUISwitchChange={() => {
+                                                    <Switch bind:checked={() => point.allowFloat ?? false, (e) => point.allowFloat = e} onSMUISwitchChange={() => {
                                                         if (point.allowFloat) {
                                                             point.decimalPlaces = 2;
                                                         } else {
@@ -72,14 +72,14 @@
                                                     </Wrapper>
                                                 {/if}
                                                 <FormField>
-                                                    <Switch bind:checked={() => point.plussOrMinusAdded?? false, (e) => point.plussOrMinusAdded = e} color="secondary" class="switch-scale" />
+                                                    <Switch bind:checked={() => point.plussOrMinusAdded ?? false, (e) => point.plussOrMinusAdded = e} color="secondary" class="switch-scale" />
                                                     {#snippet label()}
                                                         Add a + or - in front of the scores.
                                                     {/snippet}
                                                 </FormField>
                                                 {#if point.plussOrMinusAdded}
                                                     <FormField class="ml-4">
-                                                        <Switch bind:checked={() => point.plussOrMinusInverted?? false, (e) => point.plussOrMinusInverted = e} color="secondary" class="switch-scale" />
+                                                        <Switch bind:checked={() => point.plussOrMinusInverted ?? false, (e) => point.plussOrMinusInverted = e} color="secondary" class="switch-scale" />
                                                         {#snippet label()}
                                                             Invert the + and -.
                                                         {/snippet}

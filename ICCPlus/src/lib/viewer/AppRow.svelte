@@ -115,7 +115,7 @@
         </div>
     {/if}
     {#if isEnabled}
-        <div class="row gx-0 m-0 p-0 justify-{row.rowJustify}">
+        <div class="row gx-0 m-0 p-0 {rowJustify}">
             {#if row.isResultRow}
                 {#each resultRow as val, i}
                     <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} />
@@ -147,6 +147,7 @@
     let rowImageBoxWidth = $derived(typeof rowImageStyle.rowImageBoxWidth !== 'undefined' ? rowImageStyle.rowImageBoxWidth : 50);
     let isEnabled = $derived(checkRequirements(row.requireds));
     let isButtonPressable = $derived(row.onlyIfNoChoices && row.currentChoices !== 0);
+    let rowJustify = $derived(row.rowJustify ? `justify-content-${row.rowJustify}` : '');
 
     let resultRow = $derived.by(() => {
         const result = [];

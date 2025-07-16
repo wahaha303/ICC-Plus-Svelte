@@ -369,7 +369,7 @@
         </div>
     {/if}
     {#if (bCreatorMode && row.isEditModeOn) || isEnabled}
-        <div class="row gx-0 m-0 p-0 justify-{row.rowJustify}">
+        <div class="row gx-0 m-0 p-0 {rowJustify}">
             {#if row.isResultRow}
                 {#each resultRow as val, i}
                     <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} />
@@ -483,6 +483,7 @@
         else return 'col-12';
     });
     let isButtonPressable = $derived(row.onlyIfNoChoices && row.currentChoices !== 0);
+    let rowJustify = $derived(row.rowJustify ? `justify-content-${row.rowJustify}` : '');
 
     let resultRow = $derived.by(() => {
         const result = [];

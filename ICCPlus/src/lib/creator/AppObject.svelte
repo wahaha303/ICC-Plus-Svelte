@@ -1308,7 +1308,7 @@
                                 {/if}
                             {/if}
                         </span>
-                        <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
+                        <div class="d-column pa-0 col w-100 {addonJustify}">
                             {#each choice.addons as addon}
                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                             {/each}
@@ -1362,7 +1362,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1374,7 +1374,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1417,7 +1417,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1440,7 +1440,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column pa-0 col-12 justify-content-{choice.addonJustify}">
+                                <div class="d-column pa-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1629,6 +1629,7 @@
     let isEnabled = $derived.by(() => {
         return checkRequirements(choice.requireds);
     });
+    let addonJustify = $derived(choice.addonJustify ? `justify-content-${choice.addonJustify}` : '');
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight);
     let oriRow = $derived.by(() => {

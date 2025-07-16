@@ -14,7 +14,7 @@
                         {#if slot.stored}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => {confirmDialog.action = () => loadLegacySave(i); confirmDialog.context = "Are you sure you want to load this project?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
+                                    <IconButton onclick={() => {confirmDialog.action = () => loadLegacySave(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
                                 </div>
                                 <div class="col-sm-10 col-8">
                                     <div class="col-12 pt-1">
@@ -38,7 +38,7 @@
                     {#if buildAutoSaveSlot.stored}
                         <div class="row gx-0" style="border-bottom: 1px solid">
                             <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                <IconButton onclick={() => {confirmDialog.action = () => loadAutoSave(); confirmDialog.context = "Are you sure you want to load this project?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-alpha-a-box-outline"></i></IconButton>
+                                <IconButton onclick={() => {confirmDialog.action = () => loadAutoSave(); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-alpha-a-box-outline"></i></IconButton>
                             </div>
                             <div class="col-sm-11 col-10">
                                 <div class="col-12 pt-1">
@@ -52,7 +52,7 @@
                         {#if slot.stored}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => {confirmDialog.action = () => loadApp(i); confirmDialog.context = "Are you sure you want to load this project?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
+                                    <IconButton onclick={() => {confirmDialog.action = () => loadApp(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
                                 </div>
                                 <div class="col-sm-10 col-8">
                                     <div class="col-12 pt-1">
@@ -61,7 +61,7 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => {confirmDialog.action = () => removeSave(i); confirmDialog.context = "Are you sure you want to delete this project?<br>This action cannot be undone."; currentDialog = "dlgCommon";}}><i class="mdi mdi-trash-can"></i></IconButton>
+                                    <IconButton onclick={() => {confirmDialog.action = () => removeSave(i); confirmDialog.context = "Are you sure you want to delete this build?<br>This action cannot be undone."; currentDialog = "dlgCommon";}}><i class="mdi mdi-trash-can"></i></IconButton>
                                 </div>
                             </div>
                         {:else}

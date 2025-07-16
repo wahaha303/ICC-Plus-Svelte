@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.1.1';
+export const appVersion = '2.1.2';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -638,6 +638,7 @@ export const snackbarVariables = $state<SnackBarVariables>({
 });
 export const viewerSettings = $state<ViewerSetting>({
     allowDeselect: false,
+    isSingleFile: false
 });
 export const autoSaveSlot = $state<SaveSlot>({
    stored: false,
@@ -5559,7 +5560,7 @@ export async function loadFromDisk(valueTypeFiles: FileList | null) {
                         snackbarVariables.labelText = 'Data loaded successfully.';
                         snackbarVariables.isOpen = true;
                     } else {
-                        snackbarVariables.labelText = 'Filed to load data.';
+                        snackbarVariables.labelText = 'Failed to load data.';
                         snackbarVariables.isOpen = true;
                         console.error(parsed.error);
                     }
@@ -5607,14 +5608,14 @@ export async function loadFromDisk(valueTypeFiles: FileList | null) {
                             snackbarVariables.labelText = 'Data loaded successfully.';
                             snackbarVariables.isOpen = true;
                         } else {
-                            snackbarVariables.labelText = 'Filed to load data.';
+                            snackbarVariables.labelText = 'Failed to load data.';
                             snackbarVariables.isOpen = true;
                             console.error(parsed.error);
                         }
                     }
                 }
             } catch (error) {
-                snackbarVariables.labelText = 'Filed to load data.';
+                snackbarVariables.labelText = 'Failed to load data.';
                 snackbarVariables.isOpen = true;
                 console.error(error);
             }
@@ -5693,6 +5694,10 @@ export function initializeApp(tempApp: any) {
                                 kObj.fadeOutTransitionTime = kObj.fadeTransitionTime;
                                 delete kObj.fadeTransitionTime;
                             }
+
+                            if (kObj.addToAllowChoice && typeof kObj.idOfAllowChoice === 'string') {
+                                kObj.idOfAllowChoice = [kObj.idOfAllowChoice];
+                            }
                             
                             if (typeof kObj.groups !== 'undefined') {
                                 for (let k = 0; k < kObj.groups.length; k++) {
@@ -5739,10 +5744,10 @@ export function initializeApp(tempApp: any) {
                     const kPoint = tempApp[key][i];
 
                     if (typeof kPoint.initValue === 'undefined') kPoint.initValue = kPoint.startingSum;
-                    if (typeof kPoint.positiveColor === 'object' && kPoint.positiveColor.hexa) kPoint.positiveColor = kPoint.positiveColor.hexa;
-                    if (typeof kPoint.negativeColor === 'object' && kPoint.negativeColor.hexa) kPoint.negativeColor = kPoint.negativeColor.hexa;
-                    if (typeof kPoint.privateColor === 'object' && kPoint.privateColor.hexa) kPoint.privateColor = kPoint.privateColor.hexa;
-                    if (typeof kPoint.privateNegativeColor === 'object' && kPoint.privateNegativeColor.hexa) kPoint.privateNegativeColor = kPoint.privateNegativeColor.hexa;
+                    if (typeof kPoint.positiveColor === 'object' && typeof kPoint.positiveColor.hexa !== 'undefined') kPoint.positiveColor = kPoint.positiveColor.hexa;
+                    if (typeof kPoint.negativeColor === 'object' && typeof kPoint.negativeColor.hexa !== 'undefined') kPoint.negativeColor = kPoint.negativeColor.hexa;
+                    if (typeof kPoint.privateColor === 'object' && typeof kPoint.privateColor.hexa !== 'undefined') kPoint.privateColor = kPoint.privateColor.hexa;
+                    if (typeof kPoint.privateNegativeColor === 'object' && typeof kPoint.privateNegativeColor.hexa !== 'undefined') kPoint.privateNegativeColor = kPoint.privateNegativeColor.hexa;
                 }
             } else if (key === 'groups') {
                 for (let i = 0; i < tempApp[key].length; i++) {
@@ -6165,18 +6170,27 @@ function waitForRenderFrames(frames = 2): Promise<void> {
 }
 export async function downloadAsImage(printDiv?: HTMLDivElement) {
     if (printDiv) {
+        let tmpElements: HTMLSpanElement[] = [];
         try {
             snackbarVariables.labelText = 'Downloading image...';
             snackbarVariables.isOpen = true;
             forceEagerImageLoading(printDiv);
             await waitForImagesToLoad(printDiv);
 
+            printDiv.querySelectorAll('span.d-flex').forEach((el) => {
+                const span = (el as HTMLSpanElement);
+                if (!span.style.height) {
+                    span.style.height = `${(el as HTMLSpanElement).offsetHeight + 1}px`;
+                    tmpElements.push(span);
+                }
+            });
+
             const maxArea = await canvasSize.maxArea({ usePromise: true });
             const maxHeight = maxArea.height;
             const divHeight = printDiv.offsetHeight;
             const divWidth = printDiv.offsetWidth;
 
-            if (divHeight > maxHeight) {
+            if (!viewerSettings.isSingleFile && divHeight > maxHeight) {
                 let offset = 0;
                 let part = 1;
                 const maxPart = Math.ceil(divHeight / maxHeight);
@@ -6188,6 +6202,38 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
                     snackbarVariables.labelText = `Splitting large image...(${part} / ${maxPart})`;
                     snackbarVariables.isOpen = true;
 
+                    if (app.styling.useBackpackDesign) {
+                        if (app.styling.backpackBgImage) {
+                            wrapper.style.backgroundImage = app.styling.backpackBgImage;
+                        }
+                        if (app.styling.backpackBgColor) {
+                            wrapper.style.backgroundColor = hexToRgba(app.styling.backpackBgColor);
+                        }
+                        if (app.styling.isBackpackBgRepeat) {
+                            wrapper.style.backgroundRepeat = 'repeat';
+                        } else if (app.styling.isBackpackBgFitIn) {
+                            wrapper.style.backgroundSize = '100% 100%';
+                        } else {
+                            wrapper.style.backgroundSize = 'cover';
+                        }
+                    } else {
+                        if (app.styling.backgroundImage) {
+                            wrapper.style.backgroundImage = app.styling.backgroundImage;
+                        }
+                        if (app.styling.backgroundColor) {
+                            wrapper.style.backgroundColor = hexToRgba(app.styling.backgroundColor);
+                        }
+                        if (app.styling.isBackgroundRepeat) {
+                            wrapper.style.backgroundRepeat = 'repeat';
+                        } else if (app.styling.isBackgroundFitIn) {
+                            wrapper.style.backgroundSize = '100% 100%';
+                        } else {
+                            wrapper.style.backgroundSize = 'cover';
+                        }
+                    }
+                    if (printDiv.parentElement && printDiv.parentElement.classList.contains('mdc-dialog__content')) {
+                        wrapper.classList.add('backpack-wrapper');
+                    }
                     wrapper.style.width = `${divWidth}px`;
                     wrapper.style.height = `${currentHeight}px`;
                     wrapper.style.overflow = 'hidden';
@@ -6199,22 +6245,20 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
                     wrapper.style.pointerEvents = 'none';
 
                     const clone = printDiv.cloneNode(true) as HTMLElement;
-                    deepCopyStyles(printDiv, clone);
                     forceEagerImageLoading(clone);
                     
-                    clone.style.transform = `translateY(-${offset}px)`;
-                    clone.style.willChange = 'transform';
-                    clone.style.backfaceVisibility = 'hidden';
+                    clone.style.position = 'relative';
+                    clone.style.top = `-${offset}px`;
 
                     wrapper.appendChild(clone);
                     document.body.appendChild(wrapper);
 
-                    await waitForImagesToLoad(clone);
-                    await waitForBorderImagesToLoad(clone);
+                    await waitForImagesToLoad(wrapper);
+                    await waitForBorderImagesToLoad(wrapper);
                     await waitForRenderFrames(5);
 
                     try {
-                        const blob = await toBlob(wrapper, { filter: (node) => {return !node.classList?.contains('mdc-top-app-bar') && !node.classList?.contains('hidden')}});
+                        const blob = await toBlob(wrapper, { filter: (node) => {return !node.classList?.contains('mdc-top-app-bar') && !node.classList?.contains('hidden') && node.nodeType !== Node.COMMENT_NODE} });
                         if (!blob) {
                             throw new Error('blob creation failed');
                         }
@@ -6224,9 +6268,12 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
 
                         a.href = url;
                         a.download = `Build_${getTimestamp()}_part${part++}.png`;
+                        a.target = '_blank';
                         a.click();
 
-                        URL.revokeObjectURL(url);
+                        setTimeout(() => {
+                            URL.revokeObjectURL(url);
+                        }, 1000);
                     } catch (error) {
                         snackbarVariables.labelText = 'Download failed: Restricted content detected.';
                         snackbarVariables.isOpen = true;
@@ -6240,7 +6287,7 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
                 snackbarVariables.labelText = 'Image downloads complete.';
                 snackbarVariables.isOpen = true;
             } else {
-                const blob = await toBlob(printDiv, { filter: (node) => {return !node.classList?.contains('mdc-top-app-bar') && !node.classList?.contains('hidden')}});
+                const blob = await toBlob(printDiv, { filter: (node) => {return !node.classList?.contains('mdc-top-app-bar') && !node.classList?.contains('hidden') && node.nodeType !== Node.COMMENT_NODE} });
                 if (!blob) {
                     throw new Error('blob creation failed');
                 }
@@ -6250,9 +6297,12 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
 
                 a.href = url;
                 a.download = `Build_${getTimestamp()}.png`;
+                a.target = '_blank';
                 a.click();
 
-                URL.revokeObjectURL(url);
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 1000);
 
                 snackbarVariables.labelText = 'Image download complete.';
                 snackbarVariables.isOpen = true;
@@ -6261,9 +6311,17 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
             snackbarVariables.labelText = 'Download failed: Restricted content detected.';
             snackbarVariables.isOpen = true;
             console.error(error);
+        } finally {
+            for (let i = 0; i < tmpElements.length; i++) {
+                const span = tmpElements[i];
+                span.style.removeProperty('height');
+                if (span.getAttribute('style')?.trim() === '') {
+                    span.removeAttribute('style');
+                }
+            }
         }
     } else {
-        snackbarVariables.labelText = 'Download failed: Restricted content detected.';
+        snackbarVariables.labelText = 'Download failed: Cannot find window.';
         snackbarVariables.isOpen = true;
     }
 }

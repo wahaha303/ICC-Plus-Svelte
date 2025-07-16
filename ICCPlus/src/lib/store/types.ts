@@ -1,7 +1,3 @@
-import type { SvelteMap } from "svelte/reactivity";
-import type { objectWidths } from "./store.svelte";
-
-
 export type filterStyling = {
     selFilterBlurIsOn?: boolean,
     selFilterBlur?: number,
@@ -928,5 +924,6 @@ export type SnackBarVariables = {
     isOpen: boolean
 };
 export type ViewerSetting = {
-    allowDeselect: boolean
+    allowDeselect: boolean,
+    isSingleFile: boolean
 };

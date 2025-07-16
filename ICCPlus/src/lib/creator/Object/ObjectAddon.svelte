@@ -406,7 +406,7 @@
     let addonText = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.addonText};text-align: ${textStyle.addonTextAlign};font-size: ${textStyle.addonTextTextSize}%;white-space: pre-line;`);
+        styles.push(`font-family: ${textStyle.addonText}; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATextColor)};`);
         } else if (isActive && filterStyle.selATextColorIsOn) {

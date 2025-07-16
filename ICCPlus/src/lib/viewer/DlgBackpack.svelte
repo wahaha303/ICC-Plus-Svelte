@@ -2,7 +2,7 @@
     bind:open
     escapeKeyAction={dlgVariables.currentDialog !== 'dlgBackpack' ? 'close' : ''}
     scrimClickAction={dlgVariables.currentDialog !== 'dlgBackpack' ? 'close' : ''}
-    surface$style="width: {typeof app.styling.backPackWidth !== 'undefined' ? app.styling.backPackWidth : 1200}px; max-width: calc(100vw - 32px);"
+    surface$style="width: {typeof app.styling.backPackWidth !== 'undefined' ? app.styling.backPackWidth : 1200}px; max-width: 100vw;"
     onSMUIDialogClosed={onclose}
 >
     <Title class="p-0 m-0 row" tabindex={0} autofocus>
@@ -24,7 +24,7 @@
             </div>
         </div>
     </Content>
-    <Actions>
+    <Actions class="p-0" style="min-height: 36px">
         <Button action="close">
             <Label class="dialog-actions--btn">Close</Label>
         </Button>
@@ -52,7 +52,7 @@
                 styles.push(`background-image: url('${app.styling.backpackBgImage}');`);
             }
             styles.push(`background-color: ${hexToRgba(app.styling.backpackBgColor)};`);
-            if (app.styling.isBackgroundRepeat) {
+            if (app.styling.isBackpackBgRepeat) {
                 styles.push(`background-repeat: repeat;`);
             } else if (app.styling.isBackpackBgFitIn) {
                 styles.push(`background-size: 100% 100%;`);

@@ -11,29 +11,3 @@ index f6b0d96..05937e8 100644
          .map((rule) => {
          const baseUrl = rule.parentStyleSheet
              ? rule.parentStyleSheet.href
-diff --git a/node_modules/html-to-image/lib/embed-webfonts.js b/node_modules/html-to-image/lib/embed-webfonts.js
-index c91538b..8f353ff 100644
---- a/node_modules/html-to-image/lib/embed-webfonts.js
-+++ b/node_modules/html-to-image/lib/embed-webfonts.js
-@@ -262,7 +262,7 @@ function getWebFontCSS(node, options) {
-                     usedFonts = getUsedFonts(node);
-                     return [4 /*yield*/, Promise.all(rules
-                             .filter(function (rule) {
--                            return usedFonts.has(normalizeFontFamily(rule.style.fontFamily));
-+                            return usedFonts.has(normalizeFontFamily(rule.style.getPropertyValue('font-family') || rule.style.fontFamily));
-                         })
-                             .map(function (rule) {
-                             var baseUrl = rule.parentStyleSheet
-diff --git a/node_modules/html-to-image/src/embed-webfonts.ts b/node_modules/html-to-image/src/embed-webfonts.ts
-index a84a699..2798a72 100644
---- a/node_modules/html-to-image/src/embed-webfonts.ts
-+++ b/node_modules/html-to-image/src/embed-webfonts.ts
-@@ -234,7 +234,7 @@ export async function getWebFontCSS<T extends HTMLElement>(
-   const cssTexts = await Promise.all(
-     rules
-       .filter((rule) =>
--        usedFonts.has(normalizeFontFamily(rule.style.fontFamily)),
-+        usedFonts.has(normalizeFontFamily(rule.style.getPropertyValue('font-family') || rule.style.fontFamily)),
-       )
-       .map((rule) => {
-         const baseUrl = rule.parentStyleSheet
