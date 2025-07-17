@@ -170,12 +170,13 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.1.1 ~ v2.1.3 / ${getDate('2025-07-16T17:30:00Z')}`,
+        title: `v2.1.1 ~ v2.1.4 / ${getDate('2025-07-17T06:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where self-invalidating choices were not deselected upon selection.
         - Fixed issue where Other Choices Function was not rendering properly.
         - Fixed issue where score was not recalculated when using point requirements.
         - Fixed issue where forcibly activated choice didn't reset state when using Clean Selected Choices.
+        - Fixed issue where justify didn't work properly.
 
         <span style="color: green">Addon</span>
         - Fixed issue where text-align didn't apply to short lines.
@@ -183,7 +184,7 @@
         <span style="color: green">Backpack</span>
         - Fixed issue where image downloads didn't work properly in some browsers.
 
-        <span style="color: green">Viewer - Global Settings</span>
+        <span style="color: green">Viewer - Settings</span>
         - Added option to download Backpack image as single file.
         `
     }, {
@@ -211,38 +212,7 @@
         `
     }, {
         open: false,
-        title: `v2.0.1 ~ v2.0.8 / ${getDate('2025-07-10T18:00:00Z')}`,
-        text: `<span style="color: green">Row</span>
-        - Fixed issue where whitespace characters in Row's Title occupied space in layout.
-        
-        <span style="color: green">Choice</span>
-        - Fixed issue where score didn't update correctly when lower limit set to negative value in Multiple Select.
-        - Fixed issue where score value didn't display if point-type not assigned.
-        - Fixed issue where canceling the discount choice caused incorrect score calculation.
-        - Fixed issue where choices were sticking together when 'Identical Height' was disabled.
-
-        <span style="color: green">Requirement</span>
-        - Fixed issue where 'X of These is Not Selected' requirement was not working properly.
-
-        <span style="color: green">Global Settings</span>
-        - Changed minimum screen width for applying maximum choices per row from 960px to 760px.
-        - Added option to toggle adding prefix when generating ID.
-
-        <span style="color: green">Backpack</span>
-        - Fixed issue where separate background was not displayed in Viewer mode even when 'Use Separate Design' was enabled for Backpack.
-
-        <span style="color: green">Point Bar</span>
-        - Adjusted point position on the point bar to better match the previous settings.
-
-        <span style="color: green">Word</span>
-        - Fixed issue where Word didn't work properly when one Word ID was a substring of another.
-
-        <span style="color: green">Miscellaneous</span>
-        - Fixed issue where <a> tags with target="_blank" were not working.
-        `
-    }, {
-        open: false,
-        title: `v2.0.1 ~ v2.0. / ${getDate('2025-07-12T12:00:00Z')}`,
+        title: `v2.0.1 ~ v2.0.8 / ${getDate('2025-07-12T12:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where whitespace characters in Row's Title occupied space in layout.
         

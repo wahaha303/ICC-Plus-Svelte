@@ -278,7 +278,7 @@
     let isEnabled = $derived.by(() => {
         return checkRequirements(choice.requireds);
     });
-    let addonJustify = $derived(choice.addonJustify ? `justify-content-${choice.addonJustify}` : '');
+    let addonJustify = $derived(choice.addonJustify ? `justify-${choice.addonJustify}` : '');
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived(objectStyle.objectHeight);
     let oriRow = $derived.by(() => {

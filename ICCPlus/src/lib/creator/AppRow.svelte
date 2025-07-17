@@ -483,7 +483,7 @@
         else return 'col-12';
     });
     let isButtonPressable = $derived(row.onlyIfNoChoices && row.currentChoices !== 0);
-    let rowJustify = $derived(row.rowJustify ? `justify-content-${row.rowJustify}` : '');
+    let rowJustify = $derived(row.rowJustify ? `justify-${row.rowJustify}` : '');
 
     let resultRow = $derived.by(() => {
         const result = [];
