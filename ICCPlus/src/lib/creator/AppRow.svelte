@@ -264,7 +264,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper text={row.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
                                     <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}
@@ -282,7 +282,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper text={row.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
                                     <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}
@@ -302,7 +302,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper text={row.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
                                     <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}
@@ -330,7 +330,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper text={row.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
                                     <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}
@@ -346,7 +346,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper text={row.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
                                     <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}

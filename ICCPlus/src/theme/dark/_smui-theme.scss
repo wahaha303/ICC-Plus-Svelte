@@ -68,3 +68,6 @@ a:visited {
 .title--text {
   color : rgba(255, 255, 255, .87);
 }
+input, textarea {
+  caret-color: #ccc !important;
+}

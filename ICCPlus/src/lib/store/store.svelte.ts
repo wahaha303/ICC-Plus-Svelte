@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.1.4';
+export const appVersion = '2.1.5';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -6209,8 +6209,8 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
 
             printDiv.querySelectorAll('span.d-flex').forEach((el) => {
                 const span = (el as HTMLSpanElement);
-                if (!span.style.height) {
-                    span.style.height = `${(el as HTMLSpanElement).offsetHeight + 1}px`;
+                if (!span.style.height && span.offsetHeight > 0) {
+                    span.style.height = `${span.offsetHeight + 1}px`;
                     tmpElements.push(span);
                 }
             });

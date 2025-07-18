@@ -137,6 +137,9 @@ img {
     line-height: 1.375rem;
     letter-spacing: .0071428571em;
 }
+.mdc-dialog__actions {
+    padding: 4px;
+}
 .backpack-wrapper {
     font-size: .875rem;
     font-weight: 400;

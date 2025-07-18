@@ -1,4 +1,4 @@
-<div bind:this={anchorEl} class="p-0 m-0 {innerClass}">
+<div bind:this={anchorEl} class={innerClass}>
   {@render children?.()}
 </div>
 

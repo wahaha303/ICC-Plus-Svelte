@@ -55,3 +55,6 @@ a:visited {
 .text-input {
   color: var(--bs-gray-800);
 }
+input, textarea {
+  caret-color: #ccc !important;
+}

@@ -7,13 +7,13 @@
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate}
                     <span class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
-                            <div class="col" style={scoreText}>
+                            <div class="col-12" style={scoreText}>
                                 {@html DOMPurify.sanitize(replaceText(oriRow.title), sanitizeArg)}
                             </div>
                         {/if}
                         {#if (choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
                             {#if choice.imageSourceTooltip}
-                                <Wrapper text={choice.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}
@@ -47,7 +47,7 @@
                             {/if}
                             {#if choice.template === 5 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper text={choice.imageSourceTooltip}>
+                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
                                         <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                     </Wrapper>
                                 {:else}
@@ -64,7 +64,7 @@
                             {/if}
                             {#if choice.template === 4 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper text={choice.imageSourceTooltip}>
+                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
                                         <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                     </Wrapper>
                                 {:else}
@@ -86,7 +86,7 @@
                         <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
                             {#if choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper text={choice.imageSourceTooltip}>
+                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
                                         <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                     </Wrapper>
                                 {:else}
@@ -194,7 +194,7 @@
                         <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
                             {#if choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper text={choice.imageSourceTooltip}>
+                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
                                         <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                     </Wrapper>
                                 {:else}

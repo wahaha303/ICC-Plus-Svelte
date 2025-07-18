@@ -60,7 +60,7 @@
             <span class="m-0">
                 {#if (addon.template === 1 || windowWidth <= 960) && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <Wrapper text={addon.imageSourceTooltip}>
+                        <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
                             <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         </Wrapper>
                     {:else}
@@ -79,7 +79,7 @@
                 {/if}
                 {#if addon.template === 5 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <Wrapper text={addon.imageSourceTooltip}>
+                        <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
                             <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         </Wrapper>
                     {:else}
@@ -93,7 +93,7 @@
                 {/if}
                 {#if addon.template === 4 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <Wrapper text={addon.imageSourceTooltip}>
+                        <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
                             <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         </Wrapper>
                     {:else}
@@ -107,7 +107,7 @@
                     <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                         {#if addon.image && !row?.addonImageRemoved}
                             {#if addon.imageSourceTooltip}
-                                <Wrapper text={addon.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
                                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}
@@ -149,7 +149,7 @@
                     <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                         {#if addon.image && !row?.addonImageRemoved}
                             {#if addon.imageSourceTooltip}
-                                <Wrapper text={addon.imageSourceTooltip}>
+                                <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
                                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 </Wrapper>
                             {:else}
@@ -176,7 +176,7 @@
     import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
 
-    let { isEditModeOn = false, addon, row, choice, isEnabled, isActive, windowWidth = 0, preloadImages = false, index }: { isEditModeOn?: boolean; addon: Addon; row?: Row; choice?: Choice; isEnabled?: boolean, isActive?: boolean, windowWidth?: number, preloadImages?: boolean, index?: number } = $props();
+    let { isEditModeOn = false, addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, index }: { isEditModeOn?: boolean; addon: Addon; row?: Row; choice?: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean, index?: number } = $props();
 
     const templates = [{
         text: "Image top",
@@ -199,6 +199,7 @@
         if (width > 400) return 'col-6';
         else return 'col-12';
     })
+    let isActive = $derived(typeof choice !== 'undefined' ? choice.isActive : false);
     let addonImageStyle = $derived(getStyling('privateAddonImageIsOn', row, choice));
     let addonStyle = $derived(getStyling('privateAddonIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));

@@ -170,7 +170,7 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.1.1 ~ v2.1.4 / ${getDate('2025-07-17T06:00:00Z')}`,
+        title: `v2.1.1 ~ v2.1.5 / ${getDate('2025-07-18T02:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where self-invalidating choices were not deselected upon selection.
         - Fixed issue where Other Choices Function was not rendering properly.
@@ -180,12 +180,19 @@
 
         <span style="color: green">Addon</span>
         - Fixed issue where text-align didn't apply to short lines.
+        - Fixed issue where filter design was not being applied properly.
 
         <span style="color: green">Backpack</span>
         - Fixed issue where image downloads didn't work properly in some browsers.
 
+        <span style="color: green">Tooltip</span>
+        - Fixed issue where applying tooltip caused image size to shrink.
+
         <span style="color: green">Viewer - Settings</span>
         - Added option to download Backpack image as single file.
+
+        <span style="color: green">Miscellaneous</span>
+        - Changed text cursor color to make it more visible in dark mode.
         `
     }, {
         open: false,
