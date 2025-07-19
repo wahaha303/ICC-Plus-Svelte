@@ -1,7 +1,7 @@
 {
   "name": "iccplus",
   "private": true,
-  "version": "2.1.5",
+  "version": "2.1.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -33,7 +33,6 @@
     "@smui-extra/chip-input": "^8.0.0-beta.3",
     "@smui/button": "^8.0.0-beta.3",
     "@smui/chips": "^8.0.0-beta.3",
-    "@smui/circular-progress": "^8.0.0-beta.3",
     "@smui/dialog": "^8.0.0-beta.3",
     "@smui/drawer": "^8.0.0-beta.3",
     "@smui/form-field": "^8.0.0-beta.3",

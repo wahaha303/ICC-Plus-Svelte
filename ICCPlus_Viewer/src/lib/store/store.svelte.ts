@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.1.5';
+export const appVersion = '2.1.6';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3381,20 +3381,22 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                             }
                         }
                         if (!changedScores.has(aScore.idx)) {
-                            for (let j = 0; j < localChoice.scores.length; j++) {
-                                const lScore = localChoice.scores[j];
-                                const tmpScore = tmpScores.get(lScore.id) || 0;
-                                const lPoint = pointTypeMap.get(lScore.id);
-                                if (typeof lPoint !== 'undefined') {
+                            const hasScore = localChoice.scores.length > 0;
+                                const scoreLeng = localChoice.scores.length || 1;
+                                for (let j = 0; j < scoreLeng; j++) {
+                                    const lScore = hasScore ? localChoice.scores[j] : null;
+                                    const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
+                                    const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
+                                    if (!hasScore || hasScore && lPoint) {
                                     if (aChoice.isActive) {
                                         const afterSelected = checkRequirements(aScore.requireds);
                                         const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
                                         tmpActivated.delete(localChoice.id);
                                         aRow.currentChoices -= 1;
-                                        lPoint.startingSum += tmpScore;
+                                        if (lPoint) lPoint.startingSum += tmpScore;
                                         const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
                                         aRow.currentChoices += 1;
-                                        lPoint.startingSum -= tmpScore;
+                                        if (lPoint) lPoint.startingSum -= tmpScore;
                                         if (beforeSelected !== afterSelected) {
                                             let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                             if (beforeSelected) {

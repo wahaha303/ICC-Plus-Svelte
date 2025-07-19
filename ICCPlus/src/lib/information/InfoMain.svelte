@@ -1,63 +1,65 @@
-<div class="ab-0" style="max-height: 810px; overflow: auto">
-    <TopAppBar class="viewer-menu" variant="static">
-        <AppBarRow>
-            <AppBarSection class="py-0 justify-left">
-                <div class="col-12">
-                    <IconButton onclick={() => currentComponent.value = 'appMain'} size="mini">
-                        <i class="mdi mdi-chevron-left"></i>
-                    </IconButton>
-                </div>
-            </AppBarSection>
-        </AppBarRow>
-    </TopAppBar>
-
-    <TabBar tabs={['Changelog', 'QnA']} bind:active>
-        {#snippet tab(tab)}
-            <Tab {tab}>
-                <TabLabel>{tab}</TabLabel>
-            </Tab>
-        {/snippet}
-    </TabBar>
-    {#if active === 'Changelog'}
-        <Paper role="tabpanel" variant="unelevated">
-            <Content>
-                <div class="col pb-2">
-                    <div class="d-row align-items-center justify-end">
-                        <IconButton onclick={() => logCurPage > 1 ? logCurPage -= 1 : logCurPage = logPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
-                        <span class="list-text px-2">Page {logCurPage}</span>
-                        <IconButton onclick={() => logCurPage < logPageLeng ? logCurPage += 1 : logCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+<Card class="h-100">
+    <CardContent class="p-0">
+        <TopAppBar class="viewer-menu" variant="static">
+            <AppBarRow>
+                <AppBarSection class="py-0 justify-left">
+                    <div class="col-12">
+                        <IconButton onclick={() => currentComponent.value = 'appMain'} size="mini">
+                            <i class="mdi mdi-chevron-left"></i>
+                        </IconButton>
                     </div>
-                </div>
-                <Accordion>
-                    {#each logSlots as log, i}
-                        <InfoPanel title={log.title} text={log.text} open={log.open} />
-                    {/each}
-                </Accordion>
-            </Content>
-        </Paper>
-    {:else if active === 'QnA'}
-        <Paper role="tabpanel" variant="unelevated">
-            <Content>
-                <div class="col pb-2">
-                    <div class="d-row align-items-center justify-end">
-                        <IconButton onclick={() => qnaCurPage > 1 ? qnaCurPage -= 1 : qnaCurPage = qnaPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
-                        <span class="list-text px-2">Page {qnaCurPage}</span>
-                        <IconButton onclick={() => qnaCurPage < qnaPageLeng ? qnaCurPage += 1 : qnaCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                </AppBarSection>
+            </AppBarRow>
+        </TopAppBar>
+        <TabBar tabs={['Changelog', 'QnA']} bind:active>
+            {#snippet tab(tab)}
+                <Tab {tab}>
+                    <TabLabel>{tab}</TabLabel>
+                </Tab>
+            {/snippet}
+        </TabBar>
+        {#if active === 'Changelog'}
+            <Paper role="tabpanel" variant="unelevated">
+                <Content>
+                    <div class="col pb-2">
+                        <div class="d-row align-items-center justify-end">
+                            <IconButton onclick={() => logCurPage > 1 ? logCurPage -= 1 : logCurPage = logPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
+                            <span class="list-text px-2">Page {logCurPage}</span>
+                            <IconButton onclick={() => logCurPage < logPageLeng ? logCurPage += 1 : logCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                        </div>
                     </div>
-                </div>
-                <Accordion>
-                    {#each qnaSlots as qna}
-                        <InfoPanel title={qna.title} text={qna.text} />
-                    {/each}
-                </Accordion>
-            </Content>
-        </Paper>
-    {/if}
-</div>
+                    <Accordion>
+                        {#each logSlots as log, i}
+                            <InfoPanel title={log.title} text={log.text} open={log.open} />
+                        {/each}
+                    </Accordion>
+                </Content>
+            </Paper>
+        {:else if active === 'QnA'}
+            <Paper role="tabpanel" variant="unelevated">
+                <Content>
+                    <div class="col pb-2">
+                        <div class="d-row align-items-center justify-end">
+                            <IconButton onclick={() => qnaCurPage > 1 ? qnaCurPage -= 1 : qnaCurPage = qnaPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
+                            <span class="list-text px-2">Page {qnaCurPage}</span>
+                            <IconButton onclick={() => qnaCurPage < qnaPageLeng ? qnaCurPage += 1 : qnaCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                        </div>
+                    </div>
+                    <Accordion>
+                        {#each qnaSlots as qna}
+                            <InfoPanel title={qna.title} text={qna.text} />
+                        {/each}
+                    </Accordion>
+                </Content>
+            </Paper>
+        {/if}
+    </CardContent>
+</Card>
 
 <script lang="ts">
     import { currentComponent, getDate } from '$lib/store/store.svelte';
     import Accordion from '$lib/custom/accordion';
+    import Card, { Content as CardContent } from '@smui/card';
     import IconButton from '@smui/icon-button';
     import Paper, { Content } from '@smui/paper';
     import Tab, { Label as TabLabel } from '@smui/tab';
@@ -170,13 +172,13 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.1.1 ~ v2.1.5 / ${getDate('2025-07-18T02:00:00Z')}`,
+        title: `v2.1.1 ~ v2.1.6 / ${getDate('2025-07-19T11:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where self-invalidating choices were not deselected upon selection.
         - Fixed issue where Other Choices Function was not rendering properly.
-        - Fixed issue where score was not recalculated when using point requirements.
         - Fixed issue where forcibly activated choice didn't reset state when using Clean Selected Choices.
         - Fixed issue where justify didn't work properly.
+        - Fixed issue where score was not recalculated.
 
         <span style="color: green">Addon</span>
         - Fixed issue where text-align didn't apply to short lines.

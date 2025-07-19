@@ -2417,20 +2417,22 @@
                                 isChanged = localChoice.id !== aChoice.id;
                             }
                             if (!changedScores.has(aScore.idx)) {
-                                for (let j = 0; j < localChoice.scores.length; j++) {
-                                    const lScore = localChoice.scores[j];
-                                    const tmpScore = tmpScores.get(lScore.id) || 0;
-                                    const lPoint = pointTypeMap.get(lScore.id);
-                                    if (typeof lPoint !== 'undefined') {
+                                const hasScore = localChoice.scores.length > 0;
+                                const scoreLeng = localChoice.scores.length || 1;
+                                for (let j = 0; j < scoreLeng; j++) {
+                                    const lScore = hasScore ? localChoice.scores[j] : null;
+                                    const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
+                                    const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
+                                    if (!hasScore || hasScore && lPoint) {
                                         if (aChoice.isActive) {
                                             const afterDeselected = checkRequirements(aScore.requireds);
                                             const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
                                             tmpActivated.set(localChoice.id, {multiple : localChoice.multipleUseVariable});
                                             aRow.currentChoices += 1;
-                                            lPoint.startingSum += tmpScore;
+                                            if (lPoint) lPoint.startingSum += tmpScore;
                                             const beforeDeselected = checkRequirements(aScore.requireds, tmpActivated);
                                             aRow.currentChoices -= 1;
-                                            lPoint.startingSum -= tmpScore;
+                                            if (lPoint) lPoint.startingSum -= tmpScore;
                                             if (beforeDeselected !== afterDeselected) {
                                                 let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
@@ -2503,8 +2505,10 @@
                                                         }
                                                     }
                                                 }
-                                                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
-                                                isChanged = true;
+                                                if (!isChanged) {
+                                                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                                                    isChanged = true;
+                                                }
                                                 changedScores.add(aScore.idx);
                                             }
                                         }
@@ -2574,25 +2578,26 @@
                                         delete aScore.tmpDisScore;
                                     }
                                 }
-
                                 scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                                 isChanged = true;
                             }
                             if (!changedScores.has(aScore.idx)) {
-                                for (let j = 0; j < localChoice.scores.length; j++) {
-                                    const lScore = localChoice.scores[j];
-                                    const tmpScore = tmpScores.get(lScore.id) || 0;
-                                    const lPoint = pointTypeMap.get(lScore.id);
-                                    if (typeof lPoint !== 'undefined') {
+                                const hasScore = localChoice.scores.length > 0;
+                                const scoreLeng = localChoice.scores.length || 1;
+                                for (let j = 0; j < scoreLeng; j++) {
+                                    const lScore = hasScore ? localChoice.scores[j] : null;
+                                    const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
+                                    const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
+                                    if (!hasScore || hasScore && lPoint) {
                                         if (aChoice.isActive && !aScore.isChanged) {
                                             const afterSelected = checkRequirements(aScore.requireds);
                                             const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
                                             tmpActivated.delete(localChoice.id);
                                             aRow.currentChoices -= 1;
-                                            lPoint.startingSum += tmpScore;
+                                            if (lPoint) lPoint.startingSum += tmpScore;
                                             const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
                                             aRow.currentChoices += 1;
-                                            lPoint.startingSum -= tmpScore;
+                                            if (lPoint) lPoint.startingSum -= tmpScore;
                                             if (beforeSelected !== afterSelected) {
                                                 let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
@@ -2665,8 +2670,10 @@
                                                         }
                                                     }
                                                 }
-                                                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
-                                                isChanged = true;
+                                                if (!isChanged) {
+                                                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                                                    isChanged = true;
+                                                }
                                                 changedScores.add(aScore.idx);
                                             }
                                         }
