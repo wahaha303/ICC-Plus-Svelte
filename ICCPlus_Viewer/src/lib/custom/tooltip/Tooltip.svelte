@@ -22,11 +22,11 @@
         if (tooltipVariables.isVisible && tooltipVariables.anchor) {
             popper?.destroy();
             popper = createPopper(tooltipVariables.anchor, el, {
-              placement: 'bottom',
+              placement: 'top',
               modifiers: [
                   { name: 'offset', options: { offset: [0, 6] } },
                   { name: 'preventOverflow', options: { boundary: 'viewport' } },
-                  { name: 'flip', options: { fallbackPlacements: ['bottom', 'top'] } }
+                  { name: 'flip', options: { fallbackPlacements: ['top', 'bottom'] } }
               ]
             });
             el.classList.add('mdc-tooltip--shown');

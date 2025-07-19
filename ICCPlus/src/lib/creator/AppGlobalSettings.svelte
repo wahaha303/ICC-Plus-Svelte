@@ -10,7 +10,7 @@
     </Title>
     <Content>
         <TabBar tabs={['General', 'Advanced', 'Display', 'Fonts']} bind:active>
-            {#snippet tab(tab)}
+            {#snippet tab(tab: any)}
                 <Tab {tab}>
                     <TabLabel>{tab}</TabLabel>
                 </Tab>
@@ -274,6 +274,13 @@
                                         Use Toolbar Button to Add Row
                                     {/snippet}
                                 </FormField>
+                            </div>
+                            <div class="col-12 px-3">
+                                <Textfield bind:value={() => app.tooltipDelay ?? 1000, (e) => app.tooltipDelay = e} label="Tooltip Delay (Image)" type="number" variant="standard" suffix="ms" input$min="0" input$class="text-right" onchange={() => {
+                                    if (typeof app.tooltipDelay !== 'undefined' && app.tooltipDelay < 0) {
+                                        app.tooltipDelay = 0;
+                                    }
+                                }} />
                             </div>
                         </div>
                     </div>

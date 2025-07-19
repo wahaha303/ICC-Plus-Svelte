@@ -1249,9 +1249,7 @@
                         {/if}
                         {#if (choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
                             {#if choice.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
-                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -1283,9 +1281,7 @@
                             {/if}
                             {#if choice.template === 5 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
-                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                    </Wrapper>
+                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -1300,9 +1296,7 @@
                             {/if}
                             {#if choice.template === 4 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
-                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                    </Wrapper>
+                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -1322,9 +1316,7 @@
                         <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
                             {#if choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
-                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                    </Wrapper>
+                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -1430,9 +1422,7 @@
                         <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
                             {#if choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <Wrapper innerClass="w-100" text={choice.imageSourceTooltip}>
-                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                    </Wrapper>
+                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -1494,6 +1484,7 @@
     import { SvelteMap } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
+    import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     export { activateObject };
     

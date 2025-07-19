@@ -16,7 +16,7 @@
     let boxEl: HTMLElement | null;
     let indicatorEl: HTMLElement | null;
     let sizeEl: HTMLElement | null;
-    let defaultText: string = '<div>Loading</div>';    
+    let defaultText: string = '<div>Loading</div>';
     let snackbar: Snackbar;
 
     $effect(() => {

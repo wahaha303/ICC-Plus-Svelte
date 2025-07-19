@@ -805,6 +805,7 @@ export type App = {
     autoSaveInterval: number,
     buildAutoSaveIsOn: boolean,
     buildAutoSaveInterval: number,
+    tooltipDelay?: number,
     checkDeleteRow: boolean,
     checkDeleteObject: boolean,
     defaultRowTitle: string,

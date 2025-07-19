@@ -172,7 +172,7 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.1.1 ~ v2.1.6 / ${getDate('2025-07-19T11:00:00Z')}`,
+        title: `v2.1.1 ~ v2.1.7 / ${getDate('2025-07-19T17:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where self-invalidating choices were not deselected upon selection.
         - Fixed issue where Other Choices Function was not rendering properly.
@@ -189,12 +189,22 @@
 
         <span style="color: green">Tooltip</span>
         - Fixed issue where applying tooltip caused image size to shrink.
+        - Adjust tooltip position to align properly with image.
+        - Change default tooltip position to appear above instead of below.
+        - Set default tooltip delay for image to 1 second.
+
+        <span style="color: green">Image Compression</span>
+        - Fixed issue where quality setting was not being applied.
+
+        <span style="color: green">Global Settings</span>
+        - Added option to set tooltip delay for image.
 
         <span style="color: green">Viewer - Settings</span>
         - Added option to download Backpack image as single file.
 
         <span style="color: green">Miscellaneous</span>
         - Changed text cursor color to make it more visible in dark mode.
+        - Fixed issue where old project with styling field set to an empty string could not be loaded.
         `
     }, {
         open: false,

@@ -10,9 +10,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -28,9 +26,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -48,9 +44,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -76,9 +70,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -92,9 +84,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -132,9 +122,9 @@
     import AppObject from './AppObject.svelte';
     import Button, { Label } from '@smui/button';
     import DOMPurify from 'dompurify';
-    import { Wrapper } from '$lib/custom/tooltip';
     import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
+    import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     const { row, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row:Row, windowWidth:number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     

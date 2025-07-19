@@ -282,9 +282,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -302,9 +300,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -330,9 +326,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -346,9 +340,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={row.imageSourceTooltip}>
-                                    <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -404,6 +396,7 @@
     import { Wrapper } from '$lib/custom/tooltip';
     import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, optimizedGroups, winWidth, getGroupLabel, hexToRgba } from '$lib/store/store.svelte';
     import type { Requireds, Row } from '$lib/store/types';
+    import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     const { row, bCreatorMode, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row:Row, bCreatorMode:boolean, windowWidth:number, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     const rowToolbarButtons = [{

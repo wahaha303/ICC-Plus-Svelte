@@ -232,7 +232,7 @@
             canvas.setAttribute('width', imgWidth.toString());
             canvas.setAttribute('height', imgHeight.toString());
             ctx?.drawImage(img, 0, 0, imgWidth, imgHeight);
-            compressed = canvas.toDataURL("image/webp", quality);
+            compressed = canvas.toDataURL("image/webp", quality / 100);
             counter++;
             if (autoCompressFlag && counter > 1) {
                 autoCompressFlag = false;

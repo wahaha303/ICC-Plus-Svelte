@@ -5,9 +5,7 @@
             <span class="m-0">
                 {#if (addon.template === 1 || windowWidth <= 960) && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
-                            <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                        </Wrapper>
+                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
                         <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {/if}
@@ -24,9 +22,7 @@
                 {/if}
                 {#if addon.template === 5 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
-                            <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                        </Wrapper>
+                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
                         <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {/if}
@@ -38,9 +34,7 @@
                 {/if}
                 {#if addon.template === 4 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
-                            <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                        </Wrapper>
+                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
                         <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {/if}
@@ -52,9 +46,7 @@
                     <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                         {#if addon.image && !row?.addonImageRemoved}
                             {#if addon.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
-                                    <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -94,9 +86,7 @@
                     <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                         {#if addon.image && !row?.addonImageRemoved}
                             {#if addon.imageSourceTooltip}
-                                <Wrapper innerClass="w-100" text={addon.imageSourceTooltip}>
-                                    <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                </Wrapper>
+                                <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -111,9 +101,9 @@
 <script lang="ts">
     import DOMPurify from 'dompurify';
     import ObjectRequired from './ObjectRequired.svelte';
-    import { Wrapper } from '$lib/custom/tooltip';
     import { app, checkRequirements, getStyling, hexToRgba, replaceText, sanitizeArg } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
+    import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false }: { addon: Addon; row?: Row; choice?: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean } = $props();
 

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.1.6';
+export const appVersion = '2.1.7';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -397,6 +397,7 @@ export const app = $state<App>({
     autoSaveInterval: 10,
     buildAutoSaveIsOn: false,
     buildAutoSaveInterval: 10,
+    tooltipDelay: 1000,
     checkDeleteRow: true,
     checkDeleteObject: false,
     defaultRowTitle: 'Row',
@@ -501,6 +502,7 @@ export const defaultApp: App = {
     autoSaveInterval: 10,
     buildAutoSaveIsOn: false,
     buildAutoSaveInterval: 10,
+    tooltipDelay: 1000,
     checkDeleteRow: true,
     checkDeleteObject: false,
     defaultRowTitle: 'Row',
@@ -5102,7 +5104,10 @@ const pointBarStylingSchema = z.object({
 const backpackStylingSchema = z.object({
     backPackWidth: z.coerce.number().optional()
 }).passthrough();
-const StylingSchema = filterStylingSchema.merge(textStylingSchema).merge(objectImageStylingSchema).merge(rowImageStylingSchema).merge(addonImageStylingSchema).merge(objectStylingSchema).merge(rowStylingSchema).merge(addonStylingSchema).merge(multiChoiceStylingSchema).merge(pointBarStylingSchema).merge(backpackStylingSchema).passthrough();
+const StylingSchema = z.preprocess((val) => {
+    if (val === '') return {};
+    return val;
+}, filterStylingSchema.merge(textStylingSchema).merge(objectImageStylingSchema).merge(rowImageStylingSchema).merge(addonImageStylingSchema).merge(objectStylingSchema).merge(rowStylingSchema).merge(addonStylingSchema).merge(multiChoiceStylingSchema).merge(pointBarStylingSchema).merge(backpackStylingSchema).passthrough());
 const AddonSchema = z.object({
     template: z.coerce.number().optional()
 }).passthrough();
@@ -5124,7 +5129,7 @@ const ChoiceSchema = z.object({
     defaultAspectHeight: z.coerce.number().optional(),
     addons: z.array(AddonSchema).optional(),
     scores: z.array(ScoreSchema).optional(),
-    styling: StylingSchema.optional().optional(),
+    styling: StylingSchema.optional(),
     numMultipleTimesMinus: z.coerce.number().optional(),
     numMultipleTimesPluss: z.coerce.number().optional(),
     numActivateRandom: z.coerce.number().optional(),
