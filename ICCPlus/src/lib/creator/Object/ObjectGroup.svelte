@@ -1,5 +1,5 @@
 <Autocomplete
-    options={$optimizedGroups}
+    options={getGroups()}
     getOptionLabel={getGroupLabel}
     bind:value={choice.groups[index]}
     label="Group"
@@ -13,7 +13,7 @@
 
 <script lang="ts">
     import Autocomplete from '$lib/custom/autocomplete/Autocomplete.svelte';
-    import { groupMap, optimizedGroups } from '$lib/store/store.svelte';
+    import { groupMap, getGroups } from '$lib/store/store.svelte';
     import type { Choice } from '$lib/store/types';
 
     let { choice, index }: { choice: Choice; index: number; } = $props();

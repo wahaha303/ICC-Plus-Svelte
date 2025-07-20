@@ -352,6 +352,7 @@
   let visibleCounter = $state(24);
   let isAllSelected = $state(false);
 
+  console.log(options);
   const menuOpen = $derived(
     focused &&
       (text !== '' || showMenuWithNoInput) &&

@@ -27,7 +27,7 @@
                 <div class="col-12 gy-2">
                     <div class="col-12">Copy Choices Into Another Row</div>
                     <Autocomplete
-                        options={$optimizedRows}
+                        options={[...getRows(), ...getBackpackRows()]}
                         getOptionLabel={getRowLabel}
                         bind:value={newRow}
                         label="Copy this row's choices into..."
@@ -63,7 +63,7 @@
                     <div class="col-12">- This is for displaying in the Result Row. </div>
                     <div class="col-12">- For group-related functions, use Manage Groups feature.</div>
                     <Autocomplete
-                        options={$optimizedGroups}
+                        options={getGroups()}
                         bind:value={row.resultGroupId}
                         label="All choices In Row Are Members Of This Group In Result Row"
                         toggle={true}
@@ -173,7 +173,7 @@
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, appVersion, backpackStyling, choiceMap, generateObjectId, getTimestamp, initStyling, objectWidths, pointBarStyling, rowMap, optimizedGroups, optimizedRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, groupMap, objectDesignMap, filterStyling, textStyling, objectImageStyling, rowImageStyling, addonImageStyling, backgroundStyling, objectStyling, rowStyling, addonStyling, multiChoiceStyling } from '$lib/store/store.svelte';
+    import { app, appVersion, backpackStyling, choiceMap, generateObjectId, getTimestamp, initStyling, objectWidths, pointBarStyling, rowMap, getGroups, getRows, getBackpackRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, groupMap, objectDesignMap, filterStyling, textStyling, objectImageStyling, rowImageStyling, addonImageStyling, backgroundStyling, objectStyling, rowStyling, addonStyling, multiChoiceStyling } from '$lib/store/store.svelte';
     import type { Row, Styling } from '$lib/store/types';
     
     let { open, onclose, row }: { open: boolean; onclose: () => void; row: Row } = $props();

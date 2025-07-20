@@ -53,10 +53,10 @@
                                                 <Textfield bind:value={app.rowDesignGroups![row.index].activatedId} label="Id Needed To Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={app.rowDesignGroups![row.index].elements} acOptions={$optimizedRows} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.rowDesignGroups![row.index]}/>
+                                                <CustomChipInput acValue={app.rowDesignGroups![row.index].elements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.rowDesignGroups![row.index]}/>
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={app.rowDesignGroups![row.index].backpackElements} acOptions={$optimizedBackpackRows} inputLabel="Backpack Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.rowDesignGroups![row.index]}/>
+                                                <CustomChipInput acValue={app.rowDesignGroups![row.index].backpackElements} acOptions={getBackpackRows()} inputLabel="Backpack Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.rowDesignGroups![row.index]}/>
                                             </div>
                                         </div>
                                     </div>
@@ -103,10 +103,10 @@
                                                 <Textfield bind:value={designGroup.activatedId} label="Id Needed To Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.elements} acOptions={$optimizedRows} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={designGroup}/>
+                                                <CustomChipInput acValue={designGroup.elements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={designGroup}/>
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.backpackElements} acOptions={$optimizedBackpackRows} inputLabel="Backpack Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={designGroup}/>
+                                                <CustomChipInput acValue={designGroup.backpackElements} acOptions={getBackpackRows()} inputLabel="Backpack Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={designGroup}/>
                                             </div>
                                         </div>
                                     </div>
@@ -157,10 +157,10 @@
                                                 <Textfield bind:value={app.objectDesignGroups![row.index].activatedId} label="Id Needed To Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].elements} acOptions={$optimizedChoices} inputLabel="Row Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
+                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].elements} acOptions={getChoices()} inputLabel="Row Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].backpackElements} acOptions={$optimizedBackpackChoices} inputLabel="Backpack Row Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
+                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].backpackElements} acOptions={getBackpackChoices()} inputLabel="Backpack Row Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
                                             </div>
                                         </div>
                                     </div>
@@ -207,10 +207,10 @@
                                                 <Textfield bind:value={designGroup.activatedId} label="Id Needed To Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.elements} acOptions={$optimizedChoices} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={designGroup}/>
+                                                <CustomChipInput acValue={designGroup.elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={designGroup}/>
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.backpackElements} acOptions={$optimizedBackpackChoices} inputLabel="Backpack Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={designGroup}/>
+                                                <CustomChipInput acValue={designGroup.backpackElements} acOptions={getBackpackChoices()} inputLabel="Backpack Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={designGroup}/>
                                             </div>
                                         </div>
                                     </div>
@@ -260,7 +260,7 @@
     import AppPrivateDesign from './AppPrivateDesign.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
-    import { app, checkDupId, choiceMap, rowDesignMap, rowMap, objectDesignMap, generateDesignId, optimizedRows, optimizedChoices, optimizedBackpackRows, optimizedBackpackChoices, getRowLabel, getChoiceLabel, scrollToLastRow } from '$lib/store/store.svelte';
+    import { app, checkDupId, choiceMap, rowDesignMap, rowMap, objectDesignMap, generateDesignId, getRows, getChoices, getBackpackRows, getBackpackChoices, getRowLabel, getChoiceLabel, scrollToLastRow } from '$lib/store/store.svelte';
 	import type { RowDesignGroup, ObjectDesignGroup } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';

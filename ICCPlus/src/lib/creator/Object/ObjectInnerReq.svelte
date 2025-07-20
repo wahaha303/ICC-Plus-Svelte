@@ -2,7 +2,7 @@
     <Textfield bind:value={required.reqId} label={required.required ? 'Selected Id' : 'Not Selected Id'} variant="filled" />
 {:else if required.type === 'points'}
     <Autocomplete
-        options={$optimizedPointTypes}
+        options={getPointTypes()}
         getOptionLabel={getPointTypeLabel}
         bind:value={required.reqId}
         label="Point Type"
@@ -33,7 +33,7 @@
         </Wrapper>
     </div>
     <Autocomplete
-        options={$optimizedPointTypes}
+        options={getPointTypes()}
         getOptionLabel={getPointTypeLabel}
         bind:value={required.reqId}
         label="Target Point Type"
@@ -48,7 +48,7 @@
         {/each}
     </Select>
     <Autocomplete
-        options={$optimizedPointTypes}
+        options={getPointTypes()}
         getOptionLabel={getPointTypeLabel}
         bind:value={required.reqId1}
         label="Point Type"
@@ -67,7 +67,7 @@
             <div class="floating-button-container">
                 {#if more.type === 'id'}
                     <Autocomplete
-                        options={$optimizedPointTypes}
+                        options={getPointTypes()}
                         getOptionLabel={getPointTypeLabel}
                         bind:value={more.id}
                         label="Point Type"
@@ -103,9 +103,9 @@
     {/each}
 {:else if required.type === 'selFromGroups' || required.type === 'selFromRows' || required.type === 'selFromWhole'}
     {#if required.type === 'selFromGroups'}
-        <CustomChipInput acValue={required.selGroups || []} acOptions={$optimizedGroups} inputLabel="Groups" getLabel={getGroupLabel} onSelected={setGroupElement} selectProp={required} />
+        <CustomChipInput acValue={required.selGroups || []} acOptions={getGroups()} inputLabel="Groups" getLabel={getGroupLabel} onSelected={setGroupElement} selectProp={required} />
     {:else if required.type === 'selFromRows'}
-        <CustomChipInput acValue={required.selRows || []} acOptions={$optimizedRows} inputLabel="Rows" getLabel={getRowLabel} onSelected={setRowElement} selectProp={required} />
+        <CustomChipInput acValue={required.selRows || []} acOptions={getRows()} inputLabel="Rows" getLabel={getRowLabel} onSelected={setRowElement} selectProp={required} />
     {/if}
     <Select bind:value={required.selFromOperators} label="Operator" variant="filled" alwaysFloat={true}>
         {#each selFromOperators as operator}
@@ -115,7 +115,7 @@
     <Textfield bind:value={required.selNum} onchange={() => required.selNum = Math.max(required.selNum || 0, 0)} label="Number of Selection" type="number" input$min={0} variant="filled" />
 {:else if required.type === 'gid'}
     <Autocomplete
-        options={$optimizedGlobalRequirement}
+        options={getGlobalRequirement()}
         getOptionLabel={getGlobalReqLabel}
         bind:value={required.reqId}
         label="Global Requirement"
@@ -134,7 +134,7 @@
         }} ><i class="mdi mdi-plus"></i></IconButton>
     </div>
     <Autocomplete
-        options={$optimizedWords}
+        options={getWords()}
         bind:value={required.reqId}
         label="Word ID"
         toggle={true}
@@ -154,7 +154,7 @@
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { groupMap, rowMap, getGroupLabel, getPointTypeLabel, getRowLabel, optimizedRows, optimizedPointTypes, optimizedGroups, optimizedGlobalRequirement, optimizedWords, getGlobalReqLabel } from '$lib/store/store.svelte';
+    import { groupMap, rowMap, getGroupLabel, getPointTypeLabel, getRowLabel, getRows, getPointTypes, getGroups, getGlobalRequirement, getWords, getGlobalReqLabel } from '$lib/store/store.svelte';
     import type { Requireds } from '$lib/store/types';
 
     const { required }: { required: Requireds; } = $props();

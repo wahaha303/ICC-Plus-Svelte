@@ -14,7 +14,7 @@
                 <div class="col-12 gy-2 pb-5">
                     <div class="col-12">Copy Choice Into Another Row</div>
                     <Autocomplete
-                        options={$optimizedRows}
+                        options={[...getRows(), ...getBackpackRows()]}
                         getOptionLabel={getRowLabel}
                         bind:value={newRow}
                         label="Copy this choice into..."
@@ -129,7 +129,7 @@
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, choiceMap, initStyling, appVersion, getTimestamp, filterStyling, textStyling, objectImageStyling, addonImageStyling, objectStyling, addonStyling, backgroundStyling, multiChoiceStyling,rowStyling, rowImageStyling, backpackStyling, pointBarStyling, rowMap, generateObjectId, optimizedRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, objectDesignMap, groupMap } from '$lib/store/store.svelte';
+    import { app, choiceMap, initStyling, appVersion, getTimestamp, filterStyling, textStyling, objectImageStyling, addonImageStyling, objectStyling, addonStyling, backgroundStyling, multiChoiceStyling,rowStyling, rowImageStyling, backpackStyling, pointBarStyling, rowMap, generateObjectId, getRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, objectDesignMap, groupMap, getBackpackRows } from '$lib/store/store.svelte';
     import type { Choice, Styling } from '$lib/store/types';
     
     let { open, onclose, choice }: { open: boolean; onclose: () => void; choice: Choice } = $props();

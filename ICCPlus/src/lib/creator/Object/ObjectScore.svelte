@@ -70,7 +70,7 @@
         <div class="row gx-3">
             <div class={col6}>
                 <Autocomplete
-                    options={$optimizedPointTypes}
+                    options={getPointTypes()}
                     getOptionLabel={getPointTypeLabel}
                     bind:value={score.id}
                     label="Point Type"
@@ -170,7 +170,7 @@
     import ObjectRequired from './ObjectRequired.svelte';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, optimizedPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba } from '$lib/store/store.svelte';
+    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, getPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba } from '$lib/store/store.svelte';
     import type { Choice, Row, Score } from '$lib/store/types';
 
     let { isEditModeOn = false, score, row, choice, num = 0 }: { isEditModeOn?: boolean; score: Score; row?: Row; choice: Choice; num?: number } = $props();

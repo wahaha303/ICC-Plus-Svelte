@@ -79,7 +79,7 @@
                             </FormField>
                             {#if row.isResultRow}
                                 <Autocomplete
-                                    options={$optimizedGroups}
+                                    options={getGroups()}
                                     getOptionLabel={getGroupLabel}
                                     bind:value={row.resultGroupId}
                                     label="Selected Choices from Group Id"
@@ -394,7 +394,7 @@
 	import IconButton from '@smui/icon-button';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, optimizedGroups, winWidth, getGroupLabel, hexToRgba } from '$lib/store/store.svelte';
+    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba } from '$lib/store/store.svelte';
     import type { Requireds, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 

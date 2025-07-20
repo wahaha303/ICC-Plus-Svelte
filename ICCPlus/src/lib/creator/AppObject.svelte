@@ -263,7 +263,7 @@
                                                     <div class="col-12 m-1">The point type used here should only be used for this choice.</div>
                                                     <div class="col-12 m-1 px-2">
                                                         <Autocomplete
-                                                            options={$optimizedPointTypes}
+                                                            options={getPointTypes()}
                                                             getOptionLabel={getPointTypeLabel}
                                                             bind:value={choice.multipleScoreId}
                                                             label="Point Type"
@@ -520,12 +520,12 @@
                                                 </div>
                                                 <div class="col-12 m-1 px-2">
                                                     {#if choice.isDisChoices}
-                                                        <CustomChipInput acValue={choice.discountRows ?? []} acOptions={optimizedRowList} inputLabel="Rows to apply discount" getLabel={getRowLabel} selectProp={choice} />
-                                                        <CustomChipInput acValue={choice.discountChoices ?? []} acOptions={optimizedChoiceList} inputLabel="Choices to apply discount" getLabel={getChoiceLabel} selectProp={choice} />
+                                                        <CustomChipInput acValue={choice.discountRows ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Rows to apply discount" getLabel={getRowLabel} selectProp={choice} />
+                                                        <CustomChipInput acValue={choice.discountChoices ?? []} acOptions={isBackpack ? getBackpackChoices() : getChoices()} inputLabel="Choices to apply discount" getLabel={getChoiceLabel} selectProp={choice} />
                                                     {:else}
-                                                        <CustomChipInput acValue={choice.discountGroups ?? []} acOptions={$optimizedGroups} inputLabel="Groups to apply discount" getLabel={getGroupLabel} selectProp={choice} />
+                                                        <CustomChipInput acValue={choice.discountGroups ?? []} acOptions={getGroups()} inputLabel="Groups to apply discount" getLabel={getGroupLabel} selectProp={choice} />
                                                     {/if}
-                                                    <CustomChipInput acValue={choice.discountPointTypes ?? []} acOptions={$optimizedPointTypes} inputLabel="Point Types to apply discount" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={choice.discountPointTypes ?? []} acOptions={getPointTypes()} inputLabel="Point Types to apply discount" getLabel={getPointTypeLabel} selectProp={choice} />
                                                 </div>
                                                 <div class={col6}>
                                                     <Select bind:value={choice.discountOperator} label="Operator" variant="filled">
@@ -579,7 +579,7 @@
                                                 </div>
                                                 <div class="col-12 m-1 px-2">
                                                     <Autocomplete
-                                                        options={optimizedRowList}
+                                                        options={isBackpack ? getBackpackRows() : getRows()}
                                                         getOptionLabel={getRowLabel}
                                                         bind:value={choice.duplicateRowId}
                                                         label="Source Row (to be duplicated)"
@@ -589,7 +589,7 @@
                                                         class="w-100 p-0"
                                                     />
                                                     <Autocomplete
-                                                        options={optimizedRowList}
+                                                        options={isBackpack ? getBackpackRows() : getRows()}
                                                         getOptionLabel={getRowLabel}
                                                         bind:value={choice.duplicateRowPlace}
                                                         label="Target Placement (insert after)"
@@ -618,7 +618,7 @@
                                             </FormField>
                                             {#if choice.isContentHidden}
                                                 <div class="col-12 m-1 px-2">
-                                                    <CustomChipInput acValue={choice.hiddenContentsRow ?? []} acOptions={optimizedRowList} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={choice.hiddenContentsRow ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
                                                     <CustomChipInput acValue={choice.hiddenContentsType ?? []} acOptions={hideContentValue} inputLabel="Target Content" getLabel={(e) => hideContentText[parseInt(e) - 1]} selectProp={choice} />
                                                 </div>
                                                 <div class="b-line"></div>
@@ -639,7 +639,7 @@
                                             </FormField>
                                             {#if choice.addToAllowChoice}
                                                 <div class="col-12 m-1 px-2">
-                                                    <CustomChipInput acValue={choice.idOfAllowChoice ?? []} acOptions={optimizedRowList} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={choice.idOfAllowChoice ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
                                                     <Textfield bind:value={() => choice.numbAddToAllowChoice ?? 0, (e) => choice.numbAddToAllowChoice = e} label="Number to increase or decrease" type="number" variant="filled" />
                                                 </div>
                                                 <div class="b-line"></div>
@@ -771,7 +771,7 @@
                                                 <div class="col-12 m-1 px-2">
                                                     {#if choice.scrollToObject}
                                                         <Autocomplete
-                                                            options={optimizedRowList}
+                                                            options={isBackpack ? getBackpackRows() : getRows()}
                                                             getOptionLabel={getChoiceLabel}
                                                             bind:value={choice.scrollObjectId}
                                                             label="Target Choice"
@@ -782,7 +782,7 @@
                                                         />
                                                     {:else}
                                                         <Autocomplete
-                                                            options={optimizedRowList}
+                                                            options={isBackpack ? getBackpackRows() : getRows()}
                                                             getOptionLabel={getRowLabel}
                                                             bind:value={choice.scrollRowId}
                                                             label="Target Row"
@@ -1067,10 +1067,10 @@
                                                     {/snippet}
                                                 </FormField>
                                                 <div class="col-12 m-1 px-2">
-                                                    <CustomChipInput acValue={choice.pointTypeToMultiply ?? []} acOptions={$optimizedPointTypes} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={choice.pointTypeToMultiply ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
                                                         {#if choice.multiplyPointtypeIsId}
                                                             <Autocomplete
-                                                                options={$optimizedPointTypes}
+                                                                options={getPointTypes()}
                                                                 getOptionLabel={getPointTypeLabel}
                                                                 bind:value={choice.multiplyWithThis}
                                                                 label="Multiplied by"
@@ -1101,7 +1101,7 @@
                                             </FormField>
                                             {#if choice.dividePointtypeIsOn}
                                                 <div class="col-12 m-1 px-2">
-                                                    <CustomChipInput acValue={choice.pointTypeToDivide ?? []} acOptions={$optimizedPointTypes} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={choice.pointTypeToDivide ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
                                                     <Textfield bind:value={() => choice.divideWithThis ?? 0, (e) => choice.divideWithThis = e} label="Divided by" type="number" variant="filled" />
                                                 </div>
                                                 <div class="b-line"></div>
@@ -1123,7 +1123,7 @@
                                             </FormField>
                                             {#if choice.isChangeVariables}
                                                 <div class="col-12 m-1 px-2">
-                                                    <CustomChipInput acValue={choice.changedVariables ?? []} acOptions={$optimizedVariables} inputLabel="Target Variable" selectProp={choice} />
+                                                    <CustomChipInput acValue={choice.changedVariables ?? []} acOptions={getVariables()} inputLabel="Target Variable" selectProp={choice} />
                                                     <Select bind:value={choice.changeType} label="Value" variant="filled">
                                                         {#each variableTypes as type (type.text)}
                                                             <Option value={type.value}>{type.text}</Option>
@@ -1167,7 +1167,7 @@
                                                 </FormField>
                                                 <div class="col-12 m-1 px-2">
                                                     <Autocomplete
-                                                        options={$optimizedWords}
+                                                        options={getWords()}
                                                         bind:value={choice.idOfTheTextfieldWord}
                                                         label="Word ID"
                                                         toggle={true}
@@ -1480,7 +1480,7 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
-	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, optimizedChoices, optimizedGroups, optimizedPointTypes, optimizedRows, optimizedVariables, optimizedWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, optimizedBackpackChoices, optimizedBackpackRows, hexToRgba } from '$lib/store/store.svelte';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba } from '$lib/store/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
@@ -1632,8 +1632,6 @@
         }
         return row;
     });
-    let optimizedRowList = $derived(isBackpack ?  $optimizedBackpackRows : $optimizedRows);
-    let optimizedChoiceList = $derived(isBackpack ? $optimizedBackpackChoices : $optimizedChoices);
 
     let objectTitle = $derived.by(() => {
         let styles = [];

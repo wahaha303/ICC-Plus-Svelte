@@ -32,10 +32,10 @@
                                         <Textfield bind:value={app.groups[row.index].name} label="Group Name" variant="filled" />
                                     </div>
                                     <div class="col-sm-6 col-12">
-                                        <CustomChipInput acValue={app.groups[row.index].rowElements} acOptions={$optimizedRows} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.groups[row.index]} />
+                                        <CustomChipInput acValue={app.groups[row.index].rowElements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.groups[row.index]} />
                                     </div>
                                     <div class="col-sm-6 col-12">
-                                        <CustomChipInput acValue={app.groups[row.index].elements} acOptions={$optimizedChoices} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.groups[row.index]}/>
+                                        <CustomChipInput acValue={app.groups[row.index].elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.groups[row.index]}/>
                                     </div>
                                 </div>
                             </div>
@@ -73,10 +73,10 @@
                                 <Textfield bind:value={group.name} label="Group Name" variant="filled" />
                             </div>
                             <div class="col-sm-6 col-12">
-                                <CustomChipInput acValue={group.rowElements} acOptions={$optimizedRows} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={group} />
+                                <CustomChipInput acValue={group.rowElements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={group} />
                             </div>
                             <div class="col-sm-6 col-12">
-                                <CustomChipInput acValue={group.elements} acOptions={$optimizedChoices} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={group}/>
+                                <CustomChipInput acValue={group.elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={group}/>
                             </div>
                         </div>
                     </div>
@@ -113,7 +113,7 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
-    import { app, checkDupId, choiceMap, groupMap, rowMap, generateGroupId, optimizedRows, optimizedChoices, scrollToLastRow } from '$lib/store/store.svelte';
+    import { app, checkDupId, choiceMap, groupMap, rowMap, generateGroupId, getRows, getChoices, scrollToLastRow } from '$lib/store/store.svelte';
     import type { Group } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';

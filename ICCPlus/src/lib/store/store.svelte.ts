@@ -682,18 +682,42 @@ export const winWidth = readable(window.innerWidth, (set) => {
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
 });
-const readableApp = readable(app, (set) => {
-    $effect(() => set(app));
-});
-export let optimizedRows = derived(readableApp, ($app) => $app.rows.map(({id}) => id));
-export let optimizedChoices = derived(readableApp, ($app) => $app.rows.flatMap(row => row.objects).map(({ id }) => id));
-export let optimizedBackpackRows = derived(readableApp, ($app) => $app.backpack.map(({id}) => id));
-export let optimizedBackpackChoices = derived(readableApp, ($app) => $app.backpack.flatMap(row => row.objects).map(({ id }) => id));
-export let optimizedGroups = derived(readableApp, ($app) => $app.groups.map(({id}) => id));
-export let optimizedPointTypes = derived(readableApp, ($app) => $app.pointTypes.map(({id}) => id));
-export let optimizedVariables = derived(readableApp, ($app) => $app.variables.map(({id}) => id));
-export let optimizedWords = derived(readableApp, ($app) => $app.words.map(({id}) => id));
-export let optimizedGlobalRequirement = derived(readableApp, ($app) => $app.globalRequirements?.map(({id}) => id));
+let optimizedRows = $derived(app.rows.map(({id}) => id));
+let optimizedChoices = $derived(app.rows.flatMap(row => row.objects).map(({ id }) => id));
+let optimizedBackpackRows = $derived(app.backpack.map(({id}) => id));
+let optimizedBackpackChoices = $derived(app.backpack.flatMap(row => row.objects).map(({ id }) => id));
+let optimizedGroups = $derived(app.groups.map(({id}) => id));
+let optimizedPointTypes = $derived(app.pointTypes.map(({id}) => id));
+let optimizedVariables = $derived(app.variables.map(({id}) => id));
+let optimizedWords = $derived(app.words.map(({id}) => id));
+let optimizedGlobalRequirement = $derived(app.globalRequirements?.map(({id}) => id));
+export function getRows() {
+    return optimizedRows;
+};
+export function getChoices() {
+    return optimizedChoices;
+};
+export function getBackpackRows() {
+    return optimizedBackpackRows;
+};
+export function getBackpackChoices() {
+    return optimizedBackpackChoices;
+};
+export function getGroups() {
+    return optimizedGroups;
+};
+export function getPointTypes() {
+    return optimizedPointTypes;
+};
+export function getVariables() {
+    return optimizedVariables;
+};
+export function getWords() {
+    return optimizedWords;
+};
+export function getGlobalRequirement() {
+    return optimizedGlobalRequirement;
+};
 let dbInstance: IDBDatabase | null = null;
 function createCyoaPlusDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {

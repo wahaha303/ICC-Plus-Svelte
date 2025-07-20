@@ -42,7 +42,7 @@
                                 </FormField>
                                 {#if row.btnPointAddon}
                                     <Autocomplete
-                                        options={optimizedPointTypes}
+                                        options={getPointTypes()}
                                         bind:value={row.pointTypeRandom}
                                         label="Point-Type to use"
                                         toggle={true}
@@ -57,7 +57,7 @@
                                 <div class="col-12 pb-4">
                                     {#if !row.buttonRandom}
                                         <Autocomplete
-                                            options={optimizedVariables}
+                                            options={getVariables()}
                                             bind:value={row.buttonId}
                                             label="Variable"
                                             toggle={true}
@@ -143,7 +143,7 @@
     import Radio from '@smui/radio';
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
-    import { app } from '$lib/store/store.svelte';
+    import { app, getPointTypes, getVariables } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
 
     let { open, onclose, row }: { open: boolean; onclose: () => void; row: Row } = $props();
@@ -154,6 +154,4 @@
         name: 'Other',
         value: 'choiceselect'
     }];
-    let optimizedPointTypes = $derived(app.pointTypes.map(({id}) => id));
-    let optimizedVariables = $derived(app.variables.map(({id}) => id));
 </script>
