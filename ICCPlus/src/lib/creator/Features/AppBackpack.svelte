@@ -11,7 +11,7 @@
                     <div class="row gx-0">
                         <div class="col-12 py-3">
                             <div class="col-xl-3 col-sm-6 col-12">
-                                <Button onclick={() => createNewRow(-1)} variant="raised">
+                                <Button onclickcapture={() => createNewRow(-1)} variant="raised">
                                     <Label>Add New Backpack Row</Label>
                                 </Button>
                             </div>
@@ -20,7 +20,7 @@
                     <div bind:this={mainDiv} class="row gx-0">
                         {#if !app.useToolbarBtn}
                             <div class="p-2 col-12">
-                                <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclick={() => createNewRow(0)} aria-label="Create New Row">
+                                <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclickcapture={() => createNewRow(0)} aria-label="Create New Row">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -33,24 +33,24 @@
                                                 <div class="toolbar__title">{(row.debugTitle ?? '') + row.title}</div>
                                                 <div class="d-row">
                                                     <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
-                                                        <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclick={() => row.isEditModeOn = !row.isEditModeOn} />
+                                                        <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclickcapture={() => row.isEditModeOn = !row.isEditModeOn} />
                                                     </Wrapper>
                                                     {#if app.useToolbarBtn}
                                                         <Wrapper text="Insert Row Above">
-                                                            <IconButton class="mdi mdi-folder-arrow-up" onclick={() => createNewRow(i)} />
+                                                            <IconButton class="mdi mdi-folder-arrow-up" onclickcapture={() => createNewRow(i)} />
                                                         </Wrapper>
                                                     {/if}
                                                     <Wrapper text="Delete Row">
-                                                        <IconButton class="mdi mdi-delete-forever" onclick={() => deleteRow(row, i)} />
+                                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteRow(row, i)} />
                                                     </Wrapper>
                                                     <Wrapper text="Clone Row">
-                                                        <IconButton class="mdi mdi-content-copy" onclick={() => cloneRow(row, i)} />
+                                                        <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneRow(row, i)} />
                                                     </Wrapper>
                                                     <Wrapper text="Move Row Up">
-                                                        <IconButton class="mdi mdi-chevron-up" onclick={() => moveRowUp(i)} />
+                                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveRowUp(i)} />
                                                     </Wrapper>
                                                     <Wrapper text="Move Row Down">
-                                                        <IconButton class="mdi mdi-chevron-down" onclick={() => moveRowDown(i)} />
+                                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveRowDown(i)} />
                                                     </Wrapper>
                                                 </div>
                                         </CardContent>
@@ -59,7 +59,7 @@
                                 <AppRow row={row} bCreatorMode={true} windowWidth={width} isBackpack={true} mainDiv={mainDiv} />
                                 {#if !app.useToolbarBtn}
                                     <div class="p-2 col-12">
-                                        <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclick={() => createNewRow(i + 1)} aria-label="Create New Row">
+                                        <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclickcapture={() => createNewRow(i + 1)} aria-label="Create New Row">
                                             <i class="mdi mdi-plus-thick"></i>
                                         </button>
                                     </div>

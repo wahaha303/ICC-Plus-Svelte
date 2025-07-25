@@ -27,19 +27,19 @@
                                     <div class="point-slot">
                                         <div class="toolbar grey lighten-3 justify-space-around">
                                             <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclick={() => moveDesignUp(row.index, true)} />
+                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(row.index, true)} />
                                             </Wrapper>
                                             <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclick={() => deleteDesign(app.rowDesignGroups![row.index].id, row.index, true)} />
+                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(app.rowDesignGroups![row.index].id, row.index, true)} />
                                             </Wrapper>
                                             <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclick={() => {currentDialog = 'privateDesign', data = app.rowDesignGroups![row.index], bRow = true}} />
+                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = app.rowDesignGroups![row.index], bRow = true}} />
                                             </Wrapper>
                                             <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclick={() => cloneDesign(app.rowDesignGroups![row.index], row.index, true)} />
+                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(app.rowDesignGroups![row.index], row.index, true)} />
                                             </Wrapper>
                                             <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclick={() => moveDesignDown(row.index, true)} />
+                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(row.index, true)} />
                                             </Wrapper>
                                         </div>
                                         <div class="row gy-4 p-3">
@@ -62,7 +62,7 @@
                                     </div>
                                 {:else if row.index === app.rowDesignGroups.length}
                                     <div class="pb-2">
-                                        <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclick={() => createNewDesignGroup(true)} aria-label="Create New Point Type">
+                                        <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(true)} aria-label="Create New Point Type">
                                             <i class="mdi mdi-plus-thick"></i>
                                         </button>
                                     </div>
@@ -77,19 +77,19 @@
                                     <div class="point-slot mb-5">
                                         <div class="toolbar grey lighten-3 justify-space-around">
                                             <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclick={() => moveDesignUp(i, true)} />
+                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(i, true)} />
                                             </Wrapper>
                                             <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclick={() => deleteDesign(designGroup.id, i, true)} />
+                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(designGroup.id, i, true)} />
                                             </Wrapper>
                                             <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclick={() => {currentDialog = 'privateDesign', data = designGroup, bRow = true}} />
+                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = designGroup, bRow = true}} />
                                             </Wrapper>
                                             <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclick={() => cloneDesign(designGroup, i, true)} />
+                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(designGroup, i, true)} />
                                             </Wrapper>
                                             <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclick={() => moveDesignDown(i, true)} />
+                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(i, true)} />
                                             </Wrapper>
                                         </div>
                                         <div class="row gy-4 p-3">
@@ -113,7 +113,7 @@
                                 {/each}
                             {/if}
                             <div class="mb-5">
-                                <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclick={() => createNewDesignGroup(true)} aria-label="Create New Point Type">
+                                <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(true)} aria-label="Create New Point Type">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -131,19 +131,19 @@
                                     <div class="point-slot">
                                         <div class="toolbar grey lighten-3 justify-space-around">
                                             <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclick={() => moveDesignUp(row.index, false)} />
+                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(row.index, false)} />
                                             </Wrapper>
                                             <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclick={() => deleteDesign(app.objectDesignGroups![row.index].id, row.index, false)} />
+                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(app.objectDesignGroups![row.index].id, row.index, false)} />
                                             </Wrapper>
                                             <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclick={() => {currentDialog = 'privateDesign', data = app.objectDesignGroups![row.index], bRow = false}} />
+                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = app.objectDesignGroups![row.index], bRow = false}} />
                                             </Wrapper>
                                             <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclick={() => cloneDesign(app.objectDesignGroups![row.index], row.index, false)} />
+                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(app.objectDesignGroups![row.index], row.index, false)} />
                                             </Wrapper>
                                             <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclick={() => moveDesignDown(row.index, false)} />
+                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(row.index, false)} />
                                             </Wrapper>
                                         </div>
                                         <div class="row gy-4 p-3">
@@ -157,16 +157,16 @@
                                                 <Textfield bind:value={app.objectDesignGroups![row.index].activatedId} label="Id Needed To Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].elements} acOptions={getChoices()} inputLabel="Row Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
+                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
                                             </div>
                                             <div class="col-12">
-                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].backpackElements} acOptions={getBackpackChoices()} inputLabel="Backpack Row Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
+                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].backpackElements} acOptions={getBackpackChoices()} inputLabel="Backpack Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
                                             </div>
                                         </div>
                                     </div>
                                 {:else if row.index === app.objectDesignGroups.length}
                                     <div class="pb-2">
-                                        <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclick={() => createNewDesignGroup(false)} aria-label="Create New Point Type">
+                                        <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(false)} aria-label="Create New Point Type">
                                             <i class="mdi mdi-plus-thick"></i>
                                         </button>
                                     </div>
@@ -181,19 +181,19 @@
                                     <div class="point-slot mb-5">
                                         <div class="toolbar grey lighten-3 justify-space-around">
                                             <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclick={() => moveDesignUp(i, false)} />
+                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(i, false)} />
                                             </Wrapper>
                                             <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclick={() => deleteDesign(designGroup.id, i, false)} />
+                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(designGroup.id, i, false)} />
                                             </Wrapper>
                                             <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclick={() => {currentDialog = 'privateDesign', data = designGroup, bRow = false}} />
+                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = designGroup, bRow = false}} />
                                             </Wrapper>
                                             <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclick={() => cloneDesign(designGroup, i, false)} />
+                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(designGroup, i, false)} />
                                             </Wrapper>
                                             <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclick={() => moveDesignDown(i, false)} />
+                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(i, false)} />
                                             </Wrapper>
                                         </div>
                                         <div class="row gy-4 p-3">
@@ -217,7 +217,7 @@
                                 {/each}
                             {/if}
                             <div class="mb-5">
-                                <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclick={() => createNewDesignGroup(false)} aria-label="Create New Point Type">
+                                <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(false)} aria-label="Create New Point Type">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -231,12 +231,12 @@
         <div class="container-fluid">
             <div class="row p-0">
                 <div class="col-md-6 col-12">
-                    <Button action="" onclick={() => createNewDesignGroup(true)}>
+                    <Button action="" onclickcapture={() => createNewDesignGroup(true)}>
                         <Label class="dialog-actions--btn">Create New Row Group</Label>
                     </Button>
                 </div>
                 <div class="col-md-6 col-12">
-                    <Button action="" onclick={() => createNewDesignGroup(false)}>
+                    <Button action="" onclickcapture={() => createNewDesignGroup(false)}>
                         <Label class="dialog-actions--btn">Create New Choice Group</Label>
                     </Button>
                 </div>

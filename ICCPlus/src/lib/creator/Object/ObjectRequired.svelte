@@ -2,18 +2,18 @@
     <div bind:clientWidth={width}>
         <div class="d-row justify-space-between overflow-auto">
             <Wrapper text="Move Left">
-                <IconButton onclick={moveReqLeft} size="mini"><i class="mdi mdi-chevron-left"></i></IconButton>
+                <IconButton onclickcapture={moveReqLeft} size="mini"><i class="mdi mdi-chevron-left"></i></IconButton>
             </Wrapper>
             <div class="d-flex">
                 <Wrapper text="Create New Reqruirement">
-                    <IconButton onclick={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
+                    <IconButton onclickcapture={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Requirement">
-                    <IconButton onclick={copyRequirement} size="mini"><i class="mdi mdi-clipboard-outline"></i></IconButton>
+                    <IconButton onclickcapture={copyRequirement} size="mini"><i class="mdi mdi-clipboard-outline"></i></IconButton>
                 </Wrapper>
             </div>
             <Wrapper text="Move Right">
-                <IconButton onclick={moveReqRight} size="mini"><i class="mdi mdi-chevron-right"></i></IconButton>
+                <IconButton onclickcapture={moveReqRight} size="mini"><i class="mdi mdi-chevron-right"></i></IconButton>
             </Wrapper>
         </div>
         <div class="row">
@@ -63,7 +63,7 @@
             {#each required.requireds as req, i}
                 <div class={col6}>
                     <ObjectInnerReq required={req} />
-                    <Button onclick={() => required.requireds.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                    <Button onclickcapture={() => required.requireds.splice(i, 1)} class="w-100 mt-1" variant="raised">
                         <Label>Delete</Label>
                     </Button>
                 </div>
@@ -129,8 +129,9 @@
     });
 
     function copyRequirement() {
+        if (typeof app.tmpRequired === 'undefined') app.tmpRequired = [];
         app.tmpRequired.length = 0;
-        app.tmpRequired.push(required);
+        app.tmpRequired.push(JSON.parse(JSON.stringify(required)));
         snackbarVariables.labelText = 'Copied to clipboard.';
         snackbarVariables.isOpen = true;
     }

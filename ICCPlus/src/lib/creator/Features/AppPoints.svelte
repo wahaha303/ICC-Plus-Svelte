@@ -17,19 +17,19 @@
                                 <div class="point-slot">
                                     <div class="toolbar grey lighten-3 justify-space-around">
                                         <Wrapper text="Move Left">
-                                            <IconButton class="mdi mdi-chevron-left" onclick={() => movePointTypeUp(pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => movePointTypeUp(pRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Delete Point">
-                                            <IconButton class="mdi mdi-delete-forever" onclick={() => deletePointType(point, pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deletePointType(point, pRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Open Point Settings">
-                                            <IconButton class="mdi mdi-cog" onclick={() => {dlgVariables.currentDialog = 'appPointSettings'; dlgVariables.point = point}} />
+                                            <IconButton class="mdi mdi-cog" onclickcapture={() => {dlgVariables.currentDialog = 'appPointSettings'; dlgVariables.point = point}} />
                                         </Wrapper>
                                         <Wrapper text="Clone Point">
-                                            <IconButton class="mdi mdi-content-copy" onclick={() => clonePointType(point, pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-content-copy" onclickcapture={() => clonePointType(point, pRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Move Right">
-                                            <IconButton class="mdi mdi-chevron-right" onclick={() => movePointTypeDown(pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => movePointTypeDown(pRow.index * 3 + i)} />
                                         </Wrapper>
                                     </div>
                                     <div class="row p-3">
@@ -125,7 +125,7 @@
                         {/each}
                         {#if pRow.index === pointRows.length - 1}
                             <div class="col-xl-4 col-12">
-                                <button type="button" class="create-box col-12" style="min-height: 426px; font-size: 40px;" onclick={createNewPointType} aria-label="Create New Point Type">
+                                <button type="button" class="create-box col-12" style="min-height: 426px; font-size: 40px;" onclickcapture={createNewPointType} aria-label="Create New Point Type">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -139,7 +139,7 @@
         <div class="container-fluid">
             <div class="row p-0">
                 <div class="col-sm-6 col-12">
-                    <Button action="" onclick={createNewPointType}>
+                    <Button action="" onclickcapture={createNewPointType}>
                         <Label class="dialog-actions--btn">Create New Point Type</Label>
                     </Button>
                 </div>

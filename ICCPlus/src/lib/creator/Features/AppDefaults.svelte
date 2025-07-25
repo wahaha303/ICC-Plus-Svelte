@@ -46,7 +46,7 @@
                     <div class="col-12 mt-5">
                         Clicking this will change the id of all of the choices and rows where the title is longer than 2 letters, or the default title, into the title, which can make it easier to manage on larger projects with large amounts of requirements being used. Spaces will be replaced with underscores(_).
                     </div>
-                    <Button onclick={idToTitle} variant="raised">
+                    <Button onclickcapture={idToTitle} variant="raised">
                         <Label>Change Ids to titles</Label>
                     </Button>
                 </div>

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.1.7';
+export const appVersion = '2.2.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -367,7 +367,12 @@ export const app = $state<App>({
     hideBackpackBtn: 0,
     btnBackpackIsOn: 0,
     showAllAddons: 0,
+    tmpRow: [],
+    tmpChoice: [],
     tmpRequired: [],
+    tmpScore: [],
+    tmpAddon: [],
+    tmpGroup: [],
     rowIdLength: 4,
     objectIdLength: 4,
     words: [],
@@ -472,7 +477,12 @@ export const defaultApp: App = {
     hideBackpackBtn: 0,
     btnBackpackIsOn: 0,
     showAllAddons: 0,
+    tmpRow: [],
+    tmpChoice: [],
     tmpRequired: [],
+    tmpScore: [],
+    tmpAddon: [],
+    tmpGroup: [],
     rowIdLength: 4,
     objectIdLength: 4,
     words: [],
@@ -1168,7 +1178,7 @@ export function getChoiceTitle(req: Requireds) {
             }
             break;
         }
-        case 'point': {
+        case 'points': {
             let thisPoint = pointTypeMap.get(req.reqId);
             if (typeof thisPoint !== 'undefined') {
                 
@@ -2722,6 +2732,8 @@ export function cleanActivated() {
                 delete cChoice.startingSumAtDivide;
                 delete cChoice.activatedRandom;
                 delete cChoice.activatedRandomMul;
+                delete cChoice.numDiscountChoices;
+                
 
                 if (cChoice.addToAllowChoice && typeof cChoice.idOfAllowChoice !== 'undefined' && typeof cChoice.numbAddToAllowChoice !== 'undefined') {
                     for (let i = 0; i < cChoice.idOfAllowChoice.length; i++) {
@@ -2790,6 +2802,15 @@ export function cleanActivated() {
                     }
                 }
 
+                if (cChoice.muteBgm && bgmPlayer) {
+                    const player = get(bgmPlayer);
+
+                    if (player && typeof player.unMute === 'function') {
+                        app.isMute = false;
+                        player.unMute();
+                    }
+                }
+
                 if (cChoice.isContentHidden && typeof cChoice.hiddenContentsRow !== 'undefined' && typeof cChoice.hiddenContentsType !== 'undefined') {
                     for (let i = 0; i < cChoice.hiddenContentsRow.length; i++) {
                         const hRow = rowMap.get(cChoice.hiddenContentsRow[i]);
@@ -2851,7 +2872,7 @@ export function cleanActivated() {
         cRow.index = i;
 
         for (let j = 0; j < cRow.objects.length; j++) {
-            const cChoice = cRow.objects[j];            
+            const cChoice = cRow.objects[j];
             cChoice.index = j;
 
             if (typeof cChoice.defaultTemplate !== 'undefined') {
@@ -2880,6 +2901,7 @@ export function cleanActivated() {
                     delete cScore.isActive;
                 }
                 deleteDiscount(cScore);
+                delete cScore.appliedDiscount;
             }
         }
     }
@@ -2921,6 +2943,7 @@ export function cleanActivated() {
                     delete cScore.isActive;
                 }
                 deleteDiscount(cScore);
+                delete cScore.appliedDiscount;
             }
         }
     }
@@ -3268,7 +3291,7 @@ export function cleanActivated() {
                         }
                     }
                 }
-
+                
                 if (aChoice.muteBgm && bgmPlayer) {
                     const player = get(bgmPlayer);
 
@@ -3354,7 +3377,9 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
             const aRow = cMap.row;
             const aChoice = cMap.choice;
             const thisTmpScores = new SvelteMap<string, number>();
+            let isDiscounted = false;
             let isChanged = false;
+            if (localChoice.useDiscountCount && typeof localChoice.numDiscountChoices === 'undefined') localChoice.numDiscountChoices = 0;
             for (let i = 0; i < aChoice.scores.length; i++) {
                 const aScore = aChoice.scores[i];
                 if (!aScore.isNotRecalculatable) {
@@ -3363,23 +3388,29 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                         if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
                             const mul = aChoice.multipleUseVariable;
 
-                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                for (let j = mul - 1; j >= 0; j--) {
-                                    if (aChoice.isActive) {
-                                        point.startingSum += aScore.tmpDisScore;
+                            if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && localChoice.discountCount && localChoice.discountCount > localChoice.numDiscountChoices!)) {
+                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                    for (let j = mul - 1; j >= 0; j--) {
+                                        if (aChoice.isActive) {
+                                            point.startingSum += aScore.tmpDisScore;
+                                        }
                                     }
-                                }
 
-                                if (aChoice.isActive) {
-                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                    delete aScore.isChangeDiscount;
-                                    delete aScore.tmpDisScore;
+                                    if (aChoice.isActive) {
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
+                                    }
+                                } else if (!aChoice.isSelectableMultiple) {
+                                        point.startingSum += aScore.tmpDisScore;
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
                                 }
-                            } else if (!aChoice.isSelectableMultiple) {
-                                    point.startingSum += aScore.tmpDisScore;
-                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                    delete aScore.isChangeDiscount;
-                                    delete aScore.tmpDisScore;
+                                if (aChoice.isActive) {
+                                    aScore.appliedDiscount = true;
+                                    isDiscounted = true;
+                                }
                             }
                         }
                         if (!changedScores.has(aScore.idx)) {
@@ -3447,6 +3478,9 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                         }
                     }
                 }
+            }
+            if (isDiscounted && typeof localChoice.numDiscountChoices !== 'undefined') {
+                localChoice.numDiscountChoices += 1;
             }
             if (isChanged) updateScores(aChoice, thisTmpScores, ++count, changedScores);
         }
@@ -3541,12 +3575,38 @@ function selectObject(str: string, newActivatedList: string[]) {
             }
         }
 
+        let countSet = new Set<Choice>();
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             if (checkRequirements(score.requireds) && !score.isActive) {
                 const point = pointTypeMap.get(score.id);
                 if (typeof point !== 'undefined') {
-                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                    let val = score.value;
+                    if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                        const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                        if (typeof cMap !== 'undefined') {
+                            const dChoice = cMap.choice;
+
+                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
+                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                    countSet.add(dChoice);
+                                    val = score.discountScore;
+                                    score.appliedDiscount = true;
+                                } else {
+                                    if (typeof score.tmpDiscount !== 'undefined') {
+                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
+                                        }
+                                    }
+                                }
+                            } else {
+                                val = score.discountScore;
+                                score.appliedDiscount = true;
+                            }
+                        }
+                    }
                     val = point.allowFloat ? val : Math.floor(val);
                     point.startingSum -= val;
                     score.isActive = true;
@@ -3558,6 +3618,14 @@ function selectObject(str: string, newActivatedList: string[]) {
                     }
                 }
             }
+        }
+
+        if (countSet.size > 0) {
+            countSet.forEach((dChoice) => {
+                if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                    dChoice.numDiscountChoices += 1;
+                }
+            });
         }
 
         if (localChoice.duplicateRow) {
@@ -3857,8 +3925,8 @@ function selectObject(str: string, newActivatedList: string[]) {
                         app.bgColorStack = [];
                         app.defaultBgColor = app.styling.backgroundColor || '';
                     }
-                    app.bgColorStack.push({id: localChoice.id, data: localChoice.bgColor});
-                    app.styling.backgroundColor = localChoice.bgColor;
+                    app.bgColorStack.push({id: localChoice.id, data: localChoice.changedBgColorCode});
+                    app.styling.backgroundColor = localChoice.changedBgColorCode;
                 }
             }
         }
@@ -4074,7 +4142,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
             localChoice.isActive = true;
             localRow.currentChoices += 1;
         }
-        localChoice.multipleUseVariable += 1;
+        localChoice.multipleUseVariable++;
         activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
 
         if (isPos) {
@@ -4101,10 +4169,10 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                         }
                         if (typeof localChoice.discountChoices !== 'undefined') {
                             for (let i = 0; i < localChoice.discountChoices.length; i++) {
-                                const cMap = choiceMap.get(localChoice.discountChoices[i]);
-                                if (typeof cMap !== 'undefined') {
-                                    const dChoice = cMap.choice;
-                                    if (!dList.has(dChoice.id)) {
+                                if (!dList.has(localChoice.discountChoices[i])) {
+                                    const cMap = choiceMap.get(localChoice.discountChoices[i]);
+                                    if (typeof cMap !== 'undefined') {
+                                        const dChoice = cMap.choice;
                                         for (let j = 0; j < dChoice.scores.length; j++) {
                                             const score = dChoice.scores[j];
                                             if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
@@ -4139,13 +4207,39 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
             }
         }
 
+        let countSet = new Set<Choice>();
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
             if (checkRequirements(score.requireds) && !score.isActiveMul[selNum]) {
                 const point = pointTypeMap.get(score.id);
                 if (typeof point !== 'undefined') {
-                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                    let val = score.value;
+                    if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                        const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                        if (typeof cMap !== 'undefined') {
+                            const dChoice = cMap.choice;
+
+                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
+                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                    countSet.add(dChoice);
+                                    val = score.discountScore;
+                                    score.appliedDiscount = true;
+                                } else {
+                                    if (typeof score.tmpDiscount !== 'undefined') {
+                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
+                                        }
+                                    }
+                                }
+                            } else {
+                                val = score.discountScore;
+                                score.appliedDiscount = true;
+                            }
+                        }
+                    }
                     val = point.allowFloat ? val : Math.floor(val);
                     if (score.multiplyByTimes) {
                         val = val * (selNum + 1);
@@ -4160,6 +4254,14 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                     }
                 }
             }
+        }
+
+        if (countSet.size > 0) {
+            countSet.forEach((dChoice) => {
+                if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                    dChoice.numDiscountChoices += 1;
+                }
+            });
         }
 
         if (isPos) {
@@ -4680,19 +4782,19 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
 
             if (tRow.isBackpack) {
                 app.backpack.splice(tRow.index + 1, 0, newRow);
+                rowMap.set(newRow.id, app.backpack[tRow.index + 1]);
 
                 for (let i = tRow.index + 1; i < app.backpack.length; i++) {
                     app.backpack[i].index = i;
                 }
             } else {
                 app.rows.splice(tRow.index + 1, 0, newRow);
+                rowMap.set(newRow.id, app.rows[tRow.index + 1]);
 
                 for (let i = tRow.index + 1; i < app.rows.length; i++) {
                     app.rows[i].index = i;
                 }
             }
-
-            rowMap.set(newRow.id, newRow);
 
             for (let i = 0; i < newRow.objects.length; i++) {
                 const newChoice = newRow.objects[i];
@@ -4919,7 +5021,11 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
                     }
                 }
 
-                choiceMap.set(newChoice.id, {choice: newChoice, row: newRow});
+                if (tRow.isBackpack) {
+                    choiceMap.set(newChoice.id, {choice: app.backpack[tRow.index + 1].objects[i], row: app.backpack[tRow.index + 1]});
+                } else {
+                    choiceMap.set(newChoice.id, {choice: app.rows[tRow.index + 1].objects[i], row: app.rows[tRow.index + 1]});
+                }
 
                 if (newChoice.groups) {
                     for (let j = 0; j < newChoice.groups.length; j++) {
@@ -5365,7 +5471,7 @@ export function initializeApp(tempApp: any) {
                     if (key === 'backpack') {
                         kRow.isBackpack = true;
                     }
-                    initPrivateStyling(kRow, true);                            
+                    initPrivateStyling(kRow, true);
                     if (typeof kRow.styling !== 'undefined') {
                         initStyling(kRow.styling, typeof tempApp.version === 'undefined' || tempApp.version === '2.0.0-beta');
                     }
@@ -5381,6 +5487,14 @@ export function initializeApp(tempApp: any) {
                             externalImages.add(kRow.image);
                         } else if (!hasAvif.value) {
                             hasAvif.value = isAvif(kRow.image);
+                        }
+                    }
+
+                    if (typeof kRow.groups !== 'undefined') {
+                        for (let j = kRow.groups.length - 1; j >= 0; j--) {
+                            if (!groupMap.has(kRow.groups[j])) {
+                                kRow.groups.splice(j, 1);
+                            }
                         }
                     }
                     
@@ -5417,6 +5531,12 @@ export function initializeApp(tempApp: any) {
                             if (typeof kObj.groups !== 'undefined') {
                                 for (let k = 0; k < kObj.groups.length; k++) {
                                     if (typeof kObj.groups[k] === 'object') kObj.groups[k] = kObj.groups[k].id;
+                                }
+
+                                for (let k = kObj.groups.length - 1; k >= 0; k--) {
+                                    if (!groupMap.has(kObj.groups[k])) {
+                                        kObj.groups.splice(k, 1);
+                                    }
                                 }
                             }
 
@@ -5492,9 +5612,22 @@ export function initializeApp(tempApp: any) {
                             group.elements[j] = group.elements[j].id;
                         }
                     }
+
+                    for (let j = group.elements.length - 1; j >= 0; j--) {
+                        if (!choiceMap.has(group.elements[j])) {
+                            group.elements.splice(j, 1);
+                        }
+                    }
+
                     for (let j = 0; j < group.rowElements.length; j++) {
                         if (typeof group.rowElements[j] === 'object') {
                             group.rowElements[j] = group.rowElements[j].id;
+                        }
+                    }
+
+                    for (let j = group.rowElements.length - 1; j >= 0; j--) {
+                        if (!rowMap.has(group.rowElements[j])) {
+                            group.rowElements.splice(j, 1);
                         }
                     }
                 }

@@ -92,7 +92,7 @@
                 <div class="col-12 ps-3">
                     <FormField>
                         <Switch bind:checked={() => currentPoint.negativeIconIsOn ?? false, (e) => currentPoint.negativeIconIsOn = e} onSMUISwitchChange={() => {
-                            if (currentPoint.negativeIconIsOn) {
+                            if (!currentPoint.negativeIconIsOn) {
                                 delete currentPoint.negativeIconIsOn;
                                 delete currentPoint.negativeImage;
                                 delete currentPoint.negativeIconWidth;
@@ -112,11 +112,11 @@
                 <div class="col-md-6 col-12">
                     <div class="p-3">
                         {#if currentPoint.image}
-                            <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'image'}} class="btn--image-background">
+                            <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'image'}} class="btn--image-background">
                                 <img src={currentPoint.image} alt="Icon for Positive Number" loading="lazy" class="btn--image" style="max-height: 140px;" />
                             </button>
                         {/if}
-                        <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'image'}} variant="raised">
+                        <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'image'}} variant="raised">
                             <Label>Change Image</Label>
                         </Button>
                     </div>
@@ -144,11 +144,11 @@
                     <div class="col-md-6 col-12">
                         <div class="p-3">
                             {#if currentPoint.negativeImage}
-                                <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'negativeImage'}} class="btn--image-background">
+                                <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'negativeImage'}} class="btn--image-background">
                                     <img src={currentPoint.negativeImage} alt="Icon for Negative Number" loading="lazy" class="btn--image" style="max-height: 140px;" />
                                 </button>
                             {/if}
-                            <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'negativeImage'}} variant="raised">
+                            <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'negativeImage'}} variant="raised">
                                 <Label>Change Image</Label>
                             </Button>
                         </div>

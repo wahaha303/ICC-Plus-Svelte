@@ -4,19 +4,19 @@
         <AppBarRow>
             <AppBarSection class="py-0 justify-left">
                 <div class="col-8">
-                    <IconButton onclick={() => currentComponent.value = 'appMain'} size="mini">
+                    <IconButton onclickcapture={() => currentComponent.value = 'appMain'} size="mini">
                         <i class="mdi mdi-chevron-left"></i>
                     </IconButton>
                 </div>
                 <div class="col-2">
-                    <Button onclick={() => downloadAsImage(thisDiv)} variant="unelevated">
+                    <Button onclickcapture={() => downloadAsImage(thisDiv)} variant="unelevated">
                         <BtnIcon class="mdi mdi-file-image" />
                         <Label>Download Image</Label>
                     </Button>
                 </div>
                 <div class="col-2">
                     <input type="file" accept=".json, .zip" bind:this={fileInput} bind:files={valueTypeFiles} onchange={() => loadFromDisk(valueTypeFiles)} style="display: none;">
-                    <Button onclick={() => fileInput?.click()} variant="unelevated">
+                    <Button onclickcapture={() => fileInput?.click()} variant="unelevated">
                         <BtnIcon class="mdi mdi-upload" />
                         <Label>Load Project</Label>
                     </Button>
@@ -63,13 +63,13 @@
             <TopAppBar class="music-player" variant="fixed" >
                 <AppBarRow class="music-player--row">
                     <AppBarSection class="px-2 justify-left">
-                        <IconButton class="music-player--button" onclick={handlePlayButton} size="button" aria-label="Play">
+                        <IconButton class="music-player--button" onclickcapture={handlePlayButton} size="button" aria-label="Play">
                             <i class={bgmVariables.bgmIsPlaying ? 'mdi mdi-pause' : 'mdi mdi-play'}></i>
                         </IconButton>
-                        <IconButton class="music-player--button" onclick={handleStopButton} size="button" aria-label="Stop">
+                        <IconButton class="music-player--button" onclickcapture={handleStopButton} size="button" aria-label="Stop">
                             <i class="mdi mdi-stop"></i>
                         </IconButton>
-                        <IconButton class="music-player--button" onclick={handleMuteButton} size="button" aria-label="Mute">
+                        <IconButton class="music-player--button" onclickcapture={handleMuteButton} size="button" aria-label="Mute">
                             <i class={app.isMute ? 'mdi mdi-volume-off' : 'mdi mdi-volume-high'}></i>
                         </IconButton>
                         <div class="px-1" style="max-width: 104px; width: 100%">
@@ -94,7 +94,7 @@
             <TopAppBar class="pointBar" style={pointBar} variant="fixed" color="secondary" >
                 <AppBarRow class="justify-space-around">
                     <AppBarSection class="py-0 justify-center">
-                        <IconButton class="pointbar-icons" onclick={() => menuOpen = true} aria-label="Open Import Window" style={pointBarIcon}>
+                        <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} aria-label="Open Import Window" style={pointBarIcon}>
                             <i class="mdi mdi-format-list-checks"></i>
                         </IconButton>
                     </AppBarSection>
@@ -109,7 +109,7 @@
                     </AppBarSection>
                     <AppBarSection class="py-0 justify-center">
                         {#if app.backpack.length > 0 && ((typeof app.hideBackpackBtn === "undefined" || app.hideBackpackBtn === 0) || (app.hideBackpackBtn > 0 && app.hideBackpackBtn === app.btnBackpackIsOn))}
-                            <IconButton class="pointbar-icons" onclick={() => currentDialog = 'dlgBackpack'} aria-label="Open Backpack Window" style={pointBarIcon}>
+                            <IconButton class="pointbar-icons" onclickcapture={() => currentDialog = 'dlgBackpack'} aria-label="Open Backpack Window" style={pointBarIcon}>
                                 <i class="mdi mdi-checkbox-marked-circle-outline"></i>
                             </IconButton>
                         {/if}
@@ -174,8 +174,8 @@
     let fileInput = $state<HTMLInputElement>();
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
-    let pointBar = $derived(`background-color: ${hexToRgba(app.styling.barBackgroundColor)};margin:${app.styling.barMargin}px;padding:${app.styling.barPadding}px;${pointBarPosition}`);
-    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)};margin: ${app.styling.barTextMargin}px;padding: ${app.styling.barTextPadding}px;font-family: "${app.styling.barTextFont}";font-size: ${app.styling.barTextSize}px`);
+    let pointBar = $derived(`background-color: ${hexToRgba(app.styling.barBackgroundColor)}; margin:${app.styling.barMargin}px; padding:${app.styling.barPadding}px; ${pointBarPosition}`);
+    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}''; font-size: ${app.styling.barTextSize}px;`);
     let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {
         let styles = [];
@@ -199,7 +199,7 @@
             styles.push(`font-size: 0.835vw;`);
         }
         
-        return styles.join(''); 
+        return styles.join(' '); 
     });
     let mainStyle = $derived.by(() => {
         let styles = [];
@@ -208,7 +208,7 @@
             styles.push(`padding-top: 32px;`);
         }
 
-        return styles.join('');
+        return styles.join(' ');
     });
     let bgmTime = $derived.by(() => {
         return `${calTime(bgmVariables.curBgmTime)} | ${calTime(bgmVariables.curBgmLength)}`;

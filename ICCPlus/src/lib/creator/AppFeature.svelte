@@ -13,14 +13,14 @@
                 {#if i === 10}
                     <div class="col-12 d-column justify-space-between pt-3">
                         <p class="mb-3">{featureMenuComponent[i].text}</p>
-                        <Button onclick={featureMenuComponent[i].action} variant="raised" >
+                        <Button onclickcapture={featureMenuComponent[i].action} variant="raised" >
                             <Label>{featureMenuComponent[i].name}</Label>
                         </Button>
                     </div>
                 {:else}
                     <div class="col-sm-6 col-12 d-column justify-space-between py-2">
                         <p class="mb-3">{featureMenuComponent[i].text}</p>
-                        <Button onclick={featureMenuComponent[i].action} variant="raised" >
+                        <Button onclickcapture={featureMenuComponent[i].action} variant="raised" >
                             <Label>{featureMenuComponent[i].name}</Label>
                         </Button>
                     </div>

@@ -21,7 +21,7 @@
             </div>
             <div class="col-12 py-3">
                 <Wrapper text="Here you can export your design.">
-                    <Button onclick={exportDesign} variant="raised" >
+                    <Button onclickcapture={exportDesign} variant="raised" >
                         <Label>Export Design</Label>
                     </Button>
                 </Wrapper>
@@ -29,7 +29,7 @@
             {#each designMenuComponent as menu, i}
                 <div class="col-sm-6 col-12 pt-2 pb-3">
                     <Wrapper text={menu.text}>
-                        <Button onclick={menu.action} variant="raised" >
+                        <Button onclickcapture={menu.action} variant="raised" >
                             <Label>{menu.name}</Label>
                         </Button>
                     </Wrapper>

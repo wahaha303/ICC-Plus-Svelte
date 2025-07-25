@@ -2,27 +2,27 @@
     <div bind:clientWidth={width}>
         <div class="d-row justify-space-between overflow-auto">
             <Wrapper text="Move Up">
-                <IconButton onclick={moveAddonUp}><i class="mdi mdi-chevron-up"></i></IconButton>
+                <IconButton onclickcapture={moveAddonUp}><i class="mdi mdi-chevron-up"></i></IconButton>
             </Wrapper>
             <div class="d-flex">
                 <Wrapper text="Create New Reqruirement">
-                    <IconButton onclick={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'}}><i class="mdi mdi-key-plus"></i></IconButton>
+                    <IconButton onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'}}><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Addon">
-                    <IconButton onclick={copyAddon}><i class="mdi mdi-clipboard-outline"></i></IconButton>
+                    <IconButton onclickcapture={copyAddon}><i class="mdi mdi-clipboard-outline"></i></IconButton>
                 </Wrapper>
             </div>
             <Wrapper text="Move Down">
-                <IconButton onclick={moveAddonDown}><i class="mdi mdi-chevron-down"></i></IconButton>
+                <IconButton onclickcapture={moveAddonDown}><i class="mdi mdi-chevron-down"></i></IconButton>
             </Wrapper>
         </div>
         <div class="py-3 px-5 col-12">
             {#if addon.image && !app.hideImages}
-                <button type="button" onclick={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.imgProp = 'image'}} class="btn--image-background">
+                <button type="button" onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.imgProp = 'image'}} class="btn--image-background">
                     <img src={addon.image} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
                 </button>
             {/if}
-            <Button onclick={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.imgProp = 'image'}} variant="raised">
+            <Button onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.imgProp = 'image'}} variant="raised">
                 <Label>Change Image</Label>
             </Button>
         </div>
@@ -47,7 +47,7 @@
             {#each addon.requireds as required, i}
                 <div class="{required.requireds.length > 0 ? 'col-12' : reqCol} p-2">
                     <ObjectRequired required={required} isEditModeOn={true} data={addon} index={i} />
-                    <Button onclick={() => addon.requireds.splice(i, 1)} class="mt-1" variant="raised">
+                    <Button onclickcapture={() => addon.requireds.splice(i, 1)} class="mt-1" variant="raised">
                         <Label>Delete</Label>
                     </Button>
                 </div>
@@ -376,7 +376,7 @@
     let addonTitle = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.addonTitle};font-size: ${textStyle.addonTitleTextSize}%;text-align: ${textStyle.addonTitleAlign};`);
+        styles.push(`font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATitleColor)};`);
         } else if (isActive && filterStyle.selATitleColorIsOn) {
@@ -398,7 +398,7 @@
     let addonText = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.addonText}; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
+        styles.push(`font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATextColor)};`);
         } else if (isActive && filterStyle.selATextColorIsOn) {
@@ -450,12 +450,13 @@
     });
 
     let scoreText = $derived.by(() => {
-        return `font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
+        return `font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
     });
 
     function copyAddon() {
+        if (typeof app.tmpAddon === 'undefined') app.tmpAddon = [];
         app.tmpAddon.length = 0;
-        app.tmpAddon.push(addon);
+        app.tmpAddon.push(JSON.parse(JSON.stringify(addon)));
         snackbarVariables.labelText = 'Copied to clipboard.';
         snackbarVariables.isOpen = true;
     }

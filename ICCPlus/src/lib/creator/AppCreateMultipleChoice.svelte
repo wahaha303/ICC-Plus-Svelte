@@ -21,7 +21,7 @@
                     </Button>
                 </div>
                 <div class="col-6">
-                    <Button defaultAction onclick={() => submit(num)}>
+                    <Button defaultAction onclickcapture={() => submit(num)}>
                         <Label class="dialog-actions--btn">OK</Label>
                     </Button>
                 </div>

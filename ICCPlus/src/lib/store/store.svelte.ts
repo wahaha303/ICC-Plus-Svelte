@@ -1,5 +1,5 @@
-import { derived, get, readable, writable } from 'svelte/store';
-import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting } from './types';
+import { get, readable, writable } from 'svelte/store';
+import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting, MenuVariables } from './types';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { z } from 'zod';
 import JSZip from 'jszip';
@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.1.7';
+export const appVersion = '2.2.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -359,9 +359,12 @@ export const app = $state<App>({
     hideBackpackBtn: 0,
     btnBackpackIsOn: 0,
     showAllAddons: 0,
+    tmpRow: [],
+    tmpChoice: [],
     tmpRequired: [],
     tmpScore: [],
     tmpAddon: [],
+    tmpGroup: [],
     rowIdLength: 4,
     objectIdLength: 4,
     words: [],
@@ -374,6 +377,7 @@ export const app = $state<App>({
     customFonts: [],
     compressImageAuto: false,
     useToolbarBtn: false,
+    useChoiceEditBtn: false,
     hideScoresUpdated: false,
     hideChoiceDT: false,
     hideImages: false,
@@ -454,9 +458,12 @@ export const defaultApp: App = {
     hideBackpackBtn: 0,
     btnBackpackIsOn: 0,
     showAllAddons: 0,
+    tmpRow: [],
+    tmpChoice: [],
     tmpRequired: [],
     tmpScore: [],
     tmpAddon: [],
+    tmpGroup: [],
     rowIdLength: 4,
     objectIdLength: 4,
     words: [],
@@ -469,6 +476,7 @@ export const defaultApp: App = {
     customFonts: [],
     compressImageAuto: false,
     useToolbarBtn: false,
+    useChoiceEditBtn: false,
     hideScoresUpdated: false,
     hideChoiceDT: false,
     hideImages: false,
@@ -610,6 +618,7 @@ export const scoreSet = $state<SvelteSet<string>>(new SvelteSet());
 export const mdObjects = $state<Choice[]>([]);
 export const currentComponent = $state({ value: 'appMain'});
 export const currentTheme = $state({ value: 'light' });
+export const useAltMenu = $state({ value: false });
 export const sanitizeArg = {
     ALLOWED_TAGS: ['address', 'article', 'aside', 'footer', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup', 'main', 'nav', 'section', 'blockquote', 'dd', 'div', 'dl', 'dt', 'figcaption', 'figure', 'hr', 'li', 'main', 'ol', 'p', 'pre', 'ul', 'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'caption', 'col', 'colgroup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'font', 'iframe', 'img'],
     ADD_ATTR: ['href', 'target', 'style']
@@ -642,6 +651,13 @@ export const viewerSettings = $state<ViewerSetting>({
     allowDeselect: false,
     isSingleFile: false
 });
+export const menuVariables = $state<MenuVariables>({
+    anchor: null,
+    isOpen: false,
+    copy: () => {},
+    paste: () => {},
+    clear: () => {}
+})
 export const autoSaveSlot = $state<SaveSlot>({
    stored: false,
    name: 'Auto Save',
@@ -1410,10 +1426,10 @@ export function getChoiceTitle(req: Requireds) {
             }
             break;
         }
-        case 'point': {
+        case 'points': {
             let thisPoint = pointTypeMap.get(req.reqId);
             if (typeof thisPoint !== 'undefined') {
-                
+
                 return `${req.beforeText} ${req.reqPoints} ${thisPoint.name} ${req.afterText}`;
             }
             break;
@@ -2971,6 +2987,8 @@ export function cleanActivated() {
                 delete cChoice.startingSumAtDivide;
                 delete cChoice.activatedRandom;
                 delete cChoice.activatedRandomMul;
+                delete cChoice.numDiscountChoices;
+                
 
                 if (cChoice.addToAllowChoice && typeof cChoice.idOfAllowChoice !== 'undefined' && typeof cChoice.numbAddToAllowChoice !== 'undefined') {
                     for (let i = 0; i < cChoice.idOfAllowChoice.length; i++) {
@@ -3111,6 +3129,7 @@ export function cleanActivated() {
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
             cChoice.index = j;
+            cChoice.isEditModeOn = false;
 
             if (typeof cChoice.defaultTemplate !== 'undefined') {
                 cChoice.template = cChoice.defaultTemplate
@@ -3138,6 +3157,7 @@ export function cleanActivated() {
                     delete cScore.isActive;
                 }
                 deleteDiscount(cScore);
+                delete cScore.appliedDiscount;
             }
         }
     }
@@ -3152,6 +3172,7 @@ export function cleanActivated() {
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
             cChoice.index = j;
+            cChoice.isEditModeOn = false;
 
             if (typeof cChoice.defaultTemplate !== 'undefined') {
                 cChoice.template = cChoice.defaultTemplate
@@ -3179,6 +3200,7 @@ export function cleanActivated() {
                     delete cScore.isActive;
                 }
                 deleteDiscount(cScore);
+                delete cScore.appliedDiscount;
             }
         }
     }
@@ -3612,7 +3634,9 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
             const aRow = cMap.row;
             const aChoice = cMap.choice;
             const thisTmpScores = new SvelteMap<string, number>();
+            let isDiscounted = false;
             let isChanged = false;
+            if (localChoice.useDiscountCount && typeof localChoice.numDiscountChoices === 'undefined') localChoice.numDiscountChoices = 0;
             for (let i = 0; i < aChoice.scores.length; i++) {
                 const aScore = aChoice.scores[i];
                 if (!aScore.isNotRecalculatable) {
@@ -3621,23 +3645,29 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                         if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
                             const mul = aChoice.multipleUseVariable;
 
-                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                for (let j = mul - 1; j >= 0; j--) {
-                                    if (aChoice.isActive) {
-                                        point.startingSum += aScore.tmpDisScore;
+                            if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && localChoice.discountCount && localChoice.discountCount > localChoice.numDiscountChoices!)) {
+                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                    for (let j = mul - 1; j >= 0; j--) {
+                                        if (aChoice.isActive) {
+                                            point.startingSum += aScore.tmpDisScore;
+                                        }
                                     }
-                                }
 
-                                if (aChoice.isActive) {
-                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                    delete aScore.isChangeDiscount;
-                                    delete aScore.tmpDisScore;
+                                    if (aChoice.isActive) {
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
+                                    }
+                                } else if (!aChoice.isSelectableMultiple) {
+                                        point.startingSum += aScore.tmpDisScore;
+                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                        delete aScore.isChangeDiscount;
+                                        delete aScore.tmpDisScore;
                                 }
-                            } else if (!aChoice.isSelectableMultiple) {
-                                    point.startingSum += aScore.tmpDisScore;
-                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                    delete aScore.isChangeDiscount;
-                                    delete aScore.tmpDisScore;
+                                if (aChoice.isActive) {
+                                    aScore.appliedDiscount = true;
+                                    isDiscounted = true;
+                                }
                             }
                         }
                         if (!changedScores.has(aScore.idx)) {
@@ -3705,6 +3735,9 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                         }
                     }
                 }
+            }
+            if (isDiscounted && typeof localChoice.numDiscountChoices !== 'undefined') {
+                localChoice.numDiscountChoices += 1;
             }
             if (isChanged) updateScores(aChoice, thisTmpScores, ++count, changedScores);
         }
@@ -3799,12 +3832,38 @@ function selectObject(str: string, newActivatedList: string[]) {
             }
         }
 
+        let countSet = new Set<Choice>();
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             if (checkRequirements(score.requireds) && !score.isActive) {
                 const point = pointTypeMap.get(score.id);
                 if (typeof point !== 'undefined') {
-                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                    let val = score.value;
+                    if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                        const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                        if (typeof cMap !== 'undefined') {
+                            const dChoice = cMap.choice;
+
+                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
+                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                    countSet.add(dChoice);
+                                    val = score.discountScore;
+                                    score.appliedDiscount = true;
+                                } else {
+                                    if (typeof score.tmpDiscount !== 'undefined') {
+                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
+                                        }
+                                    }
+                                }
+                            } else {
+                                val = score.discountScore;
+                                score.appliedDiscount = true;
+                            }
+                        }
+                    }
                     val = point.allowFloat ? val : Math.floor(val);
                     point.startingSum -= val;
                     score.isActive = true;
@@ -3816,6 +3875,14 @@ function selectObject(str: string, newActivatedList: string[]) {
                     }
                 }
             }
+        }
+
+        if (countSet.size > 0) {
+            countSet.forEach((dChoice) => {
+                if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                    dChoice.numDiscountChoices += 1;
+                }
+            });
         }
 
         if (localChoice.duplicateRow) {
@@ -4397,13 +4464,39 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
             }
         }
 
+        let countSet = new Set<Choice>();
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
             if (checkRequirements(score.requireds) && !score.isActiveMul[selNum]) {
                 const point = pointTypeMap.get(score.id);
                 if (typeof point !== 'undefined') {
-                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                    let val = score.value;
+                    if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                        const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                        if (typeof cMap !== 'undefined') {
+                            const dChoice = cMap.choice;
+
+                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
+                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                    countSet.add(dChoice);
+                                    val = score.discountScore;
+                                    score.appliedDiscount = true;
+                                } else {
+                                    if (typeof score.tmpDiscount !== 'undefined') {
+                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
+                                        }
+                                    }
+                                }
+                            } else {
+                                val = score.discountScore;
+                                score.appliedDiscount = true;
+                            }
+                        }
+                    }
                     val = point.allowFloat ? val : Math.floor(val);
                     if (score.multiplyByTimes) {
                         val = val * (selNum + 1);
@@ -4418,6 +4511,14 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                     }
                 }
             }
+        }
+
+        if (countSet.size > 0) {
+            countSet.forEach((dChoice) => {
+                if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                    dChoice.numDiscountChoices += 1;
+                }
+            });
         }
 
         if (isPos) {
@@ -4938,19 +5039,19 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
 
             if (tRow.isBackpack) {
                 app.backpack.splice(tRow.index + 1, 0, newRow);
+                rowMap.set(newRow.id, app.backpack[tRow.index + 1]);
 
                 for (let i = tRow.index + 1; i < app.backpack.length; i++) {
                     app.backpack[i].index = i;
                 }
             } else {
                 app.rows.splice(tRow.index + 1, 0, newRow);
+                rowMap.set(newRow.id, app.rows[tRow.index + 1]);
 
                 for (let i = tRow.index + 1; i < app.rows.length; i++) {
                     app.rows[i].index = i;
                 }
             }
-
-            rowMap.set(newRow.id, newRow);
 
             for (let i = 0; i < newRow.objects.length; i++) {
                 const newChoice = newRow.objects[i];
@@ -4981,6 +5082,7 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
                     delete score.discountTextA;
                     delete score.discountTextB;
                     delete score.notStackableDiscount;
+                    delete score.appliedDiscount;
                 }
 
                 for (let j = 0; j < newChoice.addons.length; j++) {
@@ -5177,7 +5279,11 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
                     }
                 }
 
-                choiceMap.set(newChoice.id, {choice: newChoice, row: newRow});
+                if (tRow.isBackpack) {
+                    choiceMap.set(newChoice.id, {choice: app.backpack[tRow.index + 1].objects[i], row: app.backpack[tRow.index + 1]});
+                } else {
+                    choiceMap.set(newChoice.id, {choice: app.rows[tRow.index + 1].objects[i], row: app.rows[tRow.index + 1]});
+                }
 
                 if (newChoice.groups) {
                     for (let j = 0; j < newChoice.groups.length; j++) {
@@ -5719,7 +5825,7 @@ export function initializeApp(tempApp: any) {
                     if (key === 'backpack') {
                         kRow.isBackpack = true;
                     }
-                    initPrivateStyling(kRow, true);                            
+                    initPrivateStyling(kRow, true);
                     if (typeof kRow.styling !== 'undefined') {
                         initStyling(kRow.styling, typeof tempApp.version === 'undefined' || tempApp.version === '2.0.0-beta');
                     }
@@ -5727,6 +5833,14 @@ export function initializeApp(tempApp: any) {
                     if (typeof kRow.rowDesignGroups !== 'undefined') {
                         for (let j = 0; j < kRow.rowDesignGroups.length; j++) {
                             if (typeof kRow.rowDesignGroups[j] === 'object') kRow.rowDesignGroups[j] = kRow.rowDesignGroups[j].id;
+                        }
+                    }
+
+                    if (typeof kRow.groups !== 'undefined') {
+                        for (let j = kRow.groups.length - 1; j >= 0; j--) {
+                            if (!groupMap.has(kRow.groups[j])) {
+                                kRow.groups.splice(j, 1);
+                            }
                         }
                     }
                     
@@ -5763,6 +5877,12 @@ export function initializeApp(tempApp: any) {
                             if (typeof kObj.groups !== 'undefined') {
                                 for (let k = 0; k < kObj.groups.length; k++) {
                                     if (typeof kObj.groups[k] === 'object') kObj.groups[k] = kObj.groups[k].id;
+                                }
+
+                                for (let k = kObj.groups.length - 1; k >= 0; k--) {
+                                    if (!groupMap.has(kObj.groups[k])) {
+                                        kObj.groups.splice(k, 1);
+                                    }
                                 }
                             }
 
@@ -5822,9 +5942,22 @@ export function initializeApp(tempApp: any) {
                             group.elements[j] = group.elements[j].id;
                         }
                     }
+
+                    for (let j = group.elements.length - 1; j >= 0; j--) {
+                        if (!choiceMap.has(group.elements[j])) {
+                            group.elements.splice(j, 1);
+                        }
+                    }
+
                     for (let j = 0; j < group.rowElements.length; j++) {
                         if (typeof group.rowElements[j] === 'object') {
                             group.rowElements[j] = group.rowElements[j].id;
+                        }
+                    }
+
+                    for (let j = group.rowElements.length - 1; j >= 0; j--) {
+                        if (!rowMap.has(group.rowElements[j])) {
+                            group.rowElements.splice(j, 1);
                         }
                     }
                 }
@@ -6559,4 +6692,132 @@ export function hexToRgba(hex?: string) {
     const a = parseInt(hex.slice(7, 9), 16) / 255;
 
     return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
+}
+export function toggleAltMenu() {
+    const altMenu = useAltMenu.value ? 'true' : 'false';
+    localStorage.setItem('altMenu', altMenu);
+}
+export function removeAnchor() {
+    if (menuVariables.anchor) {
+        menuVariables.isOpen = false;
+        menuVariables.copy = () => {};
+        menuVariables.paste = () => {};
+        menuVariables.clear = () => {};
+        menuVariables.anchor = null;
+    }
+}
+export function pasteObject(row: Row, num: number) {
+    if (typeof app.tmpChoice === 'undefined' || app.tmpChoice.length === 0) {
+        snackbarVariables.labelText = 'The clipboard is empty.';
+        snackbarVariables.isOpen = true;
+    } else {
+        const id = generateObjectId(0, app.objectIdLength);
+        const clone: Choice = JSON.parse(JSON.stringify(app.tmpChoice[0]));
+        const index = num === -1 ? row.objects.length : num + 1;
+        
+        clone.id = id;
+        clone.index = index;
+        clone.isActive = false;
+        delete clone.forcedActivated;
+
+        for (let i = 0; i < clone.scores.length; i++) {
+            const score = clone.scores[i];
+
+            score.idx = generateScoreId(0, 5);
+            scoreSet.add(score.idx);
+            delete score.isActive;
+            delete score.setValue;
+            delete score.discountIsOn;
+            delete score.discountShow;
+            delete score.discountBeforeText;
+            delete score.discountAfterText;
+            delete score.discountScore;
+            delete score.discountScoreCal;
+            delete score.isChangeDiscount;
+            delete score.tmpDisScore;
+            delete score.tmpDiscount;
+            delete score.discountedFrom;
+            delete score.dupTextA;
+            delete score.dupTextB;
+            delete score.discountTextA;
+            delete score.discountTextB;
+            delete score.notStackableDiscount;
+            delete score.appliedDiscount;
+        }
+
+        for (let j = 0; j < clone.addons.length; j++) {
+            const addon = clone.addons[j];
+
+            addon.parentId = clone.id;
+        }
+
+        if (clone.backpackBtnRequirement) {
+            if (typeof app.hideBackpackBtn !== 'undefined') {
+                app.hideBackpackBtn += 1;
+            } else {
+                delete clone.backpackBtnRequirement;
+            }
+        }
+
+        if (num === -1) {
+            row.objects.push(clone);
+        } else {
+            row.objects.splice(num, 0, clone);
+        }
+        choiceMap.set(id, {choice: row.objects[index], row: row});
+
+        if (clone.groups) {
+            for (let i = 0; i < clone.groups.length; i++) {
+                let group = groupMap.get(clone.groups[i]);
+                if (typeof group !== 'undefined') {
+                    let elementIndex = group.elements.indexOf(id);
+                    if (elementIndex === -1) group.elements.push(id);
+                }
+            }
+        }
+        if (clone.objectDesignGroups) {
+            for (let i = 0; i < clone.objectDesignGroups.length; i++) {
+                let dGroup = objectDesignMap.get(clone.objectDesignGroups[i]);
+                if (typeof dGroup !== 'undefined') {
+                    let elementIndex = dGroup.elements.indexOf(id);
+                    if (elementIndex === -1) dGroup.elements.push(id);
+                }
+            }
+        }
+
+        if (num !== -1) {
+            for (let i = num; i < row.objects.length; i++) {
+                row.objects[i].index = i;
+            }
+        }
+    }
+}
+export function clearClipboard(type: number) {
+    switch (type) {
+        case 0:
+            app.tmpRow = [];
+            snackbarVariables.labelText = 'Row clipboard cleared.';
+            break;
+        case 1:
+            app.tmpChoice = [];
+            snackbarVariables.labelText = 'Choice clipboard cleared.';
+            break;
+        case 2:
+            app.tmpRequired = [];
+            snackbarVariables.labelText = 'Requirement clipboard cleared.';
+            break;
+        case 3:
+            app.tmpScore = [];
+            snackbarVariables.labelText = 'Score clipboard cleared.';
+            break;
+        case 4:
+            app.tmpAddon = [];
+            snackbarVariables.labelText = 'Addon clipboard cleared.';
+            break;
+        case 5:
+            app.tmpGroup = [];
+            snackbarVariables.labelText = 'Group clipboard cleared.';
+            break;
+    }
+    snackbarVariables.isOpen = true;
 }

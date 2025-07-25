@@ -6,23 +6,23 @@
                     <div class="spacer"></div>
                     {#each rowToolbarButtons as rowButton, i}
                         <Wrapper text={rowButton.text}>
-                            <IconButton onclick={rowButton.action}><i class={rowButton.icon}></i></IconButton>  
+                            <IconButton onclickcapture={rowButton.action} oncontextmenu={rowButton.contextAction}><i class={rowButton.icon}></i></IconButton>  
                         </Wrapper>
                     {/each}
                 </div>
                 <div class="row gy-4 p-4">
                     <div class={col2}>
                         {#if row.isButtonRow}
-                            <Button onclick={() => {dlgVariables.currentDialog = 'appButtonSettings'; dlgVariables.row = row;}} variant="raised">
+                            <Button onclickcapture={() => {dlgVariables.currentDialog = 'appButtonSettings'; dlgVariables.row = row;}} variant="raised">
                                 <Label>Open Button Settings</Label>
                             </Button>
                         {:else}
                             {#if row.image && !app.hideImages}
-                                <button type="button" onclick={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.imgProp = 'image';}} class="btn--image-background">
+                                <button type="button" onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = row; dlgVariables.imgProp = 'image';}} class="btn--image-background">
                                     <img src={row.image} alt="" loading="lazy" class="btn--image" style="max-height:140px;"/>
                                 </button>
                             {/if}
-                            <Button onclick={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = row; dlgVariables.imgProp = 'image';}} variant="raised">
+                            <Button onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = row; dlgVariables.imgProp = 'image';}} variant="raised">
                                 <Label>Change Image</Label>
                             </Button>
                         {/if}
@@ -66,9 +66,15 @@
                                 {/snippet}
                             </FormField>
                             <FormField class="ml-4 mb-3">
-                                <Switch bind:checked={row.isResultRow} color="secondary" class="switch-scale" />
+                                <Switch bind:checked={row.isResultRow} onSMUISwitchChange={() => {if (row.isResultRow) row.isGroupRow = false}} color="secondary" class="switch-scale" />
                                 {#snippet label()}
                                     Selected Choices?
+                                {/snippet}
+                            </FormField>
+                            <FormField class="ml-4 mb-3">
+                                <Switch bind:checked={() => row.isGroupRow ?? false, (e) => row.isGroupRow = e} onSMUISwitchChange={() => {if (row.isGroupRow) row.isResultRow = false}} color="secondary" class="switch-scale" />
+                                {#snippet label()}
+                                    Group Choices?
                                 {/snippet}
                             </FormField>
                             <FormField class="ml-4 mb-2">
@@ -77,7 +83,7 @@
                                     Half of the screen?
                                 {/snippet}
                             </FormField>
-                            {#if row.isResultRow}
+                            {#if row.isResultRow || row.isGroupRow}
                                 <Autocomplete
                                     options={getGroups()}
                                     getOptionLabel={getGroupLabel}
@@ -132,7 +138,7 @@
                             {/snippet}
                         </FormField>
                     </div>
-                    {#if row.isResultRow}
+                    {#if row.isResultRow || row.isGroupRow}
                         <div class={col3}>
                             <FormField class="ml-4 mb-2">
                                 <Switch bind:checked={() => row.choicesShareTemplate ?? false, (e) => {row.choicesShareTemplate = e}} color="secondary" class="switch-scale" />
@@ -171,7 +177,7 @@
                         </div>
                     {/if}
                 </div>
-                {#if row.isResultRow && row.textIsRemoved}
+                {#if (row.isResultRow || row.isGroupRow) && row.textIsRemoved}
                     <div class="row px-4">
                         <div class={col3}>
                             <FormField class="ml-4 mb-2">
@@ -244,7 +250,7 @@
                         <div class="col p-2">
                             <ObjectRequired isEditModeOn={true} required={required} data={row} index={i} />
                             <div class="col-12 pt-1">
-                                <Button onclick={() => row.requireds.splice(i, 1)} variant="raised">
+                                <Button onclickcapture={() => row.requireds.splice(i, 1)} variant="raised">
                                     <Label>Delete</Label>
                                 </Button>
                             </div>
@@ -259,7 +265,7 @@
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || windowWidth <= 960)}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -277,7 +283,7 @@
                     {/if}
                     {#if row.template === 5}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -295,7 +301,7 @@
                     {/if}
                     {#if row.template === 4}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -321,7 +327,7 @@
                     </div>
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -335,7 +341,7 @@
                 {:else if row.template === 3}
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -366,16 +372,26 @@
                 {#each resultRow as val, i}
                     <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} />
                 {/each}
+            {:else if row.isGroupRow}
+                {#each groupRow as val, i}
+                    <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
+                {/each}
             {:else}
                 {#each row.objects as choice, i}
                     <AppObject bind:this={choiceRef} row={row} choice={choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
                 {/each}
             {/if}
-            {#if (bCreatorMode && row.isEditModeOn && !row.isResultRow)}
+            {#if (bCreatorMode && row.isEditModeOn && !row.isResultRow && !row.isGroupRow)}
                 <div class="p-2 {objectWidthClass()}">
-                    <button type="button" class="create-box col-12" style="min-height: 581px; font-size: 40px;" onclick={createNewObject} aria-label="Create New Choice">
-                        <i class="mdi mdi-plus-thick"></i>
-                    </button>
+                    <Wrapper text="L: Create New Single Choice<br>R: Paste Choice">
+                        <button type="button" class="create-box col-12" style="min-height: 581px; font-size: 40px;" onclickcapture={createNewObject} oncontextmenu={(e: MouseEvent) => {
+                            e.preventDefault();
+                            pasteObject(row, -1);
+                            (e.currentTarget as HTMLElement)?.blur();
+                        }} aria-label="Create New Choice">
+                            <i class="mdi mdi-plus-thick"></i>
+                        </button>
+                    </Wrapper>
                 </div>
             {/if}
         </div>
@@ -394,14 +410,16 @@
 	import IconButton from '@smui/icon-button';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba } from '$lib/store/store.svelte';
-    import type { Requireds, Row } from '$lib/store/types';
+    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor } from '$lib/store/store.svelte';
+    import type { Choice, Requireds, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
+    import { tick } from 'svelte';
 
     const { row, bCreatorMode, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row:Row, bCreatorMode:boolean, windowWidth:number, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     const rowToolbarButtons = [{
         action: () => { createNewObject() },
-        text: 'Create New Single Choice',
+        contextAction: (e: MouseEvent) => { e.preventDefault(); pasteObject(row, -1); (e.currentTarget as HTMLElement)?.blur(); },
+        text: 'L: Create New Single Choice<br>R: Paste Choice',
         icon: 'mdi mdi-file-plus'
     }, {
         action: () => { dlgVariables.currentDialog = 'appCreateMultipleChoices'; dlgVariables.func = createNewObjects },
@@ -413,7 +431,8 @@
         icon: 'mdi mdi-format-list-bulleted'
     }, {
         action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = row },
-        text: 'Create Requirement',
+        contextAction: (e: MouseEvent) => { reqContext(e) },
+        text: 'L: Create Requirement<br>R: Context Menu',
         icon: 'mdi mdi-key-plus'
     }, {
         action: () => { dlgVariables.currentDialog = 'appRowSettings'; dlgVariables.row = row },
@@ -527,6 +546,30 @@
         return result;
     });
 
+    let groupRow = $derived.by(() => {
+        const result = [];
+        if (typeof row.resultGroupId !== 'undefined') {
+            const group = groupMap.get(row.resultGroupId);
+
+            if (typeof group !== 'undefined') {
+                for (let i = 0; i < group.elements.length; i++) {
+                    const cMap = choiceMap.get(group.elements[i]);
+                    
+                    if (typeof cMap !== 'undefined') {
+                        result.push({choice: cMap.choice, row: cMap.row});
+                    }
+                }
+            }
+        }
+
+        result.sort((a, b) => {
+            if (a.row.index !== b.row.index) return a.row.index - b.row.index;
+            return a.choice.index - b.choice.index;
+        });
+
+        return result;
+    });
+
     let rowBodyBgImage = $derived.by(() => {
         if (typeof row.styling !== 'undefined' && row.isPrivateStyling && row.privateBackgroundIsOn && row.styling.backgroundImage) return row.styling;
         if (typeof app.rowDesignGroups !== 'undefined' && row.rowDesignGroups) {
@@ -622,11 +665,11 @@
     });
 
     let rowTitle = $derived.by(() => {
-        return `font-family: ${textStyle.rowTitle}; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${hexToRgba(textStyle.rowTitleColor)}`;
+        return `font-family: '${textStyle.rowTitle}'; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${hexToRgba(textStyle.rowTitleColor)}`;
     });
 
     let rowText = $derived.by(() => {
-        return `white-space: pre-wrap; font-family: ${textStyle.rowText}; font-size: ${textStyle.rowTextTextSize}%; text-align: ${textStyle.rowTextAlign}; color: ${hexToRgba(textStyle.rowTextColor)}; padding: ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}% ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}%;`;
+        return `white-space: pre-wrap; font-family: '${textStyle.rowText}'; font-size: ${textStyle.rowTextTextSize}%; text-align: ${textStyle.rowTextAlign}; color: ${hexToRgba(textStyle.rowTextColor)}; padding: ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}% ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}%;`;
     });
 
     let rowImage = $derived.by(() => {
@@ -715,12 +758,67 @@
             groups: [],
             objectDesignGroups: []
         });
+        if (typeof row.groups !== 'undefined' && row.groups.length > 0) {
+            for (let i = 0; i < row.groups.length; i++) {
+                const group = groupMap.get(row.groups[i]);
+                if (typeof group !== 'undefined') {
+                    row.objects[idx].groups.push(group.id);
+                    let elementIndex = group.elements.indexOf(id);
+                    if (elementIndex === -1) group.elements.push(id);
+                }
+            }
+        }
         choiceMap.set(id, {choice: row.objects[idx], row: row});
     }
 
     function createNewObjects(num: number) {
         for(let i = 0; i < num; i++) {
             createNewObject();
+        }
+    }
+
+    function reqContext(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        if (menuVariables.isOpen) {
+            menuVariables.isOpen = false;
+            removeAnchor();
+        }
+        menuVariables.anchor = target.parentElement;
+        menuVariables.copy = () => copyRequireds();
+        menuVariables.paste = () => pasteRequired();
+        menuVariables.clear = () => clearClipboard(2);
+        tick().then(() => {
+            menuVariables.isOpen = true;
+        });
+    }
+
+    function copyRequireds() {
+        if (row.requireds.length > 0) {
+            if (typeof app.tmpRequired === 'undefined') app.tmpRequired = [];
+            app.tmpRequired.length = 0;
+            for (let i = 0; i < row.requireds.length; i++) {
+                const required = JSON.parse(JSON.stringify(row.requireds[i]));
+                app.tmpRequired.push(required);
+            }
+            snackbarVariables.labelText = 'Copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        } else {
+            snackbarVariables.labelText = 'Nothing to copy.';
+            snackbarVariables.isOpen = true;
+        }
+    }
+
+    function pasteRequired() {
+        if (typeof app.tmpRequired === 'undefined' || app.tmpRequired.length === 0) {
+            snackbarVariables.labelText = 'The clipboard is empty.';
+            snackbarVariables.isOpen = true;
+        } else {
+            for (var i = 0; i < app.tmpRequired.length; i++) {
+                const tmpRequired = JSON.parse(JSON.stringify(app.tmpRequired[i]));
+                row.requireds.push(tmpRequired);
+            }
         }
     }
 
@@ -755,7 +853,6 @@
             if (typeof point !== 'undefined') {
                 point.startingSum += rnd;
             }
-            console.log(point, rnd);
             return;
         }
 

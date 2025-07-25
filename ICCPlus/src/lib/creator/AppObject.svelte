@@ -1,22 +1,27 @@
-{#if bCreatorMode && row.isEditModeOn && !row.isResultRow}
+{#if bCreatorMode && (row.isEditModeOn || choice.isEditModeOn) && !row.isResultRow && !row.isGroupRow}
     <div class={objectWidthClass()}>
-        <div bind:clientWidth={width} class="container-fluid gx-0">
+        <div bind:clientWidth={width} class:position-relative={app.useChoiceEditBtn && !row.isEditModeOn && choice.isEditModeOn} class="container-fluid gx-0">
+            {#if app.useChoiceEditBtn && !row.isEditModeOn && choice.isEditModeOn}
+                <div class="choice-edit-button__edit-mode">
+                    <IconButton onclickcapture={() => choice.isEditModeOn = false} size="button"><i class="mdi mdi-wrench"></i></IconButton>
+                </div>
+            {/if}
             <Card class="mx-1 my-2">
                 <CardContent class="p-0">
                     <div class="toolbar justify-space-around">
                         {#each choiceToolbarButtons as choiceButton}
                             <Wrapper text={choiceButton.text}>
-                                <IconButton onclick={choiceButton.action}><i class={choiceButton.icon}></i></IconButton>
+                                <IconButton onclickcapture={choiceButton.action} oncontextmenu={choiceButton.contextAction}><i class={choiceButton.icon}></i></IconButton>
                             </Wrapper>
                         {/each}
                     </div>
                     <div class="py-3 px-5 col-12">
                         {#if choice.image && !app.hideImages}
-                            <button type="button" onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} class="btn--image-background">
+                            <button type="button" onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} class="btn--image-background">
                                 <img src={choice.image} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
                             </button>
                         {/if}
-                        <Button onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} variant="raised">
+                        <Button onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} variant="raised">
                             <Label>Change Image</Label>
                         </Button>
                     </div>
@@ -59,7 +64,7 @@
                     <div class="toolbar justify-space-around">
                         {#each choiceBottomToolbarButtons as choiceButton}
                             <Wrapper text={choiceButton.text}>
-                                <IconButton onclick={choiceButton.action} oncontextmenu={choiceButton.contextAction}><i class={choiceButton.icon}></i></IconButton>
+                                <IconButton onclickcapture={choiceButton.action} oncontextmenu={choiceButton.contextAction}><i class={choiceButton.icon}></i></IconButton>
                             </Wrapper>
                         {/each}
                     </div>
@@ -75,7 +80,7 @@
                                     {#each choice.scores as score, i}
                                         <div class="col-12 p-0">
                                             <ObjectScore score={score} choice={choice} isEditModeOn={true} num={i} />
-                                            <Button onclick={() => {choice.scores.splice(i, 1); scoreSet.delete(score.idx)}} class="w-100 mt-1" variant="raised">
+                                            <Button onclickcapture={() => {choice.scores.splice(i, 1); scoreSet.delete(score.idx)}} class="w-100 mt-1" variant="raised">
                                                 <Label>Delete</Label>
                                             </Button>
                                         </div>
@@ -115,7 +120,7 @@
                                     {#each choice.addons as addon, i}
                                         <div class="col-12 p-0">
                                             <ObjectAddon choice={choice} addon={addon} isEditModeOn={true} index={i} />
-                                            <Button onclick={() => choice.addons.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                                            <Button onclickcapture={() => choice.addons.splice(i, 1)} class="w-100 mt-1" variant="raised">
                                                 <Label>Delete</Label>
                                             </Button>
                                         </div>
@@ -136,7 +141,7 @@
                                     {#each choice.requireds as req, i}
                                         <div class="{req.requireds.length > 0 ? 'col-12' : reqCol} p-2">
                                             <ObjectRequired required={req} isEditModeOn={true} data={choice} index={i} />
-                                            <Button onclick={() => choice.requireds.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                                            <Button onclickcapture={() => choice.requireds.splice(i, 1)} class="w-100 mt-1" variant="raised">
                                                 <Label>Delete</Label>
                                             </Button>
                                         </div>
@@ -157,7 +162,7 @@
                                     {#each choice.groups, i}
                                         <div class="col-12 p-0 pb-2">
                                             <ObjectGroup choice={choice} index={i} />
-                                            <Button onclick={() => choice.groups.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                                            <Button onclickcapture={() => deleteGroup(i)} class="w-100 mt-1" variant="raised">
                                                 <Label>Delete</Label>
                                             </Button>
                                         </div>
@@ -209,7 +214,7 @@
                                                 {/snippet}
                                             </FormField>
                                             {#if choice.isSelectableMultiple}
-                                                <Wrapper text="Disabling this checkbox will make most features unavailable.">
+                                                <Wrapper innerClass="m-0 p-0" text="Disabling this checkbox will make most features unavailable.">
                                                     <FormField class="col-12 m-1 p-0">
                                                         <Checkbox bind:checked={() => choice.isMultipleUseVariable ?? false, (e) => choice.isMultipleUseVariable = e} onchange={() => {
                                                             if (choice.isMultipleUseVariable) {
@@ -500,6 +505,24 @@
                                                     </div>
                                                 {/if}
                                                 <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.useDiscountCount ?? false, (e) => choice.useDiscountCount = e} onchange={() => {
+                                                        if (choice.useDiscountCount) {
+                                                            choice.discountCount = 0;
+                                                        } else {
+                                                            delete choice.useDiscountCount;
+                                                            delete choice.discountCount;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Specify Number of Choices to Be Discounted
+                                                    {/snippet}
+                                                </FormField>
+                                                {#if choice.useDiscountCount}
+                                                    <div class="col-12 m-1 px-2">
+                                                        <Textfield bind:value={() => choice.discountCount ?? 0, (e) => choice.discountCount = e} onchange={() => choice.discountCount = Math.max(0, choice.discountCount || 0)} label="Number of choices" type="number" input$min={0} variant="filled" />
+                                                    </div>
+                                                {/if}
+                                                <FormField class="col-12 m-1 p-0">
                                                     <Checkbox bind:checked={() => choice.isDisChoices ?? false, (e) => choice.isDisChoices = e} onchange={() => {
                                                         if (choice.isDisChoices) {
                                                             choice.discountChoices = [];
@@ -515,9 +538,11 @@
                                                         Select Individual Choices Instead of Groups
                                                     {/snippet}
                                                 </FormField>
-                                                <div class="col-12 m-1 px-4">
-                                                    Do not select choices that are already included in the selected rows.
-                                                </div>
+                                                {#if choice.isDisChoices}
+                                                    <div class="col-12 m-1 px-4">
+                                                        Do not select choices that are already included in the selected rows.
+                                                    </div>
+                                                {/if}
                                                 <div class="col-12 m-1 px-2">
                                                     {#if choice.isDisChoices}
                                                         <CustomChipInput acValue={choice.discountRows ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Rows to apply discount" getLabel={getRowLabel} selectProp={choice} />
@@ -771,7 +796,7 @@
                                                 <div class="col-12 m-1 px-2">
                                                     {#if choice.scrollToObject}
                                                         <Autocomplete
-                                                            options={isBackpack ? getBackpackRows() : getRows()}
+                                                            options={isBackpack ? getBackpackChoices() : getChoices()}
                                                             getOptionLabel={getChoiceLabel}
                                                             bind:value={choice.scrollObjectId}
                                                             label="Target Choice"
@@ -900,11 +925,11 @@
                                                 {#if choice.changeBgImage}
                                                     <div class="col-12 px-5 py-3">
                                                         {#if choice.bgImage && !app.hideImages}
-                                                            <button type="button" onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'bgImage'}} class="btn--image-background">
+                                                            <button type="button" onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = choice; dlgVariables.imgProp = 'bgImage'}} class="btn--image-background">
                                                                 <img src={choice.bgImage} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
                                                             </button>
                                                         {/if}
-                                                        <Button onclick={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'bgImage'}} variant="raised">
+                                                        <Button onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = choice; dlgVariables.imgProp = 'bgImage'}} variant="raised">
                                                             <Label>Change Image</Label>
                                                         </Button>
                                                     </div>
@@ -1236,10 +1261,15 @@
     </div>
 {:else if !(bCreatorMode && row.isEditModeOn) && (isEnabled || !filterStyle.reqFilterVisibleIsOn)}
     <div class={objectWidthClass()}>
-        <span class:fullHeight={fullHeight} class="d-flex">
+        <span class:fullHeight={fullHeight} class:position-relative={app.useChoiceEditBtn} class="d-flex">
+            {#if app.useChoiceEditBtn}
+                <div class="choice-edit-button">
+                    <IconButton onclickcapture={() => choice.isEditModeOn = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
+                </div>
+            {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclick={() => activateObject(choice, row)}>
+            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate}
                     <span class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
@@ -1480,7 +1510,7 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
-	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba } from '$lib/store/store.svelte';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard } from '$lib/store/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
@@ -1503,7 +1533,8 @@
         icon: 'mdi mdi-cog'
     }, {
         action: () => { cloneObject() },
-        text: 'Clone Choice',
+        contextAction: (e: MouseEvent) => { choiceContext(e) },
+        text: 'L: Clone Choice<br>R: Context Menu',
         icon: 'mdi mdi-content-copy'
     }, {
         action: () => { moveChoiceRight() },
@@ -1512,23 +1543,23 @@
     }];
     const choiceBottomToolbarButtons = [{
         action: () => { createNewScore() },
-        contextAction: (e: MouseEvent) => { e.preventDefault(); pasteScore(); },
-        text: 'L: Create Score<br>R: Paste Score',
+        contextAction: (e: MouseEvent) => { scoreContext(e) },
+        text: 'L: Create Score<br>R: Context Menu',
         icon: 'mdi mdi-numeric-9-plus-box'
     }, {
         action: () => { createNewAddon() },
-        contextAction: (e: MouseEvent) => { e.preventDefault(); pasteAddon(); },
-        text: 'L: Create Addon<br>R: Paste Addon',
+        contextAction: (e: MouseEvent) => { addonContext(e) },
+        text: 'L: Create Addon<br>R: Context Menu',
         icon: 'mdi mdi-comment-plus'
     }, {
         action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = choice; },
-        contextAction: (e: MouseEvent) => { e.preventDefault(); pasteRequired(); },
-        text: 'L: Create Requirement<br>R: Paste Requirement',
+        contextAction: (e: MouseEvent) => { requiredContext(e) },
+        text: 'L: Create Requirement<br>R: Context Menu',
         icon: 'mdi mdi-key-plus'
     }, {
         action: () => { choice.groups.push('') },
-        contextAction: (e: MouseEvent) => { },
-        text: 'Add To Group',
+        contextAction: (e: MouseEvent) => { groupContext(e) },
+        text: 'L: Add To Group<br>R: Context Menu',
         icon: 'mdi mdi-group'
     }];
     const templates = [{
@@ -1636,7 +1667,7 @@
     let objectTitle = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.objectTitle};font-size: ${textStyle.objectTitleTextSize}%;text-align: ${textStyle.objectTitleAlign};`);
+        styles.push(`font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTitleColor)};`);
         } else if (isActive && filterStyle.selCTitleColorIsOn) {
@@ -1652,7 +1683,7 @@
     });
 
     let multiChoiceText = $derived.by(() => {
-        return `font-family: ${multiChoiceStyle.multiChoiceTextFont}; color: ${hexToRgba(textStyle.scoreTextColor)}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`;
+        return `font-family: '${multiChoiceStyle.multiChoiceTextFont}'; color: ${hexToRgba(textStyle.scoreTextColor)}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`;
     });
 
     let multiChoiceButton = $derived.by(() => {
@@ -1670,7 +1701,7 @@
     let objectText = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.objectText};text-align: ${textStyle.objectTextAlign};font-size: ${textStyle.objectTextTextSize}%;white-space: pre-line;`);
+        styles.push(`font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTextColor)};`);
         } else if (isActive && filterStyle.selCTextColorIsOn) {
@@ -1889,7 +1920,7 @@
     let scoreText = $derived.by(() => {
         let style = [];
 
-        style.push(`font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
+        style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         if (!isEnabled) {
             if (filterStyle.reqScoreTextColorIsOn)  {
@@ -1962,15 +1993,48 @@
         });
     }
 
+    function copyScores() {
+        if (choice.scores.length > 0) {
+            if (typeof app.tmpScore === 'undefined') app.tmpScore = [];
+            app.tmpScore.length = 0;
+            for (let i = 0; i < choice.scores.length; i++) {
+                const score = JSON.parse(JSON.stringify(choice.scores[i]));
+                app.tmpScore.push(score);
+            }
+            snackbarVariables.labelText = 'Copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        } else {
+            snackbarVariables.labelText = 'Nothing to copy.';
+            snackbarVariables.isOpen = true;
+        }
+    }
+
     function pasteScore() {
         if (typeof app.tmpScore === 'undefined' || app.tmpScore.length === 0) {
             snackbarVariables.labelText = 'The clipboard is empty.';
             snackbarVariables.isOpen = true;
         } else {
-            const tmpScore = JSON.parse(JSON.stringify(app.tmpScore));
-            for (var i = 0; i < tmpScore.length; i++) {
-                choice.scores.push(tmpScore[i]);
+            for (var i = 0; i < app.tmpScore.length; i++) {
+                const tmpScore = JSON.parse(JSON.stringify(app.tmpScore[i]));
+                tmpScore.idx = generateScoreId(0, 5);
+                choice.scores.push(tmpScore);
             }
+        }
+    }
+
+    function copyAddons() {
+        if (choice.addons.length > 0) {
+            if (typeof app.tmpAddon === 'undefined') app.tmpAddon = [];
+            app.tmpAddon.length = 0;
+            for (let i = 0; i < choice.addons.length; i++) {
+                const addon = JSON.parse(JSON.stringify(choice.addons[i]));
+                app.tmpAddon.push(addon);
+            }
+            snackbarVariables.labelText = 'Copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        } else {
+            snackbarVariables.labelText = 'Nothing to copy.';
+            snackbarVariables.isOpen = true;
         }
     }
 
@@ -1979,10 +2043,27 @@
             snackbarVariables.labelText = 'The clipboard is empty.';
             snackbarVariables.isOpen = true;
         } else {
-            const tmpAddon = JSON.parse(JSON.stringify(app.tmpAddon));
-            for (var i = 0; i < tmpAddon.length; i++) {
-                choice.addons.push(tmpAddon[i]);
+            for (var i = 0; i < app.tmpAddon.length; i++) {
+                const tmpAddon = JSON.parse(JSON.stringify(app.tmpAddon[i]));
+                tmpAddon.parentId = choice.id;
+                choice.addons.push(tmpAddon);
             }
+        }
+    }
+
+    function copyRequireds() {
+        if (choice.requireds.length > 0) {
+            if (typeof app.tmpRequired === 'undefined') app.tmpRequired = [];
+            app.tmpRequired.length = 0;
+            for (let i = 0; i < choice.requireds.length; i++) {
+                const required = JSON.parse(JSON.stringify(choice.requireds[i]));
+                app.tmpRequired.push(required);
+            }
+            snackbarVariables.labelText = 'Copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        } else {
+            snackbarVariables.labelText = 'Nothing to copy.';
+            snackbarVariables.isOpen = true;
         }
     }
 
@@ -1991,11 +2072,127 @@
             snackbarVariables.labelText = 'The clipboard is empty.';
             snackbarVariables.isOpen = true;
         } else {
-            const tmpRequired = JSON.parse(JSON.stringify(app.tmpRequired));
-            for (var i = 0; i < tmpRequired.length; i++) {
-                choice.requireds.push(tmpRequired[i]);
+            for (var i = 0; i < app.tmpRequired.length; i++) {
+                const tmpRequired = JSON.parse(JSON.stringify(app.tmpRequired[i]));
+                choice.requireds.push(tmpRequired);
             }
         }
+    }
+
+    function copyGroups() {
+        if (choice.groups.length > 0) {
+            if (typeof app.tmpGroup === 'undefined') app.tmpGroup = [];
+            app.tmpGroup.length = 0;
+            for (let i = 0; i < choice.groups.length; i++) {
+                app.tmpGroup.push(choice.groups[i]);
+            }
+            snackbarVariables.labelText = 'Copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        } else {
+            snackbarVariables.labelText = 'Nothing to copy.';
+            snackbarVariables.isOpen = true;
+        }
+    }
+
+    function pasteGroup() {
+        if (typeof app.tmpGroup === 'undefined' || app.tmpGroup.length === 0) {
+            snackbarVariables.labelText = 'The clipboard is empty.';
+            snackbarVariables.isOpen = true;
+        } else {
+            for (var i = 0; i < app.tmpGroup.length; i++) {
+                let group = groupMap.get(app.tmpGroup[i]);
+                choice.groups.push(app.tmpGroup[i]);
+                if (typeof group !== 'undefined') {
+                    let elementIndex = group.elements.indexOf(choice.id);
+                    if (elementIndex === -1) group.elements.push(choice.id);
+                }
+            }
+        }
+    }
+
+    function choiceContext(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        if (menuVariables.isOpen) {
+            menuVariables.isOpen = false;
+            removeAnchor();
+        }
+        menuVariables.anchor = target.parentElement;
+        menuVariables.copy = () => copyObject();
+        menuVariables.paste = () => pasteObject(row, choice.index + 1);
+        menuVariables.clear = () => clearClipboard(1);
+        tick().then(() => {
+            menuVariables.isOpen = true;
+        });
+    }
+    
+    function requiredContext(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        if (menuVariables.isOpen) {
+            menuVariables.isOpen = false;
+            removeAnchor();
+        }
+        menuVariables.anchor = target.parentElement;
+        menuVariables.copy = () => copyRequireds();
+        menuVariables.paste = () => pasteRequired();
+        menuVariables.clear = () => clearClipboard(2);
+        tick().then(() => {
+            menuVariables.isOpen = true;
+        });
+    }
+
+    function scoreContext(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        if (menuVariables.isOpen) {
+            menuVariables.isOpen = false;
+            removeAnchor();
+        }
+        menuVariables.anchor = target.parentElement;
+        menuVariables.copy = () => copyScores();
+        menuVariables.paste = () => pasteScore();
+        menuVariables.clear = () => clearClipboard(3);
+        tick().then(() => {
+            menuVariables.isOpen = true;
+        });
+    }
+
+    function addonContext(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        if (menuVariables.isOpen) {
+            menuVariables.isOpen = false;
+            removeAnchor();
+        }
+        menuVariables.anchor = target.parentElement;
+        menuVariables.copy = () => copyAddons();
+        menuVariables.paste = () => pasteAddon();
+        menuVariables.clear = () => clearClipboard(4);
+        tick().then(() => {
+            menuVariables.isOpen = true;
+        });
+    }
+
+    function groupContext(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        if (menuVariables.isOpen) {
+            menuVariables.isOpen = false;
+            removeAnchor();
+        }
+        menuVariables.anchor = target.parentElement;
+        menuVariables.copy = () => copyGroups();
+        menuVariables.paste = () => pasteGroup();
+        menuVariables.clear = () => clearClipboard(5);
+        tick().then(() => {
+            menuVariables.isOpen = true;
+        });
     }
 
     function cloneObject() {
@@ -2029,6 +2226,7 @@
             delete score.discountTextA;
             delete score.discountTextB;
             delete score.notStackableDiscount;
+            delete score.appliedDiscount;
         }
 
         for (let j = 0; j < clone.addons.length; j++) {
@@ -2069,6 +2267,25 @@
                     if (elementIndex === -1) dGroup.elements.push(id);
                 }
             }
+        }
+    }
+
+    function copyObject() {
+        if (typeof app.tmpChoice === 'undefined') app.tmpChoice = [];
+        app.tmpChoice.length = 0;
+        app.tmpChoice.push(JSON.parse(JSON.stringify(choice)));
+        snackbarVariables.labelText = 'Copied to clipboard.';
+        snackbarVariables.isOpen = true;
+    }
+
+    function deleteGroup(num: number) {
+        const group = groupMap.get(choice.groups[num]);
+        choice.groups.splice(num, 1);
+        if (typeof group !== 'undefined') {
+            let elementIndex = group.elements.indexOf(choice.id);
+            let rowElementIndex = group.rowElements.indexOf(row.id);
+            if (elementIndex !== -1) group.elements.splice(elementIndex, 1);
+            if (rowElementIndex !== -1) group.rowElements.splice(rowElementIndex, 1);
         }
     }
 
@@ -2351,14 +2568,17 @@
                 const aRow = cMap.row;
                 const aChoice = cMap.choice;
                 const thisTmpScores = new SvelteMap<string, number>();
+                const countSet = new Set<Choice>();
                 let isChanged = false;
+                let isDiscounted = false;
                 for (let i = 0; i < aChoice.scores.length; i++) {
                     const aScore = aChoice.scores[i];
                     if (!aScore.isNotRecalculatable) {
                         const point = pointTypeMap.get(aScore.id);
                         if (typeof point !== 'undefined') {
-                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
+                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined' && aScore.appliedDiscount) {
                                 const mul = aChoice.multipleUseVariable;
+
                                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                     for (let j = mul - 1; j >= 0; j--) {
                                         if (aChoice.isActive) {
@@ -2402,8 +2622,71 @@
                                         delete aScore.tmpDisScore;
                                     }
                                 }
-                                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                                 isChanged = localChoice.id !== aChoice.id;
+                                delete aScore.appliedDiscount;
+                            } else if (!aScore.appliedDiscount && aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.discountedFrom && aScore.discountedFrom.length > 0) {
+                                const cMap = choiceMap.get(aScore.discountedFrom[0]);
+
+                                if (typeof cMap !== 'undefined') {
+                                    const dChoice = cMap.choice;
+
+                                    if (dChoice.discountCount && typeof dChoice.numDiscountChoices !== 'undefined') {
+                                        if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                            const mul = aChoice.multipleUseVariable;
+                                            let val = aScore.value
+
+                                            if (typeof aScore.tmpDiscount !== 'undefined') {
+                                                for (let j = 0; j < aScore.tmpDiscount.length; j++) {
+                                                    if (val > aScore.tmpDiscount[j].discountedValue) val = aScore.tmpDiscount[j].discountedValue;
+                                                }
+                                            }
+
+                                            let tmpScore = val - aScore.discountScore;
+
+                                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                                for (let j = mul - 1; j >= 0; j--) {
+                                                    if (aChoice.isActive) {
+                                                        if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
+                                                            if (aChoice.forcedActivated && aChoice.isActive) {
+                                                                aChoice.forcedActivated = false;
+                                                                aChoice.numMultipleTimesMinus--;
+                                                                selectedOneLess(aChoice, aRow);
+                                                                aChoice.forcedActivated = true;
+                                                            } else {
+                                                                selectedOneLess(aChoice, aRow);
+                                                            }
+                                                        } else {
+                                                            point.startingSum += tmpScore;
+                                                        }
+                                                    }
+                                                }
+                                            } else if (!aChoice.isSelectableMultiple) {
+                                                if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
+                                                    if (aChoice.forcedActivated) {
+                                                        delete aChoice.forcedActivated;
+                                                        if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
+                                                    }
+                                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
+                                                        for (let j = 0; j < aChoice.multipleUseVariable; j++) {
+                                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                                        }
+                                                    } else {
+                                                        if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                                    }
+                                                } else {
+                                                    point.startingSum += tmpScore;
+                                                    thisTmpScores.set(aScore.id, tmpScore);
+                                                }
+                                            }
+
+                                            if (aChoice.isActive) {
+                                                isDiscounted = true;
+                                                aScore.appliedDiscount = true;
+                                                countSet.add(dChoice);
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             if (!changedScores.has(aScore.idx)) {
                                 const hasScore = localChoice.scores.length > 0;
@@ -2495,7 +2778,6 @@
                                                     }
                                                 }
                                                 if (!isChanged) {
-                                                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                                                     isChanged = true;
                                                 }
                                                 changedScores.add(aScore.idx);
@@ -2507,14 +2789,26 @@
                         }
                     }
                 }
-                if (isChanged) deselectUpdateScore(aChoice, thisTmpScores, ++count, changedScores);
+                if (isDiscounted && countSet.size > 0) {
+                    countSet.forEach((dChoice) => {
+                        if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                            dChoice.numDiscountChoices += 1;
+                        }
+                    });
+                }
+                if (isChanged || isDiscounted) {
+                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                    deselectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores);
+                }
             }
         });
-        if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
-            snackbarVariables.labelText = scoreUpdate.join('');
-            snackbarVariables.isOpen = true;
+        if (count === 0) {
+            if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
+                snackbarVariables.labelText = scoreUpdate.join('');
+                snackbarVariables.isOpen = true;
+            }
+            scoreUpdate.splice(0);
         }
-        scoreUpdate.splice(0);
     }
 
     function selectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
@@ -2524,7 +2818,9 @@
                 const aRow = cMap.row;
                 const aChoice = cMap.choice;
                 const thisTmpScores = new SvelteMap<string, number>();
+                let isDiscounted = false;
                 let isChanged = false;
+                if (localChoice.useDiscountCount && typeof localChoice.numDiscountChoices === 'undefined') localChoice.numDiscountChoices = 0;
                 for (let i = 0; i < aChoice.scores.length; i++) {
                     const aScore = aChoice.scores[i];
                     if (!aScore.isNotRecalculatable) {
@@ -2533,42 +2829,47 @@
                             if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined' && aChoice.id !== localChoice.id) {
                                 const mul = aChoice.multipleUseVariable;
 
-                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                    for (let j = mul - 1; j >= 0; j--) {
-                                        if (aChoice.isActive) {
-                                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
-                                                if (aChoice.forcedActivated && aChoice.isActive) {
-                                                    aChoice.forcedActivated = false;
-                                                    aChoice.numMultipleTimesMinus--;
-                                                    selectedOneLess(aChoice, aRow);
-                                                    aChoice.forcedActivated = true;
+                                if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && localChoice.discountCount && localChoice.discountCount > localChoice.numDiscountChoices!)) {
+                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                        for (let j = mul - 1; j >= 0; j--) {
+                                            if (aChoice.isActive) {
+                                                if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                                    if (aChoice.forcedActivated && aChoice.isActive) {
+                                                        aChoice.forcedActivated = false;
+                                                        aChoice.numMultipleTimesMinus--;
+                                                        selectedOneLess(aChoice, aRow);
+                                                        aChoice.forcedActivated = true;
+                                                    } else {
+                                                        selectedOneLess(aChoice, aRow);
+                                                    }
                                                 } else {
-                                                    selectedOneLess(aChoice, aRow);
+                                                    point.startingSum += aScore.tmpDisScore;
                                                 }
-                                            } else {
-                                                point.startingSum += aScore.tmpDisScore;
                                             }
                                         }
-                                    }
 
-                                    if (aChoice.isActive) {
-                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                        delete aScore.isChangeDiscount;
-                                        delete aScore.tmpDisScore;
+                                        if (aChoice.isActive) {
+                                            thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                            delete aScore.isChangeDiscount;
+                                            delete aScore.tmpDisScore;
+                                        }
+                                    } else if (!aChoice.isSelectableMultiple) {
+                                        if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                            deselectObject(aChoice, aRow);
+                                        } else {
+                                            point.startingSum += aScore.tmpDisScore;
+                                            thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                            delete aScore.isChangeDiscount;
+                                            delete aScore.tmpDisScore;
+                                        }
                                     }
-                                } else if (!aChoice.isSelectableMultiple) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
-                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                        deselectObject(aChoice, aRow);
-                                    } else {
-                                        point.startingSum += aScore.tmpDisScore;
-                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                        delete aScore.isChangeDiscount;
-                                        delete aScore.tmpDisScore;
+                                    isChanged = true;
+                                    if (aChoice.isActive) {
+                                        aScore.appliedDiscount = true;
+                                        isDiscounted = true;
                                     }
                                 }
-                                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
-                                isChanged = true;
                             }
                             if (!changedScores.has(aScore.idx)) {
                                 const hasScore = localChoice.scores.length > 0;
@@ -2588,6 +2889,7 @@
                                             aRow.currentChoices += 1;
                                             if (lPoint) lPoint.startingSum -= tmpScore;
                                             if (beforeSelected !== afterSelected) {
+                                                console.log(aChoice.id);
                                                 let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
                                                 if (beforeSelected) {
@@ -2660,7 +2962,6 @@
                                                     }
                                                 }
                                                 if (!isChanged) {
-                                                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                                                     isChanged = true;
                                                 }
                                                 changedScores.add(aScore.idx);
@@ -2672,14 +2973,22 @@
                         }
                     }
                 }
-                if (isChanged) selectUpdateScore(aChoice, thisTmpScores, ++count, changedScores);
+                if (isDiscounted && typeof localChoice.numDiscountChoices !== 'undefined') {
+                    localChoice.numDiscountChoices += 1;
+                }
+                if (isChanged) {
+                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                    selectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores);
+                }
             }
         });
-        if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
-            snackbarVariables.labelText = scoreUpdate.join('');
-            snackbarVariables.isOpen = true;
+        if (count === 0) {
+            if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
+                snackbarVariables.labelText = scoreUpdate.join('');
+                snackbarVariables.isOpen = true;
+            }
+            scoreUpdate.splice(0);
         }
-        scoreUpdate.splice(0);
     }
 
     function activateTempChoices() {
@@ -2702,9 +3011,9 @@
         if (isActivated) activateTempChoices();
     }
 
-    function activateObject(localChoice: Choice, localRow: Row) {
+    function activateObject(localChoice: Choice, localRow: Row, e?: MouseEvent) {
         let origRow = localRow;
-        if (localRow.isResultRow) {
+        if (localRow.isResultRow || localRow.isGroupRow) {
             const cMap = choiceMap.get(localChoice.id);
 
             if (typeof cMap !== 'undefined') {
@@ -2713,6 +3022,13 @@
         }
         if (localChoice.isSelectableMultiple) {
             if (localChoice.id === choice.id && localChoice.allowSelectByClick && localChoice.multipleUseVariable === 0) {
+                if (e && e.target) {
+                    const target = e.target as HTMLElement;
+
+                    if (target.classList.contains('counter-icons') || target.classList.contains('mdi-plus')) {
+                        return;
+                    }
+                }
                 selectedOneMore(localChoice, origRow);
             }
         } else {
@@ -2731,12 +3047,27 @@
         if (pointCheck) {
             const deselectProcess = () => {
                 const tmpScores = new SvelteMap<string, number>();
+                let countSet = new Set<Choice>();
                 for (let i = 0; i < localChoice.scores.length; i++) {
                     const score = localChoice.scores[i];
                     if (checkRequirements(score.requireds) && score.isActive || score.isActive) {
                         const point = pointTypeMap.get(score.id);
                         if (typeof point !== 'undefined') {
-                            let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                            let val = score.value;
+                            if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount) {
+                                if (score.discountedFrom && score.discountedFrom.length > 0) {
+                                    const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                                    if (typeof cMap !== 'undefined') {
+                                        const dChoice = cMap.choice;
+
+                                        if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
+                                            countSet.add(dChoice);
+                                        }
+                                    }
+                                }
+                                val = score.discountScore;
+                            }
                             val = point.allowFloat ? val : Math.floor(val);
                             point.startingSum += val;
                             let tmpScore = tmpScores.get(score.id);
@@ -2747,8 +3078,17 @@
                             }
                             delete score.isActive;
                             delete score.setValue;
+                            delete score.appliedDiscount
                         }
                     }
+                }
+
+                if (countSet.size > 0) {
+                    countSet.forEach((dChoice) => {
+                        if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                            dChoice.numDiscountChoices -= 1;
+                        }
+                    });
                 }
 
                 if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
@@ -2849,6 +3189,7 @@
                             }
                         }
                     }
+                    delete localChoice.numDiscountChoices;
                 }
                 
                 localChoice.isActive = false;
@@ -3408,12 +3749,38 @@
                         }
                     }
 
+                    let countSet = new Set<Choice>();
                     for (let i = 0; i < localChoice.scores.length; i++) {
                         const score = localChoice.scores[i];
                         if (checkRequirements(score.requireds) && !score.isActive) {
                             const point = pointTypeMap.get(score.id);
                             if (typeof point !== 'undefined') {
-                                let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                let val = score.value;
+                                if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                                    const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                                    if (typeof cMap !== 'undefined') {
+                                        const dChoice = cMap.choice;
+
+                                        if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                            if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
+                                            if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                                countSet.add(dChoice);
+                                                val = score.discountScore;
+                                                score.appliedDiscount = true;
+                                            } else {
+                                                if (typeof score.tmpDiscount !== 'undefined') {
+                                                    for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                                        if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            val = score.discountScore;
+                                            score.appliedDiscount = true;
+                                        }
+                                    }
+                                }
                                 val = point.allowFloat ? val : Math.floor(val);
                                 point.startingSum -= val;
                                 score.isActive = true;
@@ -3425,6 +3792,14 @@
                                 }
                             }
                         }
+                    }
+                    
+                    if (countSet.size > 0) {
+                        countSet.forEach((dChoice) => {
+                            if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                                dChoice.numDiscountChoices += 1;
+                            }
+                        });
                     }
 
                     if (localChoice.duplicateRow) {
@@ -4108,13 +4483,39 @@
                             }
                         }
 
+                        let countSet = new Set<Choice>();
                         for (let i = 0; i < localChoice.scores.length; i++) {
                             const score = localChoice.scores[i];
                             if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
                             if (checkRequirements(score.requireds) && !score.isActiveMul[selNum]) {
                                 const point = pointTypeMap.get(score.id);
                                 if (typeof point !== 'undefined') {
-                                    let val = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                                    let val = score.value;
+                                    if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                                        const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                                        if (typeof cMap !== 'undefined') {
+                                            const dChoice = cMap.choice;
+
+                                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
+                                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                                    countSet.add(dChoice);
+                                                    val = score.discountScore;
+                                                    score.appliedDiscount = true;
+                                                } else {
+                                                    if (typeof score.tmpDiscount !== 'undefined') {
+                                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                val = score.discountScore;
+                                                score.appliedDiscount = true;
+                                            }
+                                        }
+                                    }
                                     val = point.allowFloat ? val : Math.floor(val);
                                     if (score.multiplyByTimes) {
                                         val = val * (selNum + 1);
@@ -4129,6 +4530,14 @@
                                     }
                                 }
                             }
+                        }
+
+                        if (countSet.size > 0) {
+                            countSet.forEach((dChoice) => {
+                                if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                                    dChoice.numDiscountChoices += 1;
+                                }
+                            });
                         }
                     } else {
                         for (let i = 0; i < localChoice.scores.length; i++) {

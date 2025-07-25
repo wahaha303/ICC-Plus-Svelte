@@ -6,7 +6,7 @@
     toggle={true}
     showMenuWithNoInput={true}
     textfield$variant="filled"
-    class="col-12 on-top"
+    class="col-12"
     onSMUIAutocompleteSelected={setGroupElement}
     onSMUIAutocompleteDeselected={releaseGroupElement}
 />

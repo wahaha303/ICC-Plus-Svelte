@@ -80,11 +80,11 @@
                             </FormField>
                             <div class="px-5">
                                 {#if styling.backgroundImage}
-                                    <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'backgroundImage'}} class="btn--image-background">
+                                    <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'backgroundImage'}} class="btn--image-background">
                                         <img src={styling.backgroundImage} alt="Addon Background" loading="lazy" class="btn--image" style="max-height: 140px;" />
                                     </button>
                                 {/if}
-                                <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'backgroundImage'}} variant="raised">
+                                <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'backgroundImage'}} variant="raised">
                                     <Label>Change Image</Label>
                                 </Button>
                             </div>
@@ -117,11 +117,11 @@
                             </FormField>
                             <div class="px-5">
                                 {#if styling.rowBackgroundImage}
-                                    <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'rowBackgroundImage'}} class="btn--image-background">
+                                    <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'rowBackgroundImage'}} class="btn--image-background">
                                         <img src={styling.rowBackgroundImage} alt="Addon Background" loading="lazy" class="btn--image" style="max-height: 140px;" />
                                     </button>
                                 {/if}
-                                <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'rowBackgroundImage'}} variant="raised">
+                                <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'rowBackgroundImage'}} variant="raised">
                                     <Label>Change Image</Label>
                                 </Button>
                             </div>
@@ -154,11 +154,11 @@
                             </FormField>
                             <div class="px-5">
                                 {#if styling.objectBackgroundImage}
-                                    <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBackgroundImage'}} class="btn--image-background">
+                                    <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBackgroundImage'}} class="btn--image-background">
                                         <img src={styling.objectBackgroundImage} alt="Addon Background" loading="lazy" class="btn--image" style="max-height: 140px;" />
                                     </button>
                                 {/if}
-                                <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBackgroundImage'}} variant="raised">
+                                <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBackgroundImage'}} variant="raised">
                                     <Label>Change Image</Label>
                                 </Button>
                             </div>

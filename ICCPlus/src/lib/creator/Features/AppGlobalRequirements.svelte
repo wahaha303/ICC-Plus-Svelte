@@ -16,19 +16,19 @@
                             <div class="point-slot">
                                 <div class="toolbar grey lighten-3 justify-space-around">
                                     <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclick={() => moveReqUp(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveReqUp(row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Delete Global Requirement">
-                                        <IconButton class="mdi mdi-delete-forever" onclick={() => deleteReq(app.globalRequirements![row.index].id, row.index)} />
+                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(app.globalRequirements![row.index].id, row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Add Requirement">
-                                        <IconButton class="mdi mdi-key-plus" onclick={() => {currentDialog = 'appRequirement'; data = app.globalRequirements![row.index]}} />
+                                        <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = app.globalRequirements![row.index]}} />
                                     </Wrapper>
                                     <Wrapper text="Clone Global Requirement">
-                                        <IconButton class="mdi mdi mdi-content-copy" onclick={() => cloneReq(app.globalRequirements![row.index], row.index)} />
+                                        <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(app.globalRequirements![row.index], row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclick={() => moveReqDown(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveReqDown(row.index)} />
                                     </Wrapper>
                                 </div>
                                 <div class="row gy-3 p-3">
@@ -52,7 +52,7 @@
                                                             {#each app.globalRequirements[row.index].requireds as required, i}
                                                                 <div class="{required.requireds.length > 0 ? 'col-12' : 'col-sm-6 col-12'} p-2">
                                                                     <ObjectRequired required={required} isEditModeOn={true} />
-                                                                    <Button onclick={() => app.globalRequirements![row.index].requireds.splice(i, 1)} class="mt-1" variant="raised">
+                                                                    <Button onclickcapture={() => app.globalRequirements![row.index].requireds.splice(i, 1)} class="mt-1" variant="raised">
                                                                         <Label>Delete</Label>
                                                                     </Button>
                                                                 </div>
@@ -67,7 +67,7 @@
                             </div>
                         {:else if row.index === app.globalRequirements.length}
                             <div>
-                                <button type="button" class="create-box col-12" style="min-height: 154px; font-size: 40px;" onclick={createNewGlobalReq} aria-label="Create New Group">
+                                <button type="button" class="create-box col-12" style="min-height: 154px; font-size: 40px;" onclickcapture={createNewGlobalReq} aria-label="Create New Group">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -81,19 +81,19 @@
                     <div class="point-slot my-5">
                         <div class="toolbar grey lighten-3 justify-space-around">
                             <Wrapper text="Move Up">
-                                <IconButton class="mdi mdi-chevron-up" onclick={() => moveReqUp(i)} />
+                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveReqUp(i)} />
                             </Wrapper>
                             <Wrapper text="Delete Global Requirement">
-                                <IconButton class="mdi mdi-delete-forever" onclick={() => deleteReq(req.id, i)} />
+                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(req.id, i)} />
                             </Wrapper>
                             <Wrapper text="Add Requirement">
-                                <IconButton class="mdi mdi-key-plus" onclick={() => {currentDialog = 'appRequirement'; data = req}} />
+                                <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = req}} />
                             </Wrapper>
                             <Wrapper text="Clone Global Requirement">
-                                <IconButton class="mdi mdi mdi-content-copy" onclick={() => cloneReq(req, i)} />
+                                <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(req, i)} />
                             </Wrapper>
                             <Wrapper text="Move Down">
-                                <IconButton class="mdi mdi-chevron-down" onclick={() => moveReqDown(i)} />
+                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveReqDown(i)} />
                             </Wrapper>
                         </div>
                         <div class="row gy-3 p-3">
@@ -117,7 +117,7 @@
                                                     {#each req.requireds as required, j}
                                                         <div class="{required.requireds.length > 0 ? 'col-12' : 'col-sm-6 col-12'} p-2">
                                                             <ObjectRequired required={required} isEditModeOn={true} />
-                                                            <Button onclick={() => req.requireds.splice(j, 1)} class="mt-1" variant="raised">
+                                                            <Button onclickcapture={() => req.requireds.splice(j, 1)} class="mt-1" variant="raised">
                                                                 <Label>Delete</Label>
                                                             </Button>
                                                         </div>
@@ -132,7 +132,7 @@
                     </div>
                 {/each}
                 <div class="my-5">
-                    <button type="button" class="create-box col-12" style="min-height: 154px; font-size: 40px;" onclick={createNewGlobalReq} aria-label="Create New Group">
+                    <button type="button" class="create-box col-12" style="min-height: 154px; font-size: 40px;" onclickcapture={createNewGlobalReq} aria-label="Create New Group">
                         <i class="mdi mdi-plus-thick"></i>
                     </button>
                 </div>
@@ -143,7 +143,7 @@
         <div class="container-fluid">
             <div class="row p-0">
                 <div class="col-sm-6 col-12">
-                    <Button action="" onclick={createNewGlobalReq}>
+                    <Button action="" onclickcapture={createNewGlobalReq}>
                         <Label class="dialog-actions--btn">Create New Global Requirement</Label>
                     </Button>
                 </div>

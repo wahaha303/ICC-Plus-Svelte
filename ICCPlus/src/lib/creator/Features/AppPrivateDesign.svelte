@@ -19,7 +19,7 @@
                         </div>
                         <div class="col-12 py-3">
                             <Wrapper text="Here you can export your design.">
-                                <Button onclick={exportDesign} variant="raised" >
+                                <Button onclickcapture={exportDesign} variant="raised" >
                                     <Label>Export Design</Label>
                                 </Button>
                             </Wrapper>
@@ -28,7 +28,7 @@
                             {#if i > 1 || (i <= 1 && isRow)}
                                 <div class="col-sm-6 col-12 pt-2 pb-3">
                                     <Wrapper text={menu.text}>
-                                        <Button onclick={menu.action} variant="raised" >
+                                        <Button onclickcapture={menu.action} variant="raised" >
                                             <Label class="line-default">{menu.name}</Label>
                                         </Button>
                                     </Wrapper>
@@ -137,10 +137,10 @@
             file.onload = () => {
                 try {
                     const jData = JSON.parse(file.result as string);
-                    const oldVersion = (typeof data.version === 'undefined' || data.version === '2.0.0-beta');
+                    const oldVersion = (typeof jData.version === 'undefined' || jData.version === '2.0.0-beta');
                     let parsed;
 
-                    if (typeof data.styling === 'undefined') {
+                    if (typeof jData.styling === 'undefined') {
                         parsed = StylingSchema.safeParse(jData);
                     } else {
                         parsed = StylingSchema.safeParse(jData.styling);
@@ -225,7 +225,7 @@
             const blob = new Blob([saveData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            const filename = `project_${getTimestamp()}.json`;
+            const filename = `design_${getTimestamp()}.json`;
             
             a.href = url;
             a.download = filename;

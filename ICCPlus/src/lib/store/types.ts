@@ -426,7 +426,8 @@ export type Score = {
     discountTextA?: string[],
     discountTextB?: string[],
     notStackableDiscount?: boolean,
-    multiplyByTimes?: boolean
+    multiplyByTimes?: boolean,
+    appliedDiscount?: boolean
 }
 export type Choice = {
     [key: string]: any,
@@ -497,6 +498,9 @@ export type Choice = {
     discountOperator?: string,
     discountValue?: number,
     stackableDiscount?: boolean,
+    useDiscountCount?: boolean,
+    discountCount?: number,
+    numDiscountChoices?: number,
     duplicateRow?: boolean,
     dRowAddSufReq?: boolean,
     dRowAddSufFunc?: boolean,
@@ -588,7 +592,8 @@ export type Choice = {
     widthStack?: {
         id: string,
         data: string
-    }[]
+    }[],
+    isEditModeOn?: boolean,
 };
 export type Row = {
     [key: string]: any,
@@ -611,6 +616,7 @@ export type Row = {
     isResultRow?: boolean,
     resultGroupId?: string,
     isInfoRow?: boolean,
+    isGroupRow?: boolean,
     defaultAspectWidth: number,
     defaultAspectHeight: number,
     allowedChoices: number,
@@ -777,9 +783,12 @@ export type App = {
     hideBackpackBtn: number,
     btnBackpackIsOn: number,
     showAllAddons: number,
+    tmpRow: Row[],
+    tmpChoice: Choice[],
     tmpRequired: Requireds[],
     tmpScore: Score[],
     tmpAddon: Addon[],
+    tmpGroup: string[],
     rowIdLength: number,
     objectIdLength: number,
     words: Word[],
@@ -792,6 +801,7 @@ export type App = {
     customFonts: string[],
     compressImageAuto: boolean,
     useToolbarBtn: boolean,
+    useChoiceEditBtn: boolean,
     hideScoresUpdated: boolean,
     hideChoiceDT: boolean,
     hideImages: boolean,
@@ -928,3 +938,10 @@ export type ViewerSetting = {
     allowDeselect: boolean,
     isSingleFile: boolean
 };
+export type MenuVariables = {
+    anchor: HTMLElement | null,
+    isOpen: boolean,
+    copy: () => void,
+    paste: () => void,
+    clear: () => void
+}

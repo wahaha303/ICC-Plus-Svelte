@@ -7,7 +7,7 @@
 >
     <Title class="p-0 m-0 row" tabindex={0} autofocus>
         <div class="p-0 col-12">
-            <Button onclick={() => downloadAsImage(printDiv)} class="h-100">
+            <Button onclickcapture={() => downloadAsImage(printDiv)} class="h-100">
                 <BtnIcon class="mdi mdi-file-image" />
                 <Label>Download Image</Label>
             </Button>

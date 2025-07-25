@@ -207,11 +207,11 @@
                         <div class="col-lg-4 col-12 gy-2">
                             <div class="col-12 text-center px-5">
                                 {#if styling.objectBorderImage}
-                                    <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBorderImage'}} class="btn--image-background">
+                                    <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBorderImage'}} class="btn--image-background">
                                         <img src={styling.objectBorderImage} alt="Choice Border" loading="lazy" class="btn--image" style="max-height: 140px;" />
                                     </button>
                                 {/if}
-                                <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBorderImage'}} variant="raised">
+                                <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBorderImage'}} variant="raised">
                                     <Label>Change Image</Label>
                                 </Button>
                             </div>

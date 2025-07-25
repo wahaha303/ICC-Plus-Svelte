@@ -172,6 +172,40 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.2.0 / ${getDate('2025-07-25T17:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Added option to copy Row.
+        - Added context menu to some buttons.
+        - Added option to display choices within group. Displayed choices are synchronized with their original counterparts.
+        - Fixed issue where cloned rows wouldn't work properly until project reload.
+        
+        <span style="color: green">Choice</span>
+        - Added option to copy Choice.
+        - Added context menu to some buttons.
+        - Added option to set number of choices discount can be applied to.
+        - Fixed issue where dropdown menu was hidden by other dropdowns within group section.
+        - Fixed issue where list text wasn't showing in 'Scroll To Choice'.
+        - Fixed issue where score update message was not displayed correctly.
+
+        <Span style="color: green">Group</span>
+        - Added option to clone group.
+        - Fixed issue where deleting group left empty group in choices.
+
+        <span style="color: green">Requirement</span>
+        - Fixed issue where point wasn't displayed.
+
+        <span style="color: green">Global Settings</span>
+        - Added option to show menu on top.
+        - Added option to show edit button for choice.
+
+        <span style="color: green">Design Group</span>
+        - Fixed issue where border radius was always set to 10 times its value when importing design.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where some buttons triggered twice on single click in Firefox version 141.0.
+        `
+    }, {
+        open: false,
         title: `v2.1.1 ~ v2.1.7 / ${getDate('2025-07-19T17:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where self-invalidating choices were not deselected upon selection.

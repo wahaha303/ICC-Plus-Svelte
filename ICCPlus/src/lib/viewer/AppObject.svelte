@@ -3,7 +3,7 @@
         <span class:fullHeight={fullHeight} class="d-flex">
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclick={() => activateObject(choice, row)}>
+            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclick={(e) => activateObject(choice, row, e)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate}
                     <span class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
@@ -283,7 +283,7 @@
     let objectTitle = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.objectTitle};font-size: ${textStyle.objectTitleTextSize}%;text-align: ${textStyle.objectTitleAlign};`);
+        styles.push(`font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTitleColor)};`);
         } else if (isActive && filterStyle.selCTitleColorIsOn) {
@@ -313,7 +313,7 @@
     let objectText = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.objectText};text-align: ${textStyle.objectTextAlign};font-size: ${textStyle.objectTextTextSize}%;white-space: pre-line;`);
+        styles.push(`font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTextColor)};`);
         } else if (isActive && filterStyle.selCTextColorIsOn) {
@@ -532,7 +532,7 @@
     let scoreText = $derived.by(() => {
         let style = [];
 
-        style.push(`font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
+        style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         if (!isEnabled) {
             if (filterStyle.reqScoreTextColorIsOn)  {
@@ -758,14 +758,17 @@
                 const aRow = cMap.row;
                 const aChoice = cMap.choice;
                 const thisTmpScores = new SvelteMap<string, number>();
+                const countSet = new Set<Choice>();
                 let isChanged = false;
+                let isDiscounted = false;
                 for (let i = 0; i < aChoice.scores.length; i++) {
                     const aScore = aChoice.scores[i];
                     if (!aScore.isNotRecalculatable) {
                         const point = pointTypeMap.get(aScore.id);
                         if (typeof point !== 'undefined') {
-                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
+                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined' && aScore.appliedDiscount) {
                                 const mul = aChoice.multipleUseVariable;
+
                                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                     for (let j = mul - 1; j >= 0; j--) {
                                         if (aChoice.isActive) {
@@ -809,8 +812,71 @@
                                         delete aScore.tmpDisScore;
                                     }
                                 }
-                                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                                 isChanged = localChoice.id !== aChoice.id;
+                                delete aScore.appliedDiscount;
+                            } else if (!aScore.appliedDiscount && aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.discountedFrom && aScore.discountedFrom.length > 0) {
+                                const cMap = choiceMap.get(aScore.discountedFrom[0]);
+
+                                if (typeof cMap !== 'undefined') {
+                                    const dChoice = cMap.choice;
+
+                                    if (dChoice.discountCount && typeof dChoice.numDiscountChoices !== 'undefined') {
+                                        if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                            const mul = aChoice.multipleUseVariable;
+                                            let val = aScore.value
+
+                                            if (typeof aScore.tmpDiscount !== 'undefined') {
+                                                for (let j = 0; j < aScore.tmpDiscount.length; j++) {
+                                                    if (val > aScore.tmpDiscount[j].discountedValue) val = aScore.tmpDiscount[j].discountedValue;
+                                                }
+                                            }
+
+                                            let tmpScore = val - aScore.discountScore;
+
+                                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                                for (let j = mul - 1; j >= 0; j--) {
+                                                    if (aChoice.isActive) {
+                                                        if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
+                                                            if (aChoice.forcedActivated && aChoice.isActive) {
+                                                                aChoice.forcedActivated = false;
+                                                                aChoice.numMultipleTimesMinus--;
+                                                                selectedOneLess(aChoice, aRow);
+                                                                aChoice.forcedActivated = true;
+                                                            } else {
+                                                                selectedOneLess(aChoice, aRow);
+                                                            }
+                                                        } else {
+                                                            point.startingSum += tmpScore;
+                                                        }
+                                                    }
+                                                }
+                                            } else if (!aChoice.isSelectableMultiple) {
+                                                if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
+                                                    if (aChoice.forcedActivated) {
+                                                        delete aChoice.forcedActivated;
+                                                        if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
+                                                    }
+                                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
+                                                        for (let j = 0; j < aChoice.multipleUseVariable; j++) {
+                                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                                        }
+                                                    } else {
+                                                        if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                                    }
+                                                } else {
+                                                    point.startingSum += tmpScore;
+                                                    thisTmpScores.set(aScore.id, tmpScore);
+                                                }
+                                            }
+
+                                            if (aChoice.isActive) {
+                                                isDiscounted = true;
+                                                aScore.appliedDiscount = true;
+                                                countSet.add(dChoice);
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             if (!changedScores.has(aScore.idx)) {
                                 const hasScore = localChoice.scores.length > 0;
@@ -902,7 +968,6 @@
                                                     }
                                                 }
                                                 if (!isChanged) {
-                                                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                                                     isChanged = true;
                                                 }
                                                 changedScores.add(aScore.idx);
@@ -914,14 +979,26 @@
                         }
                     }
                 }
-                if (isChanged) deselectUpdateScore(aChoice, thisTmpScores, ++count, changedScores);
+                if (isDiscounted && countSet.size > 0) {
+                    countSet.forEach((dChoice) => {
+                        if (typeof dChoice.numDiscountChoices !== 'undefined') {
+                            dChoice.numDiscountChoices += 1;
+                        }
+                    });
+                }
+                if (isChanged || isDiscounted) {
+                    scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+                    deselectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores);
+                }
             }
         });
-        if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
-            snackbarVariables.labelText = scoreUpdate.join('');
-            snackbarVariables.isOpen = true;
+        if (count === 0) {
+            if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
+                snackbarVariables.labelText = scoreUpdate.join('');
+                snackbarVariables.isOpen = true;
+            }
+            scoreUpdate.splice(0);
         }
-        scoreUpdate.splice(0);
     }
 
     function selectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
@@ -1109,9 +1186,9 @@
         if (isActivated) activateTempChoices();
     }
 
-    function activateObject(localChoice: Choice, localRow: Row) {
+    function activateObject(localChoice: Choice, localRow: Row, e?: MouseEvent) {
         let origRow = localRow;
-        if (localRow.isResultRow) {
+        if (localRow.isResultRow || localRow.isGroupRow) {
             const cMap = choiceMap.get(localChoice.id);
 
             if (typeof cMap !== 'undefined') {
@@ -1120,6 +1197,13 @@
         }
         if (localChoice.isSelectableMultiple) {
             if (localChoice.id === choice.id && localChoice.allowSelectByClick && localChoice.multipleUseVariable === 0) {
+                if (e && e.target) {
+                    const target = e.target as HTMLElement;
+
+                    if (target.classList.contains('counter-icons') || target.classList.contains('mdi-plus')) {
+                        return;
+                    }
+                }
                 selectedOneMore(localChoice, origRow);
             }
         } else {

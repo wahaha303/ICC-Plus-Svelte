@@ -33,7 +33,7 @@
         <div class="container-fluid">
             <div class="row p-0">
                 <div class="col-sm-6">
-                    <Button action="" onclick={exportAsCsv} >
+                    <Button action="" onclickcapture={exportAsCsv} >
                         <Label class="dialog-actions--btn">Export as a CSV File</Label>
                     </Button>
                 </div>

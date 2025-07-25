@@ -18,7 +18,7 @@
                     More can be found on <a href="https://www.alt-codes.net/" target="_blank">https://www.alt-codes.net/</a>
                 </div>
                 <div class="col-12">
-                    <Button onclick={compressAllImages} variant="raised" >
+                    <Button onclickcapture={compressAllImages} variant="raised" >
                         <Label>Compress All Images</Label>
                     </Button>
                 </div>
@@ -32,7 +32,7 @@
                     {imageCounter} Images Compressed | Size Reduced With {parseFloat(sizeReduced.toFixed(2))} MB <br>{progress}
                 </div>
                 <div class="col-12">
-                    <Button onclick={cleanAllStyle} variant="raised" >
+                    <Button onclickcapture={cleanAllStyle} variant="raised" >
                         <Label>Clean All Private Styling</Label>
                     </Button>
                 </div>

@@ -1,42 +1,76 @@
 <div bind:clientWidth={width} class="ab-0" style={background}>
     <div class="fadeOverlay" style={fadeStyle}></div>
-    <Drawer class="mdc-drawer--mini">
-        <Content class="navigation-drawer">
-            <List>
-                <Item onSMUIAction={() => currentComponent.value = "appMain"} class="my-0">
-                    <Graphic class="mdi mdi-chevron-left" />
-                    <Text class="w-100 list-text text-center">Return To Menu</Text>
-                </Item>
-                <Separator class="my-3" />
-                {#each upperMenuCompoenet as _undefined, i}
-                    <Item onSMUIAction={upperMenuCompoenet[i].action} class="my-0">
-                        <Graphic class={upperMenuCompoenet[i].icon} />
-                        <Text class="w-100 list-text text-center">{upperMenuCompoenet[i].text}</Text>
+    {#if useAltMenu.value}
+        <TopAppBar class="creator-menu h-auto" variant="fixed">
+            <div bind:clientHeight={altMenuHeight}>
+                <AppBarRow class="py-0 h-auto align-items-center" style="flex-wrap: wrap;">
+                    <div class="col p-1 text-center">
+                        <Wrapper text="Return To Menu">
+                            <Button onclickcapture={() => currentComponent.value = 'appMain'} variant="unelevated">
+                                <BtnIcon class="mdi mdi-chevron-left m-0" />
+                            </Button>
+                        </Wrapper>
+                    </div>
+                    {#each upperMenuCompoenet as _undefined, i}
+                        <div class="col p-1 text-center">
+                            <Wrapper text={upperMenuCompoenet[i].text}>
+                                <Button onclickcapture={upperMenuCompoenet[i].action} variant="unelevated">
+                                    <BtnIcon class="{upperMenuCompoenet[i].icon} m-0" />
+                                </Button>
+                            </Wrapper>
+                        </div>
+                    {/each}
+                    {#each lowerMenuCompoenet as _undefined, i}
+                        <div class="col p-1 text-center">
+                            <Wrapper text={lowerMenuCompoenet[i].text}>
+                                <Button onclickcapture={lowerMenuCompoenet[i].action} variant="unelevated">
+                                    <BtnIcon class="{lowerMenuCompoenet[i].icon} m-0" />
+                                </Button>
+                            </Wrapper>
+                        </div>
+                    {/each}
+                </AppBarRow>
+            </div>
+        </TopAppBar>
+    {:else}
+        <Drawer class="mdc-drawer--mini">
+            <Content class="navigation-drawer">
+                <List>
+                    <Item onSMUIAction={() => currentComponent.value = "appMain"} class="my-0">
+                        <Graphic class="mdi mdi-chevron-left" />
+                        <Text class="w-100 list-text text-center">Return To Menu</Text>
                     </Item>
-                {/each}
-            </List>
-            <List>
-                {#each lowerMenuCompoenet as _undefined, i}
-                    <Item onSMUIAction={lowerMenuCompoenet[i].action} class="my-0">
-                        <Graphic class={lowerMenuCompoenet[i].icon} />
-                        <Text class="w-100 list-text text-center">{lowerMenuCompoenet[i].text}</Text>
-                    </Item>
-                {/each}
-            </List>
-        </Content>
-    </Drawer>
+                    <Separator class="my-3" />
+                    {#each upperMenuCompoenet as _undefined, i}
+                        <Item onSMUIAction={upperMenuCompoenet[i].action} class="my-0">
+                            <Graphic class={upperMenuCompoenet[i].icon} />
+                            <Text class="w-100 list-text text-center">{upperMenuCompoenet[i].text}</Text>
+                        </Item>
+                    {/each}
+                </List>
+                <List>
+                    {#each lowerMenuCompoenet as _undefined, i}
+                        <Item onSMUIAction={lowerMenuCompoenet[i].action} class="my-0">
+                            <Graphic class={lowerMenuCompoenet[i].icon} />
+                            <Text class="w-100 list-text text-center">{lowerMenuCompoenet[i].text}</Text>
+                        </Item>
+                    {/each}
+                </List>
+            </Content>
+        </Drawer>
+    {/if}
     <div class="s-main" style={mainStyle}>
         {#if app.showMusicPlayer}
             <TopAppBar class="music-player" style="max-width: calc(100vw - 56px)" variant="fixed" >
                 <AppBarRow class="music-player--row">
                     <AppBarSection class="px-2 justify-left">
-                        <IconButton class="music-player--button" onclick={handlePlayButton} size="button" aria-label="Play">
+                        <IconButton class="music-player--button" onclickcapture={handlePlayButton} size="button" aria-label="Play">
                             <i class={bgmVariables.bgmIsPlaying ? 'mdi mdi-pause' : 'mdi mdi-play'}></i>
                         </IconButton>
-                        <IconButton class="music-player--button" onclick={handleStopButton} size="button" aria-label="Stop">
+                        <IconButton class="music-player--button" onclickcapture={handleStopButton} size="button" aria-label="Stop">
                             <i class="mdi mdi-stop"></i>
                         </IconButton>
-                        <IconButton class="music-player--button" onclick={handleMuteButton} size="button" aria-label="Mute">
+                        <IconButton class="music-player--button" onclickcapture={handleMuteButton} size="button" aria-label="Mute">
                             <i class={app.isMute ? 'mdi mdi-volume-off' : 'mdi mdi-volume-high'}></i>
                         </IconButton>
                         <div class="px-1" style="max-width: 104px; width: 100%">
@@ -62,7 +96,7 @@
                 <AppBarRow class="justify-space-around">
                     <AppBarSection class="py-0 justify-center">
                         {#if app.importedChoicesIsOpen}
-                            <IconButton class="pointbar-icons" onclick={() => currentDialog = 'appBuildForm'} aria-label="Open Import Window" style={pointBarIcon}>
+                            <IconButton class="pointbar-icons" onclickcapture={() => currentDialog = 'appBuildForm'} aria-label="Open Import Window" style={pointBarIcon}>
                                 <i class="mdi mdi-format-list-checks"></i>
                             </IconButton>
                         {/if}
@@ -78,7 +112,7 @@
                     </AppBarSection>
                     <AppBarSection class="py-0 justify-center">
                         {#if app.backpack.length > 0 && ((typeof app.hideBackpackBtn === "undefined" || app.hideBackpackBtn === 0) || (app.hideBackpackBtn > 0 && app.hideBackpackBtn === app.btnBackpackIsOn))}
-                            <IconButton class="pointbar-icons" onclick={() => currentDialog = 'dlgBackpack'} aria-label="Open Backpack Window" style={pointBarIcon}>
+                            <IconButton class="pointbar-icons" onclickcapture={() => currentDialog = 'dlgBackpack'} aria-label="Open Backpack Window" style={pointBarIcon}>
                                 <i class="mdi mdi-checkbox-marked-circle-outline"></i>
                             </IconButton>
                         {/if}
@@ -90,9 +124,11 @@
             <div bind:this={mainDiv}  class="row gx-0">
                 {#if bCreatorMode && !app.useToolbarBtn}
                     <div class="p-2 col-12">
-                        <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclick={() => createNewRow(0)} aria-label="Create New Row">
-                            <i class="mdi mdi-plus-thick"></i>
-                        </button>
+                        <Wrapper text="L: Create New Row<br>R: Paste Row">
+                            <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclickcapture={() => createNewRow(0)} oncontextmenu={(e: MouseEvent) => pasteAction(e, 0)} aria-label="Create New Row">
+                                <i class="mdi mdi-plus-thick"></i>
+                            </button>
+                        </Wrapper>
                     </div>
                 {/if}
                 {#each app.rows as row, i}
@@ -101,29 +137,31 @@
                             <div class="p-2 col-12">
                                 <Card>
                                     <CardContent class="toolbar toolbar--row justify-space-between px-3 py-2">
-                                            <div class="toolbar__title">{(typeof row.debugTitle !== 'undefined' ? row.debugTitle : '') + row.title}</div>
-                                            <div class="d-row">
-                                                <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
-                                                    <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclick={() => row.isEditModeOn = !row.isEditModeOn} />
+                                        <div class="toolbar__title">{(typeof row.debugTitle !== 'undefined' ? row.debugTitle : '') + row.title}</div>
+                                        <div class="d-row">
+                                            <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
+                                                <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclickcapture={() => {row.isEditModeOn = !row.isEditModeOn;}} />
+                                            </Wrapper>
+                                            {#if app.useToolbarBtn}
+                                                <Wrapper text="L: Insert Row Above<br>R: Paste Row Above">
+                                                    <IconButton class="mdi mdi-folder-arrow-up" onclickcapture={() => createNewRow(i)} oncontextmenu={(e: MouseEvent) => {
+                                                        pasteAction(e, i);
+                                                    }} />
                                                 </Wrapper>
-                                                {#if app.useToolbarBtn}
-                                                    <Wrapper text="Insert Row Above">
-                                                        <IconButton class="mdi mdi-folder-arrow-up" onclick={() => createNewRow(i)} />
-                                                    </Wrapper>
-                                                {/if}
-                                                <Wrapper text="Delete Row">
-                                                    <IconButton class="mdi mdi-delete-forever" onclick={() => deleteRow(row, i)} />
-                                                </Wrapper>
-                                                <Wrapper text="Clone Row">
-                                                    <IconButton class="mdi mdi-content-copy" onclick={() => cloneRow(row, i)} />
-                                                </Wrapper>
-                                                <Wrapper text="Move Row Up">
-                                                    <IconButton class="mdi mdi-chevron-up" onclick={() => moveRowUp(i)} />
-                                                </Wrapper>
-                                                <Wrapper text="Move Row Down">
-                                                    <IconButton class="mdi mdi-chevron-down" onclick={() => moveRowDown(i)} />
-                                                </Wrapper>
-                                            </div>
+                                            {/if}
+                                            <Wrapper text="Delete Row">
+                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => {deleteRow(row, i); console.log('click');}} />
+                                            </Wrapper>
+                                            <Wrapper text="L: Clone Row<br>R: Context Menu">
+                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneRow(row, i)} oncontextmenu={(e) => rowContext(e, row, i)} />
+                                            </Wrapper>
+                                            <Wrapper text="Move Row Up">
+                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveRowUp(i)} />
+                                            </Wrapper>
+                                            <Wrapper text="Move Row Down">
+                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveRowDown(i)} />
+                                            </Wrapper>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </div>
@@ -131,9 +169,11 @@
                         <AppRow row={row} bCreatorMode={bCreatorMode} windowWidth={width} mainDiv={mainDiv} />
                         {#if bCreatorMode && !app.useToolbarBtn}
                             <div class="p-2 col-12">
-                                <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclick={() => createNewRow(i + 1)} aria-label="Create New Row">
-                                    <i class="mdi mdi-plus-thick"></i>
-                                </button>
+                                <Wrapper text="L: Create New Row<br>R: Paste Row">
+                                    <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclickcapture={() => createNewRow(i + 1)} oncontextmenu={(e: MouseEvent) => pasteAction(e, i + 1)} aria-label="Create New Row">
+                                        <i class="mdi mdi-plus-thick"></i>
+                                    </button>
+                                </Wrapper>
                             </div>
                         {/if}
                     </div>
@@ -178,17 +218,33 @@
 {:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.title !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
 {/if}
+<Menu bind:this={menu} onSMUIMenuSurfaceClosed={removeAnchor} anchor={false} anchorElement={menuVariables.anchor || undefined} anchorCorner="BOTTOM_RIGHT" style={menuStyle}>
+    <List>
+        <Item onclickcapture={menuVariables.copy}>
+            <Text>Copy</Text>
+        </Item>
+        <Item onclickcapture={menuVariables.paste}>
+            <Text>Paste</Text>
+        </Item>
+        <Separator style="border-bottom-color: rgba(0, 0, 0, 0.12)" />
+        <Item onclickcapture={menuVariables.clear}>
+            <Text>Clear</Text>
+        </Item>
+    </List>
+</Menu>
 <Tooltip />
 
 <script lang="ts">
     import Card, { Content as CardContent } from '@smui/card';
+    import Button, { Icon as BtnIcon } from '@smui/button';
     import Drawer, { Content } from '@smui/drawer';
     import List, { Item, Text, Graphic, Separator } from '@smui/list';
     import IconButton from '@smui/icon-button';
+    import Menu from '@smui/menu';
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer,  toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
@@ -210,7 +266,7 @@
 	import AppGlobalSettings from './AppGlobalSettings.svelte';
     import DlgCommon from './DlgCommon.svelte';
 	import { get } from 'svelte/store';
-    import { onDestroy } from 'svelte';
+    import { tick } from 'svelte';
 
     const upperMenuCompoenet = [{
         action: () => {
@@ -220,7 +276,7 @@
         icon: 'mdi mdi-folder-plus'
     }, {
         action: () => {
-                currentDialog = 'appRowList';
+            currentDialog = 'appRowList';
         },
         text: 'Open Row List',
         icon: 'mdi mdi-format-list-bulleted'
@@ -275,10 +331,35 @@
     let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${hexToRgba(app.fadeTransitionColor)}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
     let width = $state(0);
     let mainDiv = $state<HTMLDivElement>();
+    let altMenuHeight = $state(0);
+    let menu: Menu;
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
-    let pointBar = $derived(`max-width: calc(100% - 56px); background-color: ${hexToRgba(app.styling.barBackgroundColor)}; margin:${app.styling.barMargin}px; padding:${app.styling.barPadding}px; ${pointBarPosition}`);
-    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: "${app.styling.barTextFont}"; font-size: ${app.styling.barTextSize}px`);
+    let pointBar = $derived.by(() => {
+        let styles = [];
+
+        if (useAltMenu.value) {
+            styles.push(`max-width: 100%;`);
+        } else {
+            styles.push(`max-width: calc(100% - 56px);`);
+        }
+        
+        if (typeof app.styling.barBackgroundColor !== 'undefined') {
+            styles.push(`background-color: ${hexToRgba(app.styling.barBackgroundColor)};`);
+        }
+
+        if (typeof app.styling.barMargin !== 'undefined') {
+            styles.push(`margin:${app.styling.barMargin}px;`);
+        }
+
+        if (typeof app.styling.barPadding !== 'undefined') {
+            styles.push(`padding:${app.styling.barPadding}px;`)
+        }
+        styles.push(`${pointBarPosition}`);
+
+        return styles.join(' ');
+    });
+    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}'; font-size: ${app.styling.barTextSize}px`);
     let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {
         let styles = [];
@@ -302,18 +383,24 @@
             styles.push(`font-size: 0.835vw;`);
         }
         
-        return styles.join(''); 
+        return styles.join(' '); 
     });
     let mainStyle = $derived.by(() => {
         let styles = [];
 
-        styles.push(`margin-left: 56px;`);
+        if (useAltMenu.value) {
+            if (altMenuHeight) {
+                styles.push(`margin-top: ${altMenuHeight}px;`);
+            }
+        } else {
+            styles.push(`margin-left: 56px;`);
+        }
 
         if (app.showMusicPlayer) {
             styles.push(`padding-top: 32px;`);
         }
 
-        return styles.join('');
+        return styles.join(' ');
     });
     let bgmTime = $derived.by(() => {
         return `${calTime(bgmVariables.curBgmTime)} | ${calTime(bgmVariables.curBgmLength)}`;
@@ -321,6 +408,31 @@
     let curBgmTime = $state(0);
     let curVolume = $state(100);
     let isChangingVol = $state(false);
+    let menuStyle = $derived.by(() => {
+        const anchor = menuVariables.anchor;
+        if (anchor && menu) {
+            const rect = anchor.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            let xPos = rect.left + window.scrollX;
+            let yPos = rect.top + window.scrollY;
+            let xPosText = `left: ${xPos}px;`;
+            let yPosText = `top: ${yPos}px;`;
+
+            if (rect.left + 120 > viewportWidth) {
+                xPos = rect.right + window.scrollX;
+                xPosText = `left: ${xPos - 120}px; right: auto;`;
+            }
+
+            if (rect.top + 200 > viewportHeight) {
+                yPos = rect.bottom + window.scrollY;
+                yPosText = `top: ${yPos - 120}px; bottom: auto;`;
+            }
+            
+            return `${xPosText} ${yPosText}`;
+        }
+        return '';
+    });
 
     $effect(() => {
         if (!bgmVariables.isSeeking) {
@@ -333,6 +445,29 @@
             curVolume = app.curVolume;
         }
     });
+
+    $effect(() => {
+        if (menuVariables.isOpen) {
+            menu.setOpen(true);
+        }
+    });
+
+    function rowContext(e: MouseEvent, row: Row, num: number) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        if (menuVariables.isOpen) {
+            menuVariables.isOpen = false;
+            removeAnchor();
+        }
+        menuVariables.anchor = target.parentElement;
+        menuVariables.copy = () => copyRow(row);
+        menuVariables.paste = () => pasteRow(num);
+        menuVariables.clear = () => clearClipboard(0);
+        tick().then(() => {
+            menuVariables.isOpen = true;
+        });
+    }
 
     function calTime(num: number) {
         const h = Math.floor(num / 3600);
@@ -356,7 +491,6 @@
             const cChoice = clone.objects[i];
 
             cChoice.id = generateObjectId(0, app.objectIdLength);
-            console.log(cChoice.id);
             cChoice.index = i;
             cChoice.isActive = false;
             delete cChoice.forcedActivated;
@@ -383,6 +517,7 @@
                 delete score.discountTextA;
                 delete score.discountTextB;
                 delete score.notStackableDiscount;
+                delete score.appliedDiscount;
             }
 
             for (let j = 0; j < cChoice.addons.length; j++) {
@@ -398,8 +533,6 @@
                     delete cChoice.backpackBtnRequirement;
                 }
             }
-
-            choiceMap.set(cChoice.id, {choice: cChoice, row: clone});
 
             if (cChoice.groups) {
                 for (let j = 0; j < cChoice.groups.length; j++) {
@@ -419,6 +552,8 @@
                     }
                 }
             }
+
+            choiceMap.set(cChoice.id, {choice: app.rows[num + 1].objects[i], row: app.rows[num + 1]});
         }
 
         if (clone.groups) {
@@ -507,6 +642,139 @@
                 app.rows[i].index = i;
             }
             rowMap.set(id, app.rows[index]);
+        }
+    }
+
+    function copyRow(row: Row) {
+        if (typeof app.tmpRow === 'undefined') app.tmpRow = [];
+        app.tmpRow.length = 0;
+        app.tmpRow.push(JSON.parse(JSON.stringify(row)));
+        snackbarVariables.labelText = 'Copied to clipboard.';
+        snackbarVariables.isOpen = true;
+    }
+
+    function pasteAction(e: MouseEvent, num: number) {
+        e.preventDefault();
+        pasteRow(num);
+        (e.currentTarget as HTMLElement)?.blur();
+    }
+
+    function pasteRow(num: number) {
+        if (typeof app.tmpRow === 'undefined' || app.tmpRow.length === 0) {
+            snackbarVariables.labelText = 'The clipboard is empty.';
+            snackbarVariables.isOpen = true;
+        } else {
+            let id = generateRowId(0, app.rowIdLength);
+            let clone: Row = JSON.parse(JSON.stringify(app.tmpRow[0]));
+            let index = app.rows.length;
+
+            clone.id = id;
+            if (num === -1) {
+                app.rows.push(clone);
+            } else {
+                app.rows.splice(num, 0, clone);
+                index = num;
+            }
+            rowMap.set(id, app.rows[index]);
+
+            for (let i = 0; i < clone.objects.length; i++) {
+                const cChoice = clone.objects[i];
+
+                cChoice.id = generateObjectId(0, app.objectIdLength);
+                cChoice.index = i;
+                cChoice.isActive = false;
+                delete cChoice.forcedActivated;
+
+                for (let j = 0; j < cChoice.scores.length; j++) {
+                    const score = cChoice.scores[j];
+
+                    score.idx = generateScoreId(0, 5);
+                    scoreSet.add(score.idx);
+                    delete score.isActive;
+                    delete score.setValue;
+                    delete score.discountIsOn;
+                    delete score.discountShow;
+                    delete score.discountBeforeText;
+                    delete score.discountAfterText;
+                    delete score.discountScore;
+                    delete score.discountScoreCal;
+                    delete score.isChangeDiscount;
+                    delete score.tmpDisScore;
+                    delete score.tmpDiscount;
+                    delete score.discountedFrom;
+                    delete score.dupTextA;
+                    delete score.dupTextB;
+                    delete score.discountTextA;
+                    delete score.discountTextB;
+                    delete score.notStackableDiscount;
+                    delete score.appliedDiscount;
+                }
+
+                for (let j = 0; j < cChoice.addons.length; j++) {
+                    const addon = cChoice.addons[j];
+
+                    addon.parentId = cChoice.id;
+                }
+
+                if (cChoice.backpackBtnRequirement) {
+                    if (typeof app.hideBackpackBtn !== 'undefined') {
+                        app.hideBackpackBtn += 1;
+                    } else {
+                        delete cChoice.backpackBtnRequirement;
+                    }
+                }
+
+                if (cChoice.groups) {
+                    for (let j = 0; j < cChoice.groups.length; j++) {
+                        let group = groupMap.get(cChoice.groups[j]);
+                        if (typeof group !== 'undefined') {
+                            let elementIndex = group.elements.indexOf(cChoice.id);
+                            if (elementIndex === -1) group.elements.push(cChoice.id);
+                        }
+                    }
+                }
+
+                if (cChoice.objectDesignGroups) {
+                    for (let j = 0; j < cChoice.objectDesignGroups.length; j++) {
+                        let dGroup = objectDesignMap.get(cChoice.objectDesignGroups[j]);
+                        if (typeof dGroup !== 'undefined') {
+                            let elementIndex = dGroup.elements.indexOf(cChoice.id);
+                            if (elementIndex === -1) dGroup.elements.push(cChoice.id);
+                        }
+                    }
+                }
+
+                choiceMap.set(cChoice.id, {choice: app.rows[index].objects[i], row: app.rows[index]});
+            }
+
+            if (clone.groups) {
+                for (let i = 0; i < clone.groups.length; i++) {
+                    let group = groupMap.get(clone.groups[i]);
+                    if (typeof group !== 'undefined') {
+                        let elementIndex = group.rowElements.indexOf(clone.id);
+                        if (elementIndex === -1) group.rowElements.push(clone.id);
+                    }
+                }
+            }
+
+            if (clone.rowDesignGroups) {
+                for (let i = 0; i < clone.rowDesignGroups.length; i++) {
+                    let dGroup = rowDesignMap.get(clone.rowDesignGroups[i]);
+                    if (typeof dGroup !== 'undefined') {
+                        let elementIndex = dGroup.elements.indexOf(clone.id);
+                        if (elementIndex === -1) dGroup.elements.push(clone.id);
+                    }
+                }
+            }
+
+            if (num === -1) {
+                const idx = app.rows.length - 1;
+                app.rows[idx].index = idx;
+            } else {
+                for (let i = num; i < app.rows.length; i++) {
+                    app.rows[i].index = i;
+                }
+            }
         }
     }
 

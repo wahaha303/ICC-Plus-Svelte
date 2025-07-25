@@ -17,7 +17,7 @@
             <div class="row g-4">
                 {#each menuComponentButtons as _undefined, i}
                     <div class="col-12 {i === 0 ? 'mt-0' : ''}">
-                        <Button onclick={() => {currentComponent.value = menuComponentButtons[i].component; document.body.classList.remove('mdc-dialog-scroll-lock');}} variant="raised">
+                        <Button onclickcapture={() => {currentComponent.value = menuComponentButtons[i].component; document.body.classList.remove('mdc-dialog-scroll-lock');}} variant="raised">
                             <Label>{menuComponentButtons[i].text}</Label>
                         </Button>
                     </div>
@@ -58,7 +58,7 @@
     import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import ViewerMain from '$lib/viewer/ViewerMain.svelte';
     import InfoMain from '$lib/information/InfoMain.svelte';
-    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, snackbarVariables, appVersion, getDate, isMediaSupport } from '$lib/store/store.svelte';
+    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, snackbarVariables, appVersion, getDate, isMediaSupport, useAltMenu } from '$lib/store/store.svelte';
     import { onDestroy, onMount } from 'svelte';
 
     let open = $state(true);
@@ -101,6 +101,14 @@
             if (themeDarkLink) {
                 themeDarkLink.media = 'not all';
             }
+        }
+
+        let u = localStorage.getItem('altMenu') as string;
+
+        if (u === 'true') {
+            useAltMenu.value = true;
+        } else {
+            useAltMenu.value = false;
         }
 	}
 

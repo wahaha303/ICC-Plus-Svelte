@@ -15,13 +15,16 @@
                             <div class="point-slot">
                                 <div class="toolbar grey lighten-3 justify-space-around">
                                     <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclick={() => moveGroupUp(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveGroupUp(row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Delete Group">
-                                        <IconButton class="mdi mdi-delete-forever" onclick={() => deleteGroup(app.groups[row.index].id, row.index)} />
+                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteGroup(app.groups[row.index].id, row.index)} />
+                                    </Wrapper>
+                                    <Wrapper text="Clone Group">
+                                        <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneGroup(row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclick={() => moveGroupDown(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveGroupDown(row.index)} />
                                     </Wrapper>
                                 </div>
                                 <div class="row gy-4 p-3">
@@ -42,7 +45,7 @@
                         {/if}
                         {#if row.index === app.groups.length}
                             <div>
-                                <button type="button" class="create-box col-12" style="min-height: 218px; font-size: 40px;" onclick={createNewGroup} aria-label="Create New Group">
+                                <button type="button" class="create-box col-12" style="min-height: 218px; font-size: 40px;" onclickcapture={createNewGroup} aria-label="Create New Group">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -56,13 +59,16 @@
                     <div class="point-slot my-5">
                         <div class="toolbar grey lighten-3 justify-space-around">
                             <Wrapper text="Move Up">
-                                <IconButton class="mdi mdi-chevron-up" onclick={() => moveGroupUp(i)} />
+                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveGroupUp(i)} />
                             </Wrapper>
                             <Wrapper text="Delete Group">
-                                <IconButton class="mdi mdi-delete-forever" onclick={() => deleteGroup(group.id, i)} />
+                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteGroup(group.id, i)} />
+                            </Wrapper>
+                            <Wrapper text="Clone Group">
+                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneGroup(i)} />
                             </Wrapper>
                             <Wrapper text="Move Down">
-                                <IconButton class="mdi mdi-chevron-down" onclick={() => moveGroupDown(i)} />
+                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveGroupDown(i)} />
                             </Wrapper>
                         </div>
                         <div class="row gy-4 p-3">
@@ -82,7 +88,7 @@
                     </div>
                 {/each}
                 <div class="my-5">
-                    <button type="button" class="create-box col-12" style="min-height: 218px; font-size: 40px;" onclick={createNewGroup} aria-label="Create New Group">
+                    <button type="button" class="create-box col-12" style="min-height: 218px; font-size: 40px;" onclickcapture={createNewGroup} aria-label="Create New Group">
                         <i class="mdi mdi-plus-thick"></i>
                     </button>
                 </div>
@@ -93,7 +99,7 @@
         <div class="container-fluid">
             <div class="row p-0">
                 <div class="col-sm-6 col-12">
-                    <Button action="" onclick={createNewGroup}>
+                    <Button action="" onclickcapture={createNewGroup}>
                         <Label class="dialog-actions--btn">Create New Group</Label>
                     </Button>
                 </div>
@@ -223,7 +229,57 @@
         }
     }
 
+    function cloneGroup(num: number) {
+        const group = app.groups[num];
+        const clone = JSON.parse(JSON.stringify(group));
+        
+        clone.id = generateGroupId(0, 4);
+        app.groups.splice(num + 1, 0, clone);
+        groupMap.set(clone.id, app.groups[num + 1]);
+
+        for (let i = 0; i < clone.rowElements.length; i++) {
+            const row = rowMap.get(clone.rowElements[i]);
+            if (typeof row !== 'undefined') {
+                if (typeof row.groups === 'undefined') row.groups = [];
+                row.groups.push(clone.id);
+            }
+        }
+
+        for (let i = 0; i < clone.elements.length; i++) {
+            const cMap = choiceMap.get(clone.elements[i]);
+            if (typeof cMap !== 'undefined') {
+                const choice = cMap.choice;
+                if (typeof choice.groups === 'undefined') choice.groups = [];
+                choice.groups.push(clone.id);
+            }
+        }
+
+        if (app.groups.length > 3) {
+            $virtualizer.setOptions({
+                count: rowCount()
+            });
+
+            scrollToLastRow($virtualizer, virtualListEl, app.groups.length - 1);
+        }
+    }
+
     function deleteGroup(id: string, num: number) {
+        const group = app.groups[num];
+        for (let i = 0; i < group.rowElements.length; i++) {
+            const row = rowMap.get(group.rowElements[i]);
+            if (typeof row !== 'undefined' && typeof row.groups !== 'undefined') {
+                row.groups.splice(row.groups.indexOf(group.id), 1);
+            }
+        }
+        for (let i = 0; i < group.elements.length; i++) {
+            const cMap = choiceMap.get(group.elements[i]);
+            if (typeof cMap !== 'undefined') {
+                const choice = cMap.choice;
+                if (typeof choice.group !== 'undefined') {
+                    choice.groups.splice(choice.groups.indexOf(group.id), 1);
+                }
+            }
+        }
         app.groups.splice(num, 1);
         groupMap.delete(id);
 
@@ -235,7 +291,7 @@
     }
     
     function getChoiceLabel(str: string) {
-        let cMap = choiceMap.get(str);
+        const cMap = choiceMap.get(str);
         if (typeof cMap !== 'undefined') {
             let choice = cMap.choice;
             return `${choice.id} | ${choice.debugTitle ? choice.debugTitle : ''} ${choice.title}`;
@@ -244,7 +300,7 @@
     }
 
     function getRowLabel(str: string) {
-        let row = rowMap.get(str);
+        const row = rowMap.get(str);
         if (typeof row !== 'undefined') {
             return `${row.id} | ${row.debugTitle ? row.debugTitle : ''} ${row.title}`;
         }
@@ -264,15 +320,15 @@
     }
 
     function releaseChoiceElement(e: CustomEvent, group: Group) {
-        let cMap = typeof e.detail === 'object' ? choiceMap.get(e.detail.chipId) : choiceMap.get(e.detail);
+        const cMap = typeof e.detail === 'object' ? choiceMap.get(e.detail.chipId) : choiceMap.get(e.detail);
         if (typeof cMap !== 'undefined') {
-            let row = cMap.row;
-            let choice = cMap.choice;
+            const row = cMap.row;
+            const choice = cMap.choice;
             if (typeof choice.groups !== 'undefined') {
                 choice.groups.splice(choice.groups.indexOf(group.id), 1);
                 if (typeof row.groups !== 'undefined') {
-                    let groupIndex = row.groups.indexOf(group.id);
-                    let elementIndex = group.rowElements.indexOf(row.id);
+                    const groupIndex = row.groups.indexOf(group.id);
+                    const elementIndex = group.rowElements.indexOf(row.id);
                     if (groupIndex !== -1) row.groups.splice(groupIndex, 1);
                     if (elementIndex !== -1) group.rowElements.splice(elementIndex, 1);
                 }
@@ -280,15 +336,15 @@
         }
     }
 
-    function  releaseRowElement(e: CustomEvent, group: Group) {
-        let row = typeof e.detail === 'object' ? rowMap.get(e.detail.chipId) : rowMap.get(e.detail);
+    function releaseRowElement(e: CustomEvent, group: Group) {
+        const row = typeof e.detail === 'object' ? rowMap.get(e.detail.chipId) : rowMap.get(e.detail);
         if (typeof row !== 'undefined') {
             if (typeof row.groups !== 'undefined') {
                 row.groups.splice(row.groups.indexOf(group.id), 1);
                 for (let i = 0; i < row.objects.length; i++) {
-                    let choice = row.objects[i];
-                    let groupIndex = choice.groups.indexOf(group.id);
-                    let elementIndex = group.elements.indexOf(choice.id);
+                    const choice = row.objects[i];
+                    const groupIndex = choice.groups.indexOf(group.id);
+                    const elementIndex = group.elements.indexOf(choice.id);
                     if (groupIndex !== -1) choice.groups.splice(groupIndex, 1);
                     if (elementIndex !== -1) group.elements.splice(elementIndex, 1);
                 }
@@ -297,21 +353,21 @@
     }
 
     function setChoiceElement(e: CustomEvent, group: Group) {
-        let cMap = choiceMap.get(e.detail);
+        const cMap = choiceMap.get(e.detail);
         if (typeof cMap !== 'undefined') {
-            let choice = cMap.choice;
+            const choice = cMap.choice;
             if (typeof choice.groups === 'undefined') choice.groups = [];
             choice.groups.push(group.id);
         }
     }
 
     function setRowElement(e: CustomEvent, group: Group) {
-        let row = rowMap.get(e.detail);
+        const row = rowMap.get(e.detail);
         if (typeof row !== 'undefined') {
             if (typeof row.groups === 'undefined') row.groups = [];
             row.groups.push(group.id);
             for (let i = 0; i < row.objects.length; i++) {
-                let choice = row.objects[i];
+                const choice = row.objects[i];
                 if (!choice.groups.includes(group.id)) {
                     choice.groups.push(group.id);
                     group.elements.push(choice.id);

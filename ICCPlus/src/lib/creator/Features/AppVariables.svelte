@@ -15,13 +15,13 @@
                             <div class="point-slot">
                                 <div class="toolbar grey lighten-3 justify-space-around">
                                     <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclick={() => moveVariableUp(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveVariableUp(row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Delete Group">
-                                        <IconButton class="mdi mdi-delete-forever" onclick={() => deleteVariable(app.variables[row.index].id, row.index)} />
+                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteVariable(app.variables[row.index].id, row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclick={() => moveVariableDown(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveVariableDown(row.index)} />
                                     </Wrapper>
                                 </div>
                                 <div class="row gy-4 p-3">
@@ -35,7 +35,7 @@
                             </div>
                         {:else if row.index === app.variables.length}
                             <div>
-                                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclick={createNewVariable} aria-label="Create New Variable">
+                                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewVariable} aria-label="Create New Variable">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -48,13 +48,13 @@
                 <div class="point-slot my-5">
                     <div class="toolbar grey lighten-3 justify-space-around">
                         <Wrapper text="Move Up">
-                            <IconButton class="mdi mdi-chevron-up" onclick={() => moveVariableUp(i)} />
+                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveVariableUp(i)} />
                         </Wrapper>
                         <Wrapper text="Delete Group">
-                            <IconButton class="mdi mdi-delete-forever" onclick={() => deleteVariable(variable.id, i)} />
+                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteVariable(variable.id, i)} />
                         </Wrapper>
                         <Wrapper text="Move Down">
-                            <IconButton class="mdi mdi-chevron-down" onclick={() => moveVariableDown(i)} />
+                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveVariableDown(i)} />
                         </Wrapper>
                     </div>
                     <div class="row gy-4 p-3">
@@ -68,7 +68,7 @@
                 </div>
             {/each}
             <div class="my-5">
-                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclick={createNewVariable} aria-label="Create New Variable">
+                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewVariable} aria-label="Create New Variable">
                     <i class="mdi mdi-plus-thick"></i>
                 </button>
             </div>
@@ -78,7 +78,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-6 col-12">
-                    <Button action="" onclick={createNewVariable}>
+                    <Button action="" onclickcapture={createNewVariable}>
                         <Label class="dialog-actions--btn">Create New Variable</Label>
                     </Button>
                 </div>

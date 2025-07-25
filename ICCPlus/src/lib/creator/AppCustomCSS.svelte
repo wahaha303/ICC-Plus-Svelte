@@ -22,7 +22,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-6 col-12">
-                    <Button action="" onclick={() => applyCustomCSS(text)}>
+                    <Button action="" onclickcapture={() => applyCustomCSS(text)}>
                         <Label class="dialog-actions--btn">Apply</Label>
                     </Button>
                 </div>

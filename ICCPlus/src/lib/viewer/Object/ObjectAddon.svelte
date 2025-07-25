@@ -293,7 +293,7 @@
     let addonTitle = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.addonTitle}; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
+        styles.push(`font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATitleColor)};`);
         } else if (isActive && filterStyle.selATitleColorIsOn) {
@@ -315,7 +315,7 @@
     let addonText = $derived.by(() => {
         let styles = [];
 
-        styles.push(`font-family: ${textStyle.addonText}; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
+        styles.push(`font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATextColor)};`);
         } else if (isActive && filterStyle.selATextColorIsOn) {
@@ -367,7 +367,7 @@
     });
 
     let scoreText = $derived.by(() => {
-        return `font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
+        return `font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
     });
 
 </script>

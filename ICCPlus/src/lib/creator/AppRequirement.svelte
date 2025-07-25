@@ -13,17 +13,17 @@
             </div>
             <div class="row pb-2">
                 <div class="col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => pasteRequired()}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => pasteRequired()}>
                         <Label>Paste the copied requirement</Label>
                     </Button>
                 </div>
                 <div class="col-sm-6 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('gid', true, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('gid', true, '')}>
                         <Label>Add Global Requirement</Label>
                     </Button>
                 </div>
                 <div class="col-sm-6 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('word', true, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('word', true, '')}>
                         <Label>Add Word Requirement</Label>
                     </Button>
                 </div>
@@ -31,12 +31,12 @@
             <div class="row pb-2">
                 <div class="col-12 px-3 pb-2">Choice Requirements</div>
                 <div class="col-sm-6 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('id', true, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('id', true, '')}>
                         <Label>Add selected Choice requirement</Label>
                     </Button>
                 </div>
                 <div class="col-sm-6 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('id', false, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('id', false, '')}>
                         <Label>Add non-selected Choice requirement</Label>
                     </Button>
                 </div>
@@ -52,7 +52,7 @@
                         </Select>
                     </div>
                     <div class="col-12 pb-3">
-                        <Button variant="raised" class="w-100" onclick={() => addNewRequired('points', true, pointRequire)}>
+                        <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('points', true, pointRequire)}>
                             <Label>Add Point Requirement</Label>
                         </Button>
                     </div>
@@ -67,7 +67,7 @@
                         </Select>
                     </div>
                     <div class="col-12 pb-3">
-                        <Button variant="raised" class="w-100" onclick={() => addNewRequired('pointCompare', true, pointRequire)}>
+                        <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('pointCompare', true, pointRequire)}>
                             <Label>Add Point Comparison Requirement</Label>
                         </Button>
                     </div>
@@ -79,12 +79,12 @@
                     <Textfield bind:value={numberOfOrRequireds} label="Number of Requirements" variant="filled" type="number" />
                 </div>
                 <div class="col-sm-6 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('or', true, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('or', true, '')}>
                         <Label>'X of these is selected' Requirement</Label>
                     </Button>
                 </div>
                 <div class="col-sm-6 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('or', false, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('or', false, '')}>
                         <Label>'X of these is not selected' Requirement</Label>
                     </Button>
                 </div>
@@ -95,17 +95,17 @@
                     <Textfield bind:value={numberOfSelection} label="Number of Selections" variant="filled" type="number" />
                 </div>
                 <div class="col-sm-4 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('selFromGroups', true, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('selFromGroups', true, '')}>
                         <Label>From Groups</Label>
                     </Button>
                 </div>
                 <div class="col-sm-4 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('selFromRows', true, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('selFromRows', true, '')}>
                         <Label>From Rows</Label>
                     </Button>
                 </div>
                 <div class="col-sm-4 col-12 pb-3">
-                    <Button variant="raised" class="w-100" onclick={() => addNewRequired('selFromWhole', true, '')}>
+                    <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('selFromWhole', true, '')}>
                         <Label>From All</Label>
                     </Button>
                 </div>

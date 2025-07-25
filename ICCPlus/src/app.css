@@ -510,6 +510,20 @@ img {
 .smui-chip-input__chip-set {
     overflow-x: hidden;
 }
+.choice-edit-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: grey;
+    z-index: 1;
+}
+.choice-edit-button__edit-mode {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    color: grey;
+    z-index: 1;
+}
 #dnd-action-dragged-el {
     opacity: 0.5 !important;
     font-size: 1rem !important;

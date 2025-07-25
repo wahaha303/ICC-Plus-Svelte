@@ -14,7 +14,7 @@
                         {#if slot.stored}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => {confirmDialog.action = () => loadLegacySave(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
+                                    <IconButton onclickcapture={() => {confirmDialog.action = () => loadLegacySave(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
                                 </div>
                                 <div class="col-sm-10 col-8">
                                     <div class="col-12 pt-1">
@@ -23,7 +23,7 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => copyBuildCode(i)}><i class="mdi mdi-clipboard-outline"></i></IconButton>
+                                    <IconButton onclickcapture={() => copyBuildCode(i)}><i class="mdi mdi-clipboard-outline"></i></IconButton>
                                 </div>
                             </div>
                         {:else}
@@ -38,7 +38,7 @@
                     {#if buildAutoSaveSlot.stored}
                         <div class="row gx-0" style="border-bottom: 1px solid">
                             <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                <IconButton onclick={() => {confirmDialog.action = () => loadAutoSave(); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-alpha-a-box-outline"></i></IconButton>
+                                <IconButton onclickcapture={() => {confirmDialog.action = () => loadAutoSave(); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-alpha-a-box-outline"></i></IconButton>
                             </div>
                             <div class="col-sm-11 col-10">
                                 <div class="col-12 pt-1">
@@ -52,7 +52,7 @@
                         {#if slot.stored}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => {confirmDialog.action = () => loadApp(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
+                                    <IconButton onclickcapture={() => {confirmDialog.action = () => loadApp(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
                                 </div>
                                 <div class="col-sm-10 col-8">
                                     <div class="col-12 pt-1">
@@ -61,17 +61,17 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => {confirmDialog.action = () => removeSave(i); confirmDialog.context = "Are you sure you want to delete this build?<br>This action cannot be undone."; currentDialog = "dlgCommon";}}><i class="mdi mdi-trash-can"></i></IconButton>
+                                    <IconButton onclickcapture={() => {confirmDialog.action = () => removeSave(i); confirmDialog.context = "Are you sure you want to delete this build?<br>This action cannot be undone."; currentDialog = "dlgCommon";}}><i class="mdi mdi-trash-can"></i></IconButton>
                                 </div>
                             </div>
                         {:else}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclick={() => saveApp(i)}><i class="mdi mdi-content-save"></i></IconButton>
+                                    <IconButton onclickcapture={() => saveApp(i)}><i class="mdi mdi-content-save"></i></IconButton>
                                 </div>
                                 <div class="col-sm-11 col-10">
                                     <div class="col-12">
-                                        <Textfield bind:value={slot.name} onclick={() => slot.name = ''} onblur={() => {if (slot.name === '') slot.name = `Slot ${i + 1}`}} input$onkeydown={(e) => {if(e.key === 'Enter') saveApp(i)}} class="textbox-mini" variant="standard" />
+                                        <Textfield bind:value={slot.name} onclickcapture={() => slot.name = ''} onblur={() => {if (slot.name === '') slot.name = `Slot ${i + 1}`}} input$onkeydown={(e) => {if(e.key === 'Enter') saveApp(i)}} class="textbox-mini" variant="standard" />
                                     </div>
                                 </div>
                             </div>
@@ -90,15 +90,15 @@
                 </div>
                 <div class="col pb-2">
                     <div class="d-row align-items-center justify-end">
-                        <IconButton onclick={() => currentPage > 1 ? currentPage -= 1 : currentPage = 11}><i class="mdi mdi-menu-left"></i></IconButton>
+                        <IconButton onclickcapture={() => currentPage > 1 ? currentPage -= 1 : currentPage = 11}><i class="mdi mdi-menu-left"></i></IconButton>
                         <span class="list-text px-2">Page {currentPage}</span>
-                        <IconButton onclick={() => currentPage < 11 ? currentPage += 1 : currentPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                        <IconButton onclickcapture={() => currentPage < 11 ? currentPage += 1 : currentPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
                     </div>
                 </div>
             </div>
             <div class="row gy-2">
                 <div class="col-12">
-                    <Button onclick={() => currentDialog = 'appBuildForm'} variant="raised" >
+                    <Button onclickcapture={() => currentDialog = 'appBuildForm'} variant="raised" >
                         <Label>Open Build Form</Label>
                     </Button>
                 </div>

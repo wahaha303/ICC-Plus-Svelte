@@ -14,7 +14,7 @@
                         <Header>
                             <div class:panel--active={item.open}>{`${i + 1}. ${item.debugTitle} ${item.title} / ${item.id}`} </div>
                             {#snippet icon()}
-                                <IconButton onclick={(e) => {e.preventDefault(); e.stopPropagation(); scrollToRow(item.id)}} size="mini">
+                                <IconButton onclickcapture={(e) => {e.preventDefault(); e.stopPropagation(); scrollToRow(item.id)}} size="mini">
                                     <Icon class="mdi mdi-target"></Icon>
                                 </IconButton>
                             {/snippet}
@@ -28,7 +28,7 @@
                                                 {`${j + 1}. ${subItem.debugTitle} ${subItem.title} / ${subItem.id}`}
                                             </div>
                                             <div class="col pe-3 text-right">
-                                                <IconButton onclick={(e) => {e.preventDefault(); e.stopPropagation(); scrollToObject(subItem.id)}} size="mini">
+                                                <IconButton onclickcapture={(e) => {e.preventDefault(); e.stopPropagation(); scrollToObject(subItem.id)}} size="mini">
                                                     <Icon class="mdi mdi-target"></Icon>
                                                 </IconButton>
                                             </div>

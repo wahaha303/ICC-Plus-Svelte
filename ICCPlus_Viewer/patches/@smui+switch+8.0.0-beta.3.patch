@@ -1,11 +1,12 @@
 diff --git a/node_modules/@smui/switch/dist/Switch.svelte b/node_modules/@smui/switch/dist/Switch.svelte
-index fe1845e..a6a6e0a 100644
+index fe1845e..f6ff247 100644
 --- a/node_modules/@smui/switch/dist/Switch.svelte
 +++ b/node_modules/@smui/switch/dist/Switch.svelte
-@@ -33,6 +33,7 @@
+@@ -33,6 +33,8 @@
        instance.handleClick();
      }
      restProps.onclick?.(e);
++    e.stopPropagation();
 +    e.currentTarget.blur();
    }}
  >

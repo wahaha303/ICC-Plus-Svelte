@@ -1,7 +1,7 @@
 {
   "name": "iccplus",
   "private": true,
-  "version": "2.1.7",
+  "version": "2.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,7 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.0.0",
+    "@sveltejs/vite-plugin-svelte": "^6.1.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/canvas-size": "^1.2.2",
     "@types/node": "^24.0.12",
@@ -25,7 +25,7 @@
     "svelte-check": "^4.1.6",
     "terser": "^5.43.1",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.6"
   },
   "dependencies": {
     "@smui-extra/accordion": "^8.0.0-beta.3",
@@ -38,6 +38,7 @@
     "@smui/form-field": "^8.0.0-beta.3",
     "@smui/icon-button": "^8.0.0-beta.3",
     "@smui/list": "^8.0.0-beta.3",
+    "@smui/menu": "^8.0.0-beta.3",
     "@smui/paper": "^8.0.0-beta.3",
     "@smui/radio": "^8.0.0-beta.3",
     "@smui/select": "^8.0.0-beta.3",
@@ -59,7 +60,7 @@
     "propper": "^1.0.4",
     "resize-observer-polyfill": "^1.5.1",
     "ress": "^5.0.2",
-    "svelte": "^5.34.7",
+    "svelte": "^5.36.16",
     "svelte-awesome-color-picker": "^4.0.2",
     "svelte-dnd-action": "^0.9.61",
     "svelte-material-ui": "^8.0.0-beta.3",

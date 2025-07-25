@@ -148,7 +148,7 @@
                                 }} />
                             </div>
                             <div class="col-12">
-                                <Button onclick={() => currentDialog = 'appCustomCss'} variant="raised" >
+                                <Button onclickcapture={() => currentDialog = 'appCustomCss'} variant="raised" >
                                     <Label>Open Custom CSS</Label>
                                 </Button>
                             </div>
@@ -275,6 +275,22 @@
                                     {/snippet}
                                 </FormField>
                             </div>
+                            <div class="col-12">
+                                <FormField>
+                                    <Switch bind:checked={() => useAltMenu.value ?? false, (e) => useAltMenu.value = e} onSMUISwitchChange={toggleAltMenu} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Show Menu on Top
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
+                                    <Switch bind:checked={() => app.useChoiceEditBtn ?? false, (e) => app.useChoiceEditBtn = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Show Edit Button for Choice
+                                    {/snippet}
+                                </FormField>
+                            </div>
                             <div class="col-12 px-3">
                                 <Textfield bind:value={() => app.tooltipDelay ?? 1000, (e) => app.tooltipDelay = e} label="Tooltip Delay (Image)" type="number" variant="standard" suffix="ms" input$min="0" input$class="text-right" onchange={() => {
                                     if (typeof app.tooltipDelay !== 'undefined' && app.tooltipDelay < 0) {
@@ -313,7 +329,7 @@
                                 </Textfield>
                             </div>
                             <div class="col-12">
-                                <Button onclick={importFont} variant="raised" >
+                                <Button onclickcapture={importFont} variant="raised" >
                                     <Label>Import</Label>
                                 </Button>
                             </div>
@@ -335,7 +351,7 @@
                                 {/if}
                             </div>
                             <div class="col-2 d-flex align-items-center justify-center">
-                                <IconButton onclick={deleteFont} disabled={(!importFromUrl && fontName === 'Times New Roman') || (importFromUrl && fontUrl === '')}><i class="mdi mdi-trash-can"></i></IconButton>
+                                <IconButton onclickcapture={deleteFont} disabled={(!importFromUrl && fontName === 'Times New Roman') || (importFromUrl && fontUrl === '')}><i class="mdi mdi-trash-can"></i></IconButton>
                             </div>
                             {#if importFromUrl}
                                 <div class="col-12">
@@ -373,7 +389,7 @@
     import TabBar from '@smui/tab-bar';
     import Textfield from '$lib/custom/textfield';
     import AppCustomCSS from './AppCustomCSS.svelte';
-	import { app, bgmPlayer, bgmVariables, choiceMap, textFonts, autoSave, cyoaAbortController, snackbarVariables } from '$lib/store/store.svelte';
+	import { app, bgmPlayer, bgmVariables, choiceMap, textFonts, autoSave, cyoaAbortController, snackbarVariables, useAltMenu, toggleAltMenu } from '$lib/store/store.svelte';
 	import { get } from 'svelte/store';
 
     let { open, onclose }: { open: boolean; onclose: () => void; } = $props();
@@ -394,7 +410,7 @@
     let fontName = $state('Times New Roman');
     let currentDialog = $state<'none' | 'appCustomCss'>('none');
 
-    let loremStyle = $derived(`font-family: ${fontName}`);
+    let loremStyle = $derived(`font-family: '${fontName}'`);
     let dialogStyle = $derived.by(() => {
         let styles = [];
 

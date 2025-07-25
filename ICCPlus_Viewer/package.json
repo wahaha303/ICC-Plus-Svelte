@@ -1,7 +1,7 @@
 {
   "name": "iccplus_viewer",
   "private": true,
-  "version": "2.1.7",
+  "version": "2.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,7 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.0.0",
+    "@sveltejs/vite-plugin-svelte": "^6.1.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/canvas-size": "^1.2.2",
     "@types/node": "^24.0.12",
@@ -25,7 +25,7 @@
     "svelte-check": "^4.1.6",
     "terser": "^5.43.1",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.6"
   },
   "dependencies": {
     "@smui/button": "^8.0.0-beta.3",
@@ -52,7 +52,7 @@
     "propper": "^1.0.4",
     "resize-observer-polyfill": "^1.5.1",
     "ress": "^5.0.2",
-    "svelte": "^5.34.7",
+    "svelte": "^5.36.16",
     "svelte-material-ui": "^8.0.0-beta.3",
     "zod": "^3.25.67"
   }

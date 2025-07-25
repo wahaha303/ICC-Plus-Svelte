@@ -5,7 +5,7 @@
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || windowWidth <= 960)}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -21,7 +21,7 @@
                     {/if}
                     {#if row.template === 5}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -39,7 +39,7 @@
                     {/if}
                     {#if row.template === 4}
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -65,7 +65,7 @@
                     </div>
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -79,7 +79,7 @@
                 {:else if row.template === 3}
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclick={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -110,6 +110,10 @@
                 {#each resultRow as val, i}
                     <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} />
                 {/each}
+            {:else if row.isGroupRow}
+                {#each groupRow as val, i}
+                    <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
+                {/each}
             {:else}
                 {#each row.objects as choice, i}
                     <AppObject bind:this={choiceRef} row={row} choice={choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
@@ -122,7 +126,7 @@
     import AppObject from './AppObject.svelte';
     import Button, { Label } from '@smui/button';
     import DOMPurify from 'dompurify';
-    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba } from '$lib/store/store.svelte';
+    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
@@ -175,6 +179,30 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        result.sort((a, b) => {
+            if (a.row.index !== b.row.index) return a.row.index - b.row.index;
+            return a.choice.index - b.choice.index;
+        });
+
+        return result;
+    });
+
+    let groupRow = $derived.by(() => {
+        const result = [];
+        if (typeof row.resultGroupId !== 'undefined') {
+            const group = groupMap.get(row.resultGroupId);
+
+            if (typeof group !== 'undefined') {
+                for (let i = 0; i < group.elements.length; i++) {
+                    const cMap = choiceMap.get(group.elements[i]);
+                    
+                    if (typeof cMap !== 'undefined') {
+                        result.push({choice: cMap.choice, row: cMap.row});
                     }
                 }
             }
@@ -279,11 +307,11 @@
     });
 
     let rowTitle = $derived.by(() => {
-        return `font-family: ${textStyle.rowTitle}; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${hexToRgba(textStyle.rowTitleColor)}`;
+        return `font-family: '${textStyle.rowTitle}'; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${hexToRgba(textStyle.rowTitleColor)}`;
     });
 
     let rowText = $derived.by(() => {
-        return `white-space: pre-wrap; font-family: ${textStyle.rowText}; font-size: ${textStyle.rowTextTextSize}%; text-align: ${textStyle.rowTextAlign}; color: ${hexToRgba(textStyle.rowTextColor)}; padding: ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}% ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}%;`;
+        return `white-space: pre-wrap; font-family: '${textStyle.rowText}'; font-size: ${textStyle.rowTextTextSize}%; text-align: ${textStyle.rowTextAlign}; color: ${hexToRgba(textStyle.rowTextColor)}; padding: ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}% ${rowStyle.rowTextPaddingX}px ${rowStyle.rowTextPaddingY}%;`;
     });
 
     let rowImage = $derived.by(() => {

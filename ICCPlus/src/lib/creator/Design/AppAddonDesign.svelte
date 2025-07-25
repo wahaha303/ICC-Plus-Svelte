@@ -221,11 +221,11 @@
                                     </FormField>
                                     <div>
                                         {#if styling.addonBackgroundImage}
-                                            <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBackgroundImage'}} class="btn--image-background">
+                                            <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBackgroundImage'}} class="btn--image-background">
                                                 <img src={styling.addonBackgroundImage} alt="Addon Background" loading="lazy" class="btn--image" style="max-height: 80px;" />
                                             </button>
                                         {/if}
-                                        <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBackgroundImage'}} variant="raised">
+                                        <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBackgroundImage'}} variant="raised">
                                             <Label>Change Image</Label>
                                         </Button>
                                     </div>
@@ -247,11 +247,11 @@
                             <div class="col-lg-4 col-12 gy-2">
                                 <div class="col-12 text-center px-5">
                                     {#if styling.addonBorderImage}
-                                        <button type="button" onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBorderImage'}} class="btn--image-background">
+                                        <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBorderImage'}} class="btn--image-background">
                                             <img src={styling.addonBorderImage} alt="Addon Border" loading="lazy" class="btn--image" style="max-height: 140px;" />
                                         </button>
                                     {/if}
-                                    <Button onclick={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBorderImage'}} variant="raised">
+                                    <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBorderImage'}} variant="raised">
                                         <Label>Change Image</Label>
                                     </Button>
                                 </div>

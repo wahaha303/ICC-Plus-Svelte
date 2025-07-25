@@ -16,7 +16,7 @@
             </div>
             <div class="col-12">
                 <Textfield textarea bind:value={idList} label="Area To Import Activated Choices With Lists Of Id's" variant="filled" input$rows={5} />
-                <Button onclick={() => loadActivated(idList)} variant="raised" >
+                <Button onclickcapture={() => loadActivated(idList)} variant="raised" >
                     <Label>Import Choices/Clean if empty</Label>
                 </Button>
             </div>

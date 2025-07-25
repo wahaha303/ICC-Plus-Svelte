@@ -19,7 +19,7 @@
                         {/each}
                     </Select>
                     <div class="col-12 pt-2">
-                        <Button onclick={sortObjects} variant="raised">
+                        <Button onclickcapture={sortObjects} variant="raised">
                             <Label>Sort</Label>
                         </Button>
                     </div>
@@ -38,12 +38,12 @@
                     />
                     <div class="row gx-4 pt-2 pb-4">
                         <div class="col-sm-6 col-12">
-                            <Button onclick={copyObjects} variant="raised">
+                            <Button onclickcapture={copyObjects} variant="raised">
                                 <Label>Copy</Label>
                             </Button>
                         </div>
                         <div class="col-sm-6 col-12">
-                            <Button onclick={mergeRow} variant="raised">
+                            <Button onclickcapture={mergeRow} variant="raised">
                                 <Label>Copy and Delete</Label>
                             </Button>
                         </div>
@@ -106,7 +106,7 @@
                             </div>
                             <div class="col-12 py-3">
                                 <Wrapper text="Here you can export your design.">
-                                    <Button onclick={exportDesign} variant="raised" >
+                                    <Button onclickcapture={exportDesign} variant="raised" >
                                         <Label>Export Design</Label>
                                     </Button>
                                 </Wrapper>
@@ -114,7 +114,7 @@
                             {#each designMenuComponent as _undefined, i}
                                 <div class="col-sm-6 col-12 pt-2 pb-3">
                                     <Wrapper text={designMenuComponent[i].text}>
-                                        <Button onclick={designMenuComponent[i].action} variant="raised" >
+                                        <Button onclickcapture={designMenuComponent[i].action} variant="raised" >
                                             <Label class="line-default">{designMenuComponent[i].name}</Label>
                                         </Button>
                                     </Wrapper>

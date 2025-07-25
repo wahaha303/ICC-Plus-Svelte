@@ -12,42 +12,42 @@
                 <div class="container-fluid p-0">
                     <div class="row gy-4">
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(0)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(0)} variant="raised">
                                 <Label>Fall</Label>
                             </Button>
                         </div>
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(1)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(1)} variant="raised">
                                 <Label>Book</Label>
                             </Button>
                         </div>
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(2)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(2)} variant="raised">
                                 <Label>Bone</Label>
                             </Button>
                         </div>
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(3)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(3)} variant="raised">
                                 <Label>Dark</Label>
                             </Button>
                         </div>
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(4)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(4)} variant="raised">
                                 <Label>Hello 2021</Label>
                             </Button>
                         </div>
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(5)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(5)} variant="raised">
                                 <Label>Black & Gold</Label>
                             </Button>
                         </div>
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(6)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(6)} variant="raised">
                                 <Label>Rainbow</Label>
                             </Button>
                         </div>
                         <div class="col-md-3 col-sm-6 col-12">
-                            <Button onclick={() => changeStyling(7)} variant="raised">
+                            <Button onclickcapture={() => changeStyling(7)} variant="raised">
                                 <Label>Seeing Greens</Label>
                             </Button>
                         </div>

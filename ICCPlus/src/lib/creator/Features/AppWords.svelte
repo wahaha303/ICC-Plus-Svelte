@@ -15,13 +15,13 @@
                             <div class="point-slot">
                                 <div class="toolbar grey lighten-3 justify-space-around">
                                     <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclick={() => moveWordUp(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveWordUp(row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Delete Group">
-                                        <IconButton class="mdi mdi-delete-forever" onclick={() => deleteWord(app.words[row.index].id, row.index)} />
+                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteWord(app.words[row.index].id, row.index)} />
                                     </Wrapper>
                                     <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclick={() => moveWordDown(row.index)} />
+                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveWordDown(row.index)} />
                                     </Wrapper>
                                 </div>
                                 <div class="row gy-4 p-3">
@@ -35,7 +35,7 @@
                             </div>
                         {:else if row.index === app.words.length}
                             <div>
-                                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclick={createNewWord} aria-label="Create New Word">
+                                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewWord} aria-label="Create New Word">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -48,13 +48,13 @@
                 <div class="point-slot my-5">
                     <div class="toolbar grey lighten-3 justify-space-around">
                         <Wrapper text="Move Up">
-                            <IconButton class="mdi mdi-chevron-up" onclick={() => moveWordUp(i)} />
+                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveWordUp(i)} />
                         </Wrapper>
                         <Wrapper text="Delete Group">
-                            <IconButton class="mdi mdi-delete-forever" onclick={() => deleteWord(word.id, i)} />
+                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteWord(word.id, i)} />
                         </Wrapper>
                         <Wrapper text="Move Down">
-                            <IconButton class="mdi mdi-chevron-down" onclick={() => moveWordDown(i)} />
+                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveWordDown(i)} />
                         </Wrapper>
                     </div>
                     <div class="row gy-4 p-3">
@@ -68,7 +68,7 @@
                 </div>
             {/each}
             <div class="my-5">
-                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclick={createNewWord} aria-label="Create New Word">
+                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewWord} aria-label="Create New Word">
                     <i class="mdi mdi-plus-thick"></i>
                 </button>
             </div>
@@ -78,7 +78,7 @@
         <div class="container-fluid">
             <div class="row p-0">
                 <div class="col-sm-6 col-12">
-                    <Button action="" onclick={createNewWord}>
+                    <Button action="" onclickcapture={createNewWord}>
                         <Label class="dialog-actions--btn">Create New Word</Label>
                     </Button>
                 </div>

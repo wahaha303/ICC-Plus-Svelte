@@ -1,12 +1,12 @@
 {#if !choice.hideCounterUntilSelect || choice.multipleUseVariable !== 0}
     <div class="d-row justify-space-around w-100">
-        <IconButton class="counter-icons" disabled={!isEnabled} onclick={clickCounterMinus}>
+        <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterMinus}>
             <i class="mdi mdi-minus" style={multiChoiceButton}></i>
         </IconButton>
         <div translate="no" style={multiChoiceText}>
             {multipleNum}
         </div>
-        <IconButton class="counter-icons" disabled={!isEnabled} onclick={clickCounterPlus}>
+        <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterPlus}>
             <i class="mdi mdi-plus" style={multiChoiceButton}></i>
         </IconButton>
     </div>
@@ -47,12 +47,10 @@
     })
 
     function clickCounterPlus(e: Event) {
-        e.stopPropagation();
         selectedOneMore();
     }
 
     function clickCounterMinus(e: Event) {
-        e.stopPropagation();
         selectedOneLess();
     }
 
@@ -65,7 +63,9 @@
                 selectedOneLess();
             }
         }
-        (document.activeElement as HTMLElement)?.blur();
+        if (document.activeElement) {
+            (document.activeElement as HTMLElement).blur();
+        }
     }
 
 </script>

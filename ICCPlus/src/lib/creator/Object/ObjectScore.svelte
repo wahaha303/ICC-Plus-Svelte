@@ -2,18 +2,18 @@
     <div bind:clientWidth={width} class="pb-1">
         <div class="d-row justify-space-between overflow-auto">
             <Wrapper text="Move Up">
-                <IconButton onclick={moveScoreUp}><i class="mdi mdi-chevron-up"></i></IconButton>
+                <IconButton onclickcapture={moveScoreUp}><i class="mdi mdi-chevron-up"></i></IconButton>
             </Wrapper>
             <div class="d-flex">
                 <Wrapper text="Create New Reqruirement">
-                    <IconButton onclick={() => {dlgVariables.data = score; dlgVariables.currentDialog = 'appRequirement'}} ><i class="mdi mdi-key-plus"></i></IconButton>
+                    <IconButton onclickcapture={() => {dlgVariables.data = score; dlgVariables.currentDialog = 'appRequirement'}} ><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Score">
-                    <IconButton onclick={copyScore}><i class="mdi mdi-clipboard-outline"></i></IconButton>
+                    <IconButton onclickcapture={copyScore}><i class="mdi mdi-clipboard-outline"></i></IconButton>
                 </Wrapper>
             </div>
             <Wrapper text="Move Down">
-                <IconButton onclick={moveScoreDown}><i class="mdi mdi-chevron-down"></i></IconButton>
+                <IconButton onclickcapture={moveScoreDown}><i class="mdi mdi-chevron-down"></i></IconButton>
             </Wrapper>
         </div>
         <div class="row gx-3">
@@ -107,7 +107,7 @@
             {#each score.requireds as required, i}
                 <div class="{required.requireds.length > 0 ? 'col-12' : reqCol} p-2">
                     <ObjectRequired required={required} isEditModeOn={true} data={score} index={i} isNotShown={true} />
-                    <Button onclick={() => score.requireds.splice(i, 1)} class="w-100" variant="raised">
+                    <Button onclickcapture={() => score.requireds.splice(i, 1)} class="w-100" variant="raised">
                         <Label>Delete</Label>
                     </Button>
                 </div>
@@ -170,7 +170,7 @@
     import ObjectRequired from './ObjectRequired.svelte';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, getPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba } from '$lib/store/store.svelte';
+    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, getPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba, choiceMap } from '$lib/store/store.svelte';
     import type { Choice, Row, Score } from '$lib/store/types';
 
     let { isEditModeOn = false, score, row, choice, num = 0 }: { isEditModeOn?: boolean; score: Score; row?: Row; choice: Choice; num?: number } = $props();
@@ -192,14 +192,78 @@
     let scoreAfterText = $derived.by(() => {
         let text = [];
         text.push(`${score.afterText}`);
-        if (score.discountIsOn && score.discountShow && typeof score.discountAfterText !== 'undefined') text.push(`${score.discountAfterText}`);
+        if (score.discountIsOn && score.discountShow && typeof score.discountAfterText !== 'undefined') {
+            if (score.appliedDiscount) {
+                text.push(`${score.discountAfterText}`);
+            } else {
+                if (score.discountedFrom && score.discountedFrom.length > 0) {
+                    const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                    if (typeof cMap !== 'undefined') {
+                        const dChoice = cMap.choice;
+
+                        if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
+                            if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                text.push(`${score.discountAfterText}`);
+                            } else {
+                                if (typeof score.tmpDiscount !== 'undefined') {
+                                    let value = score.value;
+                                    let tmpText = '';
+                                    for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                        if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
+                                            value = score.tmpDiscount[j].discountedValue;
+                                            tmpText = score.tmpDiscount[j].beforeText || '';
+                                        }
+                                    }
+                                    text.push(`${tmpText}`);
+                                }
+                            }
+                        } else {
+                            text.push(`${score.discountAfterText}`);
+                        }
+                    }
+                }
+            }
+        }
 
         return text.join(' ');
     });
     let scoreBeforeText = $derived.by(() => {
         let text = [];
         text.push(`${score.beforeText}`);
-        if (score.discountIsOn && score.discountShow && typeof score.discountBeforeText !== 'undefined') text.push(`${score.discountBeforeText}`);
+        if (score.discountIsOn && score.discountShow && typeof score.discountBeforeText !== 'undefined') {
+            if (score.appliedDiscount) {
+                text.push(`${score.discountBeforeText}`);
+            } else {
+                if (score.discountedFrom && score.discountedFrom.length > 0) {
+                    const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                    if (typeof cMap !== 'undefined') {
+                        const dChoice = cMap.choice;
+
+                        if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
+                            if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                text.push(`${score.discountBeforeText}`);
+                            } else {
+                                if (typeof score.tmpDiscount !== 'undefined') {
+                                    let value = score.value;
+                                    let tmpText = '';
+                                    for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                        if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
+                                            value = score.tmpDiscount[j].discountedValue;
+                                            tmpText = score.tmpDiscount[j].beforeText || '';
+                                        }
+                                    }
+                                    text.push(`${tmpText}`);
+                                }
+                            }
+                        } else {
+                            text.push(`${score.discountBeforeText}`);
+                        }
+                    }
+                }
+            }
+        }
 
         return text.join(' ');
     });
@@ -219,7 +283,32 @@
         return '';
     });
     let scoreValue = $derived.by(() => {
-        let value = score.discountShow ? (typeof score.discountScore !== 'undefined' ? score.discountScore : score.value) : score.value;
+        let value = score.value;
+        if (score.discountIsOn && score.discountShow && typeof score.discountScore !== 'undefined') {
+            if (score.appliedDiscount) {
+                value = score.discountScore;
+            } else if (score.discountedFrom && score.discountedFrom.length > 0) {
+                const cMap = choiceMap.get(score.discountedFrom[0]);
+
+                if (typeof cMap !== 'undefined') {
+                    const dChoice = cMap.choice;
+
+                    if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
+                        if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                            value = score.discountScore;
+                        } else {
+                            if (typeof score.tmpDiscount !== 'undefined') {
+                                for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                    if (value > score.tmpDiscount[j].discountedValue) value = score.tmpDiscount[j].discountedValue;
+                                }
+                            }
+                        }
+                    } else {
+                        value = score.discountScore;
+                    }
+                }
+            }
+        }
         value = Math.abs(value);
         if (!pointType?.allowFloat) {
             value = Math.floor(value);
@@ -275,7 +364,7 @@
     let scoreText = $derived.by(() => {
         let style = [];
 
-        style.push(`font-family: ${textStyle.scoreText}; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
+        style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (pointType?.pointColorsIsOn) {
             if (checkNegative) {
                 style.push(`color: ${hexToRgba(pointType.positiveColor)};`);
@@ -321,8 +410,9 @@
     }
 
     function copyScore() {
+        if (typeof app.tmpScore === 'undefined') app.tmpScore = [];
         app.tmpScore.length = 0;
-        app.tmpScore.push(score);
+        app.tmpScore.push(JSON.parse(JSON.stringify(score)));
         snackbarVariables.labelText = 'Copied to clipboard.';
         snackbarVariables.isOpen = true;
     }

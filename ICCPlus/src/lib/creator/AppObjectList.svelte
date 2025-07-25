@@ -14,7 +14,7 @@
                         <Header>
                             <div class:panel--active={item.open}>{`${i + 1}. ${item.debugTitle} ${item.title} / ${item.id}`}</div>
                             {#snippet icon()}
-                                <IconButton onclick={(e) => {e.preventDefault(); e.stopPropagation(); scrollToObject(item.id)}} size="mini">
+                                <IconButton onclickcapture={(e) => {e.preventDefault(); e.stopPropagation(); scrollToObject(item.id)}} size="mini">
                                     <Icon class="mdi mdi-target"></Icon>
                                 </IconButton>
                             {/snippet}

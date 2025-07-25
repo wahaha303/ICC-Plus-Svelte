@@ -20,13 +20,13 @@
 {:else if required.type === 'pointCompare'}
     <div class="toolbar d-row justify-center">
         <Wrapper text="Add Point Type">
-            <IconButton onclick={() => {
+            <IconButton onclickcapture={() => {
                 if (typeof required.more === 'undefined') required.more = [];
                 required.more.push({operator: '1', type: 'id', id: ''});
             }} ><i class="mdi mdi-alphabetical-variant"></i></IconButton>
         </Wrapper>
         <Wrapper text="Add Number">
-            <IconButton onclick={() => {
+            <IconButton onclickcapture={() => {
                 if (typeof required.more === 'undefined') required.more = [];
                 required.more.push({operator: '1', type: 'points', points: 0});
             }} ><i class="mdi mdi-numeric"></i></IconButton>
@@ -76,12 +76,12 @@
                         textfield$variant="filled"
                         class="w-100"
                     />
-                    <IconButton onclick={() => {
+                    <IconButton onclickcapture={() => {
                         if (required.more) required.more.splice(i, 1);
                     }} class="floating-button"><i class="mdi mdi-minus-circle-outline"></i></IconButton>
                 {:else if more.type === 'points'}
                     <Textfield bind:value={more.points} label="Value" type="number" variant="filled" />
-                    <IconButton onclick={() => {
+                    <IconButton onclickcapture={() => {
                         if (required.more) required.more.splice(i, 1);
                     }} class="floating-button" style="right: 35px"><i class="mdi mdi-minus-circle-outline"></i></IconButton>
                 {/if}
@@ -90,10 +90,10 @@
     {/if}
 {:else if required.type === 'or'}
     <div class="toolbar d-row justify-space-between">
-        <IconButton onclick={() => {
+        <IconButton onclickcapture={() => {
             if (required.orRequired.length > 1) required.orRequired.pop();
         }} ><i class="mdi mdi-minus"></i></IconButton>
-        <IconButton onclick={() => {
+        <IconButton onclickcapture={() => {
             required.orRequired.push({req: ''});
         }} ><i class="mdi mdi-plus"></i></IconButton>
     </div>
@@ -126,10 +126,10 @@
     />
 {:else if required.type === 'word'}
     <div class="toolbar d-row justify-space-between">
-        <IconButton onclick={() => {
+        <IconButton onclickcapture={() => {
             if (required.orRequired.length > 1) required.orRequired.pop();
         }} ><i class="mdi mdi-minus"></i></IconButton>
-        <IconButton onclick={() => {
+        <IconButton onclickcapture={() => {
             required.orRequired.push({req: ''});
         }} ><i class="mdi mdi-plus"></i></IconButton>
     </div>
