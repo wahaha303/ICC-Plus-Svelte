@@ -318,7 +318,7 @@
         let suffix = rowImageStyle.rowImgBorderRadiusIsPixels ? 'px' : '%';
         let styles = [];
         
-        styles.push(`width: ${rowImageStyle.rowImageWidth}%; margin-top: ${rowImageStyle.rowImageMarginTop}%; margin-bottoom: ${rowImageStyle.rowImageMarginBottom}%;`);
+        styles.push(`width: ${rowImageStyle.rowImageWidth}%; margin-top: ${rowImageStyle.rowImageMarginTop}%; margin-bottom: ${rowImageStyle.rowImageMarginBottom}%;`);
         styles.push(`border-radius: ${rowImageStyle.rowImgBorderRadiusTopLeft}${suffix} ${rowImageStyle.rowImgBorderRadiusTopRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomLeft}${suffix};`);
         if (rowImageStyle.rowImgOverflowIsOn) {
             styles.push(`overflow: hidden;`);

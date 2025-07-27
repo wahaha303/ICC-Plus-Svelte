@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.2.2';
+export const appVersion = '2.2.3';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5835,14 +5835,6 @@ export function initializeApp(tempApp: any) {
                             if (typeof kRow.rowDesignGroups[j] === 'object') kRow.rowDesignGroups[j] = kRow.rowDesignGroups[j].id;
                         }
                     }
-
-                    if (typeof kRow.groups !== 'undefined') {
-                        for (let j = kRow.groups.length - 1; j >= 0; j--) {
-                            if (!groupMap.has(kRow.groups[j])) {
-                                kRow.groups.splice(j, 1);
-                            }
-                        }
-                    }
                     
                     if (typeof kRow.objects !== 'undefined') {
                         for (let j = 0; j < kRow.objects.length; j++) {
@@ -6112,6 +6104,54 @@ export function initializeApp(tempApp: any) {
         for (let j = iGroup.rowElements.length - 1; j >= 0; j--) {
             if (!rowMap.has(iGroup.rowElements[j])) {
                 iGroup.rowElements.splice(j, 1);
+            }
+        }
+    }
+
+    for (let i = 0; i < app.rows.length; i++) {
+        const iRow = app.rows[i];
+
+        if (typeof iRow.groups !== 'undefined') {
+            for (let j = iRow.groups.length - 1; j >= 0; j--) {
+                if (!groupMap.has(iRow.groups[j])) {
+                    iRow.groups.splice(j, 1);
+                }
+            }
+        }
+
+        for (let j = 0; j < iRow.objects.length; j++) {
+            const iChoice = iRow.objects[j];
+
+            if (typeof iChoice.groups !== 'undefined') {
+                for (let k = iChoice.groups.length - 1; k >= 0; k--) {
+                    if (!groupMap.has(iChoice.groups[k])) {
+                        iChoice.groups.splice(k, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    for (let i = 0; i < app.backpack.length; i++) {
+        const iRow = app.backpack[i];
+
+        if (typeof iRow.groups !== 'undefined') {
+            for (let j = iRow.groups.length - 1; j >= 0; j--) {
+                if (!groupMap.has(iRow.groups[j])) {
+                    iRow.groups.splice(j, 1);
+                }
+            }
+        }
+
+        for (let j = 0; j < iRow.objects.length; j++) {
+            const iChoice = iRow.objects[j];
+
+            if (typeof iChoice.groups !== 'undefined') {
+                for (let k = iChoice.groups.length - 1; k >= 0; k--) {
+                    if (!groupMap.has(iChoice.groups[k])) {
+                        iChoice.groups.splice(k, 1);
+                    }
+                }
             }
         }
     }

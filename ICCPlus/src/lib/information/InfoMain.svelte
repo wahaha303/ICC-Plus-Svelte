@@ -172,8 +172,11 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.2.1 / ${getDate('2025-07-27T00:00:00Z')}`,
-        text: `<span style="color: green">Choice</span>
+        title: `v2.2.3 / ${getDate('2025-07-27T07:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where bottom margin of images was not applied properly.
+
+        <span style="color: green">Choice</span>
         - Fixed issue where label of score dropdown menu overlapped with content.
 
         <span style="color: green">Group</span>
