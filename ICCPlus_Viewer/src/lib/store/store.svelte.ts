@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.2.1';
+export const appVersion = '2.2.2';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5607,21 +5607,9 @@ export function initializeApp(tempApp: any) {
                         }
                     }
 
-                    for (let j = group.elements.length - 1; j >= 0; j--) {
-                        if (!choiceMap.has(group.elements[j])) {
-                            group.elements.splice(j, 1);
-                        }
-                    }
-
                     for (let j = 0; j < group.rowElements.length; j++) {
                         if (typeof group.rowElements[j] === 'object') {
                             group.rowElements[j] = group.rowElements[j].id;
-                        }
-                    }
-
-                    for (let j = group.rowElements.length - 1; j >= 0; j--) {
-                        if (!rowMap.has(group.rowElements[j])) {
-                            group.rowElements.splice(j, 1);
                         }
                     }
                 }
@@ -5749,6 +5737,18 @@ export function initializeApp(tempApp: any) {
         if (typeof iGroup.id === 'undefined' || iGroup.id === '') iGroup.id = generateGroupId(0, 4);
         iGroup.id = checkDupId(iGroup.id, groupMap);
         groupMap.set(iGroup.id, app.groups[i]);
+
+        for (let j = iGroup.elements.length - 1; j >= 0; j--) {
+            if (!choiceMap.has(iGroup.elements[j])) {
+                iGroup.elements.splice(j, 1);
+            }
+        }
+
+        for (let j = iGroup.rowElements.length - 1; j >= 0; j--) {
+            if (!rowMap.has(iGroup.rowElements[j])) {
+                iGroup.rowElements.splice(j, 1);
+            }
+        }
     }
 
     for (let i = 0; i < app.words.length; i++) {
