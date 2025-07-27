@@ -172,6 +172,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.2.1 / ${getDate('2025-07-27T00:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where label of score dropdown menu overlapped with content.
+
+        <span style="color: green">Group</span>
+        - Fixed issue where all groups removed when loading project.
+        `
+    }, {
+        open: false,
         title: `v2.2.0 / ${getDate('2025-07-25T17:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Added option to copy Row.
@@ -187,7 +196,7 @@
         - Fixed issue where list text wasn't showing in 'Scroll To Choice'.
         - Fixed issue where score update message was not displayed correctly.
 
-        <Span style="color: green">Group</span>
+        <span style="color: green">Group</span>
         - Added option to clone group.
         - Fixed issue where deleting group left empty group in choices.
 

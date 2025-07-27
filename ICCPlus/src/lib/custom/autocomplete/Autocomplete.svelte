@@ -141,9 +141,9 @@
 
 <script lang="ts">
   import type { ComponentProps, Snippet } from 'svelte';
-  import { setContext, tick } from 'svelte';
+  import { setContext } from 'svelte';
   import { on } from 'svelte/events';
-  import { Icon, type SmuiAttrs } from '@smui/common';
+  import { type SmuiAttrs } from '@smui/common';
   import type { ActionArray } from '@smui/common/internal';
   import {
     classMap,

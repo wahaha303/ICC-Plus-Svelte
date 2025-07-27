@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.2.0';
+export const appVersion = '2.2.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5877,12 +5877,6 @@ export function initializeApp(tempApp: any) {
                             if (typeof kObj.groups !== 'undefined') {
                                 for (let k = 0; k < kObj.groups.length; k++) {
                                     if (typeof kObj.groups[k] === 'object') kObj.groups[k] = kObj.groups[k].id;
-                                }
-
-                                for (let k = kObj.groups.length - 1; k >= 0; k--) {
-                                    if (!groupMap.has(kObj.groups[k])) {
-                                        kObj.groups.splice(k, 1);
-                                    }
                                 }
                             }
 
