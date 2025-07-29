@@ -62,6 +62,14 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
+                                    <Switch bind:checked={() => app.useChoiceEditBtn ?? false, (e) => app.useChoiceEditBtn = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Enable Edit Button for Choice
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
                                     <Switch bind:checked={() => app.checkDeleteRow?? false, (e) => app.checkDeleteRow = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Confirm Before Deleting a Row
@@ -280,14 +288,6 @@
                                     <Switch bind:checked={() => useAltMenu.value ?? false, (e) => useAltMenu.value = e} onSMUISwitchChange={toggleAltMenu} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Show Menu on Top
-                                    {/snippet}
-                                </FormField>
-                            </div>
-                            <div class="col-12">
-                                <FormField>
-                                    <Switch bind:checked={() => app.useChoiceEditBtn ?? false, (e) => app.useChoiceEditBtn = e} color="secondary" class="switch-scale" />
-                                    {#snippet label()}
-                                        Show Edit Button for Choice
                                     {/snippet}
                                 </FormField>
                             </div>

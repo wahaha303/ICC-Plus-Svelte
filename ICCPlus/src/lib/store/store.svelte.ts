@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.2.3';
+export const appVersion = '2.2.4';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2291,6 +2291,15 @@ function deleteDiscount(score: Score) {
     delete score.discountScore;
     delete score.discountScoreCal;
     delete score.notStackableDiscount;
+    delete score.discountShow;
+    delete score.discountBeforeText;
+    delete score.discountAfterText;
+    delete score.isChangeDiscount;
+    delete score.tmpDisScore;
+    delete score.appliedDiscount;
+    delete score.replaceText;
+    delete score.hideDisValue;
+    delete score.hideDisIcon;
 };
 export function deselectDiscount(localChoice: Choice, score: Score) {
     const point = pointTypeMap.get(score.id);
@@ -2394,6 +2403,9 @@ export function deselectDiscount(localChoice: Choice, score: Score) {
                                 if (score.tmpDiscount[tmpNum].showDiscount) {
                                     score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
                                     score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
+                                    score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
+                                    score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
+                                    score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
                                 }
                                 score.tmpDiscount.splice(tmpNum, 1);
                                 score.notStackableDiscount = true;
@@ -2433,9 +2445,15 @@ export function deselectDiscount(localChoice: Choice, score: Score) {
                                 if (score.tmpDiscount[tmpNum].showDiscount) {
                                     score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
                                     score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
+                                    score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
+                                    score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
+                                    score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
                                 } else {
                                     score.discountBeforeText = '';
                                     score.discountAfterText = '';
+                                    score.replaceText = false;
+                                    score.hideDisValue = false;
+                                    score.hideDisIcon = false;
                                 }
                             }
 
@@ -2478,9 +2496,15 @@ export function deselectDiscount(localChoice: Choice, score: Score) {
                             if (score.tmpDiscount[tmpNum].showDiscount) {
                                 score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
                                 score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
+                                score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
+                                score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
+                                score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
                             } else {
                                 score.discountBeforeText = '';
                                 score.discountAfterText = '';
+                                score.replaceText = false;
+                                score.hideDisValue = false;
+                                score.hideDisIcon = false;
                             }
                         } else {
                             score.discountBeforeText = score.discountTextB?.join('');
@@ -2550,13 +2574,19 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                             discountedFrom: score.discountedFrom,
                             calcValue: typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.discountScore,
                             discountedValue: score.discountScore,
-                            showDiscount: false
+                            showDiscount: false,
+                            replaceText: false,
+                            hideValue: false,
+                            hideIcon: false
                         };
 
                         if (score.discountShow) {
                             aDiscount.showDiscount = true;
                             aDiscount.beforeText = localChoice.discountBeforeText;
                             aDiscount.afterText = localChoice.discountAfterText;
+                            if (localChoice.replaceScoreText) aDiscount.replaceText = true;
+                            if (localChoice.hideScoreValue) aDiscount.hideValue = true;
+                            if (localChoice.hideScoreIcon) aDiscount.hideIcon = true;
                         }
 
                         score.discountScore = discountVal;
@@ -2596,7 +2626,10 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                                 discountedFrom: discountedFrom,
                                 calcValue: discountCal,
                                 discountedValue: discountVal,
-                                showDiscount: localChoice.discountShow || false
+                                showDiscount: localChoice.discountShow || false,
+                                replaceText: localChoice.replaceScoreText || false,
+                                hideValue: localChoice.hideScoreValue || false,
+                                hideIcon: localChoice.hideScoreIcon || false
                             };
                             score.tmpDiscount.push(aDiscount);
                         }
@@ -2665,6 +2698,9 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                             aDiscount.showDiscount = true;
                             aDiscount.beforeText = score.discountBeforeText;
                             aDiscount.afterText = score.discountAfterText;
+                            aDiscount.replaceText = score.replaceText || false;
+                            aDiscount.hideValue = score.hideDisValue || false;
+                            aDiscount.hideIcon = score.hideDisIcon || false;
                         }
                         
                         score.discountScore = discountVal;
@@ -2674,19 +2710,28 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                         score.discountAfterText = localChoice.discountAfterText;
                         score.discountedFrom = [localChoice.id];
                         score.notStackableDiscount = true;
+                        score.replaceText = localChoice.replaceScoreText || false;
+                        score.hideDisValue = localChoice.hideScoreValue || false;
+                        score.hideDisIcon = localChoice.hideScoreIcon || false;
                     } else {
                         aDiscount = {
                             isStackable: localChoice.stackableDiscount || false,
                             discountedFrom: [localChoice.id],
                             calcValue: discountCal,
                             discountedValue: discountVal,
-                            showDiscount: localChoice.discountShow || false
+                            showDiscount: localChoice.discountShow || false,
+                            replaceText: score.replaceText || false,
+                            hideValue: score.hideDisValue || false,
+                            hideIcon: score.hideDisIcon || false
                         }
 
                         if (localChoice.discountShow) {
                             aDiscount.showDiscount = true;
                             aDiscount.beforeText = localChoice.discountBeforeText;
                             aDiscount.afterText = localChoice.discountAfterText;
+                            if (localChoice.replaceScoreText) aDiscount.replaceText = true;
+                            if (localChoice.hideScoreValue) aDiscount.hideValue = true;
+                            if (localChoice.hideScoreIcon) aDiscount.hideIcon = true;
                         }
                     }
                     score.tmpDiscount.push(aDiscount);
@@ -2698,6 +2743,9 @@ export function selectDiscount(localChoice: Choice, score: Score) {
                     score.discountShow = localChoice.discountShow;
                     score.discountBeforeText = localChoice.discountBeforeText;
                     score.discountAfterText = localChoice.discountAfterText;
+                    score.replaceText = localChoice.replaceScoreText || false;
+                    score.hideDisValue = localChoice.hideScoreValue || false;
+                    score.hideDisIcon = localChoice.hideScoreIcon || false;
                 }
                 if (!Array.isArray(score.discountedFrom)) score.discountedFrom = [];
                 score.discountIsOn = true;
@@ -2714,7 +2762,6 @@ export function selectDiscount(localChoice: Choice, score: Score) {
         }
     }
 };
-
 function updateDiscountTexts(localChoice: Choice, score: Score) {
     if (typeof score.discountTextA === 'undefined') score.discountTextA = [];
     if (typeof score.discountTextB === 'undefined') score.discountTextB = [];
@@ -2747,6 +2794,9 @@ function updateDiscountTexts(localChoice: Choice, score: Score) {
             score.discountTextB.push(localChoice.discountBeforeText);
         }
     }
+    score.replaceText = localChoice.replaceScoreText || false;
+    score.hideDisValue = localChoice.hideScoreValue || false;
+    score.hideDisIcon = localChoice.hideScoreIcon || false;
 };
 export function checkPoints(localChoice: Choice, isSel: boolean) {
     let isPositve = true;
@@ -2989,7 +3039,6 @@ export function cleanActivated() {
                 delete cChoice.activatedRandomMul;
                 delete cChoice.numDiscountChoices;
                 
-
                 if (cChoice.addToAllowChoice && typeof cChoice.idOfAllowChoice !== 'undefined' && typeof cChoice.numbAddToAllowChoice !== 'undefined') {
                     for (let i = 0; i < cChoice.idOfAllowChoice.length; i++) {
                         const aRow = rowMap.get(cChoice.idOfAllowChoice[i]);
@@ -3129,7 +3178,7 @@ export function cleanActivated() {
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
             cChoice.index = j;
-            cChoice.isEditModeOn = false;
+            delete cChoice.isEditModeOn;
 
             if (typeof cChoice.defaultTemplate !== 'undefined') {
                 cChoice.template = cChoice.defaultTemplate
@@ -3157,7 +3206,6 @@ export function cleanActivated() {
                     delete cScore.isActive;
                 }
                 deleteDiscount(cScore);
-                delete cScore.appliedDiscount;
             }
         }
     }
@@ -3172,7 +3220,7 @@ export function cleanActivated() {
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
             cChoice.index = j;
-            cChoice.isEditModeOn = false;
+            delete cChoice.isEditModeOn;
 
             if (typeof cChoice.defaultTemplate !== 'undefined') {
                 cChoice.template = cChoice.defaultTemplate
@@ -3200,7 +3248,6 @@ export function cleanActivated() {
                     delete cScore.isActive;
                 }
                 deleteDiscount(cScore);
-                delete cScore.appliedDiscount;
             }
         }
     }

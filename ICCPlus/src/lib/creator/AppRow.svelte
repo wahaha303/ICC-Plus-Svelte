@@ -261,9 +261,9 @@
         </Card>
     {:else if isEnabled}
         <div class="row gx-0 row-{row.id}" style={row.title !== '' ? rowBackground : ''}>
-            {#if row.template >= 4 || row.template === 1 || windowWidth <= 960}
+            {#if row.template >= 4 || row.template === 1 || windowWidth <= 1280}
                 <div class="col-12 m-0 p-0">
-                    {#if (row.template === 1 || windowWidth <= 960)}
+                    {#if (row.template === 1 || windowWidth <= 1280)}
                         {#if row.isButtonRow}
                             <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>

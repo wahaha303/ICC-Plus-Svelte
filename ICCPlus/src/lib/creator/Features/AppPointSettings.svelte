@@ -22,7 +22,7 @@
                         }
                     }} color="secondary" class="switch-scale" />
                     {#snippet label()}
-                        Set colors for positive or negative in the Choices.
+                        Set colors for positive or negative in the choice.
                     {/snippet}
                 </FormField>
             </div>
@@ -53,7 +53,7 @@
                         }
                     }} color="secondary" class="switch-scale" />
                     {#snippet label()}
-                        Set colors for positive or negative in the Point-Bar.
+                        Set colors for positive or negative in the point bar.
                     {/snippet}
                 </FormField>
             </div>
@@ -102,7 +102,23 @@
                             }
                         }} color="secondary" class="switch-scale" />
                         {#snippet label()}
-                            Use seperate Icon for negative.
+                            Use seperate icon for negative.
+                        {/snippet}
+                    </FormField>
+                </div>
+                <div class="col-12 ps-3">
+                    <FormField>
+                        <Switch bind:checked={() => currentPoint.useSeperatePosition ?? false, (e) => currentPoint.useSeperatePosition = e} onSMUISwitchChange={() => {
+                            if (!currentPoint.useSeperatePosition) {
+                                delete currentPoint.useSeperatePosition;
+                                delete currentPoint.imageOnSideInChoice;
+                                delete currentPoint.imageSidePlacementInChoice;
+                                delete currentPoint.negativeImageOnSideInChoice;
+                                delete currentPoint.negativeImageSidePlacementInChoice;
+                            }
+                        }} color="secondary" class="switch-scale" />
+                        {#snippet label()}
+                            Use seperate icon position for choice.
                         {/snippet}
                     </FormField>
                 </div>
@@ -132,9 +148,23 @@
                         <FormField>
                             <Switch bind:checked={() => currentPoint.imageSidePlacement ?? false, (e) => currentPoint.imageSidePlacement = e} color="secondary" class="switch-scale" />
                             {#snippet label()}
-                                Image is Before/After text.
+                                Image is on Before/After text.
                             {/snippet}
                         </FormField>
+                        {#if currentPoint.useSeperatePosition}
+                            <FormField>
+                                <Switch bind:checked={() => currentPoint.imageOnSideInChoice ?? false, (e) => currentPoint.imageOnSideInChoice = e} color="secondary" class="switch-scale" />
+                                {#snippet label()}
+                                    Image is on Left/Right side. (C)
+                                {/snippet}
+                            </FormField>
+                            <FormField>
+                                <Switch bind:checked={() => currentPoint.imageSidePlacementInChoice ?? false, (e) => currentPoint.imageSidePlacementInChoice = e} color="secondary" class="switch-scale" />
+                                {#snippet label()}
+                                    Image is on Before/After text. (C)
+                                {/snippet}
+                            </FormField>
+                        {/if}
                         <Textfield bind:value={() => currentPoint.iconWidth ?? 0, (e) => currentPoint.iconWidth = e} onchange={() => currentPoint.iconWidth = Math.max(currentPoint.iconWidth || 0, 0)} input$min={0} label="Image Width" type="number" variant="filled" suffix="px" />
                         <Textfield bind:value={() => currentPoint.iconHeight ?? 0, (e) => currentPoint.iconHeight = e} onchange={() => currentPoint.iconHeight = Math.max(currentPoint.iconHeight || 0, 0)} input$min={0} label="Image Height" type="number" variant="filled" suffix="px" />
                     </div>
@@ -164,9 +194,23 @@
                             <FormField>
                                 <Switch bind:checked={() => currentPoint.negativeImageSidePlacement ?? false, (e) => currentPoint.negativeImageSidePlacement = e} color="secondary" class="switch-scale" />
                                 {#snippet label()}
-                                    Image is Before/After text.
+                                    Image is on Before/After text.
                                 {/snippet}
                             </FormField>
+                            {#if currentPoint.useSeperatePosition}
+                                <FormField>
+                                    <Switch bind:checked={() => currentPoint.negativeImageOnSideInChoice ?? false, (e) => currentPoint.negativeImageOnSideInChoice = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Image is on Left/Right side. (C)
+                                    {/snippet}
+                                </FormField>
+                                <FormField>
+                                    <Switch bind:checked={() => currentPoint.negativeImageSidePlacementInChoice ?? false, (e) => currentPoint.negativeImageSidePlacementInChoice = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Image is on Before/After text. (C)
+                                    {/snippet}
+                                </FormField>
+                            {/if}
                             <Textfield bind:value={() => currentPoint.negativeIconWidth ?? 0, (e) => currentPoint.negativeIconWidth = e} onchange={() => currentPoint.negativeIconWidth = Math.max(currentPoint.negativeIconWidth || 0, 0)} input$min={0} label="Image Width" type="number" variant="filled" suffix="px" />
                             <Textfield bind:value={() => currentPoint.negativeIconHeight ?? 0, (e) => currentPoint.negativeIconHeight = e} onchange={() => currentPoint.negativeIconHeight = Math.max(currentPoint.negativeIconHeight || 0, 0)} input$min={0} label="Image Height" type="number" variant="filled" suffix="px" />
                         </div>

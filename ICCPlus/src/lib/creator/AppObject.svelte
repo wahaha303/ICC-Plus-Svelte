@@ -3,7 +3,7 @@
         <div bind:clientWidth={width} class:position-relative={app.useChoiceEditBtn && !row.isEditModeOn && choice.isEditModeOn} class="container-fluid gx-0">
             {#if app.useChoiceEditBtn && !row.isEditModeOn && choice.isEditModeOn}
                 <div class="choice-edit-button__edit-mode">
-                    <IconButton onclickcapture={() => choice.isEditModeOn = false} size="button"><i class="mdi mdi-wrench"></i></IconButton>
+                    <IconButton onclickcapture={() => delete choice.isEditModeOn} size="button"><i class="mdi mdi-wrench"></i></IconButton>
                 </div>
             {/if}
             <Card class="mx-1 my-2">
@@ -443,6 +443,12 @@
                                                         delete choice.discountPointTypes;
                                                         delete choice.discountOperator;
                                                         delete choice.discountValue;
+                                                        delete choice.discountTextDuplicated;
+                                                        delete choice.replaceScoreText;
+                                                        delete choice.hideScoreValue;
+                                                        delete choice.hideScoreIcon;
+                                                        delete choice.useDiscountCount;
+                                                        delete choice.discountCount;
                                                     }
                                                 }} />
                                                 {#snippet label()}
@@ -482,6 +488,10 @@
                                                             delete choice.discountShow;
                                                             delete choice.discountBeforeText;
                                                             delete choice.discountAfterText;
+                                                            delete choice.discountTextDuplicated;
+                                                            delete choice.replaceScoreText;
+                                                            delete choice.hideScoreValue;
+                                                            delete choice.hideScoreIcon;
                                                         }
                                                     }} />
                                                     {#snippet label()}
@@ -497,12 +507,56 @@
                                                             Display Repeated Text Only Once
                                                         {/snippet}
                                                     </FormField>
-                                                    <div class={col6}>
-                                                        <Textfield bind:value={() => choice.discountBeforeText ?? '', (e) => choice.discountBeforeText = e} label="Added to Text Before" variant="filled" />
-                                                    </div>
-                                                    <div class={col6}>
-                                                        <Textfield bind:value={() => choice.discountAfterText ?? '', (e) => choice.discountAfterText = e} label="Added to Text After" variant="filled" />
-                                                    </div>
+                                                    <FormField class="col-12 m-1 p-0">
+                                                        <Checkbox bind:checked={() => choice.replaceScoreText ?? false, (e) => choice.replaceScoreText = e} onchange={() => {
+                                                            if (!choice.replaceScoreText) {                                                                
+                                                                delete choice.discountTextDuplicated;
+                                                                delete choice.replaceScoreText;
+                                                                delete choice.hideScoreValue;
+                                                                delete choice.hideScoreIcon;
+                                                            } else {
+                                                                choice.discountTextDuplicated = true;
+                                                            }
+                                                        }} />
+                                                        {#snippet label()}
+                                                            Replace Score Text Completely
+                                                        {/snippet}
+                                                    </FormField>
+                                                    {#if choice.replaceScoreText}
+                                                        <FormField class="col-12 m-1 p-0">
+                                                            <Checkbox bind:checked={() => choice.hideScoreValue ?? false, (e) => choice.hideScoreValue = e} onchange={() => {
+                                                                if (!choice.hideScoreValue) {
+                                                                    delete choice.hideScoreValue;
+                                                                }
+                                                            }} />
+                                                            {#snippet label()}
+                                                                Hide Score Value
+                                                            {/snippet}
+                                                        </FormField>
+                                                        <FormField class="col-12 m-1 p-0">
+                                                            <Checkbox bind:checked={() => choice.hideScoreIcon ?? false, (e) => choice.hideScoreIcon = e} onchange={() => {
+                                                                if (!choice.hideScoreIcon) {
+                                                                    delete choice.hideScoreIcon;
+                                                                }
+                                                            }} />
+                                                            {#snippet label()}
+                                                                Hide Score Icon
+                                                            {/snippet}
+                                                        </FormField>
+                                                        <div class={col6}>
+                                                            <Textfield bind:value={() => choice.discountBeforeText ?? '', (e) => choice.discountBeforeText = e} label="Text Before" variant="filled" />
+                                                        </div>
+                                                        <div class={col6}>
+                                                            <Textfield bind:value={() => choice.discountAfterText ?? '', (e) => choice.discountAfterText = e} label="Text After" variant="filled" />
+                                                        </div>
+                                                    {:else}
+                                                        <div class={col6}>
+                                                            <Textfield bind:value={() => choice.discountBeforeText ?? '', (e) => choice.discountBeforeText = e} label="Added to Text Before" variant="filled" />
+                                                        </div>
+                                                        <div class={col6}>
+                                                            <Textfield bind:value={() => choice.discountAfterText ?? '', (e) => choice.discountAfterText = e} label="Added to Text After" variant="filled" />
+                                                        </div>
+                                                    {/if}
                                                 {/if}
                                                 <FormField class="col-12 m-1 p-0">
                                                     <Checkbox bind:checked={() => choice.useDiscountCount ?? false, (e) => choice.useDiscountCount = e} onchange={() => {
@@ -1261,8 +1315,8 @@
     </div>
 {:else if !(bCreatorMode && row.isEditModeOn) && (isEnabled || !filterStyle.reqFilterVisibleIsOn)}
     <div class={objectWidthClass()}>
-        <span class:fullHeight={fullHeight} class:position-relative={app.useChoiceEditBtn} class="d-flex">
-            {#if app.useChoiceEditBtn}
+        <span class:fullHeight={fullHeight} class:position-relative={app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow} class="d-flex">
+            {#if app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow}
                 <div class="choice-edit-button">
                     <IconButton onclickcapture={() => choice.isEditModeOn = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
                 </div>
@@ -1270,14 +1324,14 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e)}>
-                {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate}
+                {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
                     <span class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
                             <div class="col-12" style={scoreText}>
                                 {@html DOMPurify.sanitize(replaceText(oriRow.title), sanitizeArg)}
                             </div>
                         {/if}
-                        {#if (choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
+                        {#if (choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
                             {#if choice.imageSourceTooltip}
                                 <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
@@ -3654,7 +3708,7 @@
                         if (thisChoice.isSelectableMultiple) {
                             let counter = thisChoice.multipleUseVariable;
                             for (let j = 0; j < counter; j++) {
-                                activateObject(thisChoice, localRow);
+                                selectedOneLess(thisChoice, localRow);
                             }
                         } else {
                             activateObject(thisChoice, localRow);
@@ -4363,7 +4417,7 @@
             }
         }
 
-        if (reqCheck && localChoice.isMultipleUseVariable) {
+        if (reqCheck && localChoice.isMultipleUseVariable && localChoice.multipleUseVariable === 0) {
             if (origRow.allowedChoices > 0 && origRow.currentChoices >= origRow.allowedChoices) {
                 let count = 0;
                 for (let i = 0; i < origRow.objects.length; i++) {

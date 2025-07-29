@@ -422,7 +422,9 @@
                 a.download = filename;
                 a.click();
 
-                URL.revokeObjectURL(url);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                snackbarVariables.labelText = `The latest viewer version is ${appVersion}.`;
+                snackbarVariables.isOpen = true;
             });
         } catch (error) {
             snackbarVariables.labelText = 'Failed to export project.';
@@ -492,7 +494,9 @@
         a.download = filename;
         a.click();
 
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        snackbarVariables.labelText = `The latest viewer version is ${appVersion}.`;
+        snackbarVariables.isOpen = true;
     }
 
     function saveApp(index: number) {

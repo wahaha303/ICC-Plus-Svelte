@@ -172,7 +172,24 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.2.3 / ${getDate('2025-07-27T07:00:00Z')}`,
+        title: `v2.2.4 / ${getDate('2025-07-29T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Added option to hide score value in discount feature.
+        - Added option to hide score icon in discount feature.
+        - Added option to set icon position for choices.
+        - Fixed issue where multiple select choice did not work properly when allowed choices set.
+        - Fixed issue where discount data was not properly initialized.
+        - Fixed issue where image template did not switch to image top on small screens.
+
+        <span style="color: green">Global Settings</span>
+        - Moved option to enable Choice Edit Button from Display tab to General tab.
+
+        <span style="color: green">Viewer Settings</span>
+        - Added option to set backpack width.
+        `
+    }, {
+        open: false,
+        title: `v2.2.1 ~ v2.2.3 / ${getDate('2025-07-27T07:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where bottom margin of images was not applied properly.
 

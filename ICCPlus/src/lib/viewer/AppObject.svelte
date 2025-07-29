@@ -4,14 +4,14 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclick={(e) => activateObject(choice, row, e)}>
-                {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate}
+                {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
                     <span class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
                             <div class="col-12" style={scoreText}>
                                 {@html DOMPurify.sanitize(replaceText(oriRow.title), sanitizeArg)}
                             </div>
                         {/if}
-                        {#if (choice.template === 1 || windowWidth <= 960 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
+                        {#if (choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
                             {#if choice.imageSourceTooltip}
                                 <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
@@ -1804,7 +1804,7 @@
                         if (thisChoice.isSelectableMultiple) {
                             let counter = thisChoice.multipleUseVariable;
                             for (let j = 0; j < counter; j++) {
-                                activateObject(thisChoice, localRow);
+                                selectedOneLess(thisChoice, localRow);
                             }
                         } else {
                             activateObject(thisChoice, localRow);
@@ -2478,7 +2478,7 @@
             }
         }
 
-        if (reqCheck && localChoice.isMultipleUseVariable) {
+        if (reqCheck && localChoice.isMultipleUseVariable && localChoice.multipleUseVariable === 0) {
             if (origRow.allowedChoices > 0 && origRow.currentChoices >= origRow.allowedChoices) {
                 let count = 0;
                 for (let i = 0; i < origRow.objects.length; i++) {

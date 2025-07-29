@@ -150,6 +150,13 @@
                                     {/snippet}
                                 </FormField>
                             </div>
+                            <div class="col-12">
+                                <Textfield bind:value={() => app.styling.backPackWidth || 1200, (e) => app.styling.backPackWidth = e} label="Backpack Width" type="number" suffix="px" variant="standard" input$min="0" onchange={() => {
+                                    if (typeof app.styling.backPackWidth !== 'undefined' && app.styling.backPackWidth < 0) {
+                                        app.styling.backPackWidth = 0;
+                                    }
+                                }} />
+                            </div>
                         </div>
                     </div>
                 </PaperContent>

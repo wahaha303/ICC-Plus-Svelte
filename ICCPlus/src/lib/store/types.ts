@@ -385,7 +385,10 @@ export type Discount = {
     discountedValue: number,
     showDiscount: boolean,
     beforeText?: string,
-    afterText?: string
+    afterText?: string,
+    replaceText?: boolean,
+    hideValue?: boolean,
+    hideIcon?: boolean
 };
 export type Score = {
     [key: string]: any,
@@ -427,7 +430,10 @@ export type Score = {
     discountTextB?: string[],
     notStackableDiscount?: boolean,
     multiplyByTimes?: boolean,
-    appliedDiscount?: boolean
+    appliedDiscount?: boolean,
+    replaceText?: boolean,
+    hideDisValue?: boolean,
+    hideDisIcon?: boolean
 }
 export type Choice = {
     [key: string]: any,
@@ -488,6 +494,9 @@ export type Choice = {
     discountLowLimitIsOn?: boolean,
     discountLowLimit?: number,
     discountShow?: boolean,
+    replaceScoreText?: boolean,
+    hideScoreValue?: boolean,
+    hideScoreIcon?: boolean,
     discountBeforeText?: string,
     discountAfterText?: string,
     isDisChoices?: boolean,
@@ -691,15 +700,20 @@ export type PointType = {
     positiveColor?: string,
     negativeColor?: string,
     iconIsOn?: boolean,
+    useSeperatePosition?: boolean,
     image?: string,
     imageOnSide?: boolean,
     imageSidePlacement?: boolean,
+    imageOnSideInChoice?: boolean,
+    imageSidePlacementInChoice?: boolean,
     iconWidth?: number,
     iconHeight?: number,
     negativeIconIsOn?: boolean,
     negativeImage?: string,
     negativeImageOnSide?: boolean,
     negativeImageSidePlacement?: boolean,
+    negativeImageOnSideInChoice?: boolean,
+    negativeImageSidePlacementInChoice?: boolean,
     negativeIconWidth?: number,
     negativeIconHeight?: number,
     pointPrivateColorIsOn?: boolean,

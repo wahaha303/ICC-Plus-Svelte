@@ -1,9 +1,9 @@
 
 {#if app.showAllAddons > 0 || addon.showAddon || checkRequirements(addon.requireds)}
     <div class="text-center" style={addonBackground}>
-        {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 960}
+        {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
             <span class="m-0">
-                {#if (addon.template === 1 || windowWidth <= 960) && addon.image && !row?.addonImageRemoved}
+                {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}

@@ -43,8 +43,9 @@
         bind:value={text}
         {...prefixFilter(restProps, 'textfield$')}
         onclick={(e) => {
-          if ((e.target as HTMLElement)?.classList?.contains('mdc-text-field__input')) {
-            isOpen = !isOpen;
+          const target = e.target as HTMLElement;
+          if (target) {
+            if (target.classList.contains('mdc-text-field__input')) isOpen = !isOpen;
           }
         }}
       />
@@ -143,7 +144,7 @@
   import type { ComponentProps, Snippet } from 'svelte';
   import { setContext } from 'svelte';
   import { on } from 'svelte/events';
-  import { type SmuiAttrs } from '@smui/common';
+  import type { SmuiAttrs } from '@smui/common';
   import type { ActionArray } from '@smui/common/internal';
   import {
     classMap,
@@ -347,7 +348,7 @@
   let focusedIndex = $state(-1);
   let focusedItem: SMUIListItemAccessor | undefined = $state();
   let menuId: string =
-    typeof restProps['menu$id'] !== 'undefined' ? restProps['menu$id'] : 'SMUI-autocomplete-' + counter++ + '-menu';
+    restProps['menu$id'] ?? 'SMUI-autocomplete-' + counter++ + '-menu';
   let isOpen = $state(false);
   let visibleCounter = $state(24);
   let isAllSelected = $state(false);
