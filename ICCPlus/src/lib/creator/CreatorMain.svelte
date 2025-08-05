@@ -244,7 +244,7 @@
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
@@ -494,6 +494,7 @@
             cChoice.index = i;
             cChoice.isActive = false;
             delete cChoice.forcedActivated;
+            delete cChoice.appliedDisChoices;
 
             for (let j = 0; j < cChoice.scores.length; j++) {
                 const score = cChoice.scores[j];
@@ -502,22 +503,7 @@
                 scoreSet.add(score.idx);
                 delete score.isActive;
                 delete score.setValue;
-                delete score.discountIsOn;
-                delete score.discountShow;
-                delete score.discountBeforeText;
-                delete score.discountAfterText;
-                delete score.discountScore;
-                delete score.discountScoreCal;
-                delete score.isChangeDiscount;
-                delete score.tmpDisScore;
-                delete score.tmpDiscount;
-                delete score.discountedFrom;
-                delete score.dupTextA;
-                delete score.dupTextB;
-                delete score.discountTextA;
-                delete score.discountTextB;
-                delete score.notStackableDiscount;
-                delete score.appliedDiscount;
+                deleteDiscount(score);
             }
 
             for (let j = 0; j < cChoice.addons.length; j++) {
@@ -684,6 +670,7 @@
                 cChoice.index = i;
                 cChoice.isActive = false;
                 delete cChoice.forcedActivated;
+                delete cChoice.appliedDisChoices;
 
                 for (let j = 0; j < cChoice.scores.length; j++) {
                     const score = cChoice.scores[j];
@@ -692,22 +679,7 @@
                     scoreSet.add(score.idx);
                     delete score.isActive;
                     delete score.setValue;
-                    delete score.discountIsOn;
-                    delete score.discountShow;
-                    delete score.discountBeforeText;
-                    delete score.discountAfterText;
-                    delete score.discountScore;
-                    delete score.discountScoreCal;
-                    delete score.isChangeDiscount;
-                    delete score.tmpDisScore;
-                    delete score.tmpDiscount;
-                    delete score.discountedFrom;
-                    delete score.dupTextA;
-                    delete score.dupTextB;
-                    delete score.discountTextA;
-                    delete score.discountTextB;
-                    delete score.notStackableDiscount;
-                    delete score.appliedDiscount;
+                    deleteDiscount(score);
                 }
 
                 for (let j = 0; j < cChoice.addons.length; j++) {

@@ -84,6 +84,14 @@
                                     {/snippet}
                                 </FormField>
                             </div>
+                            <div class="col-12">
+                                <FormField>
+                                    <Switch bind:checked={() => app.checkSelectAll?? false, (e) => app.checkSelectAll = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Confirm Before Select/Deselect All
+                                    {/snippet}
+                                </FormField>
+                            </div>
                         </div>
                     </div>
                 </PaperContent>

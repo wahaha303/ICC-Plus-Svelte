@@ -429,6 +429,7 @@
                                                     if (choice.discountOther) {
                                                         choice.discountGroups = [];
                                                         choice.discountPointTypes = [];
+                                                        choice.discountValue = 0;
                                                     } else {
                                                         delete choice.discountOther;
                                                         delete choice.discountLowLimitIsOn;
@@ -509,8 +510,7 @@
                                                     </FormField>
                                                     <FormField class="col-12 m-1 p-0">
                                                         <Checkbox bind:checked={() => choice.replaceScoreText ?? false, (e) => choice.replaceScoreText = e} onchange={() => {
-                                                            if (!choice.replaceScoreText) {                                                                
-                                                                delete choice.discountTextDuplicated;
+                                                            if (!choice.replaceScoreText) {
                                                                 delete choice.replaceScoreText;
                                                                 delete choice.hideScoreValue;
                                                                 delete choice.hideScoreIcon;
@@ -1323,7 +1323,7 @@
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e)}>
+            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e)} oncontextmenu={() => console.log(choice)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
                     <span class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
@@ -1386,7 +1386,7 @@
                                 {/if}
                             {/if}
                         </span>
-                        <div class="d-column pa-0 col w-100 {addonJustify}">
+                        <div class="d-column p-0 col w-100 {addonJustify}">
                             {#each choice.addons as addon}
                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                             {/each}
@@ -1438,7 +1438,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column pa-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1450,7 +1450,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column pa-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1493,7 +1493,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column pa-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1514,7 +1514,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column pa-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100 {addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1564,7 +1564,7 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
-	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard } from '$lib/store/store.svelte';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount } from '$lib/store/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
@@ -2053,6 +2053,7 @@
             app.tmpScore.length = 0;
             for (let i = 0; i < choice.scores.length; i++) {
                 const score = JSON.parse(JSON.stringify(choice.scores[i]));
+                deleteDiscount(score);
                 app.tmpScore.push(score);
             }
             snackbarVariables.labelText = 'Copied to clipboard.';
@@ -2070,6 +2071,7 @@
         } else {
             for (var i = 0; i < app.tmpScore.length; i++) {
                 const tmpScore = JSON.parse(JSON.stringify(app.tmpScore[i]));
+                deleteDiscount(tmpScore);
                 tmpScore.idx = generateScoreId(0, 5);
                 choice.scores.push(tmpScore);
             }
@@ -2257,6 +2259,7 @@
         clone.index = index + 1;
         clone.isActive = false;
         delete clone.forcedActivated;
+        delete clone.appliedDisChoices;
 
         for (let i = 0; i < clone.scores.length; i++) {
             const score = clone.scores[i];
@@ -2265,22 +2268,7 @@
             scoreSet.add(score.idx);
             delete score.isActive;
             delete score.setValue;
-            delete score.discountIsOn;
-            delete score.discountShow;
-            delete score.discountBeforeText;
-            delete score.discountAfterText;
-            delete score.discountScore;
-            delete score.discountScoreCal;
-            delete score.isChangeDiscount;
-            delete score.tmpDisScore;
-            delete score.tmpDiscount;
-            delete score.discountedFrom;
-            delete score.dupTextA;
-            delete score.dupTextB;
-            delete score.discountTextA;
-            delete score.discountTextB;
-            delete score.notStackableDiscount;
-            delete score.appliedDiscount;
+            deleteDiscount(score);
         }
 
         for (let j = 0; j < clone.addons.length; j++) {
@@ -2326,8 +2314,18 @@
 
     function copyObject() {
         if (typeof app.tmpChoice === 'undefined') app.tmpChoice = [];
+        const tmpChoice = JSON.parse(JSON.stringify(choice));
+
+        tmpChoice.isActive = false;
+        delete tmpChoice.forcedActivated;
+        delete tmpChoice.appliedDisChoices;
+        if (typeof tmpChoice.scores !== 'undefined' && tmpChoice.scores.length > 0) {
+            for (let i = 0; i < tmpChoice.scores.length; i++) {
+                deleteDiscount(tmpChoice.scores[i]);
+            }
+        }
         app.tmpChoice.length = 0;
-        app.tmpChoice.push(JSON.parse(JSON.stringify(choice)));
+        app.tmpChoice.push(tmpChoice);
         snackbarVariables.labelText = 'Copied to clipboard.';
         snackbarVariables.isOpen = true;
     }
@@ -2616,137 +2614,108 @@
     }
 
     function deselectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
-        Array.from(activatedMap.entries()).forEach(([id]) => {
+        const activated = Array.from(activatedMap.keys());
+
+        for (let i = activated.length - 1; i >= 0; i--) {
+            const id = activated[i];
             const cMap = choiceMap.get(id);
             if (typeof cMap !== 'undefined') {
                 const aRow = cMap.row;
                 const aChoice = cMap.choice;
                 const thisTmpScores = new SvelteMap<string, number>();
-                const countSet = new Set<Choice>();
+                let disChoices = new Set<Choice>();
                 let isChanged = false;
-                let isDiscounted = false;
-                for (let i = 0; i < aChoice.scores.length; i++) {
-                    const aScore = aChoice.scores[i];
+                let isRevoked = false;
+                let idx = localChoice.appliedDisChoices ? localChoice.appliedDisChoices.indexOf(aChoice.id) : -1;
+                for (let j = 0; j < aChoice.scores.length; j++) {
+                    const aScore = aChoice.scores[j];
                     if (!aScore.isNotRecalculatable) {
                         const point = pointTypeMap.get(aScore.id);
                         if (typeof point !== 'undefined') {
-                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined' && aScore.appliedDiscount) {
-                                const mul = aChoice.multipleUseVariable;
+                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
+                                if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && localChoice.appliedDisChoices)) {
+                                    const mul = aChoice.multipleUseVariable;
+                                    let remainDiscount = false;
 
-                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                    for (let j = mul - 1; j >= 0; j--) {
-                                        if (aChoice.isActive) {
-                                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
-                                                if (aChoice.forcedActivated && aChoice.isActive) {
-                                                    aChoice.forcedActivated = false;
-                                                    aChoice.numMultipleTimesMinus--;
-                                                    selectedOneLess(aChoice, aRow);
-                                                    aChoice.forcedActivated = true;
-                                                } else {
-                                                    selectedOneLess(aChoice, aRow);
+                                    if (localChoice.useDiscountCount && aScore.discountedFrom && aScore.discountedFrom.length > 0) {
+                                        if (idx !== -1) {
+                                            for (let k = 0; k < aScore.discountedFrom.length; k++) {
+                                                const cMap2 = choiceMap.get(aScore.discountedFrom[k]);
+
+                                                if (typeof cMap2 !== 'undefined') {
+                                                    const dChoice = cMap2.choice;
+                                                    const cnt = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable && dChoice.stackableDiscount && dChoice.discountCount ? (dChoice.discountCount * dChoice.multipleUseVariable) + Number(localChoice.id === dChoice.id) : dChoice.discountCount;
+
+                                                    if (dChoice.useDiscountCount && dChoice.appliedDisChoices && cnt && cnt > dChoice.appliedDisChoices.length) {
+                                                        if (dChoice.id !== localChoice.id) disChoices.add(dChoice);
+                                                        remainDiscount = true;
+                                                    }
                                                 }
-                                            } else {
-                                                point.startingSum += aScore.tmpDisScore;
-                                            }
-                                        }
-                                    }
-
-                                    if (aChoice.isActive) {
-                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                        delete aScore.isChangeDiscount;
-                                        delete aScore.tmpDisScore;
-                                    }
-                                } else if (!aChoice.isSelectableMultiple) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
-                                        if (aChoice.forcedActivated) {
-                                            delete aChoice.forcedActivated;
-                                            if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
-                                        }
-                                        if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
-                                            for (let j = 0; j < aChoice.multipleUseVariable; j++) {
-                                                if (aChoice.isActive) selectedOneLess(aChoice, aRow);
                                             }
                                         } else {
-                                            if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                            remainDiscount = true;
                                         }
-                                    } else {
-                                        point.startingSum += aScore.tmpDisScore;
-                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                    }
+
+                                    if (remainDiscount) {
                                         delete aScore.isChangeDiscount;
                                         delete aScore.tmpDisScore;
+                                        continue;
                                     }
-                                }
-                                isChanged = localChoice.id !== aChoice.id;
-                                delete aScore.appliedDiscount;
-                            } else if (!aScore.appliedDiscount && aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.discountedFrom && aScore.discountedFrom.length > 0) {
-                                const cMap = choiceMap.get(aScore.discountedFrom[0]);
 
-                                if (typeof cMap !== 'undefined') {
-                                    const dChoice = cMap.choice;
-
-                                    if (dChoice.discountCount && typeof dChoice.numDiscountChoices !== 'undefined') {
-                                        if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                                            const mul = aChoice.multipleUseVariable;
-                                            let val = aScore.value
-
-                                            if (typeof aScore.tmpDiscount !== 'undefined') {
-                                                for (let j = 0; j < aScore.tmpDiscount.length; j++) {
-                                                    if (val > aScore.tmpDiscount[j].discountedValue) val = aScore.tmpDiscount[j].discountedValue;
-                                                }
-                                            }
-
-                                            let tmpScore = val - aScore.discountScore;
-
-                                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                                for (let j = mul - 1; j >= 0; j--) {
-                                                    if (aChoice.isActive) {
-                                                        if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
-                                                            if (aChoice.forcedActivated && aChoice.isActive) {
-                                                                aChoice.forcedActivated = false;
-                                                                aChoice.numMultipleTimesMinus--;
-                                                                selectedOneLess(aChoice, aRow);
-                                                                aChoice.forcedActivated = true;
-                                                            } else {
-                                                                selectedOneLess(aChoice, aRow);
-                                                            }
-                                                        } else {
-                                                            point.startingSum += tmpScore;
-                                                        }
-                                                    }
-                                                }
-                                            } else if (!aChoice.isSelectableMultiple) {
-                                                if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
-                                                    if (aChoice.forcedActivated) {
-                                                        delete aChoice.forcedActivated;
-                                                        if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
-                                                    }
-                                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
-                                                        for (let j = 0; j < aChoice.multipleUseVariable; j++) {
-                                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow);
-                                                        }
+                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                        for (let k = mul - 1; k >= 0; k--) {
+                                            if (aChoice.isActive) {
+                                                if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                                    if (aChoice.forcedActivated && aChoice.isActive) {
+                                                        aChoice.forcedActivated = false;
+                                                        aChoice.numMultipleTimesMinus--;
+                                                        selectedOneLess(aChoice, aRow);
+                                                        aChoice.forcedActivated = true;
                                                     } else {
-                                                        if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                                        selectedOneLess(aChoice, aRow);
                                                     }
                                                 } else {
-                                                    point.startingSum += tmpScore;
-                                                    thisTmpScores.set(aScore.id, tmpScore);
+                                                    point.startingSum += aScore.tmpDisScore;
                                                 }
                                             }
+                                        }
 
-                                            if (aChoice.isActive) {
-                                                isDiscounted = true;
-                                                aScore.appliedDiscount = true;
-                                                countSet.add(dChoice);
+                                        if (aChoice.isActive) {
+                                            thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                            delete aScore.isChangeDiscount;
+                                            delete aScore.tmpDisScore;
+                                        }
+                                    } else if (!aChoice.isSelectableMultiple) {
+                                        if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                            if (aChoice.forcedActivated) {
+                                                delete aChoice.forcedActivated;
+                                                if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
                                             }
+                                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
+                                                for (let k = 0; k < aChoice.multipleUseVariable; k++) {
+                                                    if (aChoice.isActive) selectedOneLess(aChoice, aRow);
+                                                }
+                                            } else {
+                                                if (aChoice.isActive) deselectObject(aChoice, aRow);
+                                            }
+                                        } else {
+                                            point.startingSum += aScore.tmpDisScore;
+                                            thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                                            delete aScore.isChangeDiscount;
+                                            delete aScore.tmpDisScore;
                                         }
                                     }
+                                    isChanged = localChoice.id !== aChoice.id;
+                                    delete aScore.appliedDiscount;
+                                    isRevoked = true;
                                 }
                             }
                             if (!changedScores.has(aScore.idx)) {
                                 const hasScore = localChoice.scores.length > 0;
                                 const scoreLeng = localChoice.scores.length || 1;
-                                for (let j = 0; j < scoreLeng; j++) {
-                                    const lScore = hasScore ? localChoice.scores[j] : null;
+                                for (let k = 0; k < scoreLeng; k++) {
+                                    const lScore = hasScore ? localChoice.scores[k] : null;
                                     const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
                                     const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
                                     if (!hasScore || hasScore && lPoint) {
@@ -2766,7 +2735,7 @@
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
 
-                                                        for (let k = mul - 1; k >= 0; k--) {
+                                                        for (let l = mul - 1; l >= 0; l--) {
                                                             if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[k]) {
                                                                 if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
                                                                     if (aChoice.forcedActivated && aChoice.isActive) {
@@ -2780,7 +2749,7 @@
                                                                 } else {
                                                                     point.startingSum += scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
-                                                                    aScore.isActiveMul[k] = false;
+                                                                    aScore.isActiveMul[l] = false;
                                                                 }
                                                             }
                                                         }
@@ -2800,8 +2769,8 @@
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
                                                         if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
-                                                        for (let k = mul - 1; k >= 0; k--) {
-                                                            if (!aScore.isActiveMul[k]) {
+                                                        for (let l = mul - 1; l >= 0; l--) {
+                                                            if (!aScore.isActiveMul[l]) {
                                                                 if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
                                                                     if (aChoice.forcedActivated && aChoice.isActive) {
                                                                         aChoice.forcedActivated = false;
@@ -2814,7 +2783,7 @@
                                                                 } else {
                                                                     point.startingSum -= scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
-                                                                    aScore.isActiveMul[k] = true;
+                                                                    aScore.isActiveMul[l] = true;
                                                                 }
                                                             }
                                                         }
@@ -2843,19 +2812,25 @@
                         }
                     }
                 }
-                if (isDiscounted && countSet.size > 0) {
-                    countSet.forEach((dChoice) => {
-                        if (typeof dChoice.numDiscountChoices !== 'undefined') {
-                            dChoice.numDiscountChoices += 1;
-                        }
-                    });
+                if (disChoices.size > 0) {
+                    const dChoices = Array.from(disChoices);
+                    for (let j = 0; j < dChoices.length; j++) {
+                        const dChoice = dChoices[j];
+                        
+                        if (!dChoice.appliedDisChoices) dChoice.appliedDisChoices = [];
+                        if (dChoice.appliedDisChoices.indexOf(aChoice.id) === -1) dChoice.appliedDisChoices.push(aChoice.id);
+                        if (idx !== -1) localChoice.appliedDisChoices!.splice(idx, 1);
+                    }
                 }
-                if (isChanged || isDiscounted) {
+                if (isRevoked && localChoice.appliedDisChoices && idx !== -1) {
+                    localChoice.appliedDisChoices.splice(idx, 1);
+                }
+                if (isChanged) {
                     scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                     deselectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores);
                 }
             }
-        });
+        }
         if (count === 0) {
             if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
                 snackbarVariables.labelText = scoreUpdate.join('');
@@ -2866,7 +2841,10 @@
     }
 
     function selectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
-        Array.from(activatedMap.entries()).forEach(([id]) => {
+        const activated = Array.from(activatedMap.keys());
+
+        for (let i = 0; i < activated.length; i++) {
+            const id = activated[i];
             const cMap = choiceMap.get(id);
             if (typeof cMap !== 'undefined') {
                 const aRow = cMap.row;
@@ -2874,18 +2852,19 @@
                 const thisTmpScores = new SvelteMap<string, number>();
                 let isDiscounted = false;
                 let isChanged = false;
-                if (localChoice.useDiscountCount && typeof localChoice.numDiscountChoices === 'undefined') localChoice.numDiscountChoices = 0;
-                for (let i = 0; i < aChoice.scores.length; i++) {
-                    const aScore = aChoice.scores[i];
+                if (localChoice.useDiscountCount && !localChoice.appliedDisChoices) localChoice.appliedDisChoices = [];
+                for (let j = 0; j < aChoice.scores.length; j++) {
+                    const aScore = aChoice.scores[j];
                     if (!aScore.isNotRecalculatable) {
                         const point = pointTypeMap.get(aScore.id);
                         if (typeof point !== 'undefined') {
                             if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined' && aChoice.id !== localChoice.id) {
                                 const mul = aChoice.multipleUseVariable;
+                                const count = localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable && localChoice.stackableDiscount && localChoice.discountCount ? localChoice.discountCount * localChoice.multipleUseVariable : localChoice.discountCount;
 
-                                if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && localChoice.discountCount && localChoice.discountCount > localChoice.numDiscountChoices!)) {
+                                if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && count && count > localChoice.appliedDisChoices!.length)) {
                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                        for (let j = mul - 1; j >= 0; j--) {
+                                        for (let k = mul - 1; k >= 0; k--) {
                                             if (aChoice.isActive) {
                                                 if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
                                                     if (aChoice.forcedActivated && aChoice.isActive) {
@@ -2928,8 +2907,8 @@
                             if (!changedScores.has(aScore.idx)) {
                                 const hasScore = localChoice.scores.length > 0;
                                 const scoreLeng = localChoice.scores.length || 1;
-                                for (let j = 0; j < scoreLeng; j++) {
-                                    const lScore = hasScore ? localChoice.scores[j] : null;
+                                for (let k = 0; k < scoreLeng; k++) {
+                                    const lScore = hasScore ? localChoice.scores[k] : null;
                                     const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
                                     const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
                                     if (!hasScore || hasScore && lPoint) {
@@ -2943,15 +2922,14 @@
                                             aRow.currentChoices += 1;
                                             if (lPoint) lPoint.startingSum -= tmpScore;
                                             if (beforeSelected !== afterSelected) {
-                                                console.log(aChoice.id);
                                                 let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
                                                 if (beforeSelected) {
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
                                                         
-                                                        for (let k = mul - 1; k >= 0; k--) {
-                                                            if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[k]) {
+                                                        for (let l = mul - 1; l >= 0; l--) {
+                                                            if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
                                                                 if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
                                                                     if (aChoice.forcedActivated && aChoice.isActive) {
                                                                         aChoice.forcedActivated = false;
@@ -2964,7 +2942,7 @@
                                                                 } else {
                                                                     point.startingSum += scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
-                                                                    aScore.isActiveMul[k] = false;
+                                                                    aScore.isActiveMul[l] = false;
                                                                 }
                                                             }
                                                         }
@@ -2984,8 +2962,8 @@
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
                                                         if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
-                                                        for (let k = mul - 1; k >= 0; k--) {
-                                                            if (!aScore.isActiveMul[k]) {
+                                                        for (let l = mul - 1; l >= 0; l--) {
+                                                            if (!aScore.isActiveMul[l]) {
                                                                 if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
                                                                     if (aChoice.forcedActivated && aChoice.isActive) {
                                                                         aChoice.forcedActivated = false;
@@ -2998,7 +2976,7 @@
                                                                 } else {
                                                                     point.startingSum -= scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
-                                                                    aScore.isActiveMul[k] = true;
+                                                                    aScore.isActiveMul[l] = true;
                                                                 }
                                                             }
                                                         }
@@ -3027,15 +3005,15 @@
                         }
                     }
                 }
-                if (isDiscounted && typeof localChoice.numDiscountChoices !== 'undefined') {
-                    localChoice.numDiscountChoices += 1;
+                if (isDiscounted && localChoice.appliedDisChoices) {
+                    if (localChoice.appliedDisChoices.indexOf(aChoice.id) === -1) localChoice.appliedDisChoices.push(aChoice.id);
                 }
                 if (isChanged) {
                     scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                     selectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores);
                 }
             }
-        });
+        }
         if (count === 0) {
             if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
                 snackbarVariables.labelText = scoreUpdate.join('');
@@ -3110,13 +3088,16 @@
                             let val = score.value;
                             if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount) {
                                 if (score.discountedFrom && score.discountedFrom.length > 0) {
-                                    const cMap = choiceMap.get(score.discountedFrom[0]);
+                                    for (let j = 0; j < score.discountedFrom.length; j++) {
+                                        const cMap = choiceMap.get(score.discountedFrom[j]);
 
-                                    if (typeof cMap !== 'undefined') {
-                                        const dChoice = cMap.choice;
+                                        if (typeof cMap !== 'undefined') {
+                                            const dChoice = cMap.choice;
 
-                                        if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
-                                            countSet.add(dChoice);
+                                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && dChoice.appliedDisChoices && dChoice.appliedDisChoices.length > 0) {
+                                                countSet.add(dChoice);
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -3139,8 +3120,10 @@
 
                 if (countSet.size > 0) {
                     countSet.forEach((dChoice) => {
-                        if (typeof dChoice.numDiscountChoices !== 'undefined') {
-                            dChoice.numDiscountChoices -= 1;
+                        if (dChoice.appliedDisChoices) {
+                            const index = dChoice.appliedDisChoices.indexOf(localChoice.id);
+
+                            if (index !== -1) dChoice.appliedDisChoices.splice(index, 1);
                         }
                     });
                 }
@@ -3195,12 +3178,7 @@
                                     if (typeof dRow !== 'undefined') {
                                         for (let j = 0; j < dRow.objects.length; j++) {
                                             const dChoice = dRow.objects[j];
-                                            for (let k = 0; k < dChoice.scores.length; k++) {
-                                                const score = dChoice.scores[k];
-                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
-                                                    deselectDiscount(localChoice, score);
-                                                }
-                                            }
+                                            deselectDiscount(localChoice, dChoice);
                                             dList.add(dChoice.id);
                                         }
                                     }
@@ -3211,13 +3189,7 @@
                                     if (!dList.has(localChoice.discountChoices[i])) {
                                         const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                         if (typeof cMap !== 'undefined') {
-                                            const dChoice = cMap.choice;
-                                            for (let j = 0; j < dChoice.scores.length; j++) {
-                                                const score = cMap.choice.scores[j];
-                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1) && !dList.has(score.idx)) {
-                                                    deselectDiscount(localChoice, score);
-                                                }
-                                            }
+                                            deselectDiscount(localChoice, cMap.choice);
                                         }
                                     }
                                 }
@@ -3230,12 +3202,7 @@
                                         for (let j = 0; j < groupData.elements.length; j++) {
                                             const cMap = choiceMap.get(groupData.elements[j]);
                                             if (typeof cMap !== 'undefined') {
-                                                for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                                    const score = cMap.choice.scores[k];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
-                                                        deselectDiscount(localChoice, score);
-                                                    }
-                                                }
+                                                deselectDiscount(localChoice, cMap.choice);
                                             }
                                         }
                                     }
@@ -3243,7 +3210,6 @@
                             }
                         }
                     }
-                    delete localChoice.numDiscountChoices;
                 }
                 
                 localChoice.isActive = false;
@@ -3662,6 +3628,7 @@
                 delete localChoice.tempSlots;
                 deselectUpdateScore(localChoice, tmpScores, 0);
                 activateTempChoices();
+                delete localChoice.appliedDisChoices;
             }
 
             if (linkedObjects.indexOf(localChoice.id) === -1) {
@@ -3704,7 +3671,7 @@
             for (let i = 0; i < localRow.objects.length; i++) {
                 const thisChoice = localRow.objects[i];
                 if (thisChoice.isActive) {
-                    if (!thisChoice.forcedActivated) {
+                    if (!thisChoice.forcedActivated && !thisChoice.selectOnce) {
                         if (thisChoice.isSelectableMultiple) {
                             let counter = thisChoice.multipleUseVariable;
                             for (let j = 0; j < counter; j++) {
@@ -3753,12 +3720,7 @@
                                         if (typeof dRow !== 'undefined') {
                                             for (let j = 0; j < dRow.objects.length; j++) {
                                                 const dChoice = dRow.objects[j];
-                                                for (let k = 0; k < dChoice.scores.length; k++) {
-                                                    const score = dChoice.scores[k];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                        selectDiscount(localChoice, score);
-                                                    }
-                                                }
+                                                selectDiscount(localChoice, dChoice);
                                                 dList.add(dChoice.id);
                                             }
                                         }
@@ -3769,13 +3731,7 @@
                                         if (!dList.has(localChoice.discountChoices[i])) {
                                             const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                             if (typeof cMap !== 'undefined') {
-                                                const dChoice = cMap.choice;
-                                                for (let j = 0; j < dChoice.scores.length; j++) {
-                                                    const score = dChoice.scores[j];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                        selectDiscount(localChoice, score);
-                                                    }
-                                                }
+                                                selectDiscount(localChoice, cMap.choice);
                                             }
                                         }
                                     }
@@ -3788,12 +3744,7 @@
                                             for (let j = 0; j < groupData.elements.length; j++) {
                                                 const cMap = choiceMap.get(groupData.elements[j]);
                                                 if (typeof cMap !== 'undefined') {
-                                                    for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                                        const score = cMap.choice.scores[k];
-                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                            selectDiscount(localChoice, score);
-                                                        }
-                                                    }
+                                                    selectDiscount(localChoice, cMap.choice);
                                                 }
                                             }
                                         }
@@ -3810,28 +3761,37 @@
                             const point = pointTypeMap.get(score.id);
                             if (typeof point !== 'undefined') {
                                 let val = score.value;
-                                if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
-                                    const cMap = choiceMap.get(score.discountedFrom[0]);
+                                if (score.appliedDiscount && typeof score.discountScore !== 'undefined') {
+                                    val = score.discountScore;
+                                } else if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                                    let isDiscounted = false;
+                                    for (let j = 0; j < score.discountedFrom.length; j++) {
+                                        const cMap = choiceMap.get(score.discountedFrom[j]);
 
-                                    if (typeof cMap !== 'undefined') {
-                                        const dChoice = cMap.choice;
+                                        if (typeof cMap !== 'undefined') {
+                                            const dChoice = cMap.choice;
 
-                                        if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
-                                            if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
-                                            if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                                                countSet.add(dChoice);
+                                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                                const count = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable && dChoice.stackableDiscount ? dChoice.discountCount * dChoice.multipleUseVariable : dChoice.discountCount;
+                                                if (!dChoice.appliedDisChoices) dChoice.appliedDisChoices = [];
+                                                if (count > dChoice.appliedDisChoices.length) {
+                                                    countSet.add(dChoice);
+                                                    val = score.discountScore;
+                                                    score.appliedDiscount = true;
+                                                    isDiscounted = true;
+                                                    break;
+                                                }
+                                            } else {
                                                 val = score.discountScore;
                                                 score.appliedDiscount = true;
-                                            } else {
-                                                if (typeof score.tmpDiscount !== 'undefined') {
-                                                    for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                                        if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
-                                                    }
-                                                }
+                                                isDiscounted = true;
+                                                break;
                                             }
-                                        } else {
-                                            val = score.discountScore;
-                                            score.appliedDiscount = true;
+                                        }
+                                    }
+                                    if (!isDiscounted && typeof score.tmpDiscount !== 'undefined') {
+                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
                                         }
                                     }
                                 }
@@ -3850,8 +3810,8 @@
                     
                     if (countSet.size > 0) {
                         countSet.forEach((dChoice) => {
-                            if (typeof dChoice.numDiscountChoices !== 'undefined') {
-                                dChoice.numDiscountChoices += 1;
+                            if (dChoice.appliedDisChoices) {
+                                if (dChoice.appliedDisChoices.indexOf(localChoice.id) === -1) dChoice.appliedDisChoices.push(localChoice.id);
                             }
                         });
                     }
@@ -4423,7 +4383,7 @@
                 for (let i = 0; i < origRow.objects.length; i++) {
                     const thisChoice = origRow.objects[i];
                     if (thisChoice.isActive) {
-                        if (!thisChoice.forcedActivated) {
+                        if (!thisChoice.forcedActivated && !thisChoice.selectOnce) {
                             if (thisChoice.isSelectableMultiple) {
                                 let counter = thisChoice.multipleUseVariable;
                                 for (let j = 0; j < counter; j++) {
@@ -4487,12 +4447,7 @@
                                             if (typeof dRow !== 'undefined') {
                                                 for (let j = 0; j < dRow.objects.length; j++) {
                                                     const dChoice = dRow.objects[j];
-                                                    for (let k = 0; k < dChoice.scores.length; k++) {
-                                                        const score = dChoice.scores[k];
-                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                            selectDiscount(localChoice, score);
-                                                        }
-                                                    }
+                                                    selectDiscount(localChoice, dChoice);
                                                     dList.add(dChoice.id);
                                                 }
                                             }
@@ -4503,13 +4458,7 @@
                                             if (!dList.has(localChoice.discountChoices[i])) {
                                                 const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                                 if (typeof cMap !== 'undefined') {
-                                                    const dChoice = cMap.choice;
-                                                    for (let j = 0; j < dChoice.scores.length; j++) {
-                                                        const score = dChoice.scores[j];
-                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                            selectDiscount(localChoice, score);
-                                                        }
-                                                    }
+                                                    selectDiscount(localChoice, cMap.choice);
                                                 }
                                             }
                                         }
@@ -4522,12 +4471,7 @@
                                                 for (let j = 0; j < groupData.elements.length; j++) {
                                                     const cMap = choiceMap.get(groupData.elements[j]);
                                                     if (typeof cMap !== 'undefined') {
-                                                        for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                                            const score = cMap.choice.scores[k];
-                                                            if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                                selectDiscount(localChoice, score);
-                                                            }
-                                                        }
+                                                        selectDiscount(localChoice, cMap.choice);
                                                     }
                                                 }
                                             }
@@ -4545,28 +4489,37 @@
                                 const point = pointTypeMap.get(score.id);
                                 if (typeof point !== 'undefined') {
                                     let val = score.value;
-                                    if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
-                                        const cMap = choiceMap.get(score.discountedFrom[0]);
+                                    if (score.appliedDiscount && typeof score.discountScore !== 'undefined') {
+                                        val = score.discountScore;
+                                    } else if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                                        let isDiscounted = false;
+                                        for (let j = 0; j < score.discountedFrom.length; j++) {
+                                            const cMap = choiceMap.get(score.discountedFrom[j]);
 
-                                        if (typeof cMap !== 'undefined') {
-                                            const dChoice = cMap.choice;
+                                            if (typeof cMap !== 'undefined') {
+                                                const dChoice = cMap.choice;
 
-                                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
-                                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
-                                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                                                    countSet.add(dChoice);
+                                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                                    const count = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable && dChoice.stackableDiscount ? dChoice.discountCount * dChoice.multipleUseVariable : dChoice.discountCount;
+                                                    if (!dChoice.appliedDisChoices) dChoice.appliedDisChoices = [];
+                                                    if (count > dChoice.appliedDisChoices.length) {
+                                                        countSet.add(dChoice);
+                                                        val = score.discountScore;
+                                                        score.appliedDiscount = true;
+                                                        isDiscounted = true;
+                                                        break;
+                                                    }
+                                                } else {
                                                     val = score.discountScore;
                                                     score.appliedDiscount = true;
-                                                } else {
-                                                    if (typeof score.tmpDiscount !== 'undefined') {
-                                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
-                                                        }
-                                                    }
+                                                    isDiscounted = true;
+                                                    break;
                                                 }
-                                            } else {
-                                                val = score.discountScore;
-                                                score.appliedDiscount = true;
+                                            }
+                                        }
+                                        if (!isDiscounted && typeof score.tmpDiscount !== 'undefined') {
+                                            for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                                if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
                                             }
                                         }
                                     }
@@ -4588,8 +4541,8 @@
 
                         if (countSet.size > 0) {
                             countSet.forEach((dChoice) => {
-                                if (typeof dChoice.numDiscountChoices !== 'undefined') {
-                                    dChoice.numDiscountChoices += 1;
+                                if (dChoice.appliedDisChoices) {
+                                    if (dChoice.appliedDisChoices.indexOf(localChoice.id) === -1) dChoice.appliedDisChoices.push(localChoice.id);
                                 }
                             });
                         }
@@ -5183,12 +5136,7 @@
                                         if (typeof dRow !== 'undefined') {
                                             for (let j = 0; j < dRow.objects.length; j++) {
                                                 const dChoice = dRow.objects[j];
-                                                for (let k = 0; k < dChoice.scores.length; k++) {
-                                                    const score = dChoice.scores[k];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
-                                                        deselectDiscount(localChoice, score);
-                                                    }
-                                                }
+                                                deselectDiscount(localChoice, dChoice);
                                                 dList.add(dChoice.id);
                                             }
                                         }
@@ -5199,13 +5147,7 @@
                                         if (!dList.has(localChoice.discountChoices[i])) {
                                             const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                             if (typeof cMap !== 'undefined') {
-                                                const dChoice = cMap.choice;
-                                                for (let j = 0; j < dChoice.scores.length; j++) {
-                                                    const score = cMap.choice.scores[j];
-                                                    if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1) && !dList.has(score.idx)) {
-                                                        deselectDiscount(localChoice, score);
-                                                    }
-                                                }
+                                                deselectDiscount(localChoice, cMap.choice);
                                             }
                                         }
                                     }
@@ -5218,12 +5160,7 @@
                                             for (let j = 0; j < groupData.elements.length; j++) {
                                                 const cMap = choiceMap.get(groupData.elements[j]);
                                                 if (typeof cMap !== 'undefined') {
-                                                    for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                                        const score = cMap.choice.scores[k];
-                                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
-                                                            deselectDiscount(localChoice, score);
-                                                        }
-                                                    }
+                                                    deselectDiscount(localChoice, cMap.choice);
                                                 }
                                             }
                                         }
@@ -5627,5 +5564,4 @@
             }
         }
     }
-
 </script>

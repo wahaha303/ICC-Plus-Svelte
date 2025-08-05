@@ -36,174 +36,154 @@
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let pointType = $derived(pointTypeMap.get(score.id));
     let isEnabled = $derived(checkRequirements(choice.requireds));
-    let discountedFrom = $derived.by(() => {
-        if (!score.discountIsOn || !score.discountedFrom || score.discountedFrom.length === 0) return false;
-        const cMap = choiceMap.get(score.discountedFrom[0]);
+    let discountFlags = $derived.by(() => {
+        let result = { isWithinCount: false, isSimple: false };
+        if (!score.discountIsOn || !score.discountedFrom || score.discountedFrom.length === 0) return result;
+        for (let i = 0; i < score.discountedFrom.length; i++) {
+            const cMap = choiceMap.get(score.discountedFrom[i]);
 
-        if (typeof cMap !== 'undefined') {
-            return cMap.choice;
+            if (typeof cMap !== 'undefined') {
+                const dChoice = cMap.choice;
+
+                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && dChoice.appliedDisChoices) {
+                    const count = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable ? dChoice.discountCount * dChoice.multipleUseVariable : dChoice.discountCount;
+                    if (count > dChoice.appliedDisChoices.length) {
+                        result.isWithinCount = true;
+                        break;
+                    }
+                } else {
+                    result.isSimple = true;
+                    break;
+                }
+            }
         }
-        return false;
+        return result;
     });
     let scoreAfterText = $derived.by(() => {
         let text = [];
-        if (!score.replaceText) text.push(`${score.afterText}`);
         if (score.discountIsOn && score.discountShow && typeof score.discountAfterText !== 'undefined') {
             if (score.appliedDiscount) {
                 if (!score.replaceText) text.push(`${score.afterText}`);
                 text.push(`${score.discountAfterText}`);
             } else {
-                if (discountedFrom) {
-                    const dChoice = discountedFrom;
-                
-                    if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
-                        if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                            if (!score.replaceText) text.push(`${score.afterText}`);
-                            text.push(`${score.discountAfterText}`);
-                        } else {
-                            if (typeof score.tmpDiscount !== 'undefined') {
-                                let value = score.value;
-                                let tmpText = '';
-                                let replaceText = false;
-                                for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                    if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                        value = score.tmpDiscount[j].discountedValue;
-                                        tmpText = score.tmpDiscount[j].beforeText || '';
-                                        replaceText = score.tmpDiscount[j].replaceText || false;
-                                    }
-                                }
-                                if (!replaceText) text.push(`${score.afterText}`);
-                                text.push(`${tmpText}`);
+                if (discountFlags.isWithinCount) {
+                    if (!score.replaceText) text.push(`${score.afterText}`);
+                    text.push(`${score.discountAfterText}`);
+                } else if (discountFlags.isSimple) {
+                    if (!score.replaceText) text.push(`${score.afterText}`);
+                    text.push(`${score.discountAfterText}`);
+                } else {
+                    if (typeof score.tmpDiscount !== 'undefined') {
+                        let value = score.value;
+                        let tmpText = '';
+                        let replaceText = false;
+                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
+                                value = score.tmpDiscount[j].discountedValue;
+                                tmpText = score.tmpDiscount[j].beforeText || '';
+                                replaceText = score.tmpDiscount[j].replaceText || false;
                             }
                         }
+                        if (!replaceText) text.push(`${score.afterText}`);
+                        text.push(`${tmpText}`);
                     } else {
-                        if (!score.replaceText) text.push(`${score.afterText}`);
-                        text.push(`${score.discountAfterText}`);
+                        text.push(`${score.afterText}`);
                     }
                 }
             }
+        } else {
+            text.push(`${score.afterText}`);
         }
 
         return text.join(' ');
     });
     let scoreBeforeText = $derived.by(() => {
         let text = [];
-        if (!score.replaceText) text.push(`${score.beforeText}`);
         if (score.discountIsOn && score.discountShow && typeof score.discountBeforeText !== 'undefined') {
             if (score.appliedDiscount) {
                 if (!score.replaceText) text.push(`${score.beforeText}`);
                 text.push(`${score.discountBeforeText}`);
             } else {
-                if (discountedFrom) {
-                    const dChoice = discountedFrom;
-
-                    if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
-                        if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                            if (!score.replaceText) text.push(`${score.beforeText}`);
-                            text.push(`${score.discountBeforeText}`);
-                        } else {
-                            if (typeof score.tmpDiscount !== 'undefined') {
-                                let value = score.value;
-                                let tmpText = '';
-                                let replaceText = false;
-                                for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                    if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                        value = score.tmpDiscount[j].discountedValue;
-                                        tmpText = score.tmpDiscount[j].beforeText || '';
-                                        replaceText = score.tmpDiscount[j].replaceText || false;
-                                    }
-                                }
-                                if (!replaceText) text.push(`${score.beforeText}`);
-                                text.push(`${tmpText}`);
+                if (discountFlags.isWithinCount) {
+                    if (!score.replaceText) text.push(`${score.beforeText}`);
+                    text.push(`${score.discountBeforeText}`);
+                } else if (discountFlags.isSimple) {
+                    if (!score.replaceText) text.push(`${score.beforeText}`);
+                    text.push(`${score.discountBeforeText}`);
+                } else {
+                    if (typeof score.tmpDiscount !== 'undefined') {
+                        let value = score.value;
+                        let tmpText = '';
+                        let replaceText = false;
+                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
+                                value = score.tmpDiscount[j].discountedValue;
+                                tmpText = score.tmpDiscount[j].beforeText || '';
+                                replaceText = score.tmpDiscount[j].replaceText || false;
                             }
                         }
+                        if (!replaceText) text.push(`${score.beforeText}`);
+                        text.push(`${tmpText}`);
                     } else {
-                        if (!score.replaceText) text.push(`${score.beforeText}`);
-                        text.push(`${score.discountBeforeText}`);
+                        text.push(`${score.beforeText}`);
                     }
                 }
             }
+        } else {
+            text.push(`${score.beforeText}`);
         }
-
         return text.join(' ');
     });
     let scoreValueText = $derived.by(() => {
+        let value = score.value;
         if (!score.hideValue) {
-            if (discountedFrom) {
-                const dChoice = discountedFrom;
-                if (score.appliedDiscount) {
-                    if (dChoice.replaceScoreText && dChoice.hideScoreValue) {
-                        return '';
-                    }
+            if (score.appliedDiscount) {
+                if (score.replaceText && score.hideDisValue) {
+                    return '';
+                }
+                if (typeof score.discountScore !== 'undefined') value = score.discountScore;
+            } else {
+                if (discountFlags.isWithinCount) {
+                    if (score.replaceText && score.hideDisValue) return '';
+                    if (typeof score.discountScore !== 'undefined') value = score.discountScore;
+                } else if (discountFlags.isSimple) {
+                    if (score.hideDisValue) return '';
+                    if (typeof score.discountScore !== 'undefined') value = score.discountScore;
                 } else {
-                    if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
-                        if (dChoice.discountCount > dChoice.numDiscountChoices && dChoice.replaceScoreText && dChoice.hideScoreValue) {
-                            return '';
-                        } else {
-                            if (typeof score.tmpDiscount !== 'undefined') {
-                                let value = score.value;
-                                let hideValue = false;
-                                for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                    if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                        value = score.tmpDiscount[j].discountedValue;
-                                        hideValue = score.tmpDiscount[j].hideValue || false;
-                                    }
-                                }
-                                if (hideValue) return '';
+                    if (typeof score.tmpDiscount !== 'undefined') {
+                        let hideValue = false;
+                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
+                                value = score.tmpDiscount[j].discountedValue;
+                                hideValue = score.tmpDiscount[j].hideValue || false;
                             }
                         }
-                    } else {
-                        if (score.hideDisValue) return '';
+                        if (hideValue) return '';
                     }
                 }
             }
             if (score.isRandom && !score.setValue) {
                 if (typeof score.maxValue !== 'undefined') {
                     if (score.maxValue < 0) {
-                        return `${scoreMaxValue} ~ ${scoreMinValue}`;
+                        return ` ${scoreMaxValue} ~ ${scoreMinValue} `;
                     } else {
-                        return `${scoreMinValue} ~ ${scoreMaxValue}`;
+                        return ` ${scoreMinValue} ~ ${scoreMaxValue} `;
                     }
                 }
             }
-            return `${scoreValue}`;
+            value = Math.abs(value);
+            if (!pointType?.allowFloat) {
+                value = Math.floor(value);
+            } else {
+                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
+            }
+            if (pointType?.plussOrMinusAdded) {
+                let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
+                return ` ${prefix}${value} `;
+            }
+            return ` ${value} `;
         }
         return '';
-    });
-    let scoreValue = $derived.by(() => {
-        let value = score.value;
-        if (score.discountIsOn && score.discountShow && typeof score.discountScore !== 'undefined') {
-            if (score.appliedDiscount) {
-                value = score.discountScore;
-            } if (discountedFrom) {
-                const dChoice = discountedFrom;
-
-                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
-                    if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                        value = score.discountScore;
-                    } else {
-                        if (typeof score.tmpDiscount !== 'undefined') {
-                            for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                if (value > score.tmpDiscount[j].discountedValue) value = score.tmpDiscount[j].discountedValue;
-                            }
-                        }
-                    }
-                } else {
-                    value = score.discountScore;
-                }
-            }
-        }
-        value = Math.abs(value);
-        if (!pointType?.allowFloat) {
-            value = Math.floor(value);
-        } else {
-            value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
-        }
-        if (pointType?.plussOrMinusAdded) {
-            let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
-            return `${prefix}${value}`;
-        }
-        return `${value}`;
     });
     let scoreMaxValue = $derived.by(() => {
         if (typeof score.maxValue !== 'undefined') {
@@ -273,30 +253,24 @@
     let scoreIcon = $derived.by(() => {
         if (!pointType || !pointType.iconIsOn) return false;
         if (score.discountIsOn && score.discountShow) {
-            if (discountedFrom) {
-                const dChoice = discountedFrom;
-
-                if (score.appliedDiscount) {
-                    if (score.replaceText && dChoice.hideScoreIcon) return false;
+            if (score.appliedDiscount) {
+                if (score.replaceText && score.hideDisIcon) return false;
+            } else {
+                if (discountFlags.isWithinCount) {
+                    if (score.replaceText && score.hideDisIcon) return false;
+                } else if (discountFlags.isSimple) {
+                    if (score.hideDisIcon) return false;
                 } else {
-                    if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.numDiscountChoices !== 'undefined') {
-                        if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                            if (score.replaceText && dChoice.hideScoreIcon) return false;
-                        } else {
-                            if (typeof score.tmpDiscount !== 'undefined') {
-                                let value = score.value;
-                                let hideIcon = false;
-                                for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                    if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                        value = score.tmpDiscount[j].discountedValue;
-                                        hideIcon = score.tmpDiscount[j].hideIcon || false;
-                                    }
-                                }
-                                if (hideIcon) return false;
+                    if (typeof score.tmpDiscount !== 'undefined') {
+                        let value = score.value;
+                        let hideIcon = false;
+                        for (let j = 0; j < score.tmpDiscount.length; j++) {
+                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
+                                value = score.tmpDiscount[j].discountedValue;
+                                hideIcon = score.tmpDiscount[j].hideIcon || false;
                             }
                         }
-                    } else {
-                        if (score.hideDisIcon) return false;
+                        if (hideIcon) return false;
                     }
                 }
             }
@@ -348,5 +322,4 @@
         }
         return false;
     }
-
 </script>

@@ -125,7 +125,7 @@
     }, {
         action: () => { currentDialog = 'appText' },
         name: 'Manage Text Design',
-        text: 'Here you can change the size, font andcolor of the text on titles and text.'
+        text: 'Here you can change the size, font and color of the text on titles and text.'
     }, {
         action: () => { currentDialog = 'appPointbar' },
         name: 'Manage Point-Bar Design',

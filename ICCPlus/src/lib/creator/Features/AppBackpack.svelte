@@ -83,7 +83,7 @@
     import Dialog, { Content, Actions } from '@smui/dialog';
     import IconButton from '@smui/icon-button';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, generateRowId, rowMap, choiceMap, dlgVariables, activatedMap, tmpActivatedMap, generateObjectId, generateScoreId, scoreSet, groupMap, objectDesignMap, rowDesignMap } from '$lib/store/store.svelte';
+    import { app, generateRowId, rowMap, choiceMap, dlgVariables, activatedMap, tmpActivatedMap, generateObjectId, generateScoreId, scoreSet, groupMap, objectDesignMap, rowDesignMap, deleteDiscount } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import AppRow from '../AppRow.svelte';
     
@@ -106,6 +106,7 @@
             cChoice.index = i;
             cChoice.isActive = false;
             delete cChoice.forcedActivated;
+            delete cChoice.appliedDisChoices;
 
             for (let j = 0; j < clone.scores.length; j++) {
                 const score = cChoice.scores[j];
@@ -114,21 +115,7 @@
                 scoreSet.add(score.idx);
                 delete score.isActive;
                 delete score.setValue;
-                delete score.discountIsOn;
-                delete score.discountShow;
-                delete score.discountBeforeText;
-                delete score.discountAfterText;
-                delete score.discountScore;
-                delete score.discountScoreCal;
-                delete score.isChangeDiscount;
-                delete score.tmpDisScore;
-                delete score.tmpDiscount;
-                delete score.discountedFrom;
-                delete score.dupTextA;
-                delete score.dupTextB;
-                delete score.discountTextA;
-                delete score.discountTextB;
-                delete score.notStackableDiscount;
+                deleteDiscount(score);
             }
 
             if (cChoice.backpackBtnRequirement) {

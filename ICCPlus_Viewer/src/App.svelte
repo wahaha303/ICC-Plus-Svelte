@@ -116,6 +116,7 @@
 
         if (boxEl) {
             boxEl.style.pointerEvents = 'none';
+            boxEl.style.overflow = 'hidden';
         }
         
         if (typeof window.fetch === 'function') {
@@ -163,6 +164,7 @@
                                 if (boxEl) {
                                     boxEl.style.height = '';
                                     boxEl.style.opacity = '1';
+                                    boxEl.style.overflow = '';
                                     boxEl.style.pointerEvents = '';
                                 }
                                 if (indicatorEl) indicatorEl.remove();
@@ -194,6 +196,7 @@
                         if (boxEl) {
                             boxEl.style.height = '';
                             boxEl.style.opacity = '1';
+                            boxEl.style.overflow = '';
                             boxEl.style.pointerEvents = '';
                         }
                         if (indicatorEl) indicatorEl.remove();
@@ -241,6 +244,7 @@
                         if (boxEl) {
                             boxEl.style.height = '';
                             boxEl.style.opacity = '1';
+                            boxEl.style.overflow = '';
                             boxEl.style.pointerEvents = '';
                         }
                         if (indicatorEl) indicatorEl.remove();

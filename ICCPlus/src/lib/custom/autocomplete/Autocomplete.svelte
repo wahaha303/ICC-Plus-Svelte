@@ -158,6 +158,7 @@
   import type { SMUIListAccessor, SMUIListItemAccessor } from '@smui/list';
   import List, { Item, Text } from '@smui/list';
   import { Anchor } from '@smui/menu-surface';
+  import { app, dlgVariables } from '$lib/store/store.svelte';
 
   type OwnProps = {
     /**
@@ -680,19 +681,34 @@
   }
 
   function selectAll() {
-    for (let i = 0; i < matches.length; i++) {
-      let option = matches[i];
-      if (isAllSelected) {
-        if (multipleValue && multipleValue.includes(option)) {
-          deselectOption(option);
-        }
-      } else {
-        if (multipleValue && !multipleValue.includes(option)) {
-          selectOption(option);
+    function selectProc() {
+      for (let i = 0; i < matches.length; i++) {
+        let option = matches[i];
+        if (isAllSelected) {
+          if (multipleValue && multipleValue.includes(option)) {
+            deselectOption(option);
+          }
+        } else {
+          if (multipleValue && !multipleValue.includes(option)) {
+            selectOption(option);
+          }
         }
       }
+      isAllSelected = !isAllSelected;
     }
-    isAllSelected = !isAllSelected;
+
+    if (app.checkSelectAll) {
+        dlgVariables.currentDialog = 'dlgCommon';
+        dlgVariables.context = `Are you sure you want to ${isAllSelected ? 'deselect' : 'select'} all items?`;
+        dlgVariables.title = '';
+        dlgVariables.cFunc = (e: CustomEvent) => {
+            if (e.detail.action === 'accept') {
+                selectProc();
+            }
+        }
+    } else {
+        selectProc();
+    }
   }
 
   function handleScroll(event: UIEvent) {

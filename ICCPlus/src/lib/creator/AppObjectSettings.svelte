@@ -129,7 +129,7 @@
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, choiceMap, initStyling, appVersion, getTimestamp, filterStyling, textStyling, objectImageStyling, addonImageStyling, objectStyling, addonStyling, backgroundStyling, multiChoiceStyling,rowStyling, rowImageStyling, backpackStyling, pointBarStyling, rowMap, generateObjectId, getRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, objectDesignMap, groupMap, getBackpackRows } from '$lib/store/store.svelte';
+    import { app, choiceMap, initStyling, appVersion, getTimestamp, filterStyling, textStyling, objectImageStyling, addonImageStyling, objectStyling, addonStyling, backgroundStyling, multiChoiceStyling,rowStyling, rowImageStyling, backpackStyling, pointBarStyling, rowMap, generateObjectId, getRows, generateScoreId, scoreSet, StylingSchema, snackbarVariables, getRowLabel, objectDesignMap, groupMap, getBackpackRows, deleteDiscount } from '$lib/store/store.svelte';
     import type { Choice, Styling } from '$lib/store/types';
     
     let { open, onclose, choice }: { open: boolean; onclose: () => void; choice: Choice } = $props();
@@ -288,6 +288,8 @@
                 clone.id = generateObjectId(0, app.objectIdLength);
                 clone.index = nRow.objects.length;
                 clone.isActive = false;
+                delete clone.forcedActivated;
+                delete clone.appliedDisChoices;
 
                 for (let i = 0; i < clone.scores.length; i++) {
                     const score = clone.scores[i];
@@ -296,21 +298,7 @@
                     scoreSet.add(score.idx);
                     delete score.isActive;
                     delete score.setValue;
-                    delete score.discountIsOn;
-                    delete score.discountShow;
-                    delete score.discountBeforeText;
-                    delete score.discountAfterText;
-                    delete score.discountScore;
-                    delete score.discountScoreCal;
-                    delete score.isChangeDiscount;
-                    delete score.tmpDisScore;
-                    delete score.tmpDiscount;
-                    delete score.discountedFrom;
-                    delete score.dupTextA;
-                    delete score.dupTextB;
-                    delete score.discountTextA;
-                    delete score.discountTextB;
-                    delete score.notStackableDiscount;
+                    deleteDiscount(score);
                 }
 
                 if (clone.backpackBtnRequirement) {

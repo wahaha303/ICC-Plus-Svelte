@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.2.4';
+export const appVersion = '2.2.5';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -405,6 +405,7 @@ export const app = $state<App>({
     tooltipDelay: 1000,
     checkDeleteRow: true,
     checkDeleteObject: false,
+    checkSelectAll: false,
     defaultRowTitle: 'Row',
     defaultRowText: 'This is a row, and inside of it, you can place choices. On both rows and choices Requirements can be placed, which will block a row from being viewed, or make the player unable to select a choice, depending on either Point-types or the Ids of other choices. Point-types can be made in Features then Manage Points. Hovering over buttons will explain what they do. The Design of the project can be changed in \'Modify Design\' at the side navigation bar, and private styling for each row can be turned on in the rows Settings. Default text like this can be turned off in Features -> Manage Defaults.',
     defaultChoiceTitle: 'Choice',
@@ -515,6 +516,7 @@ export const defaultApp: App = {
     tooltipDelay: 1000,
     checkDeleteRow: true,
     checkDeleteObject: false,
+    checkSelectAll: false,
     defaultRowTitle: 'Row',
     defaultRowText: 'This is a row, and inside of it, you can place choices. On both rows and choices Requirements can be placed, which will block a row from being viewed, or make the player unable to select a choice, depending on either Point-types or the Ids of other choices. Point-types can be made in Features then Manage Points. Hovering over buttons will explain what they do. The Design of the project can be changed in \'Modify Design\' at the side navigation bar, and private styling for each row can be turned on in the rows Settings. Default text like this can be turned off in Features -> Manage Defaults.',
     defaultChoiceTitle: 'Choice',
@@ -2026,7 +2028,7 @@ function calcStackDiscount(scoreVal: number, operator: string, value: number) {
         default: return scoreVal;
     }
 };
-function deleteDiscount(score: Score) {
+export function deleteDiscount(score: Score) {
     delete score.tmpDiscount;
     delete score.discountTextA;
     delete score.discountTextB;
@@ -2047,463 +2049,500 @@ function deleteDiscount(score: Score) {
     delete score.hideDisValue;
     delete score.hideDisIcon;
 };
-export function deselectDiscount(localChoice: Choice, score: Score) {
-    const point = pointTypeMap.get(score.id);
-    if (typeof point !== 'undefined' && typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
-        let scoreVal = point.allowFloat ? score.value : Math.floor(score.value);
-        let tmpDisScore = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
-        tmpDisScore = point.allowFloat ? tmpDisScore : Math.floor(tmpDisScore);
-        let discountVal = 0;
-        let discountCal = 0;
-        let discountedFrom: string[] = [];
-        let bTmpChanged = false;
-        let tmpNum = 0;
-        
-        if (localChoice.stackableDiscount) {
-            if (score.notStackableDiscount) {
-                if (typeof score.tmpDiscount !== 'undefined') {
-                    for (let i = 0; i < score.tmpDiscount.length; i++) {
-                        if (score.tmpDiscount[i].isStackable) {
-                            discountedFrom = score.tmpDiscount[i].discountedFrom;
-                            scoreVal = score.tmpDiscount[i].discountedValue;
-                            tmpNum = i;
-                        }
-                    }
+export function deselectDiscount(localChoice: Choice, targetChoice: Choice) {
+    for (let m = 0; m < targetChoice.scores.length; m++) {
+        const score = targetChoice.scores[m];
+        const appliedDiscount = score.appliedDiscount;
 
-                    score.tmpDiscount.splice(tmpNum, 1);
-                }
-            } else {
-                if (typeof score.discountedFrom !== 'undefined') {
-                    let idx = score.discountedFrom.indexOf(localChoice.id);
-                    score.discountedFrom.splice(idx, 1);
+        if (!score.isNotDiscountable && (typeof localChoice.discountPointTypes === 'undefined' || localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
+            const point = pointTypeMap.get(score.id);
 
-                    if (typeof score.discountedFrom !== 'undefined' && score.discountedFrom.length > 0) {
-                        discountVal = scoreVal;
-                        for (let i = 0; i < score.discountedFrom.length; i++) {
-                            const cMap = choiceMap.get(score.discountedFrom[i]);
-                            if (typeof cMap !== 'undefined') {
-                                const aChoice = cMap.choice;
-                                if (typeof aChoice.discountOperator !== 'undefined' && typeof aChoice.discountValue !== 'undefined') {
-                                    discountVal = calcStackDiscount(discountVal, aChoice.discountOperator, aChoice.discountValue);
-                                    discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
-                                    discountCal = discountVal;
-                                    if (aChoice.discountLowLimitIsOn && typeof aChoice.discountLowLimit !== 'undefined') {
-                                        discountVal = Math.max(discountVal, aChoice.discountLowLimit);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (localChoice.discountShow) {
-                            let aIndex = typeof localChoice.discountAfterText !== 'undefined' && typeof score.discountTextA !== 'undefined' ? score.discountTextA.indexOf(localChoice.discountAfterText) : -1;
-                            let bIndex = typeof localChoice.discountBeforeText !== 'undefined' && typeof score.discountTextB !== 'undefined' ? score.discountTextB.indexOf(localChoice.discountBeforeText) : -1;
-                            if (localChoice.discountTextDuplicated) {
-                                if (aIndex !== -1 && typeof score.dupTextA !== 'undefined' && typeof localChoice.discountAfterText !== 'undefined') {
-                                    score.dupTextA[localChoice.discountAfterText] -= 1;
-                                    if (score.dupTextA[localChoice.discountAfterText] === 0) {
-                                        score.discountTextA?.splice(aIndex, 1);
-                                        delete score.dupTextA[localChoice.discountAfterText];
-                                    }
-                                }
-                                if (bIndex !== -1 && typeof score.dupTextB !== 'undefined' && typeof localChoice.discountBeforeText !== 'undefined') {
-                                    score.dupTextB[localChoice.discountBeforeText] -= 1;
-                                    if (score.dupTextB[localChoice.discountBeforeText] === 0) {
-                                        score.discountTextB?.splice(aIndex, 1);
-                                        delete score.dupTextB[localChoice.discountBeforeText];
-                                    }
-                                }
-                            } else {
-                                if (aIndex !== -1 && typeof score.discountTextA !== 'undefined') {
-                                    score.discountTextA.splice(aIndex, 1);
-                                    score.discountAfterText = score.discountTextA.join('');
-                                }
-                                if (bIndex !== -1 && typeof score.discountTextB !== 'undefined') {
-                                    score.discountTextB.splice(bIndex, 1);
-                                    score.discountBeforeText = score.discountTextB.join('');
-                                }
-                            }
-                        }
-                        
-                        score.discountScore = discountVal;
-                        score.discountScoreCal = discountCal;
-                    } else {
+            if (typeof point !== 'undefined' && typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                let scoreVal = point.allowFloat ? score.value : Math.floor(score.value);
+                let tmpDisScore = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                tmpDisScore = point.allowFloat ? tmpDisScore : Math.floor(tmpDisScore);
+                let discountVal = 0;
+                let discountCal = 0;
+                let discountedFrom: string[] = [];
+                let bTmpChanged = false;
+                let tmpNum = 0;
+                
+                if (localChoice.stackableDiscount) {
+                    if (score.notStackableDiscount) {
                         if (typeof score.tmpDiscount !== 'undefined') {
                             for (let i = 0; i < score.tmpDiscount.length; i++) {
-                                if (!score.tmpDiscount[i].isStackable) {
-                                    if (discountVal > score.tmpDiscount[i].discountedValue) {
-                                        discountedFrom = score.tmpDiscount[i].discountedFrom;
-                                        discountCal = score.tmpDiscount[i].calcValue;
-                                        discountVal = score.tmpDiscount[i].discountedValue;
-                                        tmpNum = i;
-                                        bTmpChanged = true;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (bTmpChanged && typeof score.tmpDiscount !== 'undefined') {
-                            if (discountedFrom.length === 0) {
-                                score.tmpDiscount.splice(tmpNum, 1);
-                            } else {
-                                score.discountedFrom = discountedFrom;
-                                if (score.tmpDiscount[tmpNum].showDiscount) {
-                                    score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
-                                    score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
-                                    score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
-                                    score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
-                                    score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
-                                }
-                                score.tmpDiscount.splice(tmpNum, 1);
-                                score.notStackableDiscount = true;
-                            }
-                        } else {
-                            deleteDiscount(score);
-                        }
-                    }
-                }
-            }
-        } else {
-            if (score.notStackableDiscount) {
-                if (typeof score.discountedFrom !== 'undefined' && score.discountedFrom.length > 0 && typeof score.tmpDiscount !== 'undefined') {
-                    if (score.discountedFrom.indexOf(localChoice.id) !== -1) {
-                        if (score.tmpDiscount.length > 0) {
-                            scoreVal = score.tmpDiscount[0].discountedValue;
-                            bTmpChanged = true;
-                            for (let i = 1; i < score.tmpDiscount.length; i++) {
-                                if (scoreVal > score.tmpDiscount[i].discountedValue) {
+                                if (score.tmpDiscount[i].isStackable) {
+                                    discountedFrom = score.tmpDiscount[i].discountedFrom;
                                     scoreVal = score.tmpDiscount[i].discountedValue;
                                     tmpNum = i;
                                 }
                             }
-                        }
-
-                        if (bTmpChanged) {
-                            score.discountScore = scoreVal;
-                            score.discountScoreCal = score.tmpDiscount[tmpNum].calcValue;
-                            score.discountedFrom = score.tmpDiscount[tmpNum].discountedFrom;
-                            score.notStackableDiscount = !score.tmpDiscount[tmpNum].isStackable;
-                            score.discountShow = score.tmpDiscount[tmpNum].showDiscount;
-
-                            if (score.tmpDiscount[tmpNum].isStackable && score.tmpDiscount[tmpNum].showDiscount) {
-                                score.discountBeforeText = score.discountTextB?.join('');
-                                score.discountAfterText = score.discountTextA?.join('');
-                            } else {
-                                if (score.tmpDiscount[tmpNum].showDiscount) {
-                                    score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
-                                    score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
-                                    score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
-                                    score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
-                                    score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
-                                } else {
-                                    score.discountBeforeText = '';
-                                    score.discountAfterText = '';
-                                    score.replaceText = false;
-                                    score.hideDisValue = false;
-                                    score.hideDisIcon = false;
-                                }
-                            }
 
                             score.tmpDiscount.splice(tmpNum, 1);
+                        }
+                    } else {
+                        if (typeof score.discountedFrom !== 'undefined') {
+                            let idx = score.discountedFrom.indexOf(localChoice.id);
+                            score.discountedFrom.splice(idx, 1);
+
+                            if (score.discountedFrom.length > 0) {
+                                let replaceText = false;
+                                let hideValue = false;
+                                let hideIcon = false;
+
+                                discountVal = scoreVal;
+                                for (let i = 0; i < score.discountedFrom.length; i++) {
+                                    const cMap = choiceMap.get(score.discountedFrom[i]);
+                                    if (typeof cMap !== 'undefined') {
+                                        const aChoice = cMap.choice;
+                                        if (typeof aChoice.discountOperator !== 'undefined' && typeof aChoice.discountValue !== 'undefined') {
+                                            discountVal = calcStackDiscount(discountVal, aChoice.discountOperator, aChoice.discountValue);
+                                            discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
+                                            discountCal = discountVal;
+                                            if (aChoice.replaceScoreText) replaceText = aChoice.replaceScoreText;
+                                            if (aChoice.hideScoreValue) hideValue = aChoice.hideScoreValue;
+                                            if (aChoice.hideScoreIcon) hideIcon = aChoice.hideScoreIcon;
+                                            if (aChoice.discountLowLimitIsOn && typeof aChoice.discountLowLimit !== 'undefined') {
+                                                discountVal = Math.max(discountVal, aChoice.discountLowLimit);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (localChoice.discountShow) {
+                                    let aIndex = typeof localChoice.discountAfterText !== 'undefined' && typeof score.discountTextA !== 'undefined' ? score.discountTextA.indexOf(localChoice.discountAfterText) : -1;
+                                    let bIndex = typeof localChoice.discountBeforeText !== 'undefined' && typeof score.discountTextB !== 'undefined' ? score.discountTextB.indexOf(localChoice.discountBeforeText) : -1;
+                                    if (localChoice.discountTextDuplicated) {
+                                        if (aIndex !== -1 && typeof score.dupTextA !== 'undefined' && typeof localChoice.discountAfterText !== 'undefined') {
+                                            score.dupTextA[localChoice.discountAfterText] -= 1;
+                                            if (score.dupTextA[localChoice.discountAfterText] === 0) {
+                                                score.discountTextA?.splice(aIndex, 1);
+                                                delete score.dupTextA[localChoice.discountAfterText];
+                                            }
+                                        }
+                                        if (bIndex !== -1 && typeof score.dupTextB !== 'undefined' && typeof localChoice.discountBeforeText !== 'undefined') {
+                                            score.dupTextB[localChoice.discountBeforeText] -= 1;
+                                            if (score.dupTextB[localChoice.discountBeforeText] === 0) {
+                                                score.discountTextB?.splice(aIndex, 1);
+                                                delete score.dupTextB[localChoice.discountBeforeText];
+                                            }
+                                        }
+                                    } else {
+                                        if (aIndex !== -1 && typeof score.discountTextA !== 'undefined') {
+                                            score.discountTextA.splice(aIndex, 1);
+                                            score.discountAfterText = score.discountTextA.join(' ');
+                                        }
+                                        if (bIndex !== -1 && typeof score.discountTextB !== 'undefined') {
+                                            score.discountTextB.splice(bIndex, 1);
+                                            score.discountBeforeText = score.discountTextB.join(' ');
+                                        }
+                                    }
+                                }
+                                
+                                score.discountScore = discountVal;
+                                score.discountScoreCal = discountCal;
+                                score.replaceText = replaceText;
+                                score.hideDisValue = hideValue;
+                                score.hideDisIcon = hideIcon;
+                                
+                                if (localChoice.useDiscountCount && score.appliedDiscount) {
+                                    score.tmpDisScore = tmpDisScore - score.value;
+                                    score.isChangeDiscount = true;
+                                    continue;
+                                }
+                            } else {
+                                if (typeof score.tmpDiscount !== 'undefined') {
+                                    for (let i = 0; i < score.tmpDiscount.length; i++) {
+                                        if (!score.tmpDiscount[i].isStackable) {
+                                            if (discountVal > score.tmpDiscount[i].discountedValue) {
+                                                discountedFrom = score.tmpDiscount[i].discountedFrom;
+                                                discountCal = score.tmpDiscount[i].calcValue;
+                                                discountVal = score.tmpDiscount[i].discountedValue;
+                                                tmpNum = i;
+                                                bTmpChanged = true;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (bTmpChanged && typeof score.tmpDiscount !== 'undefined') {
+                                    if (discountedFrom.length === 0) {
+                                        score.tmpDiscount.splice(tmpNum, 1);
+                                    } else {
+                                        score.discountedFrom = discountedFrom;
+                                        if (score.tmpDiscount[tmpNum].showDiscount) {
+                                            score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
+                                            score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
+                                            score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
+                                            score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
+                                            score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
+                                        }
+                                        score.tmpDiscount.splice(tmpNum, 1);
+                                        score.notStackableDiscount = true;
+                                    }
+                                } else {
+                                    deleteDiscount(score);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (score.notStackableDiscount) {
+                        if (typeof score.discountedFrom !== 'undefined' && score.discountedFrom.length > 0 && typeof score.tmpDiscount !== 'undefined') {
+                            if (score.discountedFrom.indexOf(localChoice.id) !== -1) {
+                                if (score.tmpDiscount.length > 0) {
+                                    scoreVal = score.tmpDiscount[0].discountedValue;
+                                    bTmpChanged = true;
+                                    for (let i = 1; i < score.tmpDiscount.length; i++) {
+                                        if (scoreVal > score.tmpDiscount[i].discountedValue) {
+                                            scoreVal = score.tmpDiscount[i].discountedValue;
+                                            tmpNum = i;
+                                        }
+                                    }
+                                }
+
+                                if (bTmpChanged) {
+                                    score.discountScore = scoreVal;
+                                    score.discountScoreCal = score.tmpDiscount[tmpNum].calcValue;
+                                    score.discountedFrom = score.tmpDiscount[tmpNum].discountedFrom;
+                                    score.notStackableDiscount = !score.tmpDiscount[tmpNum].isStackable;
+                                    score.discountShow = score.tmpDiscount[tmpNum].showDiscount;
+
+                                    if (score.tmpDiscount[tmpNum].isStackable && score.tmpDiscount[tmpNum].showDiscount) {
+                                        score.discountBeforeText = score.discountTextB?.join('');
+                                        score.discountAfterText = score.discountTextA?.join('');
+                                    } else {
+                                        if (score.tmpDiscount[tmpNum].showDiscount) {
+                                            score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
+                                            score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
+                                            score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
+                                            score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
+                                            score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
+                                        } else {
+                                            score.discountBeforeText = '';
+                                            score.discountAfterText = '';
+                                            score.replaceText = false;
+                                            score.hideDisValue = false;
+                                            score.hideDisIcon = false;
+                                        }
+                                    }
+
+                                    score.tmpDiscount.splice(tmpNum, 1);
+                                } else {
+                                    deleteDiscount(score);
+                                }
+                            } else {
+                                for (let i = 0; i < score.tmpDiscount.length; i++) {
+                                    if (score.tmpDiscount[i].discountedFrom.indexOf(localChoice.id) !== -1) {
+                                        score.tmpDiscount.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                            }
                         } else {
                             deleteDiscount(score);
                         }
                     } else {
-                        for (let i = 0; i < score.tmpDiscount.length; i++) {
-                            if (score.tmpDiscount[i].discountedFrom.indexOf(localChoice.id) !== -1) {
-                                score.tmpDiscount.splice(i, 1);
-                                break;
+                        if (typeof score.tmpDiscount !== 'undefined') {
+                            score.tmpDiscount = score.tmpDiscount.filter(item => item.discountedFrom.indexOf(localChoice.id) !== -1);
+                            if (score.tmpDiscount.length > 0) {
+                                scoreVal = score.tmpDiscount[0].discountedValue;
+                                bTmpChanged = true;
+                                for (let i = 1; i < score.tmpDiscount.length; i++) {
+                                    if (scoreVal > score.tmpDiscount[i].discountedValue) {
+                                        scoreVal = score.tmpDiscount[i].discountedValue;
+                                        tmpNum = i;
+                                    }
+                                }
                             }
-                        }
-                    }
-                } else {
-                    deleteDiscount(score);
-                }
-            } else {
-                if (typeof score.tmpDiscount !== 'undefined') {
-                    score.tmpDiscount = score.tmpDiscount.filter(item => item.discountedFrom.indexOf(localChoice.id) !== -1);
-                    if (score.tmpDiscount.length > 0) {
-                        scoreVal = score.tmpDiscount[0].discountedValue;
-                        bTmpChanged = true;
-                        for (let i = 1; i < score.tmpDiscount.length; i++) {
-                            if (scoreVal > score.tmpDiscount[i].discountedValue) {
-                                scoreVal = score.tmpDiscount[i].discountedValue;
-                                tmpNum = i;
-                            }
-                        }
-                    }
 
-                    if (bTmpChanged) {
-                        score.discountScore = scoreVal;
-                        score.discountScoreCal = score.tmpDiscount[tmpNum].calcValue;
-                        score.discountedFrom = score.tmpDiscount[tmpNum].discountedFrom;
-                        score.notStackableDiscount = !score.tmpDiscount[tmpNum].isStackable;
-                        
-                        if (score.notStackableDiscount) {
-                            if (score.tmpDiscount[tmpNum].showDiscount) {
-                                score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
-                                score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
-                                score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
-                                score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
-                                score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
+                            if (bTmpChanged) {
+                                score.discountScore = scoreVal;
+                                score.discountScoreCal = score.tmpDiscount[tmpNum].calcValue;
+                                score.discountedFrom = score.tmpDiscount[tmpNum].discountedFrom;
+                                score.notStackableDiscount = !score.tmpDiscount[tmpNum].isStackable;
+                                
+                                if (score.notStackableDiscount) {
+                                    if (score.tmpDiscount[tmpNum].showDiscount) {
+                                        score.discountBeforeText = score.tmpDiscount[tmpNum].beforeText;
+                                        score.discountAfterText = score.tmpDiscount[tmpNum].afterText;
+                                        score.replaceText = score.tmpDiscount[tmpNum].replaceText || false;
+                                        score.hideDisValue = score.tmpDiscount[tmpNum].hideValue || false;
+                                        score.hideDisIcon = score.tmpDiscount[tmpNum].hideIcon || false;
+                                    } else {
+                                        score.discountBeforeText = '';
+                                        score.discountAfterText = '';
+                                        score.replaceText = false;
+                                        score.hideDisValue = false;
+                                        score.hideDisIcon = false;
+                                    }
+                                } else {
+                                    score.discountBeforeText = score.discountTextB?.join('');
+                                    score.discountAfterText = score.discountTextA?.join('');
+                                }
+                                score.tmpDiscount.splice(tmpNum, 1);
                             } else {
-                                score.discountBeforeText = '';
-                                score.discountAfterText = '';
-                                score.replaceText = false;
-                                score.hideDisValue = false;
-                                score.hideDisIcon = false;
+                                deleteDiscount(score);
                             }
                         } else {
-                            score.discountBeforeText = score.discountTextB?.join('');
-                            score.discountAfterText = score.discountTextA?.join('');
+                            deleteDiscount(score);
                         }
-                        score.tmpDiscount.splice(tmpNum, 1);
-                    } else {
-                        deleteDiscount(score);
                     }
+                }
+
+                let resultVal = typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                resultVal = point.allowFloat ? resultVal : Math.floor(resultVal);
+
+                if (resultVal !== tmpDisScore && appliedDiscount) {
+                    score.tmpDisScore = tmpDisScore - resultVal;
+                    score.isChangeDiscount = true;
                 } else {
-                    deleteDiscount(score);
+                    score.isChangeDiscount = false;
                 }
             }
         }
-
-        let resultVal = typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
-        resultVal = point.allowFloat ? resultVal : Math.floor(resultVal);
-
-        if (resultVal !== tmpDisScore) {
-            score.tmpDisScore = tmpDisScore - resultVal;
-            score.isChangeDiscount = true;
-        } else {
-            delete score.isChangeDiscount;
-        }
     }
 };
-export function selectDiscount(localChoice: Choice, score: Score) {
-    const point = pointTypeMap.get(score.id);
-    if (typeof point !== 'undefined' && typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
-        let scoreVal = point.allowFloat ? score.value : Math.floor(score.value);
-        let tmpDisScore = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : scoreVal;
-        let discountVal = 0;
-        let discountCal = 0;
-        let discountedFrom: string[] = [];
-        let aDiscount: Discount;
-        let bTempStacked = false;
-        let tmpNum = 0;
+export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
+    for (let m = 0; m < targetChoice.scores.length; m++) {
+        const score = targetChoice.scores[m];
 
-        if (typeof score.discountedFrom === 'undefined') score.discountedFrom = [];
-        
-        if (localChoice.stackableDiscount) {
-            if (score.notStackableDiscount) {
-                if (typeof score.tmpDiscount !== 'undefined') {
-                    for (let i = 0; i < score.tmpDiscount.length; i++) {
-                        if (score.tmpDiscount[i].isStackable) {
-                            discountedFrom = score.tmpDiscount[i].discountedFrom;
-                            discountedFrom.push(localChoice.id);
-                            scoreVal = score.tmpDiscount[i].discountedValue;
-                            bTempStacked = true;
-                            tmpNum = i;
-                        }
-                    }
+        if (!score.isNotDiscountable && (typeof localChoice.discountPointTypes === 'undefined' || localChoice.discountPointTypes.length === 0 || localChoice.discountPointTypes.indexOf(score.id) !== -1)) {
+            const point = pointTypeMap.get(score.id);
 
-                    discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
-                    discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
-                    discountCal = discountVal;
-            
-                    if (localChoice.discountLowLimitIsOn && typeof localChoice.discountLowLimit !== 'undefined') {
-                        discountVal = Math.max(discountVal, localChoice.discountLowLimit);
-                    }
+            if (typeof point !== 'undefined' && typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
+                let scoreVal = point.allowFloat ? score.value : Math.floor(score.value);
+                let tmpDisScore = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : scoreVal;
+                let discountVal = 0;
+                let discountCal = 0;
+                let discountedFrom: string[] = [];
+                let aDiscount: Discount;
+                let bTempStacked = false;
+                let tmpNum = 0;
+
+                if (typeof score.discountedFrom === 'undefined') score.discountedFrom = [];
                 
-                    if (typeof score.discountScore !== 'undefined' && score.discountScore > discountVal) {
-                        score.tmpDisScore = score.discountScore - discountVal;
-                        score.isChangeDiscount = true;
-                        aDiscount = {
-                            isStackable: false,
-                            discountedFrom: score.discountedFrom,
-                            calcValue: typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.discountScore,
-                            discountedValue: score.discountScore,
-                            showDiscount: false,
-                            replaceText: false,
-                            hideValue: false,
-                            hideIcon: false
-                        };
+                if (localChoice.stackableDiscount) {
+                    if (score.notStackableDiscount) {
+                        if (typeof score.tmpDiscount !== 'undefined') {
+                            for (let i = 0; i < score.tmpDiscount.length; i++) {
+                                if (score.tmpDiscount[i].isStackable) {
+                                    discountedFrom = score.tmpDiscount[i].discountedFrom;
+                                    discountedFrom.push(localChoice.id);
+                                    scoreVal = score.tmpDiscount[i].discountedValue;
+                                    bTempStacked = true;
+                                    tmpNum = i;
+                                }
+                            }
 
-                        if (score.discountShow) {
-                            aDiscount.showDiscount = true;
-                            aDiscount.beforeText = localChoice.discountBeforeText;
-                            aDiscount.afterText = localChoice.discountAfterText;
-                            if (localChoice.replaceScoreText) aDiscount.replaceText = true;
-                            if (localChoice.hideScoreValue) aDiscount.hideValue = true;
-                            if (localChoice.hideScoreIcon) aDiscount.hideIcon = true;
+                            discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
+                            discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
+                            discountCal = discountVal;
+                    
+                            if (localChoice.discountLowLimitIsOn && typeof localChoice.discountLowLimit !== 'undefined') {
+                                discountVal = Math.max(discountVal, localChoice.discountLowLimit);
+                            }
+                        
+                            if (typeof score.discountScore !== 'undefined' && score.discountScore > discountVal) {
+                                score.tmpDisScore = score.discountScore - discountVal;
+                                score.isChangeDiscount = true;
+                                aDiscount = {
+                                    isStackable: false,
+                                    discountedFrom: score.discountedFrom,
+                                    calcValue: typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.discountScore,
+                                    discountedValue: score.discountScore,
+                                    showDiscount: false,
+                                    replaceText: false,
+                                    hideValue: false,
+                                    hideIcon: false
+                                };
+
+                                if (score.discountShow) {
+                                    aDiscount.showDiscount = true;
+                                    aDiscount.beforeText = localChoice.discountBeforeText;
+                                    aDiscount.afterText = localChoice.discountAfterText;
+                                    if (localChoice.replaceScoreText) aDiscount.replaceText = true;
+                                    if (localChoice.hideScoreValue) aDiscount.hideValue = true;
+                                    if (localChoice.hideScoreIcon) aDiscount.hideIcon = true;
+                                }
+
+                                score.discountScore = discountVal;
+                                score.discountScoreCal = discountCal;
+
+                                if (localChoice.discountShow) {
+                                    score.discountShow = true;
+                                    updateDiscountTexts(localChoice, score);
+                                }
+
+                                if (typeof score.discountTextA !== 'undefined') score.discountAfterText = score.discountTextA.join(' ');
+                                if (typeof score.discountTextB !== 'undefined') score.discountBeforeText = score.discountTextB.join(' ');
+
+                                score.discountedFrom.push(...discountedFrom);
+
+                                if (bTempStacked) {
+                                    score.tmpDiscount.splice(tmpNum, 1);
+                                }
+
+                                score.tmpDiscount.push(aDiscount);
+                                score.notStackableDiscount = false;
+                            } else {
+                                score.isChangeDiscount = false;
+                                discountedFrom.push(localChoice.id);
+
+                                if (localChoice.discountShow) {
+                                    updateDiscountTexts(localChoice, score);
+                                }
+                        
+                                if (bTempStacked) {
+                                    score.tmpDiscount[tmpNum].discountedFrom = discountedFrom;
+                                    score.tmpDiscount[tmpNum].calcValue = discountCal;
+                                    score.tmpDiscount[tmpNum].discountedValue = discountVal;
+                                } else {
+                                    aDiscount = {
+                                        isStackable: localChoice.stackableDiscount || false,
+                                        discountedFrom: discountedFrom,
+                                        calcValue: discountCal,
+                                        discountedValue: discountVal,
+                                        showDiscount: localChoice.discountShow || false,
+                                        replaceText: localChoice.replaceScoreText || false,
+                                        hideValue: localChoice.hideScoreValue || false,
+                                        hideIcon: localChoice.hideScoreIcon || false
+                                    };
+                                    score.tmpDiscount.push(aDiscount);
+                                }
+                            }
                         }
-
+                    } else {
+                        scoreVal = score.discountIsOn ? (typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.value) : score.value;
+                        scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
+                        tmpDisScore = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+                        tmpDisScore = point.allowFloat ? tmpDisScore : Math.floor(tmpDisScore);
+                    
+                        discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
+                        discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
+                        discountCal = discountVal;
+                    
+                        if (localChoice.discountLowLimitIsOn && typeof localChoice.discountLowLimit !== 'undefined') {
+                            discountVal = Math.max(discountVal, localChoice.discountLowLimit);
+                        }
+                    
+                        if (!Array.isArray(score.discountedFrom)) score.discountedFrom = [];
+                    
                         score.discountScore = discountVal;
                         score.discountScoreCal = discountCal;
+                        score.discountedFrom.push(localChoice.id);
 
+                        if (score.discountScore !== tmpDisScore) {
+                            score.tmpDisScore = tmpDisScore - score.discountScore;
+                            score.isChangeDiscount = true;
+                        } else {
+                            if (!score.appliedDiscount && localChoice.useDiscountCount && localChoice.discountCount) {
+                                if (typeof localChoice.appliedDisChoices === 'undefined') localChoice.appliedDisChoices = [];
+                                score.tmpDisScore = score.value - score.discountScore;
+                                score.isChangeDiscount = true;
+                            } else {
+                                score.isChangeDiscount = false;
+                            }
+                        }
+                    
+                        if (!score.discountIsOn) score.discountIsOn = true;
+                        
                         if (localChoice.discountShow) {
                             score.discountShow = true;
                             updateDiscountTexts(localChoice, score);
                         }
 
-                        if (typeof score.discountTextA !== 'undefined') score.discountAfterText = score.discountTextA.join('');
-                        if (typeof score.discountTextB !== 'undefined') score.discountBeforeText = score.discountTextB.join('');
-
-                        score.discountedFrom.push(...discountedFrom);
-
-                        if (bTempStacked) {
-                            score.tmpDiscount.splice(tmpNum, 1);
-                        }
-
-                        score.tmpDiscount.push(aDiscount);
-                        score.notStackableDiscount = false;
-                    } else {
-                        score.isChangeDiscount = false;
-                        discountedFrom.push(localChoice.id);
-
-                        if (localChoice.discountShow) {
-                            updateDiscountTexts(localChoice, score);
-                        }
+                        if (typeof score.discountTextA !== 'undefined') score.discountAfterText = score.discountTextA.join(' ');
+                        if (typeof score.discountTextB !== 'undefined') score.discountBeforeText = score.discountTextB.join(' ');
+                    }
+                } else {
+                    if (typeof score.tmpDiscount === 'undefined') score.tmpDiscount = [];
+            
+                    discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
+                    discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
+                    discountCal = discountVal;
                 
-                        if (bTempStacked) {
-                            score.tmpDiscount[tmpNum].discountedFrom = discountedFrom;
-                            score.tmpDiscount[tmpNum].calcValue = discountCal;
-                            score.tmpDiscount[tmpNum].discountedValue = discountVal;
-                        } else {
-                            aDiscount = {
-                                isStackable: localChoice.stackableDiscount || false,
-                                discountedFrom: discountedFrom,
-                                calcValue: discountCal,
-                                discountedValue: discountVal,
-                                showDiscount: localChoice.discountShow || false,
-                                replaceText: localChoice.replaceScoreText || false,
-                                hideValue: localChoice.hideScoreValue || false,
-                                hideIcon: localChoice.hideScoreIcon || false
-                            };
+                    if (localChoice.discountLowLimitIsOn && typeof localChoice.discountLowLimit !== 'undefined') {
+                        discountVal = Math.max(discountVal, localChoice.discountLowLimit);
+                    }
+                
+                    if (score.discountIsOn) {
+                        if (typeof score.discountScore !== 'undefined') {
+                            if (score.discountScore > discountVal) {
+                                aDiscount = {
+                                    isStackable: !score.notStackableDiscount,
+                                    discountedFrom: score.discountedFrom,
+                                    calcValue: typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.discountScore,
+                                    discountedValue: score.discountScore,
+                                    showDiscount: score.discountShow || false
+                                }
+                                
+                                if (score.discountShow) {
+                                    aDiscount.showDiscount = true;
+                                    aDiscount.beforeText = score.discountBeforeText;
+                                    aDiscount.afterText = score.discountAfterText;
+                                    aDiscount.replaceText = score.replaceText || false;
+                                    aDiscount.hideValue = score.hideDisValue || false;
+                                    aDiscount.hideIcon = score.hideDisIcon || false;
+                                }
+                                
+                                score.discountScore = discountVal;
+                                score.discountScoreCal = discountCal;
+                                score.discountShow = localChoice.discountShow;
+                                score.discountBeforeText = localChoice.discountBeforeText;
+                                score.discountAfterText = localChoice.discountAfterText;
+                                score.discountedFrom = [localChoice.id];
+                                score.notStackableDiscount = true;
+                                score.replaceText = localChoice.replaceScoreText || false;
+                                score.hideDisValue = localChoice.hideScoreValue || false;
+                                score.hideDisIcon = localChoice.hideScoreIcon || false;
+                            } else {
+                                aDiscount = {
+                                    isStackable: localChoice.stackableDiscount || false,
+                                    discountedFrom: [localChoice.id],
+                                    calcValue: discountCal,
+                                    discountedValue: discountVal,
+                                    showDiscount: localChoice.discountShow || false,
+                                    replaceText: score.replaceText || false,
+                                    hideValue: score.hideDisValue || false,
+                                    hideIcon: score.hideDisIcon || false
+                                }
+
+                                if (localChoice.discountShow) {
+                                    aDiscount.showDiscount = true;
+                                    aDiscount.beforeText = localChoice.discountBeforeText;
+                                    aDiscount.afterText = localChoice.discountAfterText;
+                                    if (localChoice.replaceScoreText) aDiscount.replaceText = true;
+                                    if (localChoice.hideScoreValue) aDiscount.hideValue = true;
+                                    if (localChoice.hideScoreIcon) aDiscount.hideIcon = true;
+                                }
+                            }
                             score.tmpDiscount.push(aDiscount);
                         }
-                    }
-                }
-            } else {
-                scoreVal = score.discountIsOn ? (typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.value) : score.value;
-                scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
-                tmpDisScore = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
-                tmpDisScore = point.allowFloat ? tmpDisScore : Math.floor(tmpDisScore);
-            
-                discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
-                discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
-                discountCal = discountVal;
-            
-                if (localChoice.discountLowLimitIsOn && typeof localChoice.discountLowLimit !== 'undefined') {
-                    discountVal = Math.max(discountVal, localChoice.discountLowLimit);
-                }
-            
-                if (!Array.isArray(score.discountedFrom)) score.discountedFrom = [];
-            
-                score.discountScore = discountVal;
-                score.discountScoreCal = discountCal;
-                score.discountedFrom.push(localChoice.id);
-
-                if (score.discountScore !== tmpDisScore) {
-                    score.tmpDisScore = tmpDisScore - score.discountScore;
-                    score.isChangeDiscount = true;
-                } else {
-                    score.isChangeDiscount = false;
-                }
-            
-                if (!score.discountIsOn) score.discountIsOn = true;
-                
-                if (localChoice.discountShow) {
-                    score.discountShow = true;
-                    updateDiscountTexts(localChoice, score);
-                }
-
-                if (typeof score.discountTextA !== 'undefined') score.discountAfterText = score.discountTextA.join('');
-                if (typeof score.discountTextB !== 'undefined') score.discountBeforeText = score.discountTextB.join('');
-            }
-        } else {
-            if (typeof score.tmpDiscount === 'undefined') score.tmpDiscount = [];
-    
-            discountVal = calcStackDiscount(scoreVal, localChoice.discountOperator, localChoice.discountValue);
-            discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
-            discountCal = discountVal;
-        
-            if (localChoice.discountLowLimitIsOn && typeof localChoice.discountLowLimit !== 'undefined') {
-                discountVal = Math.max(discountVal, localChoice.discountLowLimit);
-            }
-        
-            if (score.discountIsOn) {
-                if (typeof score.discountScore !== 'undefined') {
-                    if (score.discountScore > discountVal) {
-                        aDiscount = {
-                            isStackable: !score.notStackableDiscount,
-                            discountedFrom: score.discountedFrom,
-                            calcValue: typeof score.discountScoreCal !== 'undefined' ? score.discountScoreCal : score.discountScore,
-                            discountedValue: score.discountScore,
-                            showDiscount: score.discountShow || false
-                        }
-                        
-                        if (score.discountShow) {
-                            aDiscount.showDiscount = true;
-                            aDiscount.beforeText = score.discountBeforeText;
-                            aDiscount.afterText = score.discountAfterText;
-                            aDiscount.replaceText = score.replaceText || false;
-                            aDiscount.hideValue = score.hideDisValue || false;
-                            aDiscount.hideIcon = score.hideDisIcon || false;
-                        }
-                        
+                    } else {
                         score.discountScore = discountVal;
                         score.discountScoreCal = discountCal;
-                        score.discountShow = localChoice.discountShow;
-                        score.discountBeforeText = localChoice.discountBeforeText;
-                        score.discountAfterText = localChoice.discountAfterText;
-                        score.discountedFrom = [localChoice.id];
-                        score.notStackableDiscount = true;
-                        score.replaceText = localChoice.replaceScoreText || false;
-                        score.hideDisValue = localChoice.hideScoreValue || false;
-                        score.hideDisIcon = localChoice.hideScoreIcon || false;
-                    } else {
-                        aDiscount = {
-                            isStackable: localChoice.stackableDiscount || false,
-                            discountedFrom: [localChoice.id],
-                            calcValue: discountCal,
-                            discountedValue: discountVal,
-                            showDiscount: localChoice.discountShow || false,
-                            replaceText: score.replaceText || false,
-                            hideValue: score.hideDisValue || false,
-                            hideIcon: score.hideDisIcon || false
-                        }
-
                         if (localChoice.discountShow) {
-                            aDiscount.showDiscount = true;
-                            aDiscount.beforeText = localChoice.discountBeforeText;
-                            aDiscount.afterText = localChoice.discountAfterText;
-                            if (localChoice.replaceScoreText) aDiscount.replaceText = true;
-                            if (localChoice.hideScoreValue) aDiscount.hideValue = true;
-                            if (localChoice.hideScoreIcon) aDiscount.hideIcon = true;
+                            score.discountShow = localChoice.discountShow;
+                            score.discountBeforeText = localChoice.discountBeforeText;
+                            score.discountAfterText = localChoice.discountAfterText;
+                            score.replaceText = localChoice.replaceScoreText || false;
+                            score.hideDisValue = localChoice.hideScoreValue || false;
+                            score.hideDisIcon = localChoice.hideScoreIcon || false;
                         }
+                        if (!Array.isArray(score.discountedFrom)) score.discountedFrom = [];
+                        score.discountIsOn = true;
+                        score.discountedFrom.push(localChoice.id);
+                        score.notStackableDiscount = true;
                     }
-                    score.tmpDiscount.push(aDiscount);
+                
+                    if (typeof score.discountScore !== 'undefined' && score.discountScore !== tmpDisScore) {
+                        score.tmpDisScore = tmpDisScore - score.discountScore;
+                        score.isChangeDiscount = true;
+                    } else {
+                        score.isChangeDiscount = false;
+                    }
                 }
-            } else {
-                score.discountScore = discountVal;
-                score.discountScoreCal = discountCal;
-                if (localChoice.discountShow) {
-                    score.discountShow = localChoice.discountShow;
-                    score.discountBeforeText = localChoice.discountBeforeText;
-                    score.discountAfterText = localChoice.discountAfterText;
-                    score.replaceText = localChoice.replaceScoreText || false;
-                    score.hideDisValue = localChoice.hideScoreValue || false;
-                    score.hideDisIcon = localChoice.hideScoreIcon || false;
-                }
-                if (!Array.isArray(score.discountedFrom)) score.discountedFrom = [];
-                score.discountIsOn = true;
-                score.discountedFrom.push(localChoice.id);
-                score.notStackableDiscount = true;
-            }
-        
-            if (typeof score.discountScore !== 'undefined' && score.discountScore !== tmpDisScore) {
-                score.tmpDisScore = tmpDisScore - score.discountScore;
-                score.isChangeDiscount = true;
-            } else {
-                score.isChangeDiscount = false;
             }
         }
     }
@@ -2784,6 +2823,7 @@ export function cleanActivated() {
                 delete cChoice.activatedRandom;
                 delete cChoice.activatedRandomMul;
                 delete cChoice.numDiscountChoices;
+                delete cChoice.appliedDisChoices;
                 
                 if (cChoice.addToAllowChoice && typeof cChoice.idOfAllowChoice !== 'undefined' && typeof cChoice.numbAddToAllowChoice !== 'undefined') {
                     for (let i = 0; i < cChoice.idOfAllowChoice.length; i++) {
@@ -2937,6 +2977,8 @@ export function cleanActivated() {
             if (!cChoice.isActive) {
                 delete cChoice.forcedActivated;
                 delete cChoice.activatedFrom;
+                delete cChoice.numDiscountChoices;
+                delete cChoice.appliedDisChoices;
             }
 
             delete cChoice.templateStack;
@@ -2979,6 +3021,8 @@ export function cleanActivated() {
             if (!cChoice.isActive) {
                 delete cChoice.forcedActivated;
                 delete cChoice.activatedFrom;
+                delete cChoice.numDiscountChoices;
+                delete cChoice.appliedDisChoices;
             }
 
             delete cChoice.templateStack;
@@ -3054,12 +3098,7 @@ export function cleanActivated() {
                                 for (let i = 0; i < aChoice.discountChoices.length; i++) {
                                     const cMap = choiceMap.get(aChoice.discountChoices[i]);
                                     if (typeof cMap !== 'undefined') {
-                                        for (let j = 0; j < cMap.choice.scores.length; j++) {
-                                            const score = cMap.choice.scores[j];
-                                            if (!score.isNotDiscountable && (aChoice.discountPointTypes?.length === 0 || aChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                selectDiscount(aChoice, score);
-                                            }
-                                        }
+                                        selectDiscount(aChoice, cMap.choice);
                                     }
                                 }
                             }
@@ -3071,12 +3110,7 @@ export function cleanActivated() {
                                         for (let j = 0; j < groupData.elements.length; j++) {
                                             const cMap = choiceMap.get(groupData.elements[j]);
                                             if (typeof cMap !== 'undefined') {
-                                                for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                                    const score = cMap.choice.scores[k];
-                                                    if (!score.isNotDiscountable && (aChoice.discountPointTypes?.length === 0 || aChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                        selectDiscount(aChoice, score);
-                                                    }
-                                                }
+                                                selectDiscount(aChoice, cMap.choice);
                                             }
                                         }
                                     }
@@ -3368,12 +3402,7 @@ export function cleanActivated() {
                                 for (let i = 0; i < aChoice.discountChoices.length; i++) {
                                     const cMap = choiceMap.get(aChoice.discountChoices[i]);
                                     if (typeof cMap !== 'undefined') {
-                                        for (let j = 0; j < cMap.choice.scores.length; j++) {
-                                            const score = cMap.choice.scores[j];
-                                            if (!score.isNotDiscountable && (aChoice.discountPointTypes?.length === 0 || aChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                deselectDiscount(aChoice, score);
-                                            }
-                                        }
+                                        deselectDiscount(aChoice, cMap.choice);
                                     }
                                 }
                             }
@@ -3385,12 +3414,7 @@ export function cleanActivated() {
                                         for (let j = 0; j < groupData.elements.length; j++) {
                                             const cMap = choiceMap.get(groupData.elements[j]);
                                             if (typeof cMap !== 'undefined') {
-                                                for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                                    const score = cMap.choice.scores[k];
-                                                    if (!score.isNotDiscountable && (aChoice.discountPointTypes?.length === 0 || aChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                        deselectDiscount(aChoice, score);
-                                                    }
-                                                }
+                                                deselectDiscount(aChoice, cMap.choice);
                                             }
                                         }
                                     }
@@ -3421,7 +3445,10 @@ export function cleanActivated() {
     }
 };
 function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
-    Array.from(activatedMap.entries()).forEach(([id]) => {
+    const activated = Array.from(activatedMap.keys());
+
+    for (let i = 0; i < activated.length; i++) {
+        const id = activated[i];
         const cMap = choiceMap.get(id);
         if (typeof cMap !== 'undefined') {
             const aRow = cMap.row;
@@ -3429,18 +3456,19 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
             const thisTmpScores = new SvelteMap<string, number>();
             let isDiscounted = false;
             let isChanged = false;
-            if (localChoice.useDiscountCount && typeof localChoice.numDiscountChoices === 'undefined') localChoice.numDiscountChoices = 0;
-            for (let i = 0; i < aChoice.scores.length; i++) {
-                const aScore = aChoice.scores[i];
+            if (localChoice.useDiscountCount && !localChoice.appliedDisChoices) localChoice.appliedDisChoices = [];
+            for (let j = 0; j < aChoice.scores.length; j++) {
+                const aScore = aChoice.scores[j];
                 if (!aScore.isNotRecalculatable) {
                     const point = pointTypeMap.get(aScore.id);
                     if (typeof point !== 'undefined') {
                         if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
                             const mul = aChoice.multipleUseVariable;
+                            const count = localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable && localChoice.stackableDiscount && localChoice.discountCount ? localChoice.discountCount * localChoice.multipleUseVariable : localChoice.discountCount;
 
-                            if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && localChoice.discountCount && localChoice.discountCount > localChoice.numDiscountChoices!)) {
+                            if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && count && count > localChoice.appliedDisChoices!.length)) {
                                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                    for (let j = mul - 1; j >= 0; j--) {
+                                    for (let k = mul - 1; k >= 0; k--) {
                                         if (aChoice.isActive) {
                                             point.startingSum += aScore.tmpDisScore;
                                         }
@@ -3457,6 +3485,7 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                                         delete aScore.isChangeDiscount;
                                         delete aScore.tmpDisScore;
                                 }
+                                isChanged = true;
                                 if (aChoice.isActive) {
                                     aScore.appliedDiscount = true;
                                     isDiscounted = true;
@@ -3465,12 +3494,12 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                         }
                         if (!changedScores.has(aScore.idx)) {
                             const hasScore = localChoice.scores.length > 0;
-                                const scoreLeng = localChoice.scores.length || 1;
-                                for (let j = 0; j < scoreLeng; j++) {
-                                    const lScore = hasScore ? localChoice.scores[j] : null;
-                                    const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
-                                    const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
-                                    if (!hasScore || hasScore && lPoint) {
+                            const scoreLeng = localChoice.scores.length || 1;
+                            for (let k = 0; k < scoreLeng; k++) {
+                                const lScore = hasScore ? localChoice.scores[k] : null;
+                                const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
+                                const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
+                                if (!hasScore || hasScore && lPoint) {
                                     if (aChoice.isActive) {
                                         const afterSelected = checkRequirements(aScore.requireds);
                                         const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
@@ -3481,16 +3510,16 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                                         aRow.currentChoices += 1;
                                         if (lPoint) lPoint.startingSum -= tmpScore;
                                         if (beforeSelected !== afterSelected) {
-                                            let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                                            let scoreVal = aScore.discountIsOn && aScore.appliedDiscount && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                             if (beforeSelected) {
                                                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                     const mul = aChoice.multipleUseVariable;
                                                     
-                                                    for (let k = mul - 1; k >= 0; k--) {
+                                                    for (let l = mul - 1; l >= 0; l--) {
                                                         if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[k]) {
                                                             point.startingSum += scoreVal;
                                                             thisTmpScores.set(aScore.id, scoreVal);
-                                                            aScore.isActiveMul[k] = false;
+                                                            aScore.isActiveMul[l] = false;
                                                         }
                                                     }
                                                 } else if (!aChoice.isSelectableMultiple) {
@@ -3504,11 +3533,11 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                                                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                     const mul = aChoice.multipleUseVariable;
                                                     if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
-                                                    for (let k = mul - 1; k >= 0; k--) {
-                                                        if (!aScore.isActiveMul[k]) {
+                                                    for (let l = mul - 1; l >= 0; l--) {
+                                                        if (!aScore.isActiveMul[l]) {
                                                             point.startingSum -= scoreVal;
                                                             thisTmpScores.set(aScore.id, scoreVal);
-                                                            aScore.isActiveMul[k] = true;
+                                                            aScore.isActiveMul[l] = true;
                                                         }
                                                     }
                                                 } else if (!aChoice.isSelectableMultiple) {
@@ -3519,7 +3548,9 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                                                     }
                                                 }
                                             }
-                                            isChanged = true;
+                                            if (!isChanged) {
+                                                isChanged = true;
+                                            }
                                             changedScores.add(aScore.idx);
                                         }
                                     }
@@ -3529,12 +3560,12 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                     }
                 }
             }
-            if (isDiscounted && typeof localChoice.numDiscountChoices !== 'undefined') {
-                localChoice.numDiscountChoices += 1;
+            if (isDiscounted && localChoice.appliedDisChoices) {
+                if (localChoice.appliedDisChoices.indexOf(aChoice.id) === -1) localChoice.appliedDisChoices.push(aChoice.id);
             }
             if (isChanged) updateScores(aChoice, thisTmpScores, ++count, changedScores);
         }
-    });
+    }
 };
 function selectObject(str: string, newActivatedList: string[]) {
     let cStr = str.split('/IMG#');
@@ -3575,12 +3606,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                             if (typeof dRow !== 'undefined') {
                                 for (let j = 0; j < dRow.objects.length; j++) {
                                     const dChoice = dRow.objects[j];
-                                    for (let k = 0; k < dChoice.scores.length; k++) {
-                                        const score = dChoice.scores[k];
-                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                            selectDiscount(localChoice, score);
-                                        }
-                                    }
+                                    selectDiscount(localChoice, dChoice);
                                     dList.add(dChoice.id);
                                 }
                             }
@@ -3591,13 +3617,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                             if (!dList.has(localChoice.discountChoices[i])) {
                                 const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                 if (typeof cMap !== 'undefined') {
-                                    const dChoice = cMap.choice;
-                                    for (let j = 0; j < dChoice.scores.length; j++) {
-                                        const score = dChoice.scores[j];
-                                        if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                            selectDiscount(localChoice, score);
-                                        }
-                                    }
+                                    selectDiscount(localChoice, cMap.choice);
                                 }
                             }
                         }
@@ -3610,12 +3630,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                                 for (let j = 0; j < groupData.elements.length; j++) {
                                     const cMap = choiceMap.get(groupData.elements[j]);
                                     if (typeof cMap !== 'undefined') {
-                                        for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                            const score = cMap.choice.scores[k];
-                                            if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                selectDiscount(localChoice, score);
-                                            }
-                                        }
+                                        selectDiscount(localChoice, cMap.choice);
                                     }
                                 }
                             }
@@ -3632,28 +3647,37 @@ function selectObject(str: string, newActivatedList: string[]) {
                 const point = pointTypeMap.get(score.id);
                 if (typeof point !== 'undefined') {
                     let val = score.value;
-                    if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
-                        const cMap = choiceMap.get(score.discountedFrom[0]);
+                    if (score.appliedDiscount && typeof score.discountScore !== 'undefined') {
+                        val = score.discountScore;
+                    } else if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
+                        let isDiscounted = false;
+                        for (let j = 0; j < score.discountedFrom.length; j++) {
+                            const cMap = choiceMap.get(score.discountedFrom[j]);
 
-                        if (typeof cMap !== 'undefined') {
-                            const dChoice = cMap.choice;
+                            if (typeof cMap !== 'undefined') {
+                                const dChoice = cMap.choice;
 
-                            if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
-                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
-                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
-                                    countSet.add(dChoice);
+                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                    const count = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable && dChoice.stackableDiscount ? dChoice.discountCount * dChoice.multipleUseVariable : dChoice.discountCount;
+                                    if (!dChoice.appliedDisChoices) dChoice.appliedDisChoices = [];
+                                    if (count > dChoice.appliedDisChoices.length) {
+                                        countSet.add(dChoice);
+                                        val = score.discountScore;
+                                        score.appliedDiscount = true;
+                                        isDiscounted = true;
+                                        break;
+                                    }
+                                } else {
                                     val = score.discountScore;
                                     score.appliedDiscount = true;
-                                } else {
-                                    if (typeof score.tmpDiscount !== 'undefined') {
-                                        for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                            if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
-                                        }
-                                    }
+                                    isDiscounted = true;
+                                    break;
                                 }
-                            } else {
-                                val = score.discountScore;
-                                score.appliedDiscount = true;
+                            }
+                        }
+                        if (!isDiscounted && typeof score.tmpDiscount !== 'undefined') {
+                            for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                if (val > score.tmpDiscount[j].discountedValue) val = score.tmpDiscount[j].discountedValue;
                             }
                         }
                     }
@@ -3672,8 +3696,8 @@ function selectObject(str: string, newActivatedList: string[]) {
 
         if (countSet.size > 0) {
             countSet.forEach((dChoice) => {
-                if (typeof dChoice.numDiscountChoices !== 'undefined') {
-                    dChoice.numDiscountChoices += 1;
+                if (dChoice.appliedDisChoices) {
+                    if (dChoice.appliedDisChoices.indexOf(localChoice.id) === -1) dChoice.appliedDisChoices.push(localChoice.id);
                 }
             });
         }
@@ -4206,12 +4230,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                 if (typeof dRow !== 'undefined') {
                                     for (let j = 0; j < dRow.objects.length; j++) {
                                         const dChoice = dRow.objects[j];
-                                        for (let k = 0; k < dChoice.scores.length; k++) {
-                                            const score = dChoice.scores[k];
-                                            if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                selectDiscount(localChoice, score);
-                                            }
-                                        }
+                                        selectDiscount(localChoice, dChoice);
                                         dList.add(dChoice.id);
                                     }
                                 }
@@ -4222,13 +4241,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                 if (!dList.has(localChoice.discountChoices[i])) {
                                     const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                     if (typeof cMap !== 'undefined') {
-                                        const dChoice = cMap.choice;
-                                        for (let j = 0; j < dChoice.scores.length; j++) {
-                                            const score = dChoice.scores[j];
-                                            if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                selectDiscount(localChoice, score);
-                                            }
-                                        }
+                                        selectDiscount(localChoice, cMap.choice);
                                     }
                                 }
                             }
@@ -4241,12 +4254,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                     for (let j = 0; j < groupData.elements.length; j++) {
                                         const cMap = choiceMap.get(groupData.elements[j]);
                                         if (typeof cMap !== 'undefined') {
-                                            for (let k = 0; k < cMap.choice.scores.length; k++) {
-                                                const score = cMap.choice.scores[k];
-                                                if (!score.isNotDiscountable && (localChoice.discountPointTypes?.length === 0 || localChoice.discountPointTypes?.indexOf(score.id) !== -1)) {
-                                                    selectDiscount(localChoice, score);
-                                                }
-                                            }
+                                            selectDiscount(localChoice, cMap.choice);
                                         }
                                     }
                                 }
@@ -4272,8 +4280,8 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                             const dChoice = cMap.choice;
 
                             if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
-                                if (typeof dChoice.numDiscountChoices === 'undefined') dChoice.numDiscountChoices = 0;
-                                if (dChoice.discountCount > dChoice.numDiscountChoices) {
+                                if (!dChoice.appliedDisChoices) dChoice.appliedDisChoices = [];
+                                if (dChoice.discountCount > dChoice.appliedDisChoices.length) {
                                     countSet.add(dChoice);
                                     val = score.discountScore;
                                     score.appliedDiscount = true;
@@ -4308,8 +4316,8 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
 
         if (countSet.size > 0) {
             countSet.forEach((dChoice) => {
-                if (typeof dChoice.numDiscountChoices !== 'undefined') {
-                    dChoice.numDiscountChoices += 1;
+                if (dChoice.appliedDisChoices) {
+                    if (dChoice.appliedDisChoices.indexOf(localChoice.id) === -1) dChoice.appliedDisChoices.push(localChoice.id);
                 }
             });
         }
@@ -4852,6 +4860,7 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
                 newChoice.id = `${newChoice.id.split('/D#')[0]}${suffix}`;
                 newChoice.isActive = false;
                 delete newChoice.forcedActivated;
+                delete newChoice.appliedDisChoices;
 
                 for (let j = 0; j < newChoice.scores.length; j++) {
                     const score = newChoice.scores[j];
@@ -4860,21 +4869,7 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
                     scoreSet.add(score.idx);
                     delete score.isActive;
                     delete score.setValue;
-                    delete score.discountIsOn;
-                    delete score.discountShow;
-                    delete score.discountBeforeText;
-                    delete score.discountAfterText;
-                    delete score.discountScore;
-                    delete score.discountScoreCal;
-                    delete score.isChangeDiscount;
-                    delete score.tmpDisScore;
-                    delete score.tmpDiscount;
-                    delete score.discountedFrom;
-                    delete score.dupTextA;
-                    delete score.dupTextB;
-                    delete score.discountTextA;
-                    delete score.discountTextB;
-                    delete score.notStackableDiscount;
+                    deleteDiscount(score);
                 }
 
                 for (let j = 0; j < newChoice.addons.length; j++) {

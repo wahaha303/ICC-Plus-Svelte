@@ -172,14 +172,35 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.2.5 / ${getDate('2025-08-05T17:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Adjusted 'Specify Number of Choices to Be Discounted' to support stacking when 'Allow Stacking Discounts' is enabled.
+        - Fixed issue where discount text was not displaying correctly.
+
+        <span style="color: green">Addon</span>
+        - Fixed issue where text was cut off in addon.
+
+        <span style="color: green">Build Form</span>
+        - Added option to separate choice titles by row.
+
+        <span style="color: green">Global Settings</span>
+        - Added option to confirm before select/deselect all items in dropdown.
+
+        <span style="color: green">Viewer</span>
+        - Fixed issue where scrollbar was active before loading completed.
+        `
+    }, {
+        open: false,
         title: `v2.2.4 / ${getDate('2025-07-29T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Added option to hide score value in discount feature.
         - Added option to hide score icon in discount feature.
-        - Added option to set icon position for choices.
         - Fixed issue where multiple select choice did not work properly when allowed choices set.
         - Fixed issue where discount data was not properly initialized.
         - Fixed issue where image template did not switch to image top on small screens.
+
+        <span style="color: green">Point Type</span>
+        - Added option to set icon position for choices.
 
         <span style="color: green">Global Settings</span>
         - Moved option to enable Choice Edit Button from Display tab to General tab.
