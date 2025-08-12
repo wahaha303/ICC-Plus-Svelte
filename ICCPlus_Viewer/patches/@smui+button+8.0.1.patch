@@ -1,12 +1,12 @@
 diff --git a/node_modules/@smui/button/dist/Button.svelte b/node_modules/@smui/button/dist/Button.svelte
-index 9378004..28fc595 100644
+index 1527713..3321806 100644
 --- a/node_modules/@smui/button/dist/Button.svelte
 +++ b/node_modules/@smui/button/dist/Button.svelte
-@@ -48,6 +48,7 @@
-   {...restProps}
+@@ -49,6 +49,7 @@
    onclick={(e: MouseEvent) => {
      handleClick();
-+    e.currentTarget.blur();
      restProps.onclick?.(e);
++    e.currentTarget.blur();
    }}
    ><div class="mdc-button__ripple"></div>
+   {@render children?.()}{#if touch}<div

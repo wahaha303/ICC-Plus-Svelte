@@ -129,7 +129,7 @@
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import AppBuildForm from './AppBuildForm.svelte';
-	import { buildAutoSaveSlot, buildSaveSlots, saveToSlot, deleteSlot, getSelectedObjectId, loadActivated, oldSaveSlots, snackbarVariables } from '$lib/store/store.svelte';
+	import { buildAutoSaveSlot, buildSaveSlots, saveToSlot, deleteSlot, getSelectedObjectId, loadActivated, oldSaveSlots, snackbarVariables, loadFromSlot } from '$lib/store/store.svelte';
 
     let { open, onclose }: { open: boolean; onclose: () => void } = $props();
 
@@ -149,20 +149,29 @@
     let legacySlots = $derived(Array.from({ length: pageEnd - pageStart + 1}, (_, i) => oldSaveSlots[pageStart + i]));
     let isLegacy = $state(false);
 
-    function loadApp(index: number) {
-        loadActivated(buildSaveSlots[index].app);
+    async function loadApp(index: number) {
+        const key = `${location.pathname.replace(/\/index\.html$/, '/')}slot-${index}`;
+        const data = await loadFromSlot(key, 'buildStore');
+        loadActivated(data.app);
     }
 
-    function loadAutoSave() {
-        loadActivated(buildAutoSaveSlot.app);
+    async function loadAutoSave() {
+        const key = `${location.pathname.replace(/\/index\.html$/, '/')}autoSave`;
+        const data = await loadFromSlot(key, 'buildStore');
+        loadActivated(data.app);
     }
 
-    function loadLegacySave(index: number) {
-        loadActivated(legacySlots[index].app);
+    async function loadLegacySave(index: number) {
+        const key = legacySlots[index].name;
+        const data = await loadFromSlot(key, 'buildStore', true);
+        const result = Array.isArray(data.value) ? data.value.join(',') : data.value;
+        loadActivated(result);
     }
 
-    function copyBuildCode(index: number) {
-        const text = legacySlots[index].app;
+    async function copyBuildCode(index: number) {
+        const key = legacySlots[index].name;
+        const data = await loadFromSlot(key, 'buildStore', true);
+        const text = Array.isArray(data.value) ? data.value.join(',') : data.value;
 
         navigator.clipboard.writeText(text).then(() => {
             snackbarVariables.labelText = 'Build code copied to clipboard.'

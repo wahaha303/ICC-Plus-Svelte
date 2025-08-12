@@ -35,5 +35,10 @@ declare namespace svelte.JSX {
 	open?: boolean;
   }
 }
+declare module '@smui/textfield' {
+  import type { ComponentType } from 'svelte';
+  const Textfield: ComponentType<any>;
+  export default Textfield;
+}
 
 export {};

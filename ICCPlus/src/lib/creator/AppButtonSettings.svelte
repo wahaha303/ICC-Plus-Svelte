@@ -70,7 +70,7 @@
                                     {/if}
                                 </div>
                                 <FormField class="w-100 pb-3">
-                                    <Switch bind:checked={() => row.buttonRandom?? false, (e) => row.buttonRandom = e} onSMUISwitchChange={() => {
+                                    <Switch bind:checked={() => row.buttonRandom ?? false, (e) => row.buttonRandom = e} onSMUISwitchChange={() => {
                                         if (row.buttonRandom) {
                                             row.buttonRandomNumber = 1;
                                             row.isWeightedRandom = false;
@@ -81,10 +81,11 @@
                                             delete row.isWeightedRandom
                                             delete row.onlyUnselectedChoices;
                                             delete row.onlyIfNoChoices;
+                                            delete row.allowActivateUnselectable;
                                         }
                                     }} color="secondary" class="switch-scale" />
                                     {#snippet label()}
-                                        Random or Variable?
+                                        Variable or Random?
                                     {/snippet}
                                 </FormField>
                                 {#if row.buttonRandom}
@@ -102,20 +103,42 @@
                                         {/snippet}
                                     </FormField>
                                     <FormField class="w-100 pb-3">
-                                        <Switch bind:checked={() => row.onlyUnselectedChoices ?? false, (e) => row.onlyUnselectedChoices = e} color="secondary" class="switch-scale" />
+                                        <Switch bind:checked={() => row.onlyUnselectedChoices ?? false, (e) => row.onlyUnselectedChoices = e} onSMUISwitchChange={() => {
+                                            if (!row.onlyUnselectedChoices) {
+                                                delete row.onlyUnselectedChoices;
+                                            }
+                                        }} color="secondary" class="switch-scale" />
                                         {#snippet label()}
-                                            Only Unselected choices?
+                                            Only Unselected Choices?
                                         {/snippet}
                                     </FormField>
                                     <FormField class="w-100 pb-3">
-                                        <Switch bind:checked={() => row.onlyIfNoChoices ?? false, (e) => row.onlyIfNoChoices = e} color="secondary" class="switch-scale" />
+                                        <Switch bind:checked={() => row.allowActivateUnselectable ?? false, (e) => row.allowActivateUnselectable = e} onSMUISwitchChange={() => {
+                                            if (!row.allowActivateUnselectable) {
+                                                delete row.allowActivateUnselectable;
+                                            }
+                                        }} color="secondary" class="switch-scale" />
+                                        {#snippet label()}
+                                            Can Activate Unselectable Choices?
+                                        {/snippet}
+                                    </FormField>
+                                    <FormField class="w-100 pb-3">
+                                        <Switch bind:checked={() => row.onlyIfNoChoices ?? false, (e) => row.onlyIfNoChoices = e} onSMUISwitchChange={() => {
+                                            if (!row.onlyIfNoChoices) {
+                                                delete row.onlyIfNoChoices;
+                                            }
+                                        }} color="secondary" class="switch-scale" />
                                         {#snippet label()}
                                             Button can only be pressed if no choices is selected?
                                         {/snippet}
                                     </FormField>
                                 {:else}
                                     <FormField class="w-100 pb-3">
-                                        <Switch bind:checked={() => row.buttonType ?? false, (e) => row.buttonType = e} color="secondary" class="switch-scale" />
+                                        <Switch bind:checked={() => row.buttonType ?? false, (e) => row.buttonType = e} onSMUISwitchChange={() => {
+                                            if (!row.buttonType) {
+                                                delete row.buttonType;
+                                            }
+                                        }} color="secondary" class="switch-scale" />
                                         {#snippet label()}
                                             Toggleable?
                                         {/snippet}

@@ -15,6 +15,11 @@
                             </Wrapper>
                         {/each}
                     </div>
+                    {#if row.isWeightedRandom}
+                        <div class="col-12">
+                            <Textfield bind:value={() => choice.randomWeight ?? 100, (e) => choice.randomWeight = e} label="Random Weight" variant="filled" type="number" />
+                        </div>
+                    {/if}
                     <div class="py-3 px-5 col-12">
                         {#if choice.image && !app.hideImages}
                             <button type="button" onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} class="btn--image-background">
@@ -292,7 +297,7 @@
                                                     if (!choice.isNotSelectable) delete choice.isNotSelectable;
                                                 }} />
                                                 {#snippet label()}
-                                                    Cannot Be Selected
+                                                    Cannot Be Selected Manually
                                                 {/snippet}
                                             </FormField>
                                             <FormField class="col-12 m-1 p-0">
@@ -327,6 +332,25 @@
                                                     Allows the Player to Upload Image
                                                 {/snippet}
                                             </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isSelectDelayed ?? false, (e) => choice.isSelectDelayed = e} onchange={() => {
+                                                    if (choice.isSelectDelayed) {
+                                                        choice.selectDelayTime = 1000;
+                                                    } else {
+                                                        delete choice.isSelectDelayed;
+                                                        delete choice.selectDelayTime;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Will Be Selected After a Delay
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.isSelectDelayed}
+                                                <div class="col-12 m-1">Do not use this feature unless you know exactly what you're doing. User interactions during the delay may cause unexpected issues.</div>
+                                                <div class="col-12 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.selectDelayTime ?? 0, (e) => choice.selectDelayTime = e} label="Delay" type="number" suffix="ms" variant="filled" />
+                                                </div>
+                                            {/if}
                                         </div>
                                         {/if}
                                     </AcdContent>
@@ -382,6 +406,14 @@
                                                     }} />
                                                     {#snippet label()}
                                                         Allow Deselection of Activated Choices
+                                                    {/snippet}
+                                                </FormField>
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.isNotActiveUnselectable ?? false, (e) => choice.isNotActiveUnselectable = e} onchange={() => {
+                                                        if (!choice.isNotActiveUnselectable) delete choice.isNotActiveUnselectable;
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Prevent Activation of Unselectable Choices
                                                     {/snippet}
                                                 </FormField>
                                                 <FormField class="col-12 m-1 p-0">
@@ -1315,7 +1347,7 @@
     </div>
 {:else if !(bCreatorMode && row.isEditModeOn) && (isEnabled || !filterStyle.reqFilterVisibleIsOn)}
     <div class={objectWidthClass()}>
-        <span class:fullHeight={fullHeight} class:position-relative={app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow} class="d-flex">
+        <div class:fullHeight={fullHeight} class:position-relative={app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow} class="d-flex">
             {#if app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow}
                 <div class="choice-edit-button">
                     <IconButton onclickcapture={() => choice.isEditModeOn = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
@@ -1323,9 +1355,9 @@
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e)} oncontextmenu={() => console.log(choice)}>
+            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
-                    <span class="d-column w-100 p-0 align-items-center">
+                    <div class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
                             <div class="col-12" style={scoreText}>
                                 {@html DOMPurify.sanitize(replaceText(oriRow.title), sanitizeArg)}
@@ -1338,7 +1370,7 @@
                                 <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
                         {/if}
-                        <span class="w-100">
+                        <div class="w-100">
                             {#if choice.title !== '' && !row.objectTitleRemoved}
                                 <h3 class="m-0" style={objectTitle}>
                                     {@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}
@@ -1363,7 +1395,7 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if choice.template === 5 && choice.image && !row.objectImageRemoved}
+                            {#if choice.template === 5 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
                                     <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
@@ -1378,15 +1410,15 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice}  selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if choice.template === 4 && choice.image && !row.objectImageRemoved}
+                            {#if choice.template === 4 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
                                     <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
                             {/if}
-                        </span>
-                        <div class="d-column p-0 col w-100 {addonJustify}">
+                        </div>
+                        <div class="d-column p-0 col w-100{addonJustify}">
                             {#each choice.addons as addon}
                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                             {/each}
@@ -1394,7 +1426,7 @@
                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
                             <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                         {/if}
-                    </span>
+                    </div>
                 {:else}
                     {#if choice.template === 2}
                         <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
@@ -1438,7 +1470,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column p-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100{addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1450,7 +1482,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column p-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100{addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1493,7 +1525,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column p-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100{addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1514,7 +1546,7 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column p-0 col w-100 {addonJustify}">
+                                <div class="d-column p-0 col w-100{addonJustify}">
                                     {#each choice.addons as addon}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
                                     {/each}
@@ -1526,8 +1558,8 @@
                         {/if}
                     {/if}
                 {/if}
-            </span>
-        </span>
+            </div>
+        </div>
     </div>
 {/if}
 {#if currentDialog === 'dlgCommon'}
@@ -1705,7 +1737,7 @@
     let isEnabled = $derived.by(() => {
         return checkRequirements(choice.requireds);
     });
-    let addonJustify = $derived(choice.addonJustify ? `justify-${choice.addonJustify}` : '');
+    let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}` : '');
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight);
     let oriRow = $derived.by(() => {
@@ -1719,7 +1751,7 @@
     });
 
     let objectTitle = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         styles.push(`font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
@@ -1753,7 +1785,7 @@
     });
 
     let objectText = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         styles.push(`font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
@@ -1773,7 +1805,7 @@
         let bgImageIndex = 0;
         let bgColorIndex = 0;
         let filterIndex = 0;
-        let styles = [];
+        let styles: string[] = [];;
 
         if (objectStyle.objectBorderImage) {
             styles.push(`border-image: url('${objectStyle.objectBorderImage}') ${objectStyle.objectBorderImageSliceTop} ${objectStyle.objectBorderImageSliceRight} ${objectStyle.objectBorderImageSliceBottom} ${objectStyle.objectBorderImageSliceLeft} / ${objectStyle.objectBorderImageWidth}px ${objectStyle.objectBorderImageRepeat}; border-style: solid; padding: ${objectStyle.objectBorderImageWidth}px;`);
@@ -1953,7 +1985,7 @@
     });
 
     let objectImage = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
         const suffix = objectImageStyle.objectImgBorderRadiusIsPixels ? 'px' : '%';
 
         styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
@@ -1972,7 +2004,7 @@
     });
 
     let scoreText = $derived.by(() => {
-        let style = [];
+        let style: string[] = [];;
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
@@ -2433,65 +2465,67 @@
     }
 
     function selectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, num: number) {
-        let isLinked = false;
+        if (!fChoice.isNotSelectable || !localChoice.isNotActiveUnselectable) {
+            let isLinked = false;
 
-        if (fChoice.activateOtherChoice && typeof fChoice.activateThisChoice !== 'undefined' && linkedObjects.indexOf(localChoice.id) === -1 && fChoice.activateThisChoice.split(',').some(item => item.split('/ON#')[0] === localChoice.id)) {
-            linkedObjects.push(localChoice.id);
-            isLinked = true;
-        }
-        if (fChoice.isSelectableMultiple) {
-            if (fChoice.isMultipleUseVariable && typeof fChoice.numMultipleTimesMinus !== 'undefined' && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
-                let count = fChoice.multipleUseVariable;
-
-                if (num > 0) {
-                    for (let i = 0; i < num; i++) {
-                        selectedOneMore(fChoice, fRow);
-                        count++;
-                        if (!localChoice.isAllowDeselect) {
-                            fChoice.numMultipleTimesMinus += 1;
-                        }
-                    }
-                } else if (num < 0) {
-                    for (let i = 0; i > (num * -1); i++) {
-                        selectedOneLess(fChoice, fRow);
-                        count--;
-                        if (!localChoice.isAllowDeselect) {
-                            fChoice.numMultipleTimesPluss -= 1;
-                        }
-                    }
-                }
-                if (fChoice.multipleUseVariable !== count) {
-                    const limitVal = Math.abs(fChoice.numMultipleTimesMinus - fChoice.numMultipleTimesPluss);
-
-                    if (fChoice.numMultipleTimesMinus > fChoice.numMultipleTimePluss) {
-                        const tmpAct = tmpActivatedMap.get(fChoice.id);
-
-                        if (num > 0) {
-                            fChoice.numMultipleTimesMinus -= limitVal;
-                            if (typeof tmpAct !== 'undefined') {
-                                tmpAct.multiple += limitVal;
-                            } else {
-                                tmpActivatedMap.set(fChoice.id, {multiple: limitVal, isAllowDeselect: localChoice.isAllowDeselect || false});
-                            }
-                        } else if (num < 0) {
-                            if (typeof tmpAct !== 'undefined') {
-                                tmpAct.multiple -= limitVal;
-                            } else {
-                                tmpActivatedMap.set(fChoice.id, {multiple: -limitVal, isAllowDeselect: localChoice.isAllowDeselect || false});
-                            }
-                        }
-                    }
-                }
+            if (fChoice.activateOtherChoice && typeof fChoice.activateThisChoice !== 'undefined' && linkedObjects.indexOf(localChoice.id) === -1 && fChoice.activateThisChoice.split(',').some(item => item.split('/ON#')[0] === localChoice.id)) {
+                linkedObjects.push(localChoice.id);
+                isLinked = true;
             }
-        } else {
-            if (!fChoice.isActive) activateObject(fChoice, fRow);
-            if (!localChoice.isAllowDeselect) fChoice.forcedActivated = true;
-            if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
-            if (!isLinked) fChoice.activatedFrom++;
-        }
-        if (!fChoice.isActive) {
-            delete fChoice.forcedActivated;
-            tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect || false});
+            if (fChoice.isSelectableMultiple) {
+                if (fChoice.isMultipleUseVariable && typeof fChoice.numMultipleTimesMinus !== 'undefined' && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
+                    let count = fChoice.multipleUseVariable;
+
+                    if (num > 0) {
+                        for (let i = 0; i < num; i++) {
+                            selectedOneMore(fChoice, fRow);
+                            count++;
+                            if (!localChoice.isAllowDeselect) {
+                                fChoice.numMultipleTimesMinus += 1;
+                            }
+                        }
+                    } else if (num < 0) {
+                        for (let i = 0; i > (num * -1); i++) {
+                            selectedOneLess(fChoice, fRow);
+                            count--;
+                            if (!localChoice.isAllowDeselect) {
+                                fChoice.numMultipleTimesPluss -= 1;
+                            }
+                        }
+                    }
+                    if (fChoice.multipleUseVariable !== count) {
+                        const limitVal = Math.abs(fChoice.numMultipleTimesMinus - fChoice.numMultipleTimesPluss);
+
+                        if (fChoice.numMultipleTimesMinus > fChoice.numMultipleTimePluss) {
+                            const tmpAct = tmpActivatedMap.get(fChoice.id);
+
+                            if (num > 0) {
+                                fChoice.numMultipleTimesMinus -= limitVal;
+                                if (typeof tmpAct !== 'undefined') {
+                                    tmpAct.multiple += limitVal;
+                                } else {
+                                    tmpActivatedMap.set(fChoice.id, {multiple: limitVal, isAllowDeselect: localChoice.isAllowDeselect || false});
+                                }
+                            } else if (num < 0) {
+                                if (typeof tmpAct !== 'undefined') {
+                                    tmpAct.multiple -= limitVal;
+                                } else {
+                                    tmpActivatedMap.set(fChoice.id, {multiple: -limitVal, isAllowDeselect: localChoice.isAllowDeselect || false});
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (!fChoice.isActive) activateObject(fChoice, fRow);
+                if (!localChoice.isAllowDeselect) fChoice.forcedActivated = true;
+                if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                if (!isLinked) fChoice.activatedFrom++;
+            }
+            if (!fChoice.isActive) {
+                delete fChoice.forcedActivated;
+                tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect || false});
+            }
         }
     }
 
@@ -3043,7 +3077,7 @@
         if (isActivated) activateTempChoices();
     }
 
-    function activateObject(localChoice: Choice, localRow: Row, e?: MouseEvent) {
+    function activateObject(localChoice: Choice, localRow: Row, e?: MouseEvent, isManually: boolean = false) {
         let origRow = localRow;
         if (localRow.isResultRow || localRow.isGroupRow) {
             const cMap = choiceMap.get(localChoice.id);
@@ -3064,7 +3098,7 @@
                 selectedOneMore(localChoice, origRow);
             }
         } else {
-            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localChoice.isNotSelectable && !localChoice.forcedActivated) {
+            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated) {
                 if (localChoice.isActive) {
                     if (!localChoice.selectOnce) deselectObject(localChoice, origRow);
                 } else {
@@ -3631,34 +3665,71 @@
                 delete localChoice.appliedDisChoices;
             }
 
-            if (linkedObjects.indexOf(localChoice.id) === -1) {
-                if (localChoice.isFadeTransition) {
-                    if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
-                        app.fadeTransitionColor = '000000FF';
-                    } else {
-                        app.fadeTransitionColor = localChoice.fadeTransitionColor;
-                    }
+            if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
+                if (!localChoice.selectDelayTimer) {
+                    localChoice.selectDelayTimer = window.setTimeout(() => {
+                        if (linkedObjects.indexOf(localChoice.id) === -1) {
+                            if (localChoice.isFadeTransition) {
+                                if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                    app.fadeTransitionColor = '000000FF';
+                                } else {
+                                    app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                }
 
-                    if (typeof localChoice.fadeInTransitionTime === 'undefined') {
-                        app.fadeTransitionTime = 0.25;
-                    } else {
-                        app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
-                    }
+                                if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                    app.fadeTransitionTime = 0.25;
+                                } else {
+                                    app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                }
 
-                    app.fadeTransitionIsOn = true;
-                    window.setTimeout(() => {
-                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                app.fadeTransitionIsOn = true;
+                                window.setTimeout(() => {
+                                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                    }
+                                    app.fadeTransitionIsOn = false;
+                                    deselectProcess();
+                                }, app.fadeTransitionTime * 1000);
+                            } else {
+                                deselectProcess();
+                            }
                         }
-                        app.fadeTransitionIsOn = false;
-                        deselectProcess();
-                    }, app.fadeTransitionTime * 1000);
-                } else {
-                    deselectProcess();
+                        if (linkedObjects.indexOf(localChoice.id) === 0) {
+                            linkedObjects.splice(0);
+                        }
+                        delete localChoice.selectDelayTimer;
+                    }, localChoice.selectDelayTime);
                 }
-            }
-            if (linkedObjects.indexOf(localChoice.id) === 0) {
-                linkedObjects.splice(0);
+            } else {
+                if (linkedObjects.indexOf(localChoice.id) === -1) {
+                    if (localChoice.isFadeTransition) {
+                        if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                            app.fadeTransitionColor = '000000FF';
+                        } else {
+                            app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                        }
+
+                        if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                            app.fadeTransitionTime = 0.25;
+                        } else {
+                            app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                        }
+
+                        app.fadeTransitionIsOn = true;
+                        window.setTimeout(() => {
+                            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                            }
+                            app.fadeTransitionIsOn = false;
+                            deselectProcess();
+                        }, app.fadeTransitionTime * 1000);
+                    } else {
+                        deselectProcess();
+                    }
+                }
+                if (linkedObjects.indexOf(localChoice.id) === 0) {
+                    linkedObjects.splice(0);
+                }
             }
         }
     }
@@ -4310,56 +4381,113 @@
                         deselectObject(localChoice, localRow);
                     }
                 }
-
-                if (localChoice.customTextfieldIsOn && !isOverDlg) {
-                    wordDialog.choice = localChoice;
-                    wordDialog.row = localRow;
-                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                    wordDialog.prevText = localChoice.wordChangeSelect || '';
-                    wordDialog.isWord = true;
-                    currentDialog = 'dlgCommon';
-                    
-                    return;
-                }
-
-                if (localChoice.confirmIsOn && !isOverDlg) {
-                    wordDialog.choice = localChoice;
-                    wordDialog.row = localRow;
-                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                    wordDialog.isWord = false;
-                    currentDialog = 'dlgCommon';
-                    
-                    return;
-                }
-
-                if (linkedObjects.indexOf(localChoice.id) === -1) {
-                    if (localChoice.isFadeTransition) {
-                        if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
-                            app.fadeTransitionColor = '000000FF';
-                        } else {
-                            app.fadeTransitionColor = localChoice.fadeTransitionColor;
-                        }
-
-                        if (typeof localChoice.fadeInTransitionTime === 'undefined') {
-                            app.fadeTransitionTime = 0.25;
-                        } else {
-                            app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
-                        }
-
-                        app.fadeTransitionIsOn = true;
-                        window.setTimeout(() => {
-                            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
+                    if (!localChoice.selectDelayTimer) {
+                        localChoice.selectDelayTimer = window.setTimeout(() => {
+                            if (localChoice.customTextfieldIsOn && !isOverDlg) {
+                                wordDialog.choice = localChoice;
+                                wordDialog.row = localRow;
+                                wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                wordDialog.prevText = localChoice.wordChangeSelect || '';
+                                wordDialog.isWord = true;
+                                currentDialog = 'dlgCommon';
+                                
+                                return;
                             }
-                            app.fadeTransitionIsOn = false;
-                            selectProcess();
-                        }, app.fadeTransitionTime * 1000);
-                    } else {
-                        selectProcess();
+
+                            if (localChoice.confirmIsOn && !isOverDlg) {
+                                wordDialog.choice = localChoice;
+                                wordDialog.row = localRow;
+                                wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                wordDialog.isWord = false;
+                                currentDialog = 'dlgCommon';
+                                
+                                return;
+                            }
+
+                            if (linkedObjects.indexOf(localChoice.id) === -1) {
+                                if (localChoice.isFadeTransition) {
+                                    if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                        app.fadeTransitionColor = '000000FF';
+                                    } else {
+                                        app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                    }
+
+                                    if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                        app.fadeTransitionTime = 0.25;
+                                    } else {
+                                        app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                    }
+
+                                    app.fadeTransitionIsOn = true;
+                                    window.setTimeout(() => {
+                                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                        }
+                                        app.fadeTransitionIsOn = false;
+                                        selectProcess();
+                                    }, app.fadeTransitionTime * 1000);
+                                } else {
+                                    selectProcess();
+                                }
+                            }
+                            if (linkedObjects.indexOf(localChoice.id) === 0) {
+                                linkedObjects.splice(0);
+                            }
+                            delete localChoice.selectDelayTimer;
+                        }, localChoice.selectDelayTime);
                     }
-                }
-                if (linkedObjects.indexOf(localChoice.id) === 0) {
-                    linkedObjects.splice(0);
+                } else {
+                    if (localChoice.customTextfieldIsOn && !isOverDlg) {
+                        wordDialog.choice = localChoice;
+                        wordDialog.row = localRow;
+                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                        wordDialog.prevText = localChoice.wordChangeSelect || '';
+                        wordDialog.isWord = true;
+                        currentDialog = 'dlgCommon';
+                        
+                        return;
+                    }
+
+                    if (localChoice.confirmIsOn && !isOverDlg) {
+                        wordDialog.choice = localChoice;
+                        wordDialog.row = localRow;
+                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                        wordDialog.isWord = false;
+                        currentDialog = 'dlgCommon';
+                        
+                        return;
+                    }
+
+                    if (linkedObjects.indexOf(localChoice.id) === -1) {
+                        if (localChoice.isFadeTransition) {
+                            if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                app.fadeTransitionColor = '000000FF';
+                            } else {
+                                app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                            }
+
+                            if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                app.fadeTransitionTime = 0.25;
+                            } else {
+                                app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                            }
+
+                            app.fadeTransitionIsOn = true;
+                            window.setTimeout(() => {
+                                if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                    app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                }
+                                app.fadeTransitionIsOn = false;
+                                selectProcess();
+                            }, app.fadeTransitionTime * 1000);
+                        } else {
+                            selectProcess();
+                        }
+                    }
+                    if (linkedObjects.indexOf(localChoice.id) === 0) {
+                        linkedObjects.splice(0);
+                    }
                 }
             }
         }
@@ -4999,34 +5127,71 @@
                         if (typeof localChoice.multipleUseVariable === 'undefined') localChoice.multipleUseVariable = 0;
                         if (typeof localChoice.numMultipleTimesPluss === 'undefined') localChoice.numMultipleTimesPluss = 0;
                         if (localChoice.numMultipleTimesPluss > localChoice.multipleUseVariable) {
-                            if (linkedObjects.indexOf(localChoice.id) === -1) {
-                                if (localChoice.isFadeTransition) {
-                                    if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
-                                        app.fadeTransitionColor = '000000FF';
-                                    } else {
-                                        app.fadeTransitionColor = localChoice.fadeTransitionColor;
-                                    }
+                            if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
+                                if (!localChoice.selectDelayTimer) {
+                                    localChoice.selectDelayTimer = window.setTimeout(() => {
+                                        if (linkedObjects.indexOf(localChoice.id) === -1) {
+                                            if (localChoice.isFadeTransition) {
+                                                if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                                    app.fadeTransitionColor = '000000FF';
+                                                } else {
+                                                    app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                                }
 
-                                    if (typeof localChoice.fadeInTransitionTime === 'undefined') {
-                                        app.fadeTransitionTime = 0.25;
-                                    } else {
-                                        app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
-                                    }
+                                                if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                                    app.fadeTransitionTime = 0.25;
+                                                } else {
+                                                    app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                                }
 
-                                    app.fadeTransitionIsOn = true;
-                                    window.setTimeout(() => {
-                                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                                app.fadeTransitionIsOn = true;
+                                                window.setTimeout(() => {
+                                                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                                    }
+                                                    app.fadeTransitionIsOn = false;
+                                                    selectProcess();
+                                                }, app.fadeTransitionTime * 1000);
+                                            } else {
+                                                selectProcess();
+                                            }
                                         }
-                                        app.fadeTransitionIsOn = false;
-                                        selectProcess();
-                                    }, app.fadeTransitionTime * 1000);
-                                } else {
-                                    selectProcess();
+                                        if (linkedObjects.indexOf(localChoice.id) === 0) {
+                                            linkedObjects.splice(0);
+                                        }
+                                        delete localChoice.selectDelayTimer;
+                                    }, localChoice.selectDelayTime);
                                 }
-                            }
-                            if (linkedObjects.indexOf(localChoice.id) === 0) {
-                                linkedObjects.splice(0);
+                            } else {
+                                if (linkedObjects.indexOf(localChoice.id) === -1) {
+                                    if (localChoice.isFadeTransition) {
+                                        if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                            app.fadeTransitionColor = '000000FF';
+                                        } else {
+                                            app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                        }
+
+                                        if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                            app.fadeTransitionTime = 0.25;
+                                        } else {
+                                            app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                        }
+
+                                        app.fadeTransitionIsOn = true;
+                                        window.setTimeout(() => {
+                                            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                            }
+                                            app.fadeTransitionIsOn = false;
+                                            selectProcess();
+                                        }, app.fadeTransitionTime * 1000);
+                                    } else {
+                                        selectProcess();
+                                    }
+                                }
+                                if (linkedObjects.indexOf(localChoice.id) === 0) {
+                                    linkedObjects.splice(0);
+                                }
                             }
                         }
                     } else if (typeof localChoice.multipleScoreId !== 'undefined') {
@@ -5522,34 +5687,71 @@
                 if (localChoice.isMultipleUseVariable) {
                     if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
                     if (localChoice.multipleUseVariable > localChoice.numMultipleTimesMinus) {
-                        if (linkedObjects.indexOf(localChoice.id) === -1) {
-                            if (localChoice.isFadeTransition) {
-                                if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
-                                    app.fadeTransitionColor = '000000FF';
-                                } else {
-                                    app.fadeTransitionColor = localChoice.fadeTransitionColor;
-                                }
+                        if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
+                            if (!localChoice.selectDelayTimer) {
+                                localChoice.selectDelayTimer = window.setTimeout(() => {
+                                    if (linkedObjects.indexOf(localChoice.id) === -1) {
+                                        if (localChoice.isFadeTransition) {
+                                            if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                                app.fadeTransitionColor = '000000FF';
+                                            } else {
+                                                app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                            }
 
-                                if (typeof localChoice.fadeInTransitionTime === 'undefined') {
-                                    app.fadeTransitionTime = 0.25;
-                                } else {
-                                    app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
-                                }
+                                            if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                                app.fadeTransitionTime = 0.25;
+                                            } else {
+                                                app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                            }
 
-                                app.fadeTransitionIsOn = true;
-                                window.setTimeout(() => {
-                                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                            app.fadeTransitionIsOn = true;
+                                            window.setTimeout(() => {
+                                                if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                                    app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                                }
+                                                app.fadeTransitionIsOn = false;
+                                                deselectProcess();
+                                            }, app.fadeTransitionTime * 1000);
+                                        } else {
+                                            deselectProcess();
+                                        }
                                     }
-                                    app.fadeTransitionIsOn = false;
-                                    deselectProcess();
-                                }, app.fadeTransitionTime * 1000);
-                            } else {
-                                deselectProcess();
+                                    if (linkedObjects.indexOf(localChoice.id) === 0) {
+                                        linkedObjects.splice(0);
+                                    }
+                                    delete localChoice.selectDelayTimer;
+                                }, localChoice.selectDelayTime);
                             }
-                        }
-                        if (linkedObjects.indexOf(localChoice.id) === 0) {
-                            linkedObjects.splice(0);
+                        } else {
+                            if (linkedObjects.indexOf(localChoice.id) === -1) {
+                                if (localChoice.isFadeTransition) {
+                                    if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                        app.fadeTransitionColor = '000000FF';
+                                    } else {
+                                        app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                                    }
+
+                                    if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                        app.fadeTransitionTime = 0.25;
+                                    } else {
+                                        app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                                    }
+
+                                    app.fadeTransitionIsOn = true;
+                                    window.setTimeout(() => {
+                                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                        }
+                                        app.fadeTransitionIsOn = false;
+                                        deselectProcess();
+                                    }, app.fadeTransitionTime * 1000);
+                                } else {
+                                    deselectProcess();
+                                }
+                            }
+                            if (linkedObjects.indexOf(localChoice.id) === 0) {
+                                linkedObjects.splice(0);
+                            }
                         }
                     }
                 } else if (typeof localChoice.multipleScoreId !== 'undefined') {

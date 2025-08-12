@@ -1,12 +1,12 @@
 diff --git a/node_modules/@smui/icon-button/dist/IconButton.svelte b/node_modules/@smui/icon-button/dist/IconButton.svelte
-index 75082d8..a96cdff 100644
+index ca0c628..d8b2011 100644
 --- a/node_modules/@smui/icon-button/dist/IconButton.svelte
 +++ b/node_modules/@smui/icon-button/dist/IconButton.svelte
-@@ -64,6 +64,7 @@
-     if (context === 'top-app-bar:navigation') {
+@@ -65,6 +65,7 @@
        dispatch(getElement(), 'SMUITopAppBarIconButtonNav');
-     }    
-+    e.currentTarget.blur();
+     }
      restProps.onclick?.(e);
++    e.currentTarget.blur();
    }}
    ><div class="mdc-icon-button__ripple"></div>
+   {@render children?.()}{#if touch}<div

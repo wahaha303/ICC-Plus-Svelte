@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.2.5';
+export const appVersion = '2.3.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -377,7 +377,7 @@ export const app = $state<App>({
     customFonts: [],
     compressImageAuto: false,
     useToolbarBtn: false,
-    useChoiceEditBtn: false,
+    useChoiceEditBtn: true,
     hideScoresUpdated: false,
     hideChoiceDT: false,
     hideImages: false,
@@ -477,7 +477,7 @@ export const defaultApp: App = {
     customFonts: [],
     compressImageAuto: false,
     useToolbarBtn: false,
-    useChoiceEditBtn: false,
+    useChoiceEditBtn: true,
     hideScoresUpdated: false,
     hideChoiceDT: false,
     hideImages: false,
@@ -737,6 +737,7 @@ export function getGlobalRequirement() {
     return optimizedGlobalRequirement;
 };
 let dbInstance: IDBDatabase | null = null;
+let dbInstanceOld: IDBDatabase | null = null;
 function createCyoaPlusDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open('cyoaPlusDB');
@@ -761,7 +762,15 @@ function createCyoaPlusDB(): Promise<IDBDatabase> {
         request.onerror = reject;
     });
 }
-export function getDB(): Promise<IDBDatabase> {
+function getOldDB(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+        if (dbInstanceOld) {
+            return resolve(dbInstanceOld);
+        }
+        return reject();
+    });
+};
+function getDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         if (dbInstance) {
             return resolve(dbInstance);
@@ -810,7 +819,6 @@ export function getDB(): Promise<IDBDatabase> {
                                 oldSaveSlots[i].stored = true;
                                 oldSaveSlots[i].name = item.title;
                                 oldSaveSlots[i].time = 'Unknown';
-                                oldSaveSlots[i].app = Array.isArray(item.value) ? item.value.join(',') : item.value;
                             }
 
                             createCyoaPlusDB()
@@ -820,7 +828,7 @@ export function getDB(): Promise<IDBDatabase> {
                                 })
                                 .catch(reject)
                                 .finally(() => {
-                                    db.close();
+                                    dbInstanceOld = db;
                                 });
                         };
 
@@ -918,7 +926,6 @@ export function getDB(): Promise<IDBDatabase> {
                                             oldSaveSlots[num].stored = true;
                                             oldSaveSlots[num].name = item.title;
                                             oldSaveSlots[num].time = 'Unknown';
-                                            oldSaveSlots[num].app = Array.isArray(item.value) ? item.value.join(',') : item.value;
                                             num += 1;
                                         } else {
                                             newBuildData.push(item);
@@ -929,18 +936,18 @@ export function getDB(): Promise<IDBDatabase> {
 
                             newReq.onsuccess = (e) => {
                                 const newDB = (e.target as IDBOpenDBRequest).result;
-                                newDB.close();
+                                dbInstanceOld = newDB;
                                 res();
                             }
 
                             newReq.onerror = (e) => {
-                                console.error(e, 'L872');
+                                console.error(e);
                                 rej(e);
                             }
                         }
 
                         delReq.onerror = (e) => {
-                            console.error(e, 'L877');
+                            console.error(e);
                             rej(e);
                         }
                     });
@@ -1063,7 +1070,6 @@ export async function autoSave() {
             });
             autoSaveSlot.stored = true;
             autoSaveSlot.time = currentTimeString;
-            autoSaveSlot.app = saveSlot.app;
             snackbarVariables.labelText = 'Auto-save completed successfully.';
             snackbarVariables.isOpen = true;
         } catch (error) {
@@ -1112,7 +1118,6 @@ export async function buildAutoSave() {
             });
             buildAutoSaveSlot.stored = true;
             buildAutoSaveSlot.time = currentTimeString;
-            buildAutoSaveSlot.app = saveSlot.app;
             snackbarVariables.labelText = 'Auto-save completed successfully.';
             snackbarVariables.isOpen = true;
         } catch (error) {
@@ -1134,12 +1139,10 @@ export async function saveToSlot(slotData: SaveSlot, key: string, index: number,
             buildSaveSlots[index].stored = true;
             buildSaveSlots[index].time = slotData.time;
             buildSaveSlots[index].name = slotData.name;
-            buildSaveSlots[index].app = slotData.app;
         } else {
             saveSlots[index].stored = true;
             saveSlots[index].time = slotData.time;
             saveSlots[index].name = slotData.name;
-            saveSlots[index].app = slotData.app;
         }
     } catch (error) {
         console.error(error);
@@ -1159,19 +1162,17 @@ export async function deleteSlot(key: string, index: number, storeKey: string, i
             buildSaveSlots[index].stored = false;
             buildSaveSlots[index].name = `Slot ${index + 1}`;
             buildSaveSlots[index].time = '';
-            buildSaveSlots[index].app = '';
         } else {
             saveSlots[index].stored = false;
             saveSlots[index].name = `Slot ${index + 1}`;
             saveSlots[index].time = '';
-            saveSlots[index].app = '';
         }
     } catch (error) {
         console.error(error);
     }
 };
-export async function loadFromSlot(key: string, storeKey: string): Promise<any | null> {
-    const db = await getDB();
+export async function loadFromSlot(key: string, storeKey: string, isLegacy: boolean = false): Promise<any | null> {
+    const db = isLegacy ? await getOldDB() : await getDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(storeKey, 'readonly');
         const store = tx.objectStore(storeKey);
@@ -1229,6 +1230,24 @@ async function getOldAutoSave() {
         };
     });
 }
+async function setOldSave() {
+    const db = await getDB();
+    const tx = db.transaction('cyoaStore', 'readwrite');
+    const store = tx.objectStore('cyoaStore');
+    const key = `${location.pathname.replace(/\/index\.html$/, '/')}autoSave`;
+    try {
+        await new Promise<void>((resolve, reject) => {
+            const request = store.put(autoSaveSlot, key);
+            request.onsuccess = () => {
+                autoSaveSlot.app = '';
+                resolve();
+            };
+            request.onerror = () => reject(request.error);
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
 export async function initStoreSaves(): Promise<void> {
     const oldSave = await getOldAutoSave();
 
@@ -1236,6 +1255,7 @@ export async function initStoreSaves(): Promise<void> {
         autoSaveSlot.stored = true;
         autoSaveSlot.time = 'Unknown';
         autoSaveSlot.app = JSON.stringify(oldSave);
+        await setOldSave();
     }
 
     const db = await getDB();
@@ -1265,14 +1285,12 @@ export async function initStoreSaves(): Promise<void> {
                     if (suffix === 'autoSave') {
                         autoSaveSlot.stored = true;
                         autoSaveSlot.time = value.time;
-                        autoSaveSlot.app = value.app;
                     } else {
                         const match = suffix.match(/^slot-(\d+)$/);
                         const index = Number(match?.[1]);
                         saveSlots[index].stored = true;
                         saveSlots[index].name = typeof value.name !== 'undefined' ? value.name : `Slot ${index + 1}`;
                         saveSlots[index].time = value.time;
-                        saveSlots[index].app = value.app;
                     }
                 }
             }
@@ -1289,7 +1307,6 @@ export async function initBuildSaves(): Promise<void> {
     const store = tx.objectStore('buildStore');
 
     const regex = location.pathname.replace(/\/index\.html$/, '/');
-    let oldIdx = 0;
 
     await new Promise<void>((resolve, reject) => {
         const reqest = store.openCursor();
@@ -1311,14 +1328,12 @@ export async function initBuildSaves(): Promise<void> {
                     if (suffix === 'autoSave') {
                         buildAutoSaveSlot.stored = true;
                         buildAutoSaveSlot.time = value.time;
-                        buildAutoSaveSlot.app = value.app;
                     } else {
                         const match = suffix.match(/^slot-(\d+)$/);
                         const index = Number(match?.[1]);
                         buildSaveSlots[index].stored = true;
                         buildSaveSlots[index].name = typeof value.name !== 'undefined' ? value.name : `Slot ${index + 1}`;
                         buildSaveSlots[index].time = value.time;
-                        buildSaveSlots[index].app = value.app;
                     }
                 }
             }
@@ -5522,8 +5537,6 @@ const ChoiceSchema = z.object({
     multipleUseVariable: z.coerce.number().optional(),
     initMultipleTimesMinus: z.coerce.number().optional(),
     selectedThisManyTimesProp: z.coerce.number().optional(),
-    defaultAspectWidth: z.coerce.number().optional(),
-    defaultAspectHeight: z.coerce.number().optional(),
     addons: z.array(AddonSchema).optional(),
     scores: z.array(ScoreSchema).optional(),
     styling: StylingSchema.optional(),
@@ -5916,6 +5929,14 @@ export function initializeApp(tempApp: any) {
                                 for (let k = 0; k < kObj.objectDesignGroups.length; k++) {
                                     if (typeof kObj.objectDesignGroups[k] === 'object') kObj.objectDesignGroups[k] = kObj.objectDesignGroups[k].id;
                                 }
+                            }
+
+                            if (typeof kObj.defaultAspectHeight !== 'undefined') {
+                                delete kObj.defaultAspectHeight;
+                            }
+
+                            if (typeof kObj.defaultAspectWidth !== 'undefined') {
+                                delete kObj.defaultAspectWidth;
                             }
 
                             for (let k = 0; k < kObj.addons.length; k++) {
@@ -6444,14 +6465,6 @@ export async function downloadAsImage(printDiv?: HTMLDivElement) {
             snackbarVariables.isOpen = true;
             forceEagerImageLoading(printDiv);
             await waitForImagesToLoad(printDiv);
-
-            printDiv.querySelectorAll('span.d-flex').forEach((el) => {
-                const span = (el as HTMLSpanElement);
-                if (!span.style.height && span.offsetHeight > 0) {
-                    span.style.height = `${span.offsetHeight + 1}px`;
-                    tmpElements.push(span);
-                }
-            });
 
             const maxArea = await canvasSize.maxArea({ usePromise: true });
             const maxHeight = maxArea.height;

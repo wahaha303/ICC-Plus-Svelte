@@ -171,7 +171,7 @@
     let newRow = $state('');
     let valueTypeFiles: FileList | null = $state(null);
     let dialogStyle = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         styles.push('transition:opacity 0.1s;');
         if (currentDialog !== 'none') {

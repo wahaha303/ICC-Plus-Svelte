@@ -1,7 +1,7 @@
 <div bind:clientWidth={width} class="ab-0" style={background}>
     <div class="fadeOverlay" style={fadeStyle}></div>
     {#if useAltMenu.value}
-        <TopAppBar class="creator-menu h-auto" variant="fixed">
+        <TopAppBar style={creatorMenu} variant="fixed">
             <div bind:clientHeight={altMenuHeight}>
                 <AppBarRow class="py-0 h-auto align-items-center" style="flex-wrap: wrap;">
                     <div class="col p-1 text-center">
@@ -61,7 +61,7 @@
     {/if}
     <div class="s-main" style={mainStyle}>
         {#if app.showMusicPlayer}
-            <TopAppBar class="music-player" style="max-width: calc(100vw - 56px)" variant="fixed" >
+            <TopAppBar class="music-player" style={bgmBar} variant="fixed" >
                 <AppBarRow class="music-player--row">
                     <AppBarSection class="px-2 justify-left">
                         <IconButton class="music-player--button" onclickcapture={handlePlayButton} size="button" aria-label="Play">
@@ -336,7 +336,7 @@
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
     let pointBar = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         if (useAltMenu.value) {
             styles.push(`max-width: 100%;`);
@@ -362,7 +362,7 @@
     let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}'; font-size: ${app.styling.barTextSize}px`);
     let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         if (app.styling.backgroundImage) {
             styles.push(`background-image: url('${app.styling.backgroundImage}');`);
@@ -386,7 +386,7 @@
         return styles.join(' '); 
     });
     let mainStyle = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         if (useAltMenu.value) {
             if (altMenuHeight) {
@@ -402,6 +402,8 @@
 
         return styles.join(' ');
     });
+    let creatorMenu = $derived(app.showMusicPlayer ? 'padding-top: 32px; height: auto;' : 'height: auto;');
+    let bgmBar = $derived(useAltMenu.value ? 'max-width: 100vw;' : 'max-width: calc(100vw - 56px);');
     let bgmTime = $derived.by(() => {
         return `${calTime(bgmVariables.curBgmTime)} | ${calTime(bgmVariables.curBgmLength)}`;
     });

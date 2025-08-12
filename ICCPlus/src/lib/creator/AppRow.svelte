@@ -281,7 +281,7 @@
                     {#if row.title !== ''}
                         <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                     {/if}
-                    {#if row.template === 5}
+                    {#if row.template === 5 && windowWidth > 1280}
                         {#if row.isButtonRow}
                             <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
@@ -299,7 +299,7 @@
                             {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                         </p>
                     {/if}
-                    {#if row.template === 4}
+                    {#if row.template === 4 && windowWidth > 1280}
                         {#if row.isButtonRow}
                             <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
@@ -613,7 +613,7 @@
     });
 
     let rowBody = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         if (bCreatorMode && row.isEditModeOn) {
             styles.push(`margin: 1%;`);
@@ -631,7 +631,7 @@
 
     let rowBackground = $derived.by(() => {
         let suffix = rowStyle.rowBorderRadiusIsPixels ? 'px' : '%';
-        let styles = [];
+        let styles: string[] = [];;
 
         if (rowStyle.rowBorderImage) {
             styles.push(`border-image: url('${rowStyle.rowBorderImage}') ${rowStyle.rowBorderImageSliceTop} ${rowStyle.rowBorderImageSliceRight} ${rowStyle.rowBorderImageSliceBottom} ${rowStyle.rowBorderImageSliceLeft} / ${rowStyle.rowBorderImageWidth}px ${rowStyle.rowBorderImageRepeat}; border-style: solid; padding: ${rowStyle.rowBorderImageWidth}px;`);
@@ -674,7 +674,7 @@
 
     let rowImage = $derived.by(() => {
         let suffix = rowImageStyle.rowImgBorderRadiusIsPixels ? 'px' : '%';
-        let styles = [];
+        let styles: string[] = [];;
         
         styles.push(`width: ${rowImageStyle.rowImageWidth}%; margin-top: ${rowImageStyle.rowImageMarginTop}%; margin-bottom: ${rowImageStyle.rowImageMarginBottom}%;`);
         styles.push(`border-radius: ${rowImageStyle.rowImgBorderRadiusTopLeft}${suffix} ${rowImageStyle.rowImgBorderRadiusTopRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomLeft}${suffix};`);
@@ -750,8 +750,6 @@
             multipleUseVariable: 0,
             initMultipleTimesMinus: 0,
             selectedThisManyTimesProp: 0,
-            defaultAspectWidth: row.defaultAspectWidth,
-            defaultAspectHeight: row.defaultAspectHeight,
             requireds: [],
             addons: [],
             scores: [],
@@ -858,7 +856,7 @@
 
         if (row.buttonRandom) {
             const selectedIndexes: number[] = [];
-            const validChoices = row.objects.filter(choice => checkRequirements(choice.requireds) && !choice.isNotSelectable);
+            const validChoices = row.objects.filter(choice => checkRequirements(choice.requireds) && (!choice.isNotSelectable || row.allowActivateUnselectable));
 
             if (row.isWeightedRandom) {
                 let totalWeight = 0;

@@ -113,7 +113,7 @@
     import Textfield from '$lib/custom/textfield';
     import JsZip from 'jszip';
     import type { App } from '$lib/store/types';
-	import { app, autoSaveSlot, saveSlots, saveToSlot, deleteSlot, snackbarVariables, isDataURL, getDataURL, getTimestamp, removeNulls, initializeApp, loadFromDisk, AppSchema, appVersion, getSelectedObjectId } from '$lib/store/store.svelte';
+	import { app, autoSaveSlot, saveSlots, saveToSlot, deleteSlot, snackbarVariables, isDataURL, getDataURL, getTimestamp, removeNulls, initializeApp, loadFromDisk, AppSchema, appVersion, getSelectedObjectId, loadFromSlot } from '$lib/store/store.svelte';
 
     let { open, onclose }: { open: boolean; onclose: () => void } = $props();
 
@@ -449,8 +449,11 @@
         return mt[ext] ? mt[ext] : ext;
     }
 
-    function loadApp(index: number) {
-        const cleanedData = removeNulls(saveSlots[index].app);
+    async function loadApp(index: number) {
+        const key = `${location.pathname.replace(/\/index\.html$/, '/')}slot-${index}`;
+        const data = await loadFromSlot(key, 'cyoaStore');
+        console.log(key, data);
+        const cleanedData = removeNulls(data.app);
         const parsed = AppSchema.safeParse(cleanedData);
 
         if (parsed.success) {
@@ -464,8 +467,10 @@
         }
     }
 
-    function loadAutoSave() {
-        const cleanedData = removeNulls(autoSaveSlot.app);
+    async function loadAutoSave() {
+        const key = `${location.pathname.replace(/\/index\.html$/, '/')}autoSave`;
+        const data = await loadFromSlot(key, 'cyoaStore');
+        const cleanedData = removeNulls(data.app);
         const parsed = AppSchema.safeParse(cleanedData);
         
         if (parsed.success) {

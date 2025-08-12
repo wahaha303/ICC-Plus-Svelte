@@ -226,7 +226,7 @@
         return score.value < 0;
     });
     let scoreText = $derived.by(() => {
-        let style = [];
+        let style: string[] = [];;
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (pointType?.pointColorsIsOn) {

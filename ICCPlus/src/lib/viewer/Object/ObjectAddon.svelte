@@ -1,8 +1,7 @@
-
 {#if app.showAllAddons > 0 || addon.showAddon || checkRequirements(addon.requireds)}
     <div class="text-center" style={addonBackground}>
         {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
-            <span class="d-inline-block">
+            <div>
                 {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
@@ -20,7 +19,7 @@
                         <ObjectRequired required={required} scoreText={scoreText} />
                     {/each}
                 {/if}
-                {#if addon.template === 5 && addon.image && !row?.addonImageRemoved}
+                {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
@@ -32,14 +31,14 @@
                         {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                     </p>
                 {/if}
-                {#if addon.template === 4 && addon.image && !row?.addonImageRemoved}
+                {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
                         <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {/if}
                 {/if}
-            </span>
+            </div>
         {:else}
             <div class="row m-0 p-0 w-100">
                 {#if addon.template === 2}
@@ -124,7 +123,7 @@
         let bgImageIndex = 0;
         let bgColorIndex = 0;
         let filterIndex = 0;
-        let styles = [];
+        let styles: string[] = [];;
 
         if (useDesign) {
             if (addonStyle.addonBorderImage) {
@@ -291,7 +290,7 @@
     });
 
     let addonTitle = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         styles.push(`font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
@@ -313,7 +312,7 @@
     });
 
     let addonText = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
 
         styles.push(`font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
@@ -333,7 +332,7 @@
     });
 
     let addonImage = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];;
         let useDesign = addonImageStyle.useAddonImage;
         let suffix = (useDesign ? addonImageStyle.addonImgBorderRadiusIsPixels : objectImageStyle.objectImgBorderRadiusIsPixels) ? 'px' : '%';
 

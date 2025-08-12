@@ -14,8 +14,8 @@
         </div>
     </Title>
     <Content id="backpackDialog" class="p-0">
-        <div bind:this={printDiv} bind:clientWidth={width} class="container-fluid p-0" style={background}>
-            <div class="row gx-0">
+        <div bind:this={printDiv} bind:clientWidth={width} class="container-fluid p-0 h-100" style={background}>
+            <div bind:this={mainDiv} class="row gx-0">
                 {#each app.backpack as row}
                     <div class={row.width ? 'col-6': 'col-12'}>
                         <AppRow row={row} windowWidth={width} preloadImages={app.preloadImages} isBackpack={true} />
@@ -39,9 +39,10 @@
     let { open, onclose }: { open: boolean; onclose: () => void } = $props();
     let width = $state(0);
     let printDiv = $state<HTMLDivElement>();
+    let mainDiv = $state<HTMLDivElement>();
 
     let background = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];
 
         styles.push(`overflow-wrap: break-word;`);
         styles.push(`white-space: normal;`);

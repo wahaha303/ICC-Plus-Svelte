@@ -5,8 +5,8 @@
   use:Anchor
   use:useActions={use}
   class={classMap({
-    [className]: true,
     'smui-autocomplete': true,
+    [className]: true,
   })}
   {...exclude(restProps, ['menu$', 'textfield$', 'list$'])}
   onfocusout={(
@@ -142,7 +142,7 @@
 
 <script lang="ts">
   import type { ComponentProps, Snippet } from 'svelte';
-  import { setContext } from 'svelte';
+  import { setContext, tick } from 'svelte';
   import { on } from 'svelte/events';
   import type { SmuiAttrs } from '@smui/common';
   import type { ActionArray } from '@smui/common/internal';
@@ -500,7 +500,7 @@
       if (!setText) {
         previousValue = option;
       }
-      blur();
+      tick().then(() => blur());
     }
   }
 

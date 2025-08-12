@@ -11,13 +11,6 @@
         <div class="row gy-4 text-center">
             <div class="col-md-6 col-12">
                 <h5>Row Design Groups</h5>
-            </div>
-            <div class="col-md-6 col-12">
-                <h5>Choice Design Groups</h5>
-            </div>
-        </div>
-        <div class="row gy-4">
-            <div class="col-md-6 col-12">
                 <div bind:this={rowVirtualListEl} style="max-height: 680px; overflow-y: auto; overflow-x: hidden;">
                     {#if app.rowDesignGroups && app.rowDesignGroups.length > 1}
                     <div style="position: relative; height: {rowTotalHeight}px; width: 100%;">
@@ -122,6 +115,7 @@
                 </div>
             </div>
             <div class="col-md-6 col-12">
+                <h5>Choice Design Groups</h5>
                 <div bind:this={objectVirtualListEl} style="max-height: 680px; overflow-y: auto; overflow-x: hidden;">
                     {#if app.objectDesignGroups && app.objectDesignGroups.length > 1}
                     <div style="position: relative; height: {objectTotalHeight}px; width: 100%;">

@@ -42,7 +42,7 @@
     let mainDiv = $state<HTMLDivElement>();
 
     let background = $derived.by(() => {
-        let styles = [];
+        let styles: string[] = [];
 
         styles.push(`overflow-wrap: break-word;`);
         styles.push(`white-space: normal;`);

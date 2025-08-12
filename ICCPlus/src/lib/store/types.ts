@@ -450,8 +450,6 @@ export type Choice = {
     multipleUseVariable: number,
     initMultipleTimesMinus: number,
     selectedThisManyTimesProp: number,
-    defaultAspectWidth: number,
-    defaultAspectHeight: number,
     requireds: Requireds[],
     addons: Addon[],
     scores: Score[],
@@ -488,6 +486,7 @@ export type Choice = {
     isActivateRandom?: boolean,
     numActivateRandom?: number,
     activateThisChoice?: string,
+    isNotActiveUnselectable?: boolean,
     deactivateOtherChoice?: boolean,
     deactivateThisChoice?: string,
     discountOther?: boolean,
@@ -557,7 +556,9 @@ export type Choice = {
     muteBgm?: boolean,
     isFadeTransition?: boolean,
     fadeTransitionColor?: string,
-    fadeTransitionTime?: number,
+    fadeTransitionTime?: number,    
+    fadeInTransitionTime?: number,
+    fadeOutTransitionTime?: number,
     multiplyPointtypeIsOn?: boolean,
     pointTypeToMultiply?: string[],
     multiplyWithThis?: number | string,
@@ -604,6 +605,9 @@ export type Choice = {
         data: string
     }[],
     isEditModeOn?: boolean,
+    isSelectDelayed?: boolean,
+    selectDelayTime?: number,
+    selectDelayTimer?: number
 };
 export type Row = {
     [key: string]: any,
@@ -623,6 +627,7 @@ export type Row = {
     buttonRandom?: boolean,
     buttonRandomNumber?: number,
     isWeightedRandom?: boolean,
+    allowActivateUnselectable?: boolean,
     isResultRow?: boolean,
     resultGroupId?: string,
     isInfoRow?: boolean,

@@ -172,9 +172,40 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.3.0 / ${getDate('2025-08-12T14:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where aspect ratio was not shared within same row.
+
+        <span style="color: green">Row Button</span>
+        - Added option to allow activation of unselectable choices.
+        
+        <span style="color: green">Choice</span>
+        - Added option to delay choice selection.
+        - Added option to prevent activation of unselectable choices in 'Force Other Choices to Be Active'.
+        - Fixed issue where random weight was not displayed when using row button.
+        - Fixed issue where unselectable choices could not be activated by 'Force Other Choices to Be Active'.
+
+        <span style="color: green">Addon</span>
+        - Fixed issue where addon image was not displaying correctly.
+
+        <span style="color: green">Image Template</span>
+        - Fixed issue where image remained visible in image top position on small screens when using image center or bottom.
+
+        <span style="color: green">Design Group</span>
+        - Fixed issue where design group titles were misplaced on small screens.
+
+        <span style="color: green">Save / Load</span>
+        - Fixed issue where saved data in browser was occupying memory.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where BGM player was covering top Menu.
+        `
+    }, {
+        open: false,
         title: `v2.2.5 / ${getDate('2025-08-05T17:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Adjusted 'Specify Number of Choices to Be Discounted' to support stacking when 'Allow Stacking Discounts' is enabled.
+        - Fixed issue where choice with 'Cannot Be Deselected Manually' enabled in row with Allowed Choices did not work properly.
         - Fixed issue where discount text was not displaying correctly.
 
         <span style="color: green">Addon</span>
