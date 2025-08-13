@@ -60,8 +60,8 @@
     {#if required.more}
         {#each required.more as more, i}
             <Select bind:value={more.operator} label="Operator" variant="filled" alwaysFloat={true}>
-                {#each pointReqOperators as pointReqOperator}
-                    <Option value={pointReqOperator.value}>{pointReqOperator.text}</Option>
+                {#each moreOperators as moreOperator}
+                    <Option value={moreOperator.value}>{moreOperator.text}</Option>
                 {/each}
             </Select>
             <div class="floating-button-container">

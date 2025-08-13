@@ -161,7 +161,7 @@
 {/if}
 
 <script lang="ts">
-    import Accordion, { Panel, Header, Content as AcdContent} from '@smui-extra/accordion';
+    import Accordion, { Panel, Header, Content as AcdContent} from '$lib/custom/accordion';
     import AppRequirement from '../AppRequirement.svelte';
     import Button, { Label } from '@smui/button';
     import Dialog, { Title, Content, Actions } from '@smui/dialog';

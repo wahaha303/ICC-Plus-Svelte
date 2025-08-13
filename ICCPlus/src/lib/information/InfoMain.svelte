@@ -172,6 +172,19 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.3.1 / ${getDate('2025-08-13T12:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where minimum value of multiple choice was not properly reset when using Clean Selected Choices.
+        
+        <span style="color: green">Requirement</span>
+        - Added option to hide requirement when requirement is not enabled.
+        - Fixed issue where incorrect operators were displayed in point comparison.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where UI elements overlapped in word and variable dialogs.
+        `
+    }, {
+        open: false,
         title: `v2.3.0 / ${getDate('2025-08-12T14:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where aspect ratio was not shared within same row.

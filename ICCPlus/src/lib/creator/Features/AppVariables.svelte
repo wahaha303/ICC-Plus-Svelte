@@ -10,7 +10,7 @@
         {#if app.variables.length > 4}
             <div style="position: relative; height: {totalHeight}px; width: 100%;">
                 {#each items as row (row.index)}
-                    <div class="py-3" style="position: absolute; top: {row.start}px; width: 100%;">
+                    <div class="py-3" data-index={row.index} use:observeResize={row.index} style="position: absolute; top: {row.start}px; width: 100%;">
                         {#if app.variables[row.index]}
                             <div class="point-slot">
                                 <div class="toolbar grey lighten-3 justify-space-around">
@@ -110,7 +110,8 @@
         count: rowCount(),
         getScrollElement: () => virtualListEl,
         estimateSize: () => 180,
-        overscan: 1
+        overscan: 1,
+        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 180),
     }));
     let totalHeight = $derived.by(() => {
         return $virtualizer.getTotalSize()
@@ -121,11 +122,28 @@
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--variables') as HTMLDivElement;
-        $virtualizer.setOptions({
-            getScrollElement: () => virtualListEl,
-            estimateSize: () => 180
-        });
+        setTimeout(() => {
+            $virtualizer.setOptions({
+                getScrollElement: () => virtualListEl,
+                estimateSize: () => 180,
+                measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 180),
+            });
+        }, 0);
     });
+
+    function observeResize(el: HTMLDivElement, index: number) {
+
+        const observer = new ResizeObserver(() => {
+            $virtualizer.measureElement(el);
+        });
+        observer.observe(el);
+
+        return {
+            destroy() {
+                observer.disconnect();
+            }
+        };
+    }
 
     function changeVariableId(variable: Variable) {
         if (variable.id === '') {

@@ -201,6 +201,7 @@
                                                     if (choice.isSelectableMultiple) {
                                                         choice.numMultipleTimesMinus = 0;
                                                         choice.numMultipleTimesPluss = 0;
+                                                        choice.initMultipleTimesMinus = 0;
                                                         choice.isMultipleUseVariable = true;
                                                         choice.useSlider = false;
                                                     } else {
@@ -210,6 +211,7 @@
                                                         delete choice.hideMultipleCounter;
                                                         delete choice.numMultipleTimesMinus;
                                                         delete choice.numMultipleTimesPluss;
+                                                        delete choice.initMultipleTimesMinus;
                                                         delete choice.allowSelectByClick;
                                                         delete choice.useSlider;
                                                     }
@@ -286,7 +288,7 @@
                                                 {/if}
                                                 <div class="col-12 m-1 px-2">
                                                     <Wrapper text="Some features may not work properly if this value is set below 0.">
-                                                        <Textfield bind:value={() => choice.numMultipleTimesMinus ?? 0, (e) => choice.numMultipleTimesMinus = e} label="Number at which the minus stops working" type="number" variant="filled" />
+                                                        <Textfield bind:value={() => choice.numMultipleTimesMinus ?? 0, (e) => choice.numMultipleTimesMinus = e} onchange={() => choice.initMultipleTimesMinus = choice.numMultipleTimesMinus} label="Number at which the minus stops working" type="number" variant="filled" />
                                                     </Wrapper>
                                                     <Textfield bind:value={() => choice.numMultipleTimesPluss ?? 0, (e) => choice.numMultipleTimesPluss = e} label="Number at which the plus stops working" type="number" variant="filled" />
                                                 </div>

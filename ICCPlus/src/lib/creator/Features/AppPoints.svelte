@@ -78,7 +78,7 @@
                                                     {/snippet}
                                                 </FormField>
                                                 {#if point.plussOrMinusAdded}
-                                                    <FormField class="ml-4">
+                                                    <FormField class="ms-4">
                                                         <Switch bind:checked={() => point.plussOrMinusInverted ?? false, (e) => point.plussOrMinusInverted = e} color="secondary" class="switch-scale" />
                                                         {#snippet label()}
                                                             Invert the + and -.

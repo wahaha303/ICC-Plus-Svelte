@@ -29,16 +29,20 @@
         return [];
     });
     let isShowReq = $derived.by(() => {
+        let result = false;
         if (required.showRequired) {
+            result = true;
+            if (required.hideRequired2) {
+                result = checkRequirements(required.requireds);
+            }
             if (required.hideRequired) {
                 if (required.requireds.length > 0) {
-                    return checkRequirements(required.requireds) && !checkReq(required);
+                    result = checkRequirements(required.requireds) && !checkReq(required);
                 } else {
-                    return !checkReq(required);
+                    result = !checkReq(required);
                 }
             }
-            return true;
         }
-        return false;
+        return result;
     });
 </script>

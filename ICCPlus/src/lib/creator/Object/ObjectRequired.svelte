@@ -31,13 +31,21 @@
                     </FormField>
                     {#if required.showRequired}
                         <FormField class="w-100">
-                            <Checkbox bind:checked={() => required.hideRequired?? false, (e) => required.hideRequired = e} class="check-scale" />
+                            <Checkbox bind:checked={() => required.hideRequired ?? false, (e) => required.hideRequired = e} class="check-scale" />
                             {#snippet label()}
                                 Hide when Requirement is met
                             {/snippet}
                         </FormField>
+                        {#if required.requireds.length > 0}
+                            <FormField class="w-100">
+                                <Checkbox bind:checked={() => required.hideRequired2 ?? false, (e) => required.hideRequired2 = e} class="check-scale" />
+                                {#snippet label()}
+                                    Hide when Requirement is not enabled
+                                {/snippet}
+                            </FormField>
+                        {/if}
                         <FormField class="w-100">
-                            <Checkbox bind:checked={() => required.customTextIsOn?? false, (e) => required.customTextIsOn = e} onchange={() => {
+                            <Checkbox bind:checked={() => required.customTextIsOn ?? false, (e) => required.customTextIsOn = e} onchange={() => {
                                 if (!required.customTextIsOn) {
                                     delete required.customText;
                                 }
@@ -47,7 +55,7 @@
                             {/snippet}
                         </FormField>
                         {#if required.customTextIsOn}
-                            <Textfield bind:value={() => required.customText?? '', (e) => required.customText = e} label="Custom Text" variant="filled" />
+                            <Textfield bind:value={() => required.customText ?? '', (e) => required.customText = e} label="Custom Text" variant="filled" />
                         {:else}
                             <Textfield bind:value={required.beforeText} label="Text Before" variant="filled" />
                             <Textfield bind:value={required.afterText} label="Text After" variant="filled" />
@@ -63,7 +71,7 @@
             {#each required.requireds as req, i}
                 <div class={col6}>
                     <ObjectInnerReq required={req} />
-                    <Button onclickcapture={() => required.requireds.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                    <Button onclickcapture={() => deleteInnerReq(i)} class="w-100 mt-1" variant="raised">
                         <Label>Delete</Label>
                     </Button>
                 </div>
@@ -115,17 +123,21 @@
         return [];
     });
     let isShowReq = $derived.by(() => {
+        let result = false;
         if (required.showRequired) {
+            result = true;
+            if (required.hideRequired2) {
+                result = checkRequirements(required.requireds);
+            }
             if (required.hideRequired) {
                 if (required.requireds.length > 0) {
-                    return checkRequirements(required.requireds) && !checkReq(required);
+                    result = checkRequirements(required.requireds) && !checkReq(required);
                 } else {
-                    return !checkReq(required);
+                    result = !checkReq(required);
                 }
             }
-            return true;
         }
-        return false;
+        return result;
     });
 
     function copyRequirement() {
@@ -134,6 +146,13 @@
         app.tmpRequired.push(JSON.parse(JSON.stringify(required)));
         snackbarVariables.labelText = 'Copied to clipboard.';
         snackbarVariables.isOpen = true;
+    }
+
+    function deleteInnerReq(index: number) {
+        required.requireds.splice(index, 1);
+        if (required.requireds.length === 0 && required.hideRequired2) {
+            delete required.hideRequired2;
+        }
     }
 
     function moveReqLeft() {

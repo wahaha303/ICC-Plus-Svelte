@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.3.0';
+export const appVersion = '2.3.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3086,7 +3086,7 @@ export function cleanActivated() {
             if (!preserveList.has(cChoice.id)) {
                 delete cChoice.multiplyPointtypeIsOnCheck;
                 delete cChoice.startingSumAtMultiply;
-                delete cChoice.multiplyPointtypeIsOnCheck;
+                delete cChoice.dividePointtypeIsOnCheck;
                 delete cChoice.startingSumAtDivide;
                 delete cChoice.activatedRandom;
                 delete cChoice.activatedRandomMul;
@@ -3207,6 +3207,7 @@ export function cleanActivated() {
                     }
                 }
 
+                if (typeof cChoice.initMultipleTimesMinus !== 'undefined') cChoice.numMultipleTimesMinus = cChoice.initMultipleTimesMinus;
                 cChoice.multipleUseVariable = 0;
                 cChoice.isActive = false;
                 activatedMap.delete(cChoice.id);
@@ -5937,6 +5938,10 @@ export function initializeApp(tempApp: any) {
 
                             if (typeof kObj.defaultAspectWidth !== 'undefined') {
                                 delete kObj.defaultAspectWidth;
+                            }
+
+                            if (kObj.isSelectableMultiple && typeof kObj.numMultipleTimesMinus !== 'undefined' && typeof kObj.initMultipleTimesMinus === 'undefined') {
+                                kObj.initMultipleTimesMinus = kObj.forcedActivated ? 0 : kObj.numMultipleTimesMinus;
                             }
 
                             for (let k = 0; k < kObj.addons.length; k++) {
