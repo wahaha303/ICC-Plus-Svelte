@@ -184,7 +184,7 @@
         - Added option to hide selected and unselected choice completely.
         `
     }, {
-        open: true,
+        open: false,
         title: `v2.3.1 / ${getDate('2025-08-13T12:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where minimum value of multiple choice was not properly reset when using Clean Selected Choices.

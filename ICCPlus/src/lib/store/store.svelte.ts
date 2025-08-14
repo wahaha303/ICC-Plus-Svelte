@@ -2947,7 +2947,8 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
     return isPositve;
 };
 export function cleanActivated() {
-    const preserveList = new Set();
+    const preserveList = new Set<string>();
+    const reactivateList = new Set<string>();
 
     function checkActivateOther(localChoice: Choice) {
         if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
@@ -2961,8 +2962,9 @@ export function cleanActivated() {
 
                                 if (typeof cMap !== 'undefined') {
                                     const fChoice = cMap.choice;
-                                    if (activatedMap.has(fChoice.id)) {
+                                    if (activatedMap.has(fChoice.id) || localChoice.activateAfterReset) {
                                         if (!localChoice.isAllowDeselect || localChoice.activateAfterReset) {
+                                            if (localChoice.activateAfterReset) reactivateList.add(fChoice.id);
                                             preserveList.add(fChoice.id);
 
                                             if (val.length > 1 && fChoice.isSelectableMultiple) {
@@ -2995,8 +2997,9 @@ export function cleanActivated() {
 
                             if (typeof cMap !== 'undefined') {
                                 const fChoice = cMap.choice;
-                                if (activatedMap.has(fChoice.id)) {
+                                if (activatedMap.has(fChoice.id) || localChoice.activateAfterReset) {
                                     if (!localChoice.isAllowDeselect || localChoice.activateAfterReset) {
+                                        if (localChoice.activateAfterReset) reactivateList.add(fChoice.id);
                                         preserveList.add(fChoice.id);
 
                                         if (val.length > 1 && fChoice.isSelectableMultiple) {
@@ -3030,8 +3033,9 @@ export function cleanActivated() {
 
                     if (typeof cMap !== 'undefined') {
                         const fChoice = cMap.choice;
-                        if (activatedMap.has(fChoice.id)) {
+                        if (activatedMap.has(fChoice.id) || localChoice.activateAfterReset) {
                             if (!localChoice.isAllowDeselect || localChoice.activateAfterReset) {
+                                if (localChoice.activateAfterReset) reactivateList.add(fChoice.id);
                                 preserveList.add(fChoice.id);
 
                                 if (val.length > 1 && fChoice.isSelectableMultiple) {
@@ -3087,7 +3091,7 @@ export function cleanActivated() {
         }
     }
 
-    let keys = [...keysSet];
+    let keys = [...keysSet, ...reactivateList];
 
     for (let i = keys.length - 1; i >= 0; i--) {
         const cMap = choiceMap.get(keys[i]);
@@ -3228,6 +3232,10 @@ export function cleanActivated() {
                 if (cChoice.isSelectableMultiple && cChoice.isMultipleUseVariable && typeof cChoice.tempMultipleValue !== 'undefined') {
                     cChoice.multipleUseVariable = cChoice.tempMultipleValue;
                     delete cChoice.tempMultipleValue;
+                }
+                if (reactivateList.has(cChoice.id)) {
+                    cChoice.isActive = true;
+                    activatedMap.set(cChoice.id, {multiple: cChoice.isSelectableMultiple && cChoice.isMultipleUseVariable ? cChoice.multipleUseVariable : 0});
                 }
             }
         } else {
