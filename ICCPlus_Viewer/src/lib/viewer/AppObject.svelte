@@ -1,4 +1,4 @@
-{#if isEnabled || !filterStyle.reqFilterVisibleIsOn}
+{#if isShown}
     <div class={objectWidthClass()}>
         <div class:fullHeight={fullHeight} class="d-flex">
             <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -267,6 +267,14 @@
 
     let isEnabled = $derived.by(() => {
         return checkRequirements(choice.requireds);
+    });
+    let isShown = $derived.by(() => {
+        if (choice.isActive) {
+            return !filterStyle.selFilterVisibleIsOn;
+        } else if (!isEnabled) {
+            return !filterStyle.reqFilterVisibleIsOn
+        }
+        return !filterStyle.unselFilterVisibleIsOn;
     });
     let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}` : '');
     let isActive = $derived(choice.isActive);
@@ -847,7 +855,7 @@
                                         }
                                     }
                                     isChanged = localChoice.id !== aChoice.id;
-                                    delete aScore.appliedDiscount;
+                                    if (!aScore.discountIsOn) delete aScore.appliedDiscount;
                                     isRevoked = true;
                                 }
                             }

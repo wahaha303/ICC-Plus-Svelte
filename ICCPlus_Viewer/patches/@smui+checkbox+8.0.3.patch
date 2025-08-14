@@ -1,0 +1,14 @@
+diff --git a/node_modules/@smui/checkbox/dist/Checkbox.svelte b/node_modules/@smui/checkbox/dist/Checkbox.svelte
+index d23ec5b..7a13be1 100644
+--- a/node_modules/@smui/checkbox/dist/Checkbox.svelte
++++ b/node_modules/@smui/checkbox/dist/Checkbox.svelte
+@@ -51,6 +51,9 @@
+       : undefined}
+     {...nativeControlAttrs}
+     {...prefixFilter(restProps, 'input$')}
++    onclick={(e) => {
++      e.currentTarget.blur();
++    }}
+     onblur={(e) => {
+       dispatch(getElement(), 'blur', e);
+       restProps.input$onblur?.(e);

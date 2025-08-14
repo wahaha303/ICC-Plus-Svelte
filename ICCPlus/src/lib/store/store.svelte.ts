@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.3.1';
+export const appVersion = '2.3.2';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -42,6 +42,7 @@ export const filterStyling = {
     selFilterATextColor: '#000000FF',
     selScoreTextColorIsOn: false,
     selFilterSTextColor: '#000000FF',
+    selFilterVisibleIsOn: false,
     reqFilterBlurIsOn: false,
     reqFilterBlur: 0,
     reqFilterBrightIsOn: false,
@@ -93,7 +94,8 @@ export const filterStyling = {
     unselFilterSaturIsOn: false,
     unselFilterSatur: 1,
     unselFilterSepiaIsOn: false,
-    unselFilterSepia: 0
+    unselFilterSepia: 0,
+    unselFilterVisibleIsOn: false,
 };
 export const textStyling = {
     customRowTitle: false,
@@ -2293,6 +2295,7 @@ function calcStackDiscount(scoreVal: number, operator: string, value: number) {
         case '2': return scoreVal + value;
         case '3': return scoreVal * value;
         case '4': return scoreVal / value;
+        case '5': return value;
         default: return scoreVal;
     }
 };
@@ -2959,7 +2962,7 @@ export function cleanActivated() {
                                 if (typeof cMap !== 'undefined') {
                                     const fChoice = cMap.choice;
                                     if (activatedMap.has(fChoice.id)) {
-                                        if (!localChoice.isAllowDeselect) {
+                                        if (!localChoice.isAllowDeselect || localChoice.activateAfterReset) {
                                             preserveList.add(fChoice.id);
 
                                             if (val.length > 1 && fChoice.isSelectableMultiple) {
@@ -2993,7 +2996,7 @@ export function cleanActivated() {
                             if (typeof cMap !== 'undefined') {
                                 const fChoice = cMap.choice;
                                 if (activatedMap.has(fChoice.id)) {
-                                    if (!localChoice.isAllowDeselect) {
+                                    if (!localChoice.isAllowDeselect || localChoice.activateAfterReset) {
                                         preserveList.add(fChoice.id);
 
                                         if (val.length > 1 && fChoice.isSelectableMultiple) {
@@ -3028,7 +3031,7 @@ export function cleanActivated() {
                     if (typeof cMap !== 'undefined') {
                         const fChoice = cMap.choice;
                         if (activatedMap.has(fChoice.id)) {
-                            if (!localChoice.isAllowDeselect) {
+                            if (!localChoice.isAllowDeselect || localChoice.activateAfterReset) {
                                 preserveList.add(fChoice.id);
 
                                 if (val.length > 1 && fChoice.isSelectableMultiple) {
@@ -3072,10 +3075,19 @@ export function cleanActivated() {
         }
     });
 
-    let actkeys = [...activatedMap.keys()];
-    let rawKeys = Array.from(choiceMap.entries()).filter(([key, value]) => value.choice.isActive === true).map(([key]) => key);
+    let keysSet = new Set<string>();
 
-    let keys = Array.from(new Set([...actkeys, ...rawKeys]));
+    for (let key of activatedMap.keys()) {
+        keysSet.add(key);
+    }
+
+    for (let [key, value] of choiceMap) {
+        if (value.choice.isActive) {
+            keysSet.add(key);
+        }
+    }
+
+    let keys = [...keysSet];
 
     for (let i = keys.length - 1; i >= 0; i--) {
         const cMap = choiceMap.get(keys[i]);
@@ -3083,21 +3095,69 @@ export function cleanActivated() {
         if (typeof cMap !== 'undefined') {
             const cChoice = cMap.choice;
 
+            delete cChoice.multiplyPointtypeIsOnCheck;
+            delete cChoice.startingSumAtMultiply;
+            delete cChoice.dividePointtypeIsOnCheck;
+            delete cChoice.startingSumAtDivide;
+            delete cChoice.numDiscountChoices;
+            delete cChoice.appliedDisChoices;
+            
+            if (cChoice.addToAllowChoice && typeof cChoice.idOfAllowChoice !== 'undefined' && typeof cChoice.numbAddToAllowChoice !== 'undefined') {
+                for (let i = 0; i < cChoice.idOfAllowChoice.length; i++) {
+                    const aRow = rowMap.get(cChoice.idOfAllowChoice[i]);
+                    if (typeof aRow !== 'undefined') {
+                        aRow.allowedChoices -= cChoice.numbAddToAllowChoice;
+                    }
+                }
+            }
+
+            if (cChoice.muteBgm && bgmPlayer) {
+                const player = get(bgmPlayer);
+
+                if (player && typeof player.unMute === 'function') {
+                    app.isMute = false;
+                    player.unMute();
+                }
+            }
+
             if (!preserveList.has(cChoice.id)) {
-                delete cChoice.multiplyPointtypeIsOnCheck;
-                delete cChoice.startingSumAtMultiply;
-                delete cChoice.dividePointtypeIsOnCheck;
-                delete cChoice.startingSumAtDivide;
                 delete cChoice.activatedRandom;
                 delete cChoice.activatedRandomMul;
-                delete cChoice.numDiscountChoices;
-                delete cChoice.appliedDisChoices;
-                
-                if (cChoice.addToAllowChoice && typeof cChoice.idOfAllowChoice !== 'undefined' && typeof cChoice.numbAddToAllowChoice !== 'undefined') {
-                    for (let i = 0; i < cChoice.idOfAllowChoice.length; i++) {
-                        const aRow = rowMap.get(cChoice.idOfAllowChoice[i]);
-                        if (typeof aRow !== 'undefined') {
-                            aRow.allowedChoices -= cChoice.numbAddToAllowChoice;
+
+                if (cChoice.isContentHidden && typeof cChoice.hiddenContentsRow !== 'undefined' && typeof cChoice.hiddenContentsType !== 'undefined') {
+                    for (let i = 0; i < cChoice.hiddenContentsRow.length; i++) {
+                        const hRow = rowMap.get(cChoice.hiddenContentsRow[i]);
+                        if (typeof hRow !== 'undefined') {
+                            for (let j = 0; j < cChoice.hiddenContentsType.length; j++) {
+                                switch (cChoice.hiddenContentsType[j]) {
+                                    case '1':
+                                        delete hRow.objectTitleRemoved;
+                                        break;
+                                    case '2':
+                                        delete hRow.objectImageRemoved;
+                                        break;
+                                    case '3':
+                                        delete hRow.objectTextRemoved;
+                                        break;
+                                    case '4':
+                                        delete hRow.objectScoreRemoved;
+                                        break;
+                                    case '5':
+                                        delete hRow.objectRequirementRemoved;
+                                        break;
+                                    case '6':
+                                        delete hRow.addonTitleRemoved;
+                                        break;
+                                    case '7':
+                                        delete hRow.addonImageRemoved;
+                                        break;
+                                    case '8':
+                                        delete hRow.addonTextRemoved;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
                         }
                     }
                 }
@@ -3159,58 +3219,16 @@ export function cleanActivated() {
                         }
                     }
                 }
-
-                if (cChoice.muteBgm && bgmPlayer) {
-                    const player = get(bgmPlayer);
-
-                    if (player && typeof player.unMute === 'function') {
-                        app.isMute = false;
-                        player.unMute();
-                    }
-                }
-
-                if (cChoice.isContentHidden && typeof cChoice.hiddenContentsRow !== 'undefined' && typeof cChoice.hiddenContentsType !== 'undefined') {
-                    for (let i = 0; i < cChoice.hiddenContentsRow.length; i++) {
-                        const hRow = rowMap.get(cChoice.hiddenContentsRow[i]);
-                        if (typeof hRow !== 'undefined') {
-                            for (let j = 0; j < cChoice.hiddenContentsType.length; j++) {
-                                switch (cChoice.hiddenContentsType[j]) {
-                                    case '1':
-                                        delete hRow.objectTitleRemoved;
-                                        break;
-                                    case '2':
-                                        delete hRow.objectImageRemoved;
-                                        break;
-                                    case '3':
-                                        delete hRow.objectTextRemoved;
-                                        break;
-                                    case '4':
-                                        delete hRow.objectScoreRemoved;
-                                        break;
-                                    case '5':
-                                        delete hRow.objectRequirementRemoved;
-                                        break;
-                                    case '6':
-                                        delete hRow.addonTitleRemoved;
-                                        break;
-                                    case '7':
-                                        delete hRow.addonImageRemoved;
-                                        break;
-                                    case '8':
-                                        delete hRow.addonTextRemoved;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
-
+                
                 if (typeof cChoice.initMultipleTimesMinus !== 'undefined') cChoice.numMultipleTimesMinus = cChoice.initMultipleTimesMinus;
                 cChoice.multipleUseVariable = 0;
                 cChoice.isActive = false;
                 activatedMap.delete(cChoice.id);
+            } else {
+                if (cChoice.isSelectableMultiple && cChoice.isMultipleUseVariable && typeof cChoice.tempMultipleValue !== 'undefined') {
+                    cChoice.multipleUseVariable = cChoice.tempMultipleValue;
+                    delete cChoice.tempMultipleValue;
+                }
             }
         } else {
             activatedMap.delete(keys[i]);

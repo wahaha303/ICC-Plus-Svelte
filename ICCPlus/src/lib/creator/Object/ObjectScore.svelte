@@ -288,28 +288,30 @@
     let scoreValueText = $derived.by(() => {
         let value = score.value;
         if (!score.hideValue) {
-            if (score.appliedDiscount) {
-                if (score.replaceText && score.hideDisValue) {
-                    return '';
-                }
-                if (typeof score.discountScore !== 'undefined') value = score.discountScore;
-            } else {
-                if (discountFlags.isWithinCount) {
-                    if (score.replaceText && score.hideDisValue) return '';
-                    if (typeof score.discountScore !== 'undefined') value = score.discountScore;
-                } else if (discountFlags.isSimple) {
-                    if (score.hideDisValue) return '';
+            if (score.discountShow) {
+                if (score.appliedDiscount) {
+                    if (score.replaceText && score.hideDisValue) {
+                        return '';
+                    }
                     if (typeof score.discountScore !== 'undefined') value = score.discountScore;
                 } else {
-                    if (typeof score.tmpDiscount !== 'undefined') {
-                        let hideValue = false;
-                        for (let j = 0; j < score.tmpDiscount.length; j++) {
-                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                value = score.tmpDiscount[j].discountedValue;
-                                hideValue = score.tmpDiscount[j].hideValue || false;
+                    if (discountFlags.isWithinCount) {
+                        if (score.replaceText && score.hideDisValue) return '';
+                        if (typeof score.discountScore !== 'undefined') value = score.discountScore;
+                    } else if (discountFlags.isSimple) {
+                        if (score.hideDisValue) return '';
+                        if (typeof score.discountScore !== 'undefined') value = score.discountScore;
+                    } else {
+                        if (typeof score.tmpDiscount !== 'undefined') {
+                            let hideValue = false;
+                            for (let j = 0; j < score.tmpDiscount.length; j++) {
+                                if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
+                                    value = score.tmpDiscount[j].discountedValue;
+                                    hideValue = score.tmpDiscount[j].hideValue || false;
+                                }
                             }
+                            if (hideValue) return '';
                         }
-                        if (hideValue) return '';
                     }
                 }
             }

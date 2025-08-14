@@ -312,7 +312,10 @@
                                             </FormField>
                                             <FormField class="col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.notDeselectedByClean ?? false, (e) => choice.notDeselectedByClean = e} onchange={() => {
-                                                    if (!choice.notDeselectedByClean) delete choice.notDeselectedByClean;
+                                                    if (!choice.notDeselectedByClean) {
+                                                        delete choice.notDeselectedByClean;
+                                                        delete choice.activateAfterReset;
+                                                    }
                                                 }} />
                                                 {#snippet label()}
                                                     Cannot Be Reset Manually
@@ -387,6 +390,7 @@
                                                         delete choice.isActivateRandom;
                                                         delete choice.numActivateRandom;
                                                         delete choice.activateThisChoice;
+                                                        delete choice.activateAfterReset;
                                                     }
                                                 }} />
                                                 {#snippet label()}
@@ -404,12 +408,25 @@
                                                 </FormField>
                                                 <FormField class="col-12 m-1 p-0">
                                                     <Checkbox bind:checked={() => choice.isAllowDeselect ?? false, (e) => choice.isAllowDeselect = e} onchange={() => {
-                                                        if (!choice.isAllowDeselect) delete choice.isAllowDeselect;
+                                                        if (!choice.isAllowDeselect) {
+                                                            delete choice.isAllowDeselect;
+                                                            delete choice.activateAfterReset;
+                                                        }
                                                     }} />
                                                     {#snippet label()}
                                                         Allow Deselection of Activated Choices
                                                     {/snippet}
                                                 </FormField>
+                                                {#if choice.isAllowDeselect && choice.notDeselectedByClean}
+                                                    <FormField class="col-12 m-1 p-0">
+                                                        <Checkbox bind:checked={() => choice.activateAfterReset ?? false, (e) => choice.activateAfterReset = e} onchange={() => {
+                                                            if (!choice.activateAfterReset) delete choice.activateAfterReset;
+                                                        }} />
+                                                        {#snippet label()}
+                                                            Activate Choices Again After Reset
+                                                        {/snippet}
+                                                    </FormField>
+                                                {/if}
                                                 <FormField class="col-12 m-1 p-0">
                                                     <Checkbox bind:checked={() => choice.isNotActiveUnselectable ?? false, (e) => choice.isNotActiveUnselectable = e} onchange={() => {
                                                         if (!choice.isNotActiveUnselectable) delete choice.isNotActiveUnselectable;
@@ -1347,7 +1364,7 @@
             </Card>
         </div>
     </div>
-{:else if !(bCreatorMode && row.isEditModeOn) && (isEnabled || !filterStyle.reqFilterVisibleIsOn)}
+{:else if !(bCreatorMode && row.isEditModeOn) && isShown}
     <div class={objectWidthClass()}>
         <div class:fullHeight={fullHeight} class:position-relative={app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow} class="d-flex">
             {#if app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow}
@@ -1678,6 +1695,9 @@
     }, {
         text: '÷ Divide',
         value: '4'
+    }, {
+        text: '= Equal',
+        value: '5'
     }];
     const hideContentText = ['Title of Choice', 'Image of Choice', 'Text of Choice', 'Score of Choice', 'Requirement of Choice', 'Title of Addon', 'Image of Addon', 'Text of Addon'];
     const hideContentValue = ['1', '2', '3', '4', '5', '6', '7', '8'];
@@ -1738,6 +1758,14 @@
     })
     let isEnabled = $derived.by(() => {
         return checkRequirements(choice.requireds);
+    });
+    let isShown = $derived.by(() => {
+        if (choice.isActive) {
+            return !filterStyle.selFilterVisibleIsOn;
+        } else if (!isEnabled) {
+            return !filterStyle.reqFilterVisibleIsOn
+        }
+        return !filterStyle.unselFilterVisibleIsOn;
     });
     let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}` : '');
     let isActive = $derived(choice.isActive);
@@ -2743,7 +2771,7 @@
                                         }
                                     }
                                     isChanged = localChoice.id !== aChoice.id;
-                                    delete aScore.appliedDiscount;
+                                    if (!aScore.discountIsOn) delete aScore.appliedDiscount;
                                     isRevoked = true;
                                 }
                             }

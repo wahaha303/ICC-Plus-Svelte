@@ -172,6 +172,19 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.3.2 / ${getDate('2025-08-14T16:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Added option to use 'Equal' in discount operator.
+        - Added option to reactivate choices after reset when both 'Cannot be Reset' and 'Allow Deselection of Activated Choices' are enabled.
+        - Fixed issue where points were not recalculated correctly when canceling non-stackable discount.
+        - Fixed issue where discounted score was displayed even when 'Display Discounted Score' option was disabled.
+        - Fixed issue where 'Cannot Be Reset' option did not work properly.
+        
+        <span style="color: green">Filter Design</span>
+        - Added option to hide selected and unselected choice completely.
+        `
+    }, {
+        open: true,
         title: `v2.3.1 / ${getDate('2025-08-13T12:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where minimum value of multiple choice was not properly reset when using Clean Selected Choices.

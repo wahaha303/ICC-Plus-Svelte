@@ -452,7 +452,6 @@
     async function loadApp(index: number) {
         const key = `${location.pathname.replace(/\/index\.html$/, '/')}slot-${index}`;
         const data = await loadFromSlot(key, 'cyoaStore');
-        console.log(key, data);
         const cleanedData = removeNulls(data.app);
         const parsed = AppSchema.safeParse(cleanedData);
 

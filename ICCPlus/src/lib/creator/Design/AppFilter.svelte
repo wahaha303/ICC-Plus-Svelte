@@ -48,7 +48,15 @@
                         <div class="col-12 px-3 py-2 b-line">
                             <h5>Filter on Choice that is selected</h5>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-12 gy-2">
+                            <FormField>
+                                <Switch bind:checked={() => styling.selFilterVisibleIsOn ?? false,(e) => styling.selFilterVisibleIsOn = e} color="secondary" class="switch-scale" />
+                                {#snippet label()}
+                                    Hide the Choice Completely
+                                {/snippet}
+                            </FormField>
+                        </div>
+                        <div class:disabled={styling.selFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selFilterBlurIsOn ?? false, (e) => styling.selFilterBlurIsOn = e} />
                             </FormField>
@@ -62,7 +70,7 @@
                             </FormField>
                             <Textfield bind:value={() => styling.selFilterCont ?? 0, (e) => styling.selFilterCont = e} disabled={!styling.selFilterContIsOn} label="Contrast" type="number" suffix="%" variant="filled" />
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class:disabled={styling.selFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selFilterHueIsOn ?? false, (e) => styling.selFilterHueIsOn = e} />
                             </FormField>
@@ -76,7 +84,7 @@
                             </FormField>
                             <Textfield bind:value={() => styling.selFilterSepia ?? 0, (e) => styling.selFilterSepia = e} disabled={!styling.selFilterSepiaIsOn} label="Sepia" type="number" suffix="%" variant="filled" />
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class:disabled={styling.selFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selFilterOpacIsOn ?? false, (e) => styling.selFilterOpacIsOn = e} />
                             </FormField>
@@ -91,7 +99,7 @@
                             <Textfield bind:value={() => styling.selFilterGray ?? 0, (e) => styling.selFilterGray = e} disabled={!styling.selFilterGrayIsOn} label="Greyscale" type="number" suffix="%" variant="filled" />
                         </div>
                     </div>
-                    <div class="row">
+                    <div class:disabled={styling.selFilterVisibleIsOn} class="row">
                         <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selBgColorIsOn ?? false, (e) => styling.selBgColorIsOn = e} />
@@ -132,7 +140,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class:disabled={styling.selFilterVisibleIsOn} class="row">
                         <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selCTextColorIsOn ?? false, (e) => styling.selCTextColorIsOn = e} />
@@ -186,7 +194,7 @@
                             <FormField>
                                 <Switch bind:checked={() => styling.reqFilterVisibleIsOn ?? false,(e) => styling.reqFilterVisibleIsOn = e} color="secondary" class="switch-scale" />
                                 {#snippet label()}
-                                    Hide The Choice Completely
+                                    Hide the Choice Completely
                                 {/snippet}
                             </FormField>
                         </div>
@@ -233,8 +241,8 @@
                             <Textfield bind:value={() => styling.reqFilterGray ?? 0, (e) => styling.reqFilterGray = e} disabled={!styling.reqFilterGrayIsOn} label="Greyscale" type="number" suffix="%" variant="filled" />
                         </div>
                     </div>
-                    <div class="row">
-                        <div class:disabled={styling.reqFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
+                    <div class:disabled={styling.reqFilterVisibleIsOn} class="row">
+                        <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqBgColorIsOn ?? false, (e) => styling.reqBgColorIsOn = e} />
                                 {#snippet label()}
@@ -251,7 +259,7 @@
                                 <ColorPicker bind:hex={() => styling.reqFilterBgColor ?? '#000000', (e) => styling.reqFilterBgColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class:disabled={styling.reqFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
+                        <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqBorderColorIsOn ?? false, (e) => styling.reqBorderColorIsOn = e} />
                                 {#snippet label()}
@@ -262,7 +270,7 @@
                                 <ColorPicker bind:hex={() => styling.reqFilterBorderColor ?? '#000000', (e) => styling.reqFilterBorderColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class:disabled={styling.reqFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
+                        <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqCTitleColorIsOn ?? false, (e) => styling.reqCTitleColorIsOn = e} />
                                 {#snippet label()}
@@ -286,7 +294,7 @@
                                 <ColorPicker bind:hex={() => styling.reqFilterCTextColor ?? '#000000', (e) => styling.reqFilterCTextColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class:disabled={styling.reqFilterVisibleIsOn} class="col-xl-3 col-lg-6 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqATitleColorIsOn ?? false, (e) => styling.reqATitleColorIsOn = e} />
                                 {#snippet label()}
@@ -297,7 +305,7 @@
                                 <ColorPicker bind:hex={() => styling.reqFilterATitleColor ?? '#000000', (e) => styling.reqFilterATitleColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class:disabled={styling.reqFilterVisibleIsOn} class="col-xl-3 col-lg-6 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqATextColorIsOn ?? false, (e) => styling.reqATextColorIsOn = e} />
                                 {#snippet label()}
@@ -308,7 +316,7 @@
                                 <ColorPicker bind:hex={() => styling.reqFilterATextColor ?? '#000000', (e) => styling.reqFilterATextColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class:disabled={styling.reqFilterVisibleIsOn} class="col-xl-3 col-lg-6 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqScoreTextColorIsOn ?? false, (e) => styling.reqScoreTextColorIsOn = e} />
                                 {#snippet label()}
@@ -324,7 +332,15 @@
                         <div class="col-12 px-3 py-2 b-line">
                             <h5>Filter on Choice that is not selected</h5>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-12 gy-2">
+                            <FormField>
+                                <Switch bind:checked={() => styling.unselFilterVisibleIsOn ?? false,(e) => styling.unselFilterVisibleIsOn = e} color="secondary" class="switch-scale" />
+                                {#snippet label()}
+                                    Hide the Choice Completely
+                                {/snippet}
+                            </FormField>
+                        </div>
+                        <div class:disabled={styling.unselFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.unselFilterBlurIsOn ?? false, (e) => styling.unselFilterBlurIsOn = e} />
                             </FormField>
@@ -338,7 +354,7 @@
                             </FormField>
                             <Textfield bind:value={() => styling.unselFilterCont ?? 0, (e) => styling.unselFilterCont = e} disabled={!styling.unselFilterContIsOn} label="Contrast" type="number" suffix="%" variant="filled" />
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class:disabled={styling.unselFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.unselFilterHueIsOn ?? false, (e) => styling.unselFilterHueIsOn = e} />
                             </FormField>
@@ -352,7 +368,7 @@
                             </FormField>
                             <Textfield bind:value={() => styling.unselFilterSepia ?? 0, (e) => styling.unselFilterSepia = e} disabled={!styling.unselFilterSepiaIsOn} label="Sepia" type="number" suffix="%" variant="filled" />
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class:disabled={styling.unselFilterVisibleIsOn} class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.unselFilterOpacIsOn ?? false, (e) => styling.unselFilterOpacIsOn = e} />
                             </FormField>

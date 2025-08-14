@@ -32,6 +32,7 @@ export type filterStyling = {
     selFilterATextColor?: string,
     selScoreTextColorIsOn?: boolean,
     selFilterSTextColor?: string,
+    selFilterVisibleIsOn?: boolean,
     reqFilterBlurIsOn?: boolean,
     reqFilterBlur?: number,
     reqFilterBrightIsOn?: boolean,
@@ -83,7 +84,8 @@ export type filterStyling = {
     unselFilterSaturIsOn?: boolean,
     unselFilterSatur?: number,
     unselFilterSepiaIsOn?: boolean,
-    unselFilterSepia?: number
+    unselFilterSepia?: number,
+    unselFilterVisibleIsOn?: boolean
 };
 export type textStyling = {
     customRowTitle?: boolean,
@@ -484,6 +486,7 @@ export type Choice = {
     activateOtherChoice?: boolean,
     isNotDeactivate?: boolean,
     isAllowDeselect?: boolean,
+    activateAfterReset?: boolean,
     isActivateRandom?: boolean,
     numActivateRandom?: number,
     activateThisChoice?: string,
