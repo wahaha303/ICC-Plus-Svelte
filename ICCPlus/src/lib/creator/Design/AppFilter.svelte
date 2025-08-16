@@ -100,6 +100,24 @@
                         </div>
                     </div>
                     <div class:disabled={styling.selFilterVisibleIsOn} class="row">
+                        <div class="col-lg-4 col-12 gy-2 text-center">
+                            <FormField class="w-100">
+                                <Checkbox bind:checked={() => styling.selBgImageIsOn ?? false, (e) => styling.selBgImageIsOn = e} />
+                                {#snippet label()}
+                                    Background Image
+                                {/snippet}
+                            </FormField>
+                            <div class:disabled={!styling.selBgImageIsOn}>
+                                {#if styling.selFilterBgImage}
+                                    <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'selFilterBgImage'}} class="btn--image-background">
+                                        <img src={styling.selFilterBgImage} alt="Filter Background" loading="lazy" class="btn--image" style="max-height: 140px;" />
+                                    </button>
+                                {/if}
+                                <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'selFilterBgImage'}} variant="raised" disabled={!styling.selBgImageIsOn}>
+                                    <Label>Change Image</Label>
+                                </Button>
+                            </div>
+                        </div>
                         <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selBgColorIsOn ?? false, (e) => styling.selBgColorIsOn = e} />
@@ -242,6 +260,26 @@
                         </div>
                     </div>
                     <div class:disabled={styling.reqFilterVisibleIsOn} class="row">
+                        <div class="col-lg-4 col-12 gy-2 text-center">
+                            <div class:disabled={styling.reqFilterVisibleIsOn}>
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.reqBgImageIsOn ?? false, (e) => styling.reqBgImageIsOn = e} />
+                                    {#snippet label()}
+                                        Background Image
+                                    {/snippet}
+                                </FormField>
+                                <div class:disabled={!styling.reqBgImageIsOn}>
+                                    {#if styling.reqFilterBgImage}
+                                        <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'reqFilterBgImage'}} class="btn--image-background">
+                                            <img src={styling.reqFilterBgImage} alt="Filter Background for Required" loading="lazy" class="btn--image" style="max-height: 140px;" />
+                                        </button>
+                                    {/if}
+                                    <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'reqFilterBgImage'}} variant="raised" disabled={!styling.reqBgImageIsOn}>
+                                        <Label>Change Image</Label>
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqBgColorIsOn ?? false, (e) => styling.reqBgColorIsOn = e} />
@@ -393,6 +431,10 @@
         </Button>
     </Actions>
 </Dialog>
+{#if currentDialog === 'appImageUpload'}
+<ImageUpload open={currentDialog === 'appImageUpload'} onclose={() => (currentDialog = 'none')} imgObject={styling} imgProp={imgProp} canHaveURL={true} />
+{/if}
+
 <script lang="ts">
     import Button, { Label } from '@smui/button';
     import Card, { Content as CardContent } from '@smui/card';
@@ -404,10 +446,13 @@
     import Switch from '@smui/switch';
     import { app, filterStyling } from '$lib/store/store.svelte';
     import type { Choice, Row, Styling, filterStyling as StyleType, RowDesignGroup, ObjectDesignGroup } from '$lib/store/types';
+    import ImageUpload from '$lib/store/ImageUpload.svelte';
 
     let { open, onclose, data }: { open: boolean; onclose: () => void; data?: Row | Choice | RowDesignGroup | ObjectDesignGroup } = $props();
     let styling = $state<Styling>(typeof data !== 'undefined' ? data.styling || filterStyling : app.styling);
     let isTransparent = $state(false);
     let dialogStyle = $derived(isTransparent ? 'opacity: 0.2' : '');
     let isDisabled = $derived(typeof data !== 'undefined' && !data.privateFilterIsOn);
+    let currentDialog = $state<'none' | 'appImageUpload'>('none');
+    let imgProp = $state('');
 </script>
