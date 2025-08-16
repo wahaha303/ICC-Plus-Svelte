@@ -1920,6 +1920,12 @@
                     }
                     styles.push(`background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`);
                 }
+                if (filterStyle.selBgImageIsOn && filterStyle.selFilterBgImage) {
+                    if (bgImageIndex !== 0) {
+                        styles.splice(bgImageIndex - 1, 1);
+                    }
+                    styles.push(`background-image: url('${filterStyle.selFilterBgImage}'); background-size: cover; background-position: center;`);
+                }
                 if (objectStyle.objectGradientIsOn) {
                     styles.push(`background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`);
                 }
@@ -2006,6 +2012,12 @@
                     }
                 }
                 styles.push(`background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`);
+            }
+            if (filterStyle.reqBgImageIsOn && filterStyle.reqFilterBgImage) {
+                if (bgImageIndex !== 0) {
+                    styles.splice(bgImageIndex - 1, 1);
+                }
+                styles.push(`background-image: url('${filterStyle.reqFilterBgImage}'); background-size: cover; background-position: center;`);
             }
             if (objectStyle.objectGradientIsOn) {
                 styles.push(`background-image: linear-gradient(${objectStyle.objectGradientOnReq});`);
