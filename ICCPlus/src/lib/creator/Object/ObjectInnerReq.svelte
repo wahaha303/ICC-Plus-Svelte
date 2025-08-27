@@ -22,13 +22,13 @@
         <Wrapper text="Add Point Type">
             <IconButton onclickcapture={() => {
                 if (typeof required.more === 'undefined') required.more = [];
-                required.more.push({operator: '1', type: 'id', id: ''});
+                required.more.push({operator: '1', type: 'id', id: '', priority: 1});
             }} ><i class="mdi mdi-alphabetical-variant"></i></IconButton>
         </Wrapper>
         <Wrapper text="Add Number">
             <IconButton onclickcapture={() => {
                 if (typeof required.more === 'undefined') required.more = [];
-                required.more.push({operator: '1', type: 'points', points: 0});
+                required.more.push({operator: '1', type: 'points', points: 0, priority: 1});
             }} ><i class="mdi mdi-numeric"></i></IconButton>
         </Wrapper>
     </div>
@@ -64,6 +64,11 @@
                     <Option value={moreOperator.value}>{moreOperator.text}</Option>
                 {/each}
             </Select>
+            <Textfield bind:value={() => more.priority ?? 1, (e) => more.priority = e} onchange={() => {
+                if (typeof more.priority !== 'undefined') {
+                    more.priority = Math.min(Math.max(more.priority, -99), 99);
+                }
+            }} label="Priority" type="number" variant="filled" input$min="-99" input$max="99" />
             <div class="floating-button-container">
                 {#if more.type === 'id'}
                     <Autocomplete

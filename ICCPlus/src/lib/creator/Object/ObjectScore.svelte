@@ -17,8 +17,20 @@
             </Wrapper>
         </div>
         <div class="row gx-3">
+            {#if choice?.isSelectableMultiple}
+                <FormField class="col-12">
+                    <Checkbox bind:checked={() => score.multiplyByTimes ?? false, (e) => score.multiplyByTimes = e} onchange={() => {
+                        if (!score.multiplyByTimes) {
+                            delete score.multiplyByTimes;
+                        }
+                    }} />
+                    {#snippet label()}
+                        Muliply by number of selections
+                    {/snippet}
+                </FormField>
+            {/if}
             <FormField class="col-12">
-                <Checkbox bind:checked={() => score.isNotRecalculatable?? false, (e) => score.isNotRecalculatable = e} onchange={() => {
+                <Checkbox bind:checked={() => score.isNotRecalculatable ?? false, (e) => score.isNotRecalculatable = e} onchange={() => {
                     if (!score.isNotRecalculatable) {
                         delete score.isNotDiscountable;
                     }
@@ -28,7 +40,7 @@
                 {/snippet}    
             </FormField>
             <FormField class={col6}>
-                <Checkbox bind:checked={() => score.isNotDiscountable?? false, (e) => score.isNotDiscountable = e} onchange={() => {
+                <Checkbox bind:checked={() => score.isNotDiscountable ?? false, (e) => score.isNotDiscountable = e} onchange={() => {
                     if (!score.isNotDiscountable) {
                         delete score.isNotDiscountable;
                     }
@@ -38,7 +50,7 @@
                 {/snippet}
             </FormField>
             <FormField class={col6}>
-                <Checkbox bind:checked={() => score.isRandom?? false, (e) => score.isRandom = e} onchange={() => {
+                <Checkbox bind:checked={() => score.isRandom ?? false, (e) => score.isRandom = e} onchange={() => {
                     if (score.isRandom) {
                         score.minValue = 0;
                         score.maxValue = 0;
@@ -54,18 +66,6 @@
                     Enable Random
                 {/snippet}
             </FormField>
-            {#if choice?.isSelectableMultiple}
-                <FormField class="col-12">
-                    <Checkbox bind:checked={() => score.multiplyByTimes?? false, (e) => score.multiplyByTimes = e} onchange={() => {
-                        if (!score.multiplyByTimes) {
-                            delete score.multiplyByTimes;
-                        }
-                    }} />
-                    {#snippet label()}
-                        Muliply by number of selections
-                    {/snippet}
-                </FormField>
-            {/if}
         </div>
         <div class="row gx-3">
             <div class={col6}>
@@ -80,12 +80,12 @@
                     class="col-12 my-1"
                 />
                 {#if score.isRandom}
-                    <Textfield class="mb-1" bind:value={() => score.minValue?? 0, (e) => score.minValue = e} onchange={() => {
+                    <Textfield class="mb-1" bind:value={() => score.minValue ?? 0, (e) => score.minValue = e} onchange={() => {
                         if (score.minValue && !pointType?.allowFloat) {
                             score.minValue = Math.floor(score.minValue);
                         }
                     }} label="Minimum Value" type="number" variant="filled" />
-                    <Textfield class="mb-1" bind:value={() => score.maxValue?? 0, (e) => score.maxValue = e} onchange={() => {
+                    <Textfield class="mb-1" bind:value={() => score.maxValue ?? 0, (e) => score.maxValue = e} onchange={() => {
                         if (score.maxValue && !pointType?.allowFloat) {
                             score.maxValue = Math.floor(score.maxValue);
                         }
@@ -103,6 +103,26 @@
                 <Textfield class="mb-1" bind:value={score.afterText} label="Text After" variant="filled" />
             </div>
         </div>
+        <div class="row gx-3">
+            <FormField class={col6}>
+                <Checkbox bind:checked={score.showScore} />
+                {#snippet label()}
+                    Show Score
+                {/snippet}
+            </FormField>
+            {#if score.showScore}
+                <FormField class={col6}>
+                    <Checkbox bind:checked={() => score.hideValue ?? false, (e) => score.hideValue = e} onchange={() => {
+                        if (!score.hideValue) {
+                            delete score.hideValue;
+                        }
+                    }} />
+                    {#snippet label()}
+                        Hide Value
+                    {/snippet}
+                </FormField>
+            {/if}
+        </div>
         <div class="row gy-3 p-2">
             {#each score.requireds as required, i}
                 <div class="{required.requireds.length > 0 ? 'col-12' : reqCol} p-2">
@@ -112,24 +132,6 @@
                     </Button>
                 </div>
             {/each}
-        </div>
-        <div class="row gx-3">
-            <FormField class={col6}>
-                <Checkbox bind:checked={score.showScore} />
-                {#snippet label()}
-                    Show Score
-                {/snippet}
-            </FormField>
-            <FormField class={col6}>
-                <Checkbox bind:checked={() => score.hideValue?? false, (e) => score.hideValue = e} onchange={() => {
-                    if (!score.hideValue) {
-                        delete score.hideValue;
-                    }
-                }} />
-                {#snippet label()}
-                    Hide Value
-                {/snippet}
-            </FormField>
         </div>
     </div>
 {:else if isPointtypeActivated() && checkRequirements(score.requireds)}
@@ -379,7 +381,7 @@
         return score.value < 0;
     });
     let scoreText = $derived.by(() => {
-        let style: string[] = [];;
+        let style: string[] = [];
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (pointType?.pointColorsIsOn) {

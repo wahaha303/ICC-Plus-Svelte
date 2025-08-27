@@ -19,7 +19,7 @@
 
   $effect(() => {
     if (el && tooltipVariables.text !== '') {
-        if (tooltipVariables.isVisible && tooltipVariables.anchor) {
+        if (tooltipVariables.isVisible && tooltipVariables.anchor && tooltipVariables.anchor.isConnected) {
             popper?.destroy();
             popper = createPopper(tooltipVariables.anchor, el, {
               placement: 'top',

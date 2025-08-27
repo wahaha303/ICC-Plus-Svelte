@@ -12,7 +12,7 @@
                 {#each itemList as item, i (item.id)}
                     <Panel class="m-0" bind:open={() => item.open != null ? item.open : false, (e) => item.open = e} conditionalRender={true}>
                         <Header>
-                            <div class:panel--active={item.open}>{`${i + 1}. ${item.debugTitle} ${item.title} / ${item.id}`} </div>
+                            <div class:panel--active={item.open} class="list__title">{@html `${i + 1}. ${item.debugTitle || ''} ${item.title} / ${item.id}`} </div>
                             {#snippet icon()}
                                 <IconButton onclickcapture={(e) => {e.preventDefault(); e.stopPropagation(); scrollToRow(item.id)}} size="mini">
                                     <Icon class="mdi mdi-target"></Icon>
@@ -24,8 +24,8 @@
                                 <div class="container-fluid p-0">
                                     {#each item.objects as subItem, j (subItem.id)}
                                         <div class="row gx-0 ps-2 py-2 justify-space-between align-items-center">
-                                            <div class="col">
-                                                {`${j + 1}. ${subItem.debugTitle} ${subItem.title} / ${subItem.id}`}
+                                            <div class="col list__title">
+                                                {`${j + 1}. ${subItem.debugTitle || ''} ${subItem.title} / ${subItem.id}`}
                                             </div>
                                             <div class="col pe-3 text-right">
                                                 <IconButton onclickcapture={(e) => {e.preventDefault(); e.stopPropagation(); scrollToObject(subItem.id)}} size="mini">

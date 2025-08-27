@@ -4,7 +4,7 @@
         <AppBarRow>
             <AppBarSection class="py-0 justify-left">
                 <div class="col-8">
-                    <IconButton onclickcapture={() => currentComponent.value = 'appMain'} size="mini">
+                    <IconButton onclick={() => currentComponent.value = 'appMain'} size="mini">
                         <i class="mdi mdi-chevron-left"></i>
                     </IconButton>
                 </div>
@@ -40,11 +40,15 @@
                     <Graphic class="mdi mdi-swap-vertical" />
                     <Text class="w-100 list-text text-center">Top/Bottom Point Bar</Text>
                 </Item>
-                <Item onSMUIAction={cleanActivated} class="my-0">
+                <Item onSMUIAction={() => {confirmDialog.action = () => cleanActivated(); confirmDialog.context = "Are you sure you want to clear selected choices?<br>This action cannot be undone."; currentDialog = "dlgCommon"; menuOpen = false;}} class="my-0">
                     <Graphic class="mdi mdi-select-off" />
-                    <Text class="w-100 list-text text-center">Clean Selected Choices</Text>
+                    <Text class="w-100 list-text text-center">Clear Selected Choices</Text>
                 </Item>
                 {#if app.importedChoicesIsOpen}
+                    <Item onSMUIAction={() => {currentDialog = 'appBuildForm'; menuOpen = false;}} class="my-0">
+                        <Graphic class="mdi mdi-format-list-checks" />
+                        <Text class="w-100 list-text text-center">Open Build Form</Text>
+                    </Item>
                     <Item onSMUIAction={() => {currentDialog = 'appSaveLoad'; menuOpen = false;}} class="my-0">
                         <Graphic class="mdi mdi-content-save" />
                         <Text class="w-100 list-text text-center">Save/Load Build</Text>
@@ -94,7 +98,7 @@
             <TopAppBar class="pointBar" style={pointBar} variant="fixed" color="secondary" >
                 <AppBarRow class="justify-space-around">
                     <AppBarSection class="py-0 justify-center">
-                        <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} aria-label="Open Import Window" style={pointBarIcon}>
+                        <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} oncontextmenu={buildContext} aria-label="Open Import Window" style={pointBarIcon}>
                             <i class="mdi mdi-format-list-checks"></i>
                         </IconButton>
                     </AppBarSection>
@@ -134,6 +138,14 @@
     <DlgBackpack open={currentDialog === 'dlgBackpack'} onclose={() => (currentDialog = 'none')} />
 {:else if currentDialog === 'appGlobalSettings'}
     <AppGlobalSettings open={currentDialog === 'appGlobalSettings'} onclose={() => (currentDialog = 'none')} />
+{:else if currentDialog === 'appBuildForm'}
+    <AppBuildForm open={currentDialog === 'appBuildForm'} onclose={() => (currentDialog = 'none')} />
+{:else if currentDialog === 'dlgCommon'}
+    <DlgCommon open={currentDialog === 'dlgCommon'} onclose={() => (currentDialog = 'none')} title={confirmDialog.title} context={confirmDialog.context} closeHandler={(e) => {
+        if (e.detail.action === 'accept') {
+            confirmDialog.action();
+        }
+    }}/>
 {/if}
 {#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
     <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} />
@@ -151,18 +163,25 @@
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
     import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, bgmPlayer, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba } from '$lib/store/store.svelte';
+    import AppBuildForm from './AppBuildForm.svelte';
+    import AppGlobalSettings from './AppGlobalSettings.svelte';
+    import AppPointBar from './AppPointBar.svelte';
     import AppSaveLoad from './AppSaveLoad.svelte';
 	import AppRow from './AppRow.svelte';
-    import AppPointBar from './AppPointBar.svelte';
     import DlgBackpack from './DlgBackpack.svelte';
 	import ImageUpload from '$lib/store/ImageUpload.svelte';
-	import AppGlobalSettings from './AppGlobalSettings.svelte';
     import DlgCommon from './DlgCommon.svelte';
 	import { get } from 'svelte/store';
+
+    const confirmDialog = {
+        action: () => {},
+        title: 'Warning',
+        context: ''
+    };
     
     let menuOpen = $state(false);
     let topPointBar = $state(false);
-    let currentDialog = $state<'none' | 'appSaveLoad' | 'dlgBackpack' | 'appGlobalSettings'>('none');
+    let currentDialog = $state<'none' | 'appSaveLoad' | 'dlgBackpack' | 'appGlobalSettings' | 'appBuildForm' | 'dlgCommon'>('none');
     let pointBarPosition = $derived(topPointBar ? app.showMusicPlayer ? 'top: 32px;' : 'top: 0;' : 'bottom: 0;');
     let viewerMenuStyle = $derived(topPointBar ? app.showMusicPlayer ? 'margin-top: 88px;' : 'margin-top: 56px;' : app.showMusicPlayer ? 'margin-top: 32px;' : '');
     let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${hexToRgba(app.fadeTransitionColor)}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
@@ -175,10 +194,10 @@
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
     let pointBar = $derived(`background-color: ${hexToRgba(app.styling.barBackgroundColor)}; margin:${app.styling.barMargin}px; padding:${app.styling.barPadding}px; ${pointBarPosition}`);
-    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}''; font-size: ${app.styling.barTextSize}px;`);
+    let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}'; font-size: ${app.styling.barTextSize}px;`);
     let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (app.styling.backgroundImage) {
             styles.push(`background-image: url('${app.styling.backgroundImage}');`);
@@ -202,7 +221,7 @@
         return styles.join(' '); 
     });
     let mainStyle = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (app.showMusicPlayer) {
             styles.push(`padding-top: 32px;`);
@@ -228,6 +247,13 @@
             curVolume = app.curVolume;
         }
     });
+
+    function buildContext(e: MouseEvent) {
+        const target = e.currentTarget as HTMLElement;
+        e.preventDefault();
+        target.blur();
+        currentDialog = 'appBuildForm';
+    }
 
     function calTime(num: number) {
         const h = Math.floor(num / 3600);

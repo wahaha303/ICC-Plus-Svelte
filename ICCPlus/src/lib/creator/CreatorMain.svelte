@@ -137,7 +137,7 @@
                             <div class="p-2 col-12">
                                 <Card>
                                     <CardContent class="toolbar toolbar--row justify-space-between px-3 py-2">
-                                        <div class="toolbar__title">{(typeof row.debugTitle !== 'undefined' ? row.debugTitle : '') + row.title}</div>
+                                        <div class="toolbar__title">{@html (typeof row.debugTitle !== 'undefined' ? row.debugTitle : '') + (row.title !== '' ? ' ' + row.title : '')}</div>
                                         <div class="d-row">
                                             <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
                                                 <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclickcapture={() => {row.isEditModeOn = !row.isEditModeOn;}} />
@@ -150,7 +150,7 @@
                                                 </Wrapper>
                                             {/if}
                                             <Wrapper text="Delete Row">
-                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => {deleteRow(row, i); console.log('click');}} />
+                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => {deleteRow(row, i);}} />
                                             </Wrapper>
                                             <Wrapper text="L: Clone Row<br>R: Context Menu">
                                                 <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneRow(row, i)} oncontextmenu={(e) => rowContext(e, row, i)} />
@@ -315,7 +315,7 @@
         action: () => {
             cleanActivated();
         },
-        text: 'Clean Selected Choices',
+        text: 'Clear Selected Choices',
         icon: 'mdi mdi-select-off'
     }, {
         action: () => {

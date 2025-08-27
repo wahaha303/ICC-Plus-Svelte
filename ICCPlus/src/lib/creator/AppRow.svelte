@@ -1,10 +1,15 @@
-<div class="row-{row.id}-bg text-center" style={rowBody} bind:clientWidth={width}>
-    {#if bCreatorMode && row.isEditModeOn}
+<div class="row-{row.id}-bg text-center {!bCreatorMode && !isEnabled ? 'hidden' : ''}" style={rowBody} bind:clientWidth={width}>
+    {#if bCreatorMode && (row.isEditModeOn || row.isSimpleEditMode)}
         <Card class="mt-n3">
             <CardContent class="p-0 mb-4">
+                {#if app.useChoiceEditBtn && !row.isEditModeOn && row.isSimpleEditMode}
+                    <div class="row-edit-button__edit-mode">
+                        <IconButton onclickcapture={() => delete row.isSimpleEditMode} size="button"><i class="mdi mdi-wrench"></i></IconButton>
+                    </div>
+                {/if}
                 <div class="toolbar">
                     <div class="spacer"></div>
-                    {#each rowToolbarButtons as rowButton, i}
+                    {#each rowToolbarButtons as rowButton}
                         <Wrapper text={rowButton.text}>
                             <IconButton onclickcapture={rowButton.action} oncontextmenu={rowButton.contextAction}><i class={rowButton.icon}></i></IconButton>  
                         </Wrapper>
@@ -83,6 +88,17 @@
                                     Half of the screen?
                                 {/snippet}
                             </FormField>
+                        </div>
+                    </div>
+                    <div class={col2}>
+                        <div class="d-column">
+                            <Select bind:value={row.template} label="Template" variant="filled" alwaysFloat={true}>
+                                {#each templates as template (template.text)}
+                                    <Option value={template.value}>{template.text}</Option>
+                                {/each}
+                            </Select>
+                            <Textfield bind:value={row.id} label="Row Id" onchange={changeRowId} variant="filled" />
+                            <Textfield bind:value={() => row.debugTitle ?? '', (e) => row.debugTitle = e} label="Debug Title" variant="filled" />
                             {#if row.isResultRow || row.isGroupRow}
                                 <Autocomplete
                                     options={getGroups()}
@@ -99,18 +115,6 @@
                     </div>
                     <div class={col2}>
                         <div class="d-column">
-                            <Select bind:value={row.template} label="Template" variant="filled" alwaysFloat={true}>
-                                {#each templates as template (template.text)}
-                                    <Option value={template.value}>{template.text}</Option>
-                                {/each}
-                            </Select>
-                            <Textfield bind:value={row.title} label="Row Title" variant="filled" />
-                            <Textfield bind:value={() => row.debugTitle ?? '', (e) => row.debugTitle = e} label="Debug Title" variant="filled" />
-                            <Textfield bind:value={row.allowedChoices} onchange={() => row.allowedChoices = Math.max(row.allowedChoices, 0)} input$min={0} label="Allowed Choices" variant="filled" type="number" />
-                        </div>
-                    </div>
-                    <div class={col2}>
-                        <div class="d-column">
                             <Select bind:value={row.objectWidth} label="Choices Per Row" variant="filled" alwaysFloat={true}>
                                 {#each objectWidths as objectWidth (objectWidth.text)}
                                     <Option value={objectWidth.value}>{objectWidth.text}</Option>
@@ -121,61 +125,52 @@
                                     <Option value={justify.value}>{justify.value}</Option>
                                 {/each}
                             </Select>
-                            <Textfield bind:value={row.id} label="Row Id" onchange={changeRowId} variant="filled" />
+                            <Textfield bind:value={row.allowedChoices} onchange={() => row.allowedChoices = Math.max(row.allowedChoices, 0)} input$min={0} label="Allowed Choices" variant="filled" type="number" />
                             <Textfield bind:value={row.currentChoices} onchange={() => row.currentChoices = Math.max(row.currentChoices, 0)} input$min={0} label="Selected Choices" variant="filled" type="number" />
                         </div>
                     </div>
                     <div class={col4}>
-                        <Textfield textarea bind:value={row.titleText} label="Row Text" variant="filled" input$rows={8} />
+                        <div class="d-column">
+                            <FormField class="ml-4 mb-3">
+                                <Switch bind:checked={() => row.deselectChoices ?? false, (e) => {row.deselectChoices = e}} color="secondary" class="switch-scale" />
+                                {#snippet label()}
+                                    Deselect choices if row doesn't meet requirements
+                                {/snippet}
+                            </FormField>
+                            {#if row.isResultRow || row.isGroupRow}
+                                <FormField class="ml-4 mb-3">
+                                    <Switch bind:checked={() => row.choicesShareTemplate ?? false, (e) => {row.choicesShareTemplate = e}} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Use 'Image Top' template for all choices
+                                    {/snippet}
+                                </FormField>
+                                <FormField class="ml-4 mb-3">
+                                    <Switch bind:checked={() => row.textIsRemoved ?? false, (e) => row.textIsRemoved = e} onSMUISwitchChange={() => {
+                                        if (!row.textIsRemoved) {
+                                            delete row.objectTitleRemoved;
+                                            delete row.objectImageRemoved;
+                                            delete row.objectTextRemoved;
+                                            delete row.objectScoreRemoved;
+                                            delete row.objectRequirementRemoved;
+                                            delete row.addonTitleRemoved;
+                                            delete row.addonImageRemoved;
+                                            delete row.addonTextRemoved;
+                                            delete row.textIsRemoved;
+                                        }
+                                    }} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Hide the contents of choices
+                                    {/snippet}
+                                </FormField>
+                                <FormField class="ml-4 mb-3">
+                                    <Switch bind:checked={() => row.resultShowRowTitle ?? false, (e) => {row.resultShowRowTitle = e}} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Show the title of the row in the choice
+                                    {/snippet}
+                                </FormField>
+                            {/if}
+                        </div>
                     </div>
-                </div>
-                <div class="row px-4">
-                    <div class="col">
-                        <FormField class="ml-4 mb-2">
-                            <Switch bind:checked={() => row.deselectChoices ?? false, (e) => {row.deselectChoices = e}} color="secondary" class="switch-scale" />
-                            {#snippet label()}
-                                Deselect choices if row doesn't meet requirements
-                            {/snippet}
-                        </FormField>
-                    </div>
-                    {#if row.isResultRow || row.isGroupRow}
-                        <div class={col3}>
-                            <FormField class="ml-4 mb-2">
-                                <Switch bind:checked={() => row.choicesShareTemplate ?? false, (e) => {row.choicesShareTemplate = e}} color="secondary" class="switch-scale" />
-                                {#snippet label()}
-                                    Use 'Image Top' template for all choices
-                                {/snippet}
-                            </FormField>
-                        </div>
-                        <div class={col3}>
-                            <FormField class="ml-4 mb-2">
-                                <Switch bind:checked={() => row.textIsRemoved ?? false, (e) => row.textIsRemoved = e} onSMUISwitchChange={() => {
-                                    if (!row.textIsRemoved) {
-                                        delete row.objectTitleRemoved;
-                                        delete row.objectImageRemoved;
-                                        delete row.objectTextRemoved;
-                                        delete row.objectScoreRemoved;
-                                        delete row.objectRequirementRemoved;
-                                        delete row.addonTitleRemoved;
-                                        delete row.addonImageRemoved;
-                                        delete row.addonTextRemoved;
-                                        delete row.textIsRemoved;
-                                    }
-                                }} color="secondary" class="switch-scale" />
-                                {#snippet label()}
-                                    Hide the contents of choices
-                                {/snippet}
-                            </FormField>
-                        </div>
-                        <div class={col3}>
-                            <FormField class="ml-4 mb-2">
-                                <Switch bind:checked={() => row.resultShowRowTitle ?? false, (e) => {row.resultShowRowTitle = e}} color="secondary" class="switch-scale" />
-                                {#snippet label()}
-                                    Show the title of the row in the choice
-                                {/snippet}
-                            </FormField>
-                        </div>
-                    {/if}
                 </div>
                 {#if (row.isResultRow || row.isGroupRow) && row.textIsRemoved}
                     <div class="row px-4">
@@ -257,10 +252,25 @@
                         </div>
                     {/each}
                 </div>
+                <div class="row px-4 pt-3">
+                    <div class="col-12">
+                        <Tiptap data={row} dataProp="title" label="Row Title" />
+                    </div>
+                </div>
+                <div class="row px-4 py-2">
+                    <div class="col-12">
+                        <Tiptap data={row} dataProp="titleText" textarea={true} label="Row Text" rows={8} />
+                    </div>
+                </div>
             </CardContent>
         </Card>
     {:else if isEnabled}
-        <div class="row gx-0 row-{row.id}" style={row.title !== '' ? rowBackground : ''}>
+        <div class="row gx-0 row-{row.id}" class:row-edit-button__wrapper={app.useChoiceEditBtn && bCreatorMode} style={row.title !== '' ? rowBackground : ''}>
+            {#if app.useChoiceEditBtn && bCreatorMode}
+                <div class="row-edit-button" style="width: auto;">
+                    <IconButton onclickcapture={() => row.isSimpleEditMode = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
+                </div>
+            {/if}
             {#if row.template >= 4 || row.template === 1 || windowWidth <= 1280}
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || windowWidth <= 1280)}
@@ -295,7 +305,7 @@
                         {/if}
                     {/if}
                     {#if row.titleText !== ''}
-                        <p class="mb-0" style={rowText}>
+                        <p style={rowText}>
                             {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                         </p>
                     {/if}
@@ -320,7 +330,7 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p class="mb-0" style={rowText}>
+                            <p style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}
@@ -357,7 +367,7 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p class="mb-0" style={rowText}>
+                            <p style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}
@@ -384,7 +394,7 @@
             {#if (bCreatorMode && row.isEditModeOn && !row.isResultRow && !row.isGroupRow)}
                 <div class="p-2 {objectWidthClass()}">
                     <Wrapper text="L: Create New Single Choice<br>R: Paste Choice">
-                        <button type="button" class="create-box col-12" style="min-height: 581px; font-size: 40px;" onclickcapture={createNewObject} oncontextmenu={(e: MouseEvent) => {
+                        <button type="button" class="create-box col-12" style="min-height: 651px; font-size: 40px;" onclickcapture={createNewObject} oncontextmenu={(e: MouseEvent) => {
                             e.preventDefault();
                             pasteObject(row, -1);
                             (e.currentTarget as HTMLElement)?.blur();
@@ -414,6 +424,7 @@
     import type { Choice, Requireds, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { tick } from 'svelte';
+    import Tiptap from '$lib/store/Tiptap.svelte';
 
     const { row, bCreatorMode, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row:Row, bCreatorMode:boolean, windowWidth:number, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     const rowToolbarButtons = [{
@@ -613,7 +624,7 @@
     });
 
     let rowBody = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (bCreatorMode && row.isEditModeOn) {
             styles.push(`margin: 1%;`);
@@ -631,7 +642,7 @@
 
     let rowBackground = $derived.by(() => {
         let suffix = rowStyle.rowBorderRadiusIsPixels ? 'px' : '%';
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (rowStyle.rowBorderImage) {
             styles.push(`border-image: url('${rowStyle.rowBorderImage}') ${rowStyle.rowBorderImageSliceTop} ${rowStyle.rowBorderImageSliceRight} ${rowStyle.rowBorderImageSliceBottom} ${rowStyle.rowBorderImageSliceLeft} / ${rowStyle.rowBorderImageWidth}px ${rowStyle.rowBorderImageRepeat}; border-style: solid; padding: ${rowStyle.rowBorderImageWidth}px;`);
@@ -674,7 +685,7 @@
 
     let rowImage = $derived.by(() => {
         let suffix = rowImageStyle.rowImgBorderRadiusIsPixels ? 'px' : '%';
-        let styles: string[] = [];;
+        let styles: string[] = [];
         
         styles.push(`width: ${rowImageStyle.rowImageWidth}%; margin-top: ${rowImageStyle.rowImageMarginTop}%; margin-bottom: ${rowImageStyle.rowImageMarginBottom}%;`);
         styles.push(`border-radius: ${rowImageStyle.rowImgBorderRadiusTopLeft}${suffix} ${rowImageStyle.rowImgBorderRadiusTopRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomLeft}${suffix};`);

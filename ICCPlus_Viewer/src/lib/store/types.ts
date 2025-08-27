@@ -339,6 +339,13 @@ export type backpackStyling = {
     backPackWidth?: number
 };
 export type Styling = {[key: string]: any} & filterStyling & textStyling & objectImageStyling & rowImageStyling & addonImageStyling & backgroundStyling & objectStyling & rowStyling & addonStyling & multiChoiceStyling & pointBarStyling & backpackStyling;
+export type MoreReq = {
+    operator?: string,
+    type?: string,
+    id?: string,
+    points?: number,
+    priority?: number
+};
 export type Requireds = {
     required: boolean,
     requireds: Requireds[],
@@ -361,7 +368,7 @@ export type Requireds = {
     selFromOperators?: string,
     selGroups?: string[],
     selRows?: string[],
-    more?: { operator?: string, type?: string, id?: string, points?: number }[],
+    more?: MoreReq[],
     customTextIsOn?: boolean,
     customText?: string
 };
@@ -375,6 +382,8 @@ export type Addon = {
     requireds: Requireds[],
     parentId: string,
     showAddon?: boolean,
+    hideAddon?: boolean,
+    skipIndex?: boolean,
     defaultTemplate?: number,
     templateStack?: {
         id: string,
@@ -486,7 +495,7 @@ export type Choice = {
     activateOtherChoice?: boolean,
     isNotDeactivate?: boolean,
     isAllowDeselect?: boolean,
-    keepOnReset?: boolean,
+    activateAfterReset?: boolean,
     isActivateRandom?: boolean,
     numActivateRandom?: number,
     activateThisChoice?: string,
@@ -611,7 +620,9 @@ export type Choice = {
     isEditModeOn?: boolean,
     isSelectDelayed?: boolean,
     selectDelayTime?: number,
-    selectDelayTimer?: number
+    selectDelayTimer?: number,
+    showScoreInAddon?: boolean,
+    showReqInAddon?: boolean,
 };
 export type Row = {
     [key: string]: any,
@@ -642,6 +653,7 @@ export type Row = {
     currentChoices: number,
     requireds: Requireds[],
     isEditModeOn?: boolean,
+    isSimpleEditMode?: boolean,
     isRequirementOpen?: boolean,
     objects: Choice[],
     rowDesignGroups?: string[],
@@ -964,4 +976,10 @@ export type SnackBarVariables = {
 export type ViewerSetting = {
     allowDeselect: boolean,
     isSingleFile: boolean
+};
+export type ExprNode = {
+    left: number | ExprNode,
+    operator: string,
+    right: number | ExprNode,
+    priority: number
 };

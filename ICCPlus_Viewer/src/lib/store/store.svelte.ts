@@ -1,11 +1,11 @@
 import { get, readable, writable } from 'svelte/store';
-import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting } from './types';
+import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting, ExprNode } from './types';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.3.2';
+export const appVersion = '2.4.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1535,6 +1535,33 @@ export function checkActivated(str: string, actMap: SvelteMap<string, ActivatedM
     }
     return actMap.has(key);
 };
+function getPriority(operator: string, priority: number = 1) {
+    switch (operator) {
+        case '5':
+        case '4':
+        case '3':
+            return priority * 10 + 1;
+        case '2':
+        case '1':
+        default:
+            return priority * 10 + 2;
+    }
+}
+function evaluate(node: number | ExprNode): number {
+    if (typeof node === 'number') return node;
+
+    const left = evaluate(node.left);
+    const right = evaluate(node.right);
+
+    switch (node.operator) {
+        case '1': return left + right;
+        case '2': return left - right;
+        case '3': return left * right;
+        case '4': return right !== 0 ? left / right : left;
+        case '5': return right !== 0 ? left % right : left;
+        default: return left;
+    }
+}
 export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> = activatedMap) {
     if (req.required) {
         switch (req.type) {
@@ -1573,50 +1600,46 @@ export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> =
                 const point1 = pointTypeMap.get(req.reqId);
                 const point2 = pointTypeMap.get(req.reqId1);
                 if (typeof point1 !== 'undefined' && typeof point2 !== 'undefined') {
-                    let compareVal = point2.startingSum;
+                    let current: number | ExprNode = point2.startingSum;
+
                     if (req.more) {
                         for (let i = 0; i < req.more.length; i++) {
                             let temp = 0;
-                            let moreId = req.more[i].id;
-                            let morePoint = req.more[i].points;
-                            if (typeof moreId !== 'undefined') {
-                                let moreData = pointTypeMap.get(moreId);
+                            const item = req.more[i];
+                            const operator = item.operator || '1';
+                            const priority = getPriority(operator, item.priority);
+                            if (item.id) {
+                                const moreData = pointTypeMap.get(item.id);
                                 if (typeof moreData !== 'undefined') {
                                     temp = moreData.startingSum;
                                 }
-                            } else if (typeof morePoint !== 'undefined') {
-                                temp = morePoint;
+                            } else if (typeof item.points !== 'undefined') {
+                                temp = item.points;
                             }
-                            switch (req.more[i].operator) {
-                                case '1':
-                                    compareVal += temp;
-                                    break;
-                                case '2':
-                                    compareVal -= temp;
-                                    break;
-                                case '3':
-                                    compareVal *= temp;
-                                    break;
-                                case '4':
-                                    compareVal /= temp;
-                                    break;
-                                case '5':
-                                    compareVal %= temp;
-                                    break;
+
+                            const node: ExprNode = { left: current, operator, right: temp, priority };
+
+                            if (typeof current !== 'number' && priority < current.priority) {
+                                current = { left: current.left, operator: current.operator, right: { left: current.right, operator, right: temp, priority }, priority: current.priority };
+                            } else {
+                                current = node;
                             }
                         }
                     }
+
+                    const result = evaluate(current);
+
                     switch (req.operator) {
                         case '1':
-                            return point1.startingSum > compareVal;
+                            return point1.startingSum > result;
                         case '2':
-                            return point1.startingSum >= compareVal;
+                            return point1.startingSum >= result;
                         case '3':
-                            return point1.startingSum == compareVal;
+                            return point1.startingSum == result;
                         case '4':
-                            return point1.startingSum <= compareVal;
+                            return point1.startingSum <= result;
                         case '5':
-                            return point1.startingSum < compareVal;
+                            return point1.startingSum < result;
                         default:
                             return false;
                     }

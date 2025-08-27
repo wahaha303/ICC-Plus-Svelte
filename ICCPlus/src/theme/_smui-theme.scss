@@ -58,3 +58,21 @@ a:visited {
 .title--text {
   color: rgba(0, 0, 0, .87);
 }
+.tiptap-wrapper {
+  background-color: rgb(244.8, 244.8, 244.8);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+}
+.tiptap-wrapper:not(.tiptap-wrapper--focused):hover {
+  background-color: rgb(236, 236, 236);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.87);
+}
+.tiptap-wrapper--focused {
+  background-color: rgb(219, 219, 219);
+  border-bottom: 2px solid rgb(103, 103, 120);
+}
+.tiptap-headmenu {
+  background-color: rgb(244.8, 244.8, 244.8);
+}
+.tiptap-submenu {
+  background-color: #fff;
+}

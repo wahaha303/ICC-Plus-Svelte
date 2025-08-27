@@ -22,7 +22,7 @@
             <div class="row">
                 {#if imgIsUrl}
                     <div class="col col-lg-4">
-                        <Textfield bind:value={() => imgObject.imageLink || '', (e) => {imgObject.imageLink = e}} label="External Image URL" variant="filled" />
+                        <Textfield bind:value={() => imgObject?.imageLink || '', (e) => {imgObject.imageLink = e}} label="External Image URL" variant="filled" />
                         <Button onclick={() => {setImage(imgObject, imgProp, imgObject.imageLink)}} variant="raised">
                             <Label>Convert URL to Image</Label>
                         </Button>
@@ -33,7 +33,7 @@
                             <Button onclick={() => {setImage(imgObject, imgProp, ''); delete imgObject.imageLink}} variant="raised" class="my-3">
                                 <Label>Remove Photo</Label>
                             </Button>
-                            <Textfield bind:value={() => imgObject.imageSourceTooltip || '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
+                            <Textfield bind:value={() => imgObject?.imageSourceTooltip || '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
                         {/if}
                     </div>
                 {:else}
@@ -51,10 +51,10 @@
                                 />
                             {/if}
                         </div>
-                        <div class:hidden={!(getImage(imgObject, imgProp))} class="pa-4">
+                        <div class:hidden={!(getImage(imgObject, imgProp))} class="p-2">
                             <b>Before:</b>{originalSize} kB|<b>After:</b>{compressedSize} kB
                         </div>
-                        <Textfield bind:value={() => imgObject.imageSourceTooltip || '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
+                        <Textfield bind:value={() => imgObject?.imageSourceTooltip || '', (e) => {imgObject.imageSourceTooltip = e}} label="Tooltip That Shows When Hovering over it" variant="filled" />
                     </div>
                     <div class="col-lg-8">
                         <TabBar tabs={['Cropper', 'Compress']} bind:active>
@@ -68,10 +68,10 @@
                             <PaperContent>
                                 <div class="row justify-center">
                                     <div class="col">
-                                        <Textfield bind:value={aspectWidth} label="Width Aspect" type="number" variant="filled" />
+                                        <Textfield bind:value={aspectWidth} onchange={setAspectWidth} label="Width Aspect" type="number" variant="filled" />
                                     </div>
                                     <div class="col">
-                                        <Textfield bind:value={aspectHeight} label="Height Aspect" type="number" variant="filled" />
+                                        <Textfield bind:value={aspectHeight} onchange={setAspectHeight} label="Height Aspect" type="number" variant="filled" />
                                     </div>
                                     <div class="col">
                                         <Button onclick={changeAspect} variant="raised" style="height: 100%;">
@@ -137,7 +137,8 @@
     import Textfield from '$lib/custom/textfield';
     import type { CommonImage } from '$lib/store/types';
     import 'cropperjs/dist/cropper.min.css';
-	import { app, getDataURL, isDataURL } from './store.svelte';
+	import { app, choiceMap, getDataURL, isDataURL, rowMap } from './store.svelte';
+    import { onMount } from 'svelte';
     
     let { open, onclose, imgObject, imgProp, canHaveURL = true }: { open: boolean; onclose: () => void; imgObject: CommonImage; imgProp: string; canHaveURL?: boolean } = $props();
 
@@ -191,6 +192,10 @@
             }
         }
     });
+
+    onMount(() => {
+        initAspect();
+    });
     
     function redraw() {
         const str = getImage(imgObject, imgProp);
@@ -221,7 +226,7 @@
 
     function drawImage(str: string) {
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext("2d");;
+        const ctx = canvas.getContext("2d");
         const img = new Image;
         img.crossOrigin = 'anonymous';
         img.onload = () => {
@@ -261,6 +266,90 @@
             return obj[str];
         }
         return '';
+    }
+
+    function initAspect() {
+        if (imgObject.parentId) {
+            const cMap = choiceMap.get(imgObject.parentId);
+
+            if (typeof cMap !== 'undefined') {
+                if (typeof cMap.row.defaultAspectHeight !== 'undefined') aspectHeight = cMap.row.defaultAspectHeight;
+                if (typeof cMap.row.defaultAspectWidth !== 'undefined') aspectWidth = cMap.row.defaultAspectWidth;
+            }
+            return;
+        }
+
+        if (imgObject.id) {
+            const row = rowMap.get(imgObject.id);
+
+            if (typeof row !== 'undefined') {
+                if (typeof row.defaultAspectHeight !== 'undefined') aspectHeight = row.defaultAspectHeight;
+                if (typeof row.defaultAspectWidth !== 'undefined') aspectWidth = row.defaultAspectWidth;
+                return;
+            }
+            
+            const cMap = choiceMap.get(imgObject.id);
+
+            if (typeof cMap !== 'undefined') {
+                if (typeof cMap.row.defaultAspectHeight !== 'undefined') aspectHeight = cMap.row.defaultAspectHeight;
+                if (typeof cMap.row.defaultAspectWidth !== 'undefined') aspectWidth = cMap.row.defaultAspectWidth;
+                return;
+            }
+        }
+    }
+
+    function setAspectWidth() {
+        if (imgObject.parentId) {
+            const cMap = choiceMap.get(imgObject.parentId);
+
+            if (typeof cMap !== 'undefined') {
+                cMap.row.defaultAspectWidth = aspectWidth;
+                return;
+            }
+        }
+
+        if (imgObject.id) {
+            const row = rowMap.get(imgObject.id);
+
+            if (typeof row !== 'undefined') {
+                row.defaultAspectWidth = aspectWidth;
+                return;
+            }
+
+            const cMap = choiceMap.get(imgObject.id);
+
+            if (typeof cMap !== 'undefined') {
+                cMap.row.defaultAspectWidth = aspectWidth;
+                return;
+            }
+        }
+    }
+
+    function setAspectHeight() {
+        if (imgObject.parentId) {
+            const cMap = choiceMap.get(imgObject.parentId);
+
+            if (typeof cMap !== 'undefined') {
+                cMap.row.defaultAspectHeight = aspectHeight;
+                return;
+            }
+        }
+
+        if (imgObject.id) {
+            const row = rowMap.get(imgObject.id);
+
+            if (typeof row !== 'undefined') {
+                row.defaultAspectHeight = aspectHeight;
+                return;
+            }
+            
+            const cMap = choiceMap.get(imgObject.id);
+
+            if (typeof cMap !== 'undefined') {
+                cMap.row.defaultAspectHeight = aspectHeight;
+                return;
+            }
+        }
     }
 
 </script>

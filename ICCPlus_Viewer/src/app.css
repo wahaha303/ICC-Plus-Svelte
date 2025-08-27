@@ -1,6 +1,9 @@
 html, body {
     height: 100%;
 }
+p {
+    margin-bottom: 0;
+}
 #app {
     height: 100%;
 }
@@ -184,13 +187,25 @@ img {
     align-items: center;
     overflow: auto;
 }
+.toolbar__dialog {
+    font-size: 0.875rem;
+}
 .toolbar__title {
     font-family: Roboto,sans-serif;
     font-size: 1.25rem;
     line-height: 1.5;
 }
-.toolbar__dialog {
-    font-size: 0.875rem;
+.toolbar__title p {
+    display: inline;
+}
+.toolbar__title p:not(:last-child) {
+    margin-right: 4px;
+}
+.req p {
+    display: inline;
+}
+.req p:not(:last-child) {
+    margin-right: 4px;
 }
 .point-slot {
     border-radius: 4px;
@@ -457,6 +472,53 @@ img {
 }
 .viewer-menu {
     height: 48px;
+}
+.picture-input {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+.preview-container {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 auto;
+    cursor: pointer;
+    overflow: hidden;
+    transform: translate3d(0, 0, 0);
+}
+.picture-preview {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 10001;
+    box-sizing: border-box;
+    background-color: rgba(200,200,200,0.25);
+}
+.picture-preview.dragging-over {
+    filter: brightness(0.5);
+}
+.picture-inner {
+    position: relative;
+    z-index: 10002;
+    pointer-events: none;
+    box-sizing: border-box;
+    margin: 1em auto;
+    padding: 0.5em;
+    border: 0.3em dashed rgba(66,66,66,0.15);
+    border-radius: 8px;
+    width: calc(100% - 2.5em);
+    height: calc(100% - 2.5em);
+    display: table;
+}
+.picture-inner .picture-inner-text {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 2em;
+    line-height: 1.5;
+}
+.picture-input input[type="file"] {
+    display: none;
 }
 @keyframes scrollText {
     0% {

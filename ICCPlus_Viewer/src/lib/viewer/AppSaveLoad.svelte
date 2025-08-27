@@ -5,7 +5,7 @@
     id="dialog"
 >
         <Title class="text-left dialog-title" tabindex={0} autofocus>
-            Save/Load Project
+            Save/Load Build
         </Title>
         <Content class="pt-3">
             <div class="container-fluid pb-2 mb-2" style="border: 1px solid">

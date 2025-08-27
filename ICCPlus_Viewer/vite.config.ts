@@ -25,6 +25,7 @@ export default defineConfig({
         'edge >= 79',
         'android >= 64'
       ],
+      modernPolyfills: true,
     }),
   ],
   resolve: {

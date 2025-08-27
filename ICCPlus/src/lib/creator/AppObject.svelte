@@ -29,27 +29,27 @@
                         <Button onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} variant="raised">
                             <Label>Change Image</Label>
                         </Button>
-                    </div>
-                    <div class="row gx-1 p-2">
+                    </div>                    
+                    <div class="row g-1 px-2 py-2">
                         <div class="col-12">
-                            <Textfield textarea bind:value={choice.text} label="Choice Text" variant="filled" input$rows={5} />
+                            <Tiptap data={choice} dataProp="title" label="Choice Title" />
+                        </div>
+                    </div>
+                    <div class="row gx-1 px-2 pb-3">
+                        <div class="col-12">
+                            <Tiptap data={choice} dataProp="text" textarea={true} label="Choice Text" />
                         </div>
                     </div>
                     <div class="row g-1 px-2 pb-2">
-                        <div class={col6}>
-                            <Textfield bind:value={choice.title} label="Choice Title" variant="filled" />
-                        </div>
-                        <div class={col6}>
+                        <div class={app.hideChoiceDT ? 'col-12' : col6}>
                             <Textfield bind:value={choice.id} onfocus={() => choiceId = choice.id} onchange={() => changeObjectId()} label="Choice Id" variant="filled" />
                         </div>
-                    </div>
-                    {#if !app.hideChoiceDT}
-                        <div class="row g-1 px-2 pb-2">
-                            <div class="col-12">
+                        {#if !app.hideChoiceDT}
+                            <div class={col6}>
                                 <Textfield bind:value={() => choice.debugTitle ?? '', (e) => choice.debugTitle = e} label="Debug Title" variant="filled" />
                             </div>
-                        </div>
-                    {/if}
+                        {/if}
+                    </div>
                     <div class="row g-1 px-2 pb-2">
                         <div class={col6}>
                             <Select bind:value={choice.template} label="Template" variant="filled" alwaysFloat={true}>
@@ -356,6 +356,26 @@
                                                     <Textfield bind:value={() => choice.selectDelayTime ?? 0, (e) => choice.selectDelayTime = e} label="Delay" type="number" suffix="ms" variant="filled" />
                                                 </div>
                                             {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.showScoreInAddon ?? false, (e) => choice.showScoreInAddon = e} onchange={() => {
+                                                    if (!choice.showScoreInAddon) {
+                                                        delete choice.showScoreInAddon;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Show Scores in First Visible Addon
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.showReqInAddon ?? false, (e) => choice.showReqInAddon = e} onchange={() => {
+                                                    if (!choice.showReqInAddon) {
+                                                        delete choice.showReqInAddon;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Show Requirements in First Visible Addon
+                                                {/snippet}
+                                            </FormField>
                                         </div>
                                         {/if}
                                     </AcdContent>
@@ -1367,7 +1387,7 @@
 {:else if !(bCreatorMode && row.isEditModeOn) && isShown}
     <div class={objectWidthClass()}>
         <div class:fullHeight={fullHeight} class:position-relative={app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow} class="d-flex">
-            {#if app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow}
+            {#if app.useChoiceEditBtn && !row.isResultRow && !row.isGroupRow && bCreatorMode}
                 <div class="choice-edit-button">
                     <IconButton onclickcapture={() => choice.isEditModeOn = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
                 </div>
@@ -1379,7 +1399,7 @@
                     <div class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
                             <div class="col-12" style={scoreText}>
-                                {@html DOMPurify.sanitize(replaceText(oriRow.title), sanitizeArg)}
+                                {@html DOMPurify.sanitize(replaceText(oriRow.title !== '' ? oriRow.title : oriRow.debugTitle || ''), sanitizeArg)}
                             </div>
                         {/if}
                         {#if (choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
@@ -1398,7 +1418,7 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if !row.objectScoreRemoved}
+                            {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                 {#each choice.scores as score}
                                     <ObjectScore score={score} row={row} choice={choice} />
                                 {/each}
@@ -1406,7 +1426,7 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if !row.objectRequirementRemoved}
+                            {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                 {#each choice.requireds as required}
                                     <ObjectRequired required={required} scoreText={scoreText} />
                                 {/each}
@@ -1422,7 +1442,7 @@
                                 {/if}
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p class="mb-0" style={objectText}>
+                                <p style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -1437,11 +1457,15 @@
                                 {/if}
                             {/if}
                         </div>
-                        <div class="d-column p-0 col w-100{addonJustify}">
-                            {#each choice.addons as addon}
-                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
-                            {/each}
-                        </div>
+                        {#if choice.addons && choice.addons.length > 0}
+                            <div class="d-column p-0 col w-100{addonJustify}">
+                                {#each choice.addons as addon, i}
+                                    {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
+                                    {/if}
+                                {/each}
+                            </div>
+                        {/if}
                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
                             <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                         {/if}
@@ -1464,7 +1488,7 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if !row.objectScoreRemoved}
+                            {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                 {#each choice.scores as score}
                                     <ObjectScore score={score} row={row} choice={choice} />
                                 {/each}
@@ -1472,7 +1496,7 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if !row.objectRequirementRemoved}
+                            {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                 {#each choice.requireds as required}
                                     <ObjectRequired required={required} scoreText={scoreText} />
                                 {/each}
@@ -1481,7 +1505,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p class="mb-0" style={objectText}>
+                                <p style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -1489,11 +1513,15 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column p-0 col w-100{addonJustify}">
-                                    {#each choice.addons as addon}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
-                                    {/each}
-                                </div>
+                                {#if choice.addons && choice.addons.length > 0}
+                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                        {#each choice.addons as addon, i}
+                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
                                     <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
@@ -1501,11 +1529,15 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column p-0 col w-100{addonJustify}">
-                                    {#each choice.addons as addon}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
-                                    {/each}
-                                </div>
+                                {#if choice.addons && choice.addons.length > 0}
+                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                        {#each choice.addons as addon, i}
+                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
                                     <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
@@ -1519,7 +1551,7 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if !row.objectScoreRemoved}
+                            {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                 {#each choice.scores as score}
                                     <ObjectScore score={score} row={row} choice={choice} />
                                 {/each}
@@ -1527,7 +1559,7 @@
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
-                            {#if !row.objectRequirementRemoved}
+                            {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                 {#each choice.requireds as required}
                                     <ObjectRequired required={required} scoreText={scoreText} />
                                 {/each}
@@ -1536,7 +1568,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p class="mb-0" style={objectText}>
+                                <p style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -1544,11 +1576,15 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if !choice.useSeperateAddon}
-                                <div class="d-column p-0 col w-100{addonJustify}">
-                                    {#each choice.addons as addon}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
-                                    {/each}
-                                </div>
+                                {#if choice.addons && choice.addons.length > 0}
+                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                        {#each choice.addons as addon, i}
+                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
                                     <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
@@ -1565,11 +1601,15 @@
                         </div>
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
-                                <div class="d-column p-0 col w-100{addonJustify}">
-                                    {#each choice.addons as addon}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} />
-                                    {/each}
-                                </div>
+                                {#if choice.addons && choice.addons.length > 0}
+                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                        {#each choice.addons as addon, i}
+                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
+                                            {/if}
+                                        {/each}
+                                    </div>
+                                {/if}
                                 {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
                                     <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                                 {/if}
@@ -1613,6 +1653,7 @@
     import ObjectScore from './Object/ObjectScore.svelte';
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield';
+    import Tiptap from '$lib/store/Tiptap.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
 	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount } from '$lib/store/store.svelte';
@@ -1696,7 +1737,7 @@
         text: '÷ Divide',
         value: '4'
     }, {
-        text: '= Equal',
+        text: '= Assignment',
         value: '5'
     }];
     const hideContentText = ['Title of Choice', 'Image of Choice', 'Text of Choice', 'Score of Choice', 'Requirement of Choice', 'Title of Addon', 'Image of Addon', 'Text of Addon'];
@@ -1735,6 +1776,17 @@
     let panel03 = $state(false);
     let panel04 = $state(false);
 
+    let firstAddonIndex = $derived.by(() => {
+        if (choice.addons) {
+            for (let i = 0; i < choice.addons.length; i++) {
+                const addon = choice.addons[i];
+                if (app.showAllAddons > 0 || !addon.skipIndex && (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    });
     let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let multiChoiceStyle = $derived(getStyling('privateMultiChoiceIsOn', row, choice));
@@ -1781,7 +1833,7 @@
     });
 
     let objectTitle = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push(`font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
@@ -1815,7 +1867,7 @@
     });
 
     let objectText = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push(`font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
@@ -1835,7 +1887,7 @@
         let bgImageIndex = 0;
         let bgColorIndex = 0;
         let filterIndex = 0;
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (objectStyle.objectBorderImage) {
             styles.push(`border-image: url('${objectStyle.objectBorderImage}') ${objectStyle.objectBorderImageSliceTop} ${objectStyle.objectBorderImageSliceRight} ${objectStyle.objectBorderImageSliceBottom} ${objectStyle.objectBorderImageSliceLeft} / ${objectStyle.objectBorderImageWidth}px ${objectStyle.objectBorderImageRepeat}; border-style: solid; padding: ${objectStyle.objectBorderImageWidth}px;`);
@@ -2015,7 +2067,7 @@
     });
 
     let objectImage = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
         const suffix = objectImageStyle.objectImgBorderRadiusIsPixels ? 'px' : '%';
 
         styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
@@ -2034,7 +2086,7 @@
     });
 
     let scoreText = $derived.by(() => {
-        let style: string[] = [];;
+        let style: string[] = [];
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);

@@ -71,3 +71,24 @@ a:visited {
 input, textarea {
   caret-color: #ccc !important;
 }
+.tiptap-wrapper {
+  background-color: rgb(41.88, 41.88, 45.72);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.87);
+}
+.tiptap-wrapper:not(.tiptap-wrapper--focused):hover {
+  background-color: rgb(57, 57, 61);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.87)
+}
+.tiptap-wrappe--focused {
+  background-color: rgb(86, 86, 89);
+  border-bottom: 1px solid rgb(82.4, 82.4, 120);
+}
+.tiptap-headmenu {
+  background-color: rgb(41.88, 41.88, 45.72);
+  color: rgba(255, 255, 255, .87);
+}
+.tiptap-submenu {
+  background-color: rgb(41.88, 41.88, 45.72);
+  color: rgba(255, 255, 255, 0.6);
+}

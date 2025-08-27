@@ -33,7 +33,7 @@
                         {/if}
                     {/if}
                     {#if row.titleText !== ''}
-                        <p class="mb-0" style={rowText}>
+                        <p style={rowText}>
                             {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                         </p>
                     {/if}
@@ -58,7 +58,7 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p class="mb-0" style={rowText}>
+                            <p style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}
@@ -95,7 +95,7 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p class="mb-0" style={rowText}>
+                            <p style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}
@@ -259,7 +259,7 @@
     });
 
     let rowBody = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push(`margin: ${rowStyle.rowBodyMarginTop}px ${rowStyle.rowBodyMarginSides}% ${rowStyle.rowBodyMarginBottom}px ${rowStyle.rowBodyMarginSides}%;`);
         if (rowBodyBgImage) {
@@ -273,7 +273,7 @@
 
     let rowBackground = $derived.by(() => {
         let suffix = rowStyle.rowBorderRadiusIsPixels ? 'px' : '%';
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (rowStyle.rowBorderImage) {
             styles.push(`border-image: url('${rowStyle.rowBorderImage}') ${rowStyle.rowBorderImageSliceTop} ${rowStyle.rowBorderImageSliceRight} ${rowStyle.rowBorderImageSliceBottom} ${rowStyle.rowBorderImageSliceLeft} / ${rowStyle.rowBorderImageWidth}px ${rowStyle.rowBorderImageRepeat}; border-style: solid; padding: ${rowStyle.rowBorderImageWidth}px;`);
@@ -316,7 +316,7 @@
 
     let rowImage = $derived.by(() => {
         let suffix = rowImageStyle.rowImgBorderRadiusIsPixels ? 'px' : '%';
-        let styles: string[] = [];;
+        let styles: string[] = [];
         
         styles.push(`width: ${rowImageStyle.rowImageWidth}%; margin-top: ${rowImageStyle.rowImageMarginTop}%; margin-bottom: ${rowImageStyle.rowImageMarginBottom}%;`);
         styles.push(`border-radius: ${rowImageStyle.rowImgBorderRadiusTopLeft}${suffix} ${rowImageStyle.rowImgBorderRadiusTopRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomLeft}${suffix};`);

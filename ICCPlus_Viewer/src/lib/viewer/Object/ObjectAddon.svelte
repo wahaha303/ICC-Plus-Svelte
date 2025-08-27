@@ -1,101 +1,129 @@
-{#if app.showAllAddons > 0 || addon.showAddon || checkRequirements(addon.requireds)}
-    <div class="text-center" style={addonBackground}>
-        {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
-            <div>
-                {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row?.addonImageRemoved}
-                    {#if addon.imageSourceTooltip}
-                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                    {:else}
-                        <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                    {/if}
+<div class="text-center" style={addonBackground}>
+    {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
+        <div>
+            {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}
+                {#if addon.imageSourceTooltip}
+                    <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                {:else}
+                    <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
-                {#if addon.title !== '' && !row?.addonTitleRemoved}
-                    <h3 class="m-0" style={addonTitle}>
-                        {@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}
-                    </h3>
-                {/if}
-                {#if !row?.objectRequirementRemoved}
-                    {#each addon.requireds as required}
+            {/if}
+            {#if addon.title !== '' && !row.addonTitleRemoved}
+                <h3 class="m-0" style={addonTitle}>
+                    {@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}
+                </h3>
+            {/if}
+            {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                {#each choice.scores as score}
+                    <ObjectScore score={score} row={row} choice={choice} />
+                {/each}
+            {/if}
+            {#if !row.objectRequirementRemoved}
+                {#if choice.showReqInAddon && isFirst}
+                    {#each choice.requireds as required}
                         <ObjectRequired required={required} scoreText={scoreText} />
                     {/each}
                 {/if}
-                {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
-                    {#if addon.imageSourceTooltip}
-                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                    {:else}
-                        <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                    {/if}
+                {#each addon.requireds as required}
+                    <ObjectRequired required={required} scoreText={scoreText} />
+                {/each}
+            {/if}
+            {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
+                {#if addon.imageSourceTooltip}
+                    <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                {:else}
+                    <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
-                {#if addon.text !== '' && !row?.addonTextRemoved}
-                    <p class="mb-0" style={addonText}>
-                        {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
-                    </p>
+            {/if}
+            {#if addon.text !== '' && !row.addonTextRemoved}
+                <p style={addonText}>
+                    {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
+                </p>
+            {/if}
+            {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
+                {#if addon.imageSourceTooltip}
+                    <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                {:else}
+                    <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
-                {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
-                    {#if addon.imageSourceTooltip}
-                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                    {:else}
-                        <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                    {/if}
-                {/if}
-            </div>
-        {:else}
-            <div class="row m-0 p-0 w-100">
-                {#if addon.template === 2}
-                    <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
-                        {#if addon.image && !row?.addonImageRemoved}
-                            {#if addon.imageSourceTooltip}
-                                <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                            {:else}
-                                <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                            {/if}
+            {/if}
+        </div>
+    {:else}
+        <div class="row m-0 p-0 w-100">
+            {#if addon.template === 2}
+                <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
+                    {#if addon.image && !row.addonImageRemoved}
+                        {#if addon.imageSourceTooltip}
+                            <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                        {:else}
+                            <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {/if}
-                    </div>
-                    <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
-                        {#if addon.title !== '' && !row?.addonTitleRemoved}
-                            <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
-                        {/if}
-                        {#if !row?.objectRequirementRemoved}
-                            {#each addon.requireds as required}
+                    {/if}
+                </div>
+                <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
+                    {#if addon.title !== '' && !row.addonTitleRemoved}
+                        <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
+                    {/if}
+                    {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                        {#each choice.scores as score}
+                            <ObjectScore score={score} row={row} choice={choice} />
+                        {/each}
+                    {/if}
+                    {#if !row.objectRequirementRemoved}
+                        {#if choice.showReqInAddon && isFirst}
+                            {#each choice.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
                             {/each}
                         {/if}
-                        {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p class="mb-0" style={addonText}>
-                                {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
-                            </p>
-                        {/if}
-                    </div>
-                {:else if addon.template === 3}
-                    <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
-                        {#if addon.title !== '' && !row?.addonTitleRemoved}
-                            <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
-                        {/if}
-                        {#if !row?.objectRequirementRemoved}
-                            {#each addon.requireds as required}
+                        {#each addon.requireds as required}
+                            <ObjectRequired required={required} scoreText={scoreText} />
+                        {/each}
+                    {/if}
+                    {#if addon.text !== '' && !row.addonTextRemoved}
+                        <p style={addonText}>
+                            {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
+                        </p>
+                    {/if}
+                </div>
+            {:else if addon.template === 3}
+                <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
+                    {#if addon.title !== '' && !row.addonTitleRemoved}
+                        <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
+                    {/if}
+                    {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                        {#each choice.scores as score}
+                            <ObjectScore score={score} row={row} choice={choice} />
+                        {/each}
+                    {/if}
+                    {#if !row.objectRequirementRemoved}
+                        {#if choice.showReqInAddon && isFirst}
+                            {#each choice.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
                             {/each}
                         {/if}
-                        {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p class="mb-0" style={addonText}>
-                                {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
-                            </p>
+                        {#each addon.requireds as required}
+                            <ObjectRequired required={required} scoreText={scoreText} />
+                        {/each}
+                    {/if}
+                    {#if addon.text !== '' && !row.addonTextRemoved}
+                        <p style={addonText}>
+                            {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
+                        </p>
+                    {/if}
+                </div>
+                <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
+                    {#if addon.image && !row.addonImageRemoved}
+                        {#if addon.imageSourceTooltip}
+                            <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                        {:else}
+                            <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {/if}
-                    </div>
-                    <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
-                        {#if addon.image && !row?.addonImageRemoved}
-                            {#if addon.imageSourceTooltip}
-                                <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                            {:else}
-                                <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                            {/if}
-                        {/if}
-                    </div>
-                {/if}
-            </div>
-        {/if}
-    </div>
-{/if}
+                    {/if}
+                </div>
+            {/if}
+        </div>
+    {/if}
+</div>
 
 <script lang="ts">
     import DOMPurify from 'dompurify';
@@ -103,8 +131,9 @@
     import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
+    import ObjectScore from './ObjectScore.svelte';
 
-    let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false }: { addon: Addon; row?: Row; choice?: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean } = $props();
+    let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, isFirst }: { addon: Addon; row: Row; choice: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean, isFirst?: boolean } = $props();
 
     let isActive = $derived(typeof choice !== 'undefined' ? choice.isActive : false);
     let addonImageStyle = $derived(getStyling('privateAddonImageIsOn', row, choice));
@@ -113,7 +142,7 @@
     let objectImageStyle = $derived(getStyling('privateObjectImageIsOn', row, choice));
     let objectStyle = $derived(getStyling('privateObjectIsOn', row, choice));
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
-    let addonEnabled = $derived(checkRequirements(addon.requireds))
+    let addonEnabled = $derived(checkRequirements(addon.requireds));
     
     let addonImageBoxWidth = $derived(typeof addonImageStyle.addonImageBoxWidth !== 'undefined' ? addonImageStyle.addonImageBoxWidth : 50);
 
@@ -123,7 +152,7 @@
         let bgImageIndex = 0;
         let bgColorIndex = 0;
         let filterIndex = 0;
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (useDesign) {
             if (addonStyle.addonBorderImage) {
@@ -290,7 +319,7 @@
     });
 
     let addonTitle = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push(`font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
@@ -312,7 +341,7 @@
     });
 
     let addonText = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push(`font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
@@ -332,14 +361,14 @@
     });
 
     let addonImage = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
         let useDesign = addonImageStyle.useAddonImage;
         let suffix = (useDesign ? addonImageStyle.addonImgBorderRadiusIsPixels : objectImageStyle.objectImgBorderRadiusIsPixels) ? 'px' : '%';
 
         if (useDesign) {
             styles.push(`width: ${addonImageStyle.addonImageWidth}%; margin-top: ${addonImageStyle.addonImageMarginTop}%; margin-bottom: ${addonImageStyle.addonImageMarginBottom}%;`);
-            if (addonImageStyle.addonImgObjectFillIsOn && choice?.addonImgObjectFillHeight) {
-                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice?.addonImgObjectFillHeight}px;`);
+            if (addonImageStyle.addonImgObjectFillIsOn && choice.addonImgObjectFillHeight) {
+                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice.addonImgObjectFillHeight}px;`);
             }
             styles.push(`border-radius: ${addonImageStyle.addonImgBorderRadiusTopLeft}${suffix} ${addonImageStyle.addonImgBorderRadiusTopRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomLeft}${suffix};`);
             if (addonImageStyle.addonImgOverflowIsOn) {
@@ -350,8 +379,8 @@
             }    
         } else {
             styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
-            if (objectImageStyle.objectImgObjectFillIsOn && row?.objectImgObjectFillHeight) {
-                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row?.objectImgObjectFillHeight}px;`);
+            if (objectImageStyle.objectImgObjectFillIsOn && row.objectImgObjectFillHeight) {
+                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row.objectImgObjectFillHeight}px;`);
             }
             styles.push(`border-radius: ${objectImageStyle.objectImgBorderRadiusTopLeft}${suffix} ${objectImageStyle.objectImgBorderRadiusTopRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomLeft}${suffix};`);
             if (objectImageStyle.objectImgOverflowIsOn) {

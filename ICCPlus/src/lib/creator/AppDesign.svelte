@@ -143,7 +143,7 @@
     let currentDialog = $state<'none' | 'appRowDesign' | 'appRowImage' | 'appChoiceDesign' | 'appChoiceImage' | 'appAddonDesign' | 'appAddonImage' | 'appFilter' | 'appBackground' | 'appText' | 'appPointbar' | 'appMultiChoice' | 'appBackpack'>('none');
     let valueTypeFiles: FileList | null = $state(null);
     let dialogStyle = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push('transition:opacity 0.1s;');
         if (currentDialog !== 'none') {

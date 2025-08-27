@@ -13,12 +13,12 @@
                     <div class="row">
                         You can use CTRL + F to find ID or Title.
                         {#each app.rows as row}
-                            <div class="col-12 p-2">
-                                <b>{@html `${row.debugTitle ?? ''} ${row.title} / ${row.id}`}</b>
+                            <div class="col-12 p-2 list__title">
+                                <b>{@html `${row.debugTitle || ''} ${row.title} / ${row.id}`}</b>
                                 <div class="row">
                                     {#each row.objects as choice}
-                                        <div class="col-lg-2 col-sm-4 p-2">
-                                            {@html `${choice.debugTitle ?? ''} ${choice.title} / ${choice.id}`}
+                                        <div class="col-lg-2 col-sm-4 p-2 list__title">
+                                            {@html `${choice.debugTitle || ''} ${choice.title} / ${choice.id}`}
                                         </div>
                                     {/each}
                                 </div>

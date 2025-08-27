@@ -53,6 +53,8 @@ export function tooltip(node: HTMLElement, data: string | TooltipData) {
 
     return {
         destroy() {
+            tooltipVariables.isVisible = false;
+            tooltipVariables.anchor = null;
             node.removeEventListener('mouseenter', show);
             node.removeEventListener('mouseleave', hide);
             node.removeEventListener('focusin', show);

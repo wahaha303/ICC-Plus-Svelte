@@ -1,12 +1,12 @@
 {
   "name": "iccplus_viewer",
   "private": true,
-  "version": "2.3.2",
+  "version": "2.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build && vite build --config vite.config.local.ts && node build-core.js && node build-index.js && node add-comment.js && node build-local-index.js",
-    "preview": "vite build && vite preview",
+    "preview": "vite build && node build-core.js && node build-index.js && node add-comment.js && vite preview",
     "prepare": "npm run smui-theme-light && npm run smui-theme-dark",
     "smui-theme-light": "smui-theme compile public/css/smui.css -i src/theme",
     "smui-theme-dark": "smui-theme compile public/css/smui-dark.css -i src/theme/dark",
@@ -19,7 +19,7 @@
     "@types/canvas-size": "^1.2.2",
     "@types/node": "^24.0.12",
     "@types/youtube": "^0.1.2",
-    "@vitejs/plugin-legacy": "^7.1.0",
+    "@vitejs/plugin-legacy": "^7.2.1",
     "core-js": "^3.44.0",
     "smui-theme": "^8.0.3",
     "svelte-check": "^4.3.1",

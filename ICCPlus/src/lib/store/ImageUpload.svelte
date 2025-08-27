@@ -226,7 +226,7 @@
 
     function drawImage(str: string) {
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext("2d");;
+        const ctx = canvas.getContext("2d");
         const img = new Image;
         img.crossOrigin = 'anonymous';
         img.onload = () => {

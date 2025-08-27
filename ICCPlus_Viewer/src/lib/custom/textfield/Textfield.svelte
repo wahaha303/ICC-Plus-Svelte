@@ -197,7 +197,6 @@
     }}
     use:useActions={use}
     class={classMap({
-      [className]: true,
       'mdc-text-field': true,
       'mdc-text-field--disabled': disabled,
       'mdc-text-field--textarea': textarea,
@@ -209,6 +208,7 @@
       'mdc-text-field--with-trailing-icon': trailingIcon,
       'mdc-text-field--invalid': invalid,
       ...internalClasses,
+      [className]: true,
     })}
     style={Object.entries(internalStyles)
       .map(([name, value]) => `${name}: ${value};`)
@@ -769,7 +769,7 @@
 
   function hasClass(className: string) {
     return className in internalClasses
-      ? (typeof internalClasses[className] !== 'undefined' ? internalClasses[className] : null)
+      ? (typeof internalClasses[className] !== 'undefined' ? internalClasses[className] : false)
       : getElement().classList.contains(className);
   }
 

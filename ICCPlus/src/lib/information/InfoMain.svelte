@@ -172,9 +172,35 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.0 / ${getDate('2025-08-27T10:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Added text editor feature.
+        
+        <span style="color: green">Row</span>
+        - Fixed issue where rows that didn't meet requirements still occupied space in Creator Mode.
+
+        <span style="color: green">Choice</span>
+        - Added option to show scores in first visible addon.
+        - Added option to show requirements in first visible addon.
+        - Adjusted to show debug title instead when row title is empty while using "Show title of the row in choice" option.
+
+        <span style="color: green">Addon</span>
+        - Added option to hide addon unless its choice is selected.
+        
+        <span style="color: green">Requirement</span>
+        - Added option to set priority for operators in point comparison.
+        - Fixed issue where operations in point comparison did not follow the standard order of arithmetic operations.
+
+        <span style="color: green">Viewer</span>
+        - Added option to open build form in side menu.
+        - Added feature to open build form directly via right-click on side menu button.
+        - Added confirmation dialog when clicking Clear Selected Choices button.
+        `
+    }, {
+        open: false,
         title: `v2.3.2 / ${getDate('2025-08-14T16:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
-        - Added option to use 'Equal' in discount operator.
+        - Added option to use '= (Assignment)' in discount operator.
         - Added option to reactivate choices after reset when both 'Cannot be Reset' and 'Allow Deselection of Activated Choices' are enabled.
         - Fixed issue where points were not recalculated correctly when canceling non-stackable discount.
         - Fixed issue where discounted score was displayed even when 'Display Discounted Score' option was disabled.

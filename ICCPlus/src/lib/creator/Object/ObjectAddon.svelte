@@ -28,19 +28,49 @@
         </div>
         <div class="row gx-3">
             <FormField class="col-12">
-                <Checkbox bind:checked={() => addon.showAddon ?? false, (e) => addon.showAddon = e} />
+                <Checkbox bind:checked={() => addon.showAddon ?? false, (e) => addon.showAddon = e} onchange={() => {
+                    if (!addon.showAddon) {
+                        delete addon.showAddon;
+                    }
+                }} />
                 {#snippet label()}
                     Always show this addon
                 {/snippet}
             </FormField>
+            <FormField class="col-12">
+                <Checkbox bind:checked={() => addon.hideAddon ?? false, (e) => addon.hideAddon = e} onchange={() => {
+                    if (!addon.hideAddon) {
+                        delete addon.hideAddon;
+                    }
+                }} />
+                {#snippet label()}
+                    Hide unless this choice is selected
+                {/snippet}
+            </FormField>
+            {#if choice.showScoreInAddon || choice.showReqInAddon}
+                <FormField class="col-12">
+                    <Checkbox bind:checked={() => addon.skipIndex ?? false, (e) => addon.skipIndex = e} onchange={() => {
+                        if (!addon.skipIndex) {
+                            delete addon.skipIndex;
+                        }
+                    }} />
+                    {#snippet label()}
+                        Skip displaying choice score / requirement
+                    {/snippet}
+                </FormField>
+            {/if}
             <div class="col-12">
                 <Select bind:value={addon.template} label="Template" variant="filled" alwaysFloat={true}>
                     {#each templates as template (template.text)}
                         <Option value={template.value}>{template.text}</Option>
                     {/each}
                 </Select>
-                <Textfield class="mb-1" bind:value={addon.title} label="Addon Title" variant="filled" />
-                <Textfield textarea bind:value={addon.text} label="Addon Text" variant="filled" input$rows={5} />
+                <div class="py-2 col-12">
+                    <Tiptap data={addon} dataProp="title" label="Addon Title" />
+                </div>
+                <div class="pb-3 col-12">
+                    <Tiptap data={addon} dataProp="text" textarea={true} label="Addon Text" />
+                </div>
             </div>
         </div>
         <div class="row gy-3 p-2">
@@ -54,7 +84,7 @@
             {/each}
         </div>
     </div>
-{:else if app.showAllAddons > 0 || addon.showAddon || checkRequirements(addon.requireds)}
+{:else}
     <div class="text-center" style={addonBackground}>
         {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
             <div>
@@ -70,7 +100,17 @@
                         {@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}
                     </h3>
                 {/if}
+                {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                    {#each choice.scores as score}
+                        <ObjectScore score={score} row={row} choice={choice} />
+                    {/each}
+                {/if}
                 {#if !row?.objectRequirementRemoved}
+                    {#if choice.showReqInAddon && isFirst}
+                        {#each choice.requireds as required}
+                            <ObjectRequired required={required} scoreText={scoreText} />
+                        {/each}
+                    {/if}
                     {#each addon.requireds as required}
                         <ObjectRequired required={required} scoreText={scoreText} />
                     {/each}
@@ -83,7 +123,7 @@
                     {/if}
                 {/if}
                 {#if addon.text !== '' && !row?.addonTextRemoved}
-                    <p class="mb-0" style={addonText}>
+                    <p style={addonText}>
                         {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                     </p>
                 {/if}
@@ -111,13 +151,23 @@
                         {#if addon.title !== '' && !row?.addonTitleRemoved}
                             <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
                         {/if}
+                        {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                            {#each choice.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} />
+                            {/each}
+                        {/if}
                         {#if !row?.objectRequirementRemoved}
+                            {#if choice.showReqInAddon && isFirst}
+                                {#each choice.requireds as required}
+                                    <ObjectRequired required={required} scoreText={scoreText} />
+                                {/each}
+                            {/if}
                             {#each addon.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p class="mb-0" style={addonText}>
+                            <p style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}
@@ -127,13 +177,23 @@
                         {#if addon.title !== '' && !row?.addonTitleRemoved}
                             <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
                         {/if}
+                        {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                            {#each choice.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} />
+                            {/each}
+                        {/if}
                         {#if !row?.objectRequirementRemoved}
+                            {#if choice.showReqInAddon && isFirst}
+                                {#each choice.requireds as required}
+                                    <ObjectRequired required={required} scoreText={scoreText} />
+                                {/each}
+                            {/if}
                             {#each addon.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p class="mb-0" style={addonText}>
+                            <p style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}
@@ -161,13 +221,14 @@
     import IconButton from '@smui/icon-button';
     import ObjectRequired from './ObjectRequired.svelte';
     import Select, { Option } from '$lib/custom/select';
-    import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
+    import Tiptap from '$lib/store/Tiptap.svelte';
+    import ObjectScore from './ObjectScore.svelte';
 
-    let { isEditModeOn = false, addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, index }: { isEditModeOn?: boolean; addon: Addon; row?: Row; choice?: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean, index?: number } = $props();
+    let { isEditModeOn = false, addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, index, isFirst }: { isEditModeOn?: boolean; addon: Addon; row?: Row; choice: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean, index?: number, isFirst?: boolean } = $props();
 
     const templates = [{
         text: "Image top",
@@ -197,7 +258,7 @@
     let objectImageStyle = $derived(getStyling('privateObjectImageIsOn', row, choice));
     let objectStyle = $derived(getStyling('privateObjectIsOn', row, choice));
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
-    let addonEnabled = $derived(checkRequirements(addon.requireds))
+    let addonEnabled = $derived(checkRequirements(addon.requireds));
     
     let addonImageBoxWidth = $derived(typeof addonImageStyle.addonImageBoxWidth !== 'undefined' ? addonImageStyle.addonImageBoxWidth : 50);
     
@@ -207,7 +268,7 @@
         let bgImageIndex = 0;
         let bgColorIndex = 0;
         let filterIndex = 0;
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         if (useDesign) {
             if (addonStyle.addonBorderImage) {
@@ -374,7 +435,7 @@
     });
 
     let addonTitle = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push(`font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
@@ -396,7 +457,7 @@
     });
 
     let addonText = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
 
         styles.push(`font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
@@ -416,14 +477,14 @@
     });
 
     let addonImage = $derived.by(() => {
-        let styles: string[] = [];;
+        let styles: string[] = [];
         let useDesign = addonImageStyle.useAddonImage;
         let suffix = (useDesign ? addonImageStyle.addonImgBorderRadiusIsPixels : objectImageStyle.objectImgBorderRadiusIsPixels) ? 'px' : '%';
 
         if (useDesign) {
             styles.push(`width: ${addonImageStyle.addonImageWidth}%; margin-top: ${addonImageStyle.addonImageMarginTop}%; margin-bottom: ${addonImageStyle.addonImageMarginBottom}%;`);
-            if (addonImageStyle.addonImgObjectFillIsOn && choice?.addonImgObjectFillHeight) {
-                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice?.addonImgObjectFillHeight}px;`);
+            if (addonImageStyle.addonImgObjectFillIsOn && choice.addonImgObjectFillHeight) {
+                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice.addonImgObjectFillHeight}px;`);
             }
             styles.push(`border-radius: ${addonImageStyle.addonImgBorderRadiusTopLeft}${suffix} ${addonImageStyle.addonImgBorderRadiusTopRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomLeft}${suffix};`);
             if (addonImageStyle.addonImgOverflowIsOn) {
