@@ -144,6 +144,7 @@
 	import { Editor } from '@tiptap/core';
     import { BackgroundColor, Color, FontSize, LineHeight, TextStyle } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
+    import { SanitizeExtensions } from './SanitizeExtensions';
 
     type Params = {
         callback: () => void;
@@ -189,8 +190,8 @@
     let lineHeight = $state<string | null>(null);
 
     let tiptapStyle = $derived.by(() => {
-        if (!textarea) return 'max-height: 83px;';
-        return `height: ${24 * (rows + 1) + 11}px;`;
+        if (!textarea) return 'max-height: 83px; min-height: 40px;';
+        return `height: ${24 * (rows + 1) + 11}px; min-height: 155px;`;
     });
     let fontSizeBoxStyle = $derived.by(() => {
         if (!fontSizeBtn) return '';
@@ -327,6 +328,7 @@
                     types: ['paragraph'],
                 }),
                 TextStyle,
+                ...SanitizeExtensions,
             ],
 			content: data[dataProp],
 			onTransaction: () => {
@@ -367,7 +369,6 @@
                 data[dataProp] = insertBrTags(str);
             }
         });
-
 
         return () => {
             if (editor) editor.destroy();

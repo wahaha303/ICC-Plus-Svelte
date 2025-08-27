@@ -625,7 +625,7 @@ export const currentTheme = $state({ value: 'light' });
 export const useAltMenu = $state({ value: false });
 export const sanitizeArg = {
     ALLOWED_TAGS: ['address', 'article', 'aside', 'footer', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup', 'main', 'nav', 'section', 'blockquote', 'dd', 'div', 'dl', 'dt', 'figcaption', 'figure', 'hr', 'li', 'main', 'ol', 'p', 'pre', 'ul', 'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'caption', 'col', 'colgroup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'font', 'iframe', 'img'],
-    ADD_ATTR: ['href', 'target', 'style']
+    ADD_ATTR: ['href', 'target', 'style', 'class']
 };
 export const bgmPlayer = writable<YT.Player | null>(null);
 export const bgmVariables = $state<BgmPlayer>({
@@ -3278,6 +3278,7 @@ export function cleanActivated() {
         cRow.isEditModeOn = false;
         cRow.currentChoices = 0;
         cRow.index = i;
+        delete cRow.isSimpleEditMode;
 
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
@@ -3322,6 +3323,7 @@ export function cleanActivated() {
         cRow.isEditModeOn = false;
         cRow.currentChoices = 0;
         cRow.index = i;
+        delete cRow.isSimpleEditMode;
 
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
