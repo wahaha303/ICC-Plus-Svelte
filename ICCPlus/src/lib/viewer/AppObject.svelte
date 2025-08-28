@@ -51,7 +51,7 @@
                                 {/if}
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p style={objectText}>
+                                <p class="mb-0" style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -114,7 +114,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p style={objectText}>
+                                <p class="mb-0" style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}
@@ -177,7 +177,7 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p style={objectText}>
+                                <p class="mb-0" style={objectText}>
                                     {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
                                 </p>
                             {/if}

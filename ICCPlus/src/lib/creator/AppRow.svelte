@@ -313,7 +313,7 @@
                         {/if}
                     {/if}
                     {#if row.titleText !== ''}
-                        <p style={rowText}>
+                        <p class="mb-0" style={rowText}>
                             {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                         </p>
                     {/if}
@@ -338,7 +338,7 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p style={rowText}>
+                            <p class="mb-0" style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}
@@ -375,7 +375,7 @@
                             <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
                         {/if}
                         {#if row.titleText !== ''}
-                            <p style={rowText}>
+                            <p class="mb-0" style={rowText}>
                                 {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
                             </p>
                         {/if}

@@ -131,7 +131,7 @@
                     {/if}
                 {/if}
                 {#if addon.text !== '' && !row?.addonTextRemoved}
-                    <p style={addonText}>
+                    <p class="mb-0" style={addonText}>
                         {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                     </p>
                 {/if}
@@ -175,7 +175,7 @@
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p style={addonText}>
+                            <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}
@@ -201,7 +201,7 @@
                             {/each}
                         {/if}
                         {#if addon.text !== '' && !row?.addonTextRemoved}
-                            <p style={addonText}>
+                            <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
                             </p>
                         {/if}

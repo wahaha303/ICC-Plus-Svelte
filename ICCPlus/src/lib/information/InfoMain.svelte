@@ -178,7 +178,7 @@
         - Fixed issue where text inside text editor remained unchanged when moving Choices or Rows.
 
         <span style="color: green">Choice</span>
-        - Fixed issue where some data remained when loading different project while another project was already loaded.
+        - Fixed issue where loading a new project left behind some data from the previous one.
         
         <span style="color: green">Global Settings</span>
         - Added option to enable text editor in advanced tab.
