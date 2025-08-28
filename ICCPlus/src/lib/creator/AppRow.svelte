@@ -254,12 +254,20 @@
                 </div>
                 <div class="row px-4 pt-3">
                     <div class="col-12">
-                        <Tiptap data={row} dataProp="title" label="Row Title" />
+                        {#if app.useTextEditor}
+                            <Tiptap data={row} dataProp="title" label="Row Title" />
+                        {:else}
+                            <Textfield bind:value={row.title} label="Row Title" variant="filled" />
+                        {/if}
                     </div>
                 </div>
                 <div class="row px-4 py-2">
                     <div class="col-12">
-                        <Tiptap data={row} dataProp="titleText" textarea={true} label="Row Text" rows={8} />
+                        {#if app.useTextEditor}
+                            <Tiptap data={row} dataProp="titleText" textarea={true} label="Row Text" rows={8} />
+                        {:else}
+                            <Textfield textarea bind:value={row.titleText} label="Row Text" variant="filled" input$rows={8} />
+                        {/if}
                     </div>
                 </div>
             </CardContent>

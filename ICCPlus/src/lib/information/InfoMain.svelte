@@ -172,6 +172,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.1 / ${getDate('2025-08-28T02:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where text editor was removing certain HTML tags and attributes.
+        
+        <span style="color: green">Global Settings</span>
+        - Added option to enable text editor in advanced tab.
+        `
+    }, {
+        open: true,
         title: `v2.4.0 / ${getDate('2025-08-27T10:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Added text editor feature.

@@ -836,6 +836,7 @@ export type App = {
     googleFonts: string[],
     customFonts: string[],
     compressImageAuto: boolean,
+    useTextEditor: boolean,
     useToolbarBtn: boolean,
     useChoiceEditBtn: boolean,
     hideScoresUpdated: boolean,

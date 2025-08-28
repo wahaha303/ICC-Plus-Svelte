@@ -24,7 +24,7 @@
                         <div class="row gy-3">
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.autoSaveIsOn?? false, (e) => app.autoSaveIsOn = e} onSMUISwitchChange={() => {
+                                    <Switch bind:checked={() => app.autoSaveIsOn ?? false, (e) => app.autoSaveIsOn = e} onSMUISwitchChange={() => {
                                         if (app.autoSaveIsOn) {
                                             saveProcess();
                                         }
@@ -46,7 +46,7 @@
                             {/if}
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.enableShortcut?? false, (e) => app.enableShortcut = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.enableShortcut ?? false, (e) => app.enableShortcut = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Enable Mode Switch Shortcuts
                                     {/snippet}
@@ -70,7 +70,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.checkDeleteRow?? false, (e) => app.checkDeleteRow = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.checkDeleteRow ?? false, (e) => app.checkDeleteRow = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Confirm Before Deleting a Row
                                     {/snippet}
@@ -78,7 +78,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.checkDeleteObject?? false, (e) => app.checkDeleteObject = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.checkDeleteObject ?? false, (e) => app.checkDeleteObject = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Confirm Before Deleting a Choice
                                     {/snippet}
@@ -86,7 +86,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.checkSelectAll?? false, (e) => app.checkSelectAll = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.checkSelectAll ?? false, (e) => app.checkSelectAll = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Confirm Before Select/Deselect All
                                     {/snippet}
@@ -103,7 +103,7 @@
                         <div class="row gy-3">
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.compressImageAuto?? false, (e) => app.compressImageAuto = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.compressImageAuto ?? false, (e) => app.compressImageAuto = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Enable Auto Image Compression
                                     {/snippet}
@@ -111,7 +111,15 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.preloadImages?? false, (e) => app.preloadImages = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.useTextEditor ?? false, (e) => app.useTextEditor = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Enable Text Editor
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
+                                    <Switch bind:checked={() => app.preloadImages ?? false, (e) => app.preloadImages = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Preload Images in Backpack
                                     {/snippet}
@@ -119,7 +127,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.preloadExternalImages?? false, (e) => app.preloadExternalImages = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.preloadExternalImages ?? false, (e) => app.preloadExternalImages = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Preload External Images in Viewer
                                     {/snippet}
@@ -127,7 +135,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.useVW?? false, (e) => app.useVW = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.useVW ?? false, (e) => app.useVW = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Use Viewport Units for Default Font Size
                                     {/snippet}
@@ -135,7 +143,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.isPointerCursor?? false, (e) => app.isPointerCursor = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.isPointerCursor ?? false, (e) => app.isPointerCursor = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Use Pointer Cursor on Hover Over Choices
                                     {/snippet}
@@ -143,7 +151,7 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
-                                    <Switch bind:checked={() => app.addPrefix?? false, (e) => app.addPrefix = e} color="secondary" class="switch-scale" />
+                                    <Switch bind:checked={() => app.addPrefix ?? false, (e) => app.addPrefix = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Add Prefix to ID on Creation
                                     {/snippet}

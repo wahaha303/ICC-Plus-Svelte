@@ -1,8 +1,11 @@
 import { Node, Mark, Extension } from '@tiptap/core'
 import { sanitizeArg } from './store.svelte'
+import Heading from '@tiptap/extension-heading'
+import Paragraph from '@tiptap/extension-paragraph'
+import Image from '@tiptap/extension-image'
 
 const BUILTIN_TAGS = new Set([
-  'p', 'blockquote', 'pre', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'strike', 'code', 'br' 
+  'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img'
 ])
 
 const inlineTags = new Set([
@@ -10,10 +13,10 @@ const inlineTags = new Set([
 ])
 
 const leafTags = new Set([
-  'img','iframe','br','hr','wbr','col','colgroup'
+  'img', 'iframe', 'br', 'hr', 'wbr', 'col', 'colgroup'
 ])
 
-const allowedAttrs = ['class', 'style', 'id', 'src', 'href', 'target', 'width', 'height', 'alt', 'title', 'color', 'face', 'span', 'value', 'reversed', 'start', 'type', 'download', 'rel', 'type', 'border', 'cellpadding', 'cellspacing', 'colspan', 'rowspan', 'headers', 'scope', 'abbr', 'size', 'name', 'lazy', 'allow', 'allowfullscreen'];
+const allowedAttrs = ['class', 'style', 'id', 'src', 'href', 'target', 'width', 'height', 'alt', 'title', 'color', 'face', 'span', 'value', 'reversed', 'start', 'type', 'download', 'rel', 'type', 'border', 'cellpadding', 'cellspacing', 'colspan', 'rowspan', 'headers', 'scope', 'abbr', 'size', 'name', 'lazy', 'allow', 'allowfullscreen', 'crossorigin'];
 
 function getAllAttributes(dom: HTMLElement): Record<string, string> {
   const attrs: Record<string, string> = {}
@@ -39,8 +42,9 @@ function createGenericNode(tag: string): Extension {
   const isLeaf = leafTags.has(tag)
 
   return Node.create({
-    name: tag,
+    name: tag === 'p' ? 'paragraph' : tag,
     group: isInline ? 'inline' : 'block',
+    content: isInline ? 'text*' : 'inline*',
     inline: isInline,
     atom: isLeaf,
     selectable: true,
@@ -66,7 +70,6 @@ function createGenericNode(tag: string): Extension {
   }) as Extension
 }
 
-// Mark
 function createGenericMark(tag: string): Extension {
   const markName = tag === 'span' ? 'spanStyle' : tag
 
@@ -99,3 +102,40 @@ export const SanitizeExtensions: Extension[] =
         ? createGenericMark(tag)
         : createGenericNode(tag)
     )
+
+export const CustomParagraph = Paragraph.extend({
+  parseHTML() {
+    return [
+      {
+        tag: 'p',
+        getAttrs: () => ({}),
+      },
+    ]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['p', HTMLAttributes, 0]
+  },
+})
+
+export const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: { default: null },
+      height: { default: null },
+      class: { default: null },
+      style: { default: null },
+    }
+  },
+})
+
+export const CustomHeading = Heading.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      class: { default: null },
+      style: { default: null },
+      id: { default: null },
+    }
+  },
+})

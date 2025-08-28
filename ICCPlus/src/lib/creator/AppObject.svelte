@@ -32,12 +32,20 @@
                     </div>                    
                     <div class="row g-1 px-2 py-2">
                         <div class="col-12">
-                            <Tiptap data={choice} dataProp="title" label="Choice Title" />
+                            {#if app.useTextEditor}
+                                <Tiptap data={choice} dataProp="title" label="Choice Title" />
+                            {:else}
+                                <Textfield bind:value={choice.title} label="Choice Title" variant="filled" />
+                            {/if}
                         </div>
                     </div>
                     <div class="row gx-1 px-2 pb-3">
                         <div class="col-12">
-                            <Tiptap data={choice} dataProp="text" textarea={true} label="Choice Text" />
+                            {#if app.useTextEditor}
+                                <Tiptap data={choice} dataProp="text" textarea={true} label="Choice Text" />
+                            {:else}
+                                <Textfield textarea bind:value={choice.text} label="Choice Text" variant="filled" input$rows={5} />
+                            {/if}
                         </div>
                     </div>
                     <div class="row g-1 px-2 pb-2">

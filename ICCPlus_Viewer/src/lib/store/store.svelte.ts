@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.4.0';
+export const appVersion = '2.4.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -343,7 +343,7 @@ export const backpackStyling = {
     isBackpackBgRepeat: false,
     isBackpackBgFitIn: false,
     backpackBgImage: '',
-    backPackWidth: 1200
+    backPackWidth: 1400
 };
 /*! Delete and replace this part with your project if you're pasting it in, leave it here if you have placed your project.json file under index.html. */
 export const app = $state<App>({
@@ -387,6 +387,7 @@ export const app = $state<App>({
     googleFonts: [],
     customFonts: [],
     compressImageAuto: false,
+    useTextEditor: true,
     useToolbarBtn: false,
     useChoiceEditBtn: true,
     hideScoresUpdated: false,
@@ -500,6 +501,7 @@ export const defaultApp: App = {
     googleFonts: [],
     customFonts: [],
     compressImageAuto: false,
+    useTextEditor: true,
     useToolbarBtn: false,
     useChoiceEditBtn: true,
     hideScoresUpdated: false,

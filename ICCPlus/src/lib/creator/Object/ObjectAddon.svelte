@@ -66,10 +66,18 @@
                     {/each}
                 </Select>
                 <div class="py-2 col-12">
-                    <Tiptap data={addon} dataProp="title" label="Addon Title" />
+                    {#if app.useTextEditor}
+                        <Tiptap data={addon} dataProp="title" label="Addon Title" />
+                    {:else}
+                        <Textfield bind:value={addon.title} label="Addon Title" variant="filled" />
+                    {/if}
                 </div>
                 <div class="pb-3 col-12">
-                    <Tiptap data={addon} dataProp="text" textarea={true} label="Addon Text" />
+                    {#if app.useTextEditor}
+                        <Tiptap data={addon} dataProp="text" textarea={true} label="Addon Text" />
+                    {:else}
+                        <Textfield textarea bind:value={addon.text} label="Addon Text" variant="filled" input$rows={5} />
+                    {/if}
                 </div>
             </div>
         </div>
@@ -221,6 +229,7 @@
     import IconButton from '@smui/icon-button';
     import ObjectRequired from './ObjectRequired.svelte';
     import Select, { Option } from '$lib/custom/select';
+    import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
     import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';

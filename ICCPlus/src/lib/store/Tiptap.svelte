@@ -144,7 +144,7 @@
 	import { Editor } from '@tiptap/core';
     import { BackgroundColor, Color, FontSize, LineHeight, TextStyle } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
-    import { SanitizeExtensions } from './SanitizeExtensions';
+    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading } from './SanitizeExtensions';
 
     type Params = {
         callback: () => void;
@@ -319,10 +319,19 @@
 		editor = new Editor({
 			element: element,
 			extensions: [
-                StarterKit,
+                StarterKit.configure({
+                    paragraph: false,
+                    heading: false,
+                }),
                 BackgroundColor,
                 Color,
+                CustomParagraph,
+                CustomHeading,
                 FontSize,
+                CustomImage.configure({
+                    inline: true,
+                    allowBase64: true,
+                }),
                 LineHeight,
                 TextAlign.configure({
                     types: ['paragraph'],
