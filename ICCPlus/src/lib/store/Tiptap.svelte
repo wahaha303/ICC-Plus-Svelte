@@ -388,6 +388,15 @@
         }
 	});
 
+    $effect(() => {
+        if (editor && !isRaw && data[dataProp]) {
+            const str = convertNewlinesToBr(data[dataProp]);
+            if (str !== editor.getHTML()) {
+                editor.commands.setContent(str);
+            }
+        }
+    })
+
     function convertNewlinesToBr(str?: string) {
         if (!str) return '';
         return str.includes('\n') ? str.replace(/\n/g, '<br>') : str;

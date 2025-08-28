@@ -172,15 +172,19 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.4.1 / ${getDate('2025-08-28T02:00:00Z')}`,
+        title: `v2.4.1 ~ 2.4.2 / ${getDate('2025-08-28T03:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where text editor was removing certain HTML tags and attributes.
+        - Fixed issue where text inside text editor remained unchanged when moving Choices or Rows.
+
+        <span style="color: green">Choice</span>
+        - Fixed issue where some data remained when loading different project while another project was already loaded.
         
         <span style="color: green">Global Settings</span>
         - Added option to enable text editor in advanced tab.
         `
     }, {
-        open: true,
+        open: false,
         title: `v2.4.0 / ${getDate('2025-08-27T10:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Added text editor feature.

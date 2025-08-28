@@ -5916,6 +5916,7 @@ function getMimeFromBlob(str: string) {
     return ext ? (mt[ext] || `image/${ext}`) : 'application/octet-stream';
 }
 export function initializeApp(tempApp: any) {
+    cleanActivated();
     const keys = Object.keys(tempApp);
 
     for (let i = 0; i < keys.length; i++) {
