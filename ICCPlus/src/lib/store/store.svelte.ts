@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.4.2';
+export const appVersion = '2.4.3';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1397,35 +1397,43 @@ export function getTimestamp() {
     return `${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}`;
 };
 export function getPointTypeLabel(str: string) {
-    let pointType = pointTypeMap.get(str);
+    const pointType = pointTypeMap.get(str);
     if (typeof pointType !== 'undefined') {
         return `${pointType.id} | ${pointType.name}`;
     }
     return '';
 };
 export function getChoiceLabel(str: string) {
-    let cMap = choiceMap.get(str);
+    const cMap = choiceMap.get(str);
     if (typeof cMap !== 'undefined') {
-        return `${cMap.choice.id} | ${cMap.choice.title}`;
+        const choice = cMap.choice;
+        const tempDiv = document.createElement('div');
+        
+        tempDiv.innerHTML = choice.title;
+        
+        return `${choice.id} | ${choice.debugTitle ? choice.debugTitle : ''} ${tempDiv.textContent}`;
     }
     return '';
 };
 export function getGroupLabel(str: string) {
-    let group = groupMap.get(str);
+    const group = groupMap.get(str);
     if (typeof group !== 'undefined') {
         return `${group.id} | ${group.name}`;
     }
     return '';
 };
 export function getRowLabel(str: string) {
-    let row = rowMap.get(str);
+    const row = rowMap.get(str);
     if (typeof row !== 'undefined') {
-        return `${row.id} | ${row.title}`;
+        const tempDiv = document.createElement('div');
+        
+        tempDiv.innerHTML = row.title;
+        return `${row.id} | ${row.debugTitle ? row.debugTitle : ''} ${tempDiv.textContent}`;
     }
     return '';
 };
 export function getGlobalReqLabel(str: string) {
-    let globalReq = globalReqMap.get(str);
+    const globalReq = globalReqMap.get(str);
     if (typeof globalReq !== 'undefined') {
         return `${globalReq.id} | ${globalReq.name}`;
     }
@@ -5917,6 +5925,7 @@ function getMimeFromBlob(str: string) {
 }
 export function initializeApp(tempApp: any) {
     cleanActivated();
+    if (typeof tempApp.useTextEditor === 'undefined') tempApp.useTextEditor = false;
     const keys = Object.keys(tempApp);
 
     for (let i = 0; i < keys.length; i++) {

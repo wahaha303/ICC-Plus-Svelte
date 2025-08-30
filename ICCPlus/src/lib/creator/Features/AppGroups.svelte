@@ -119,7 +119,7 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
-    import { app, checkDupId, choiceMap, groupMap, rowMap, generateGroupId, getRows, getChoices, scrollToLastRow } from '$lib/store/store.svelte';
+    import { app, checkDupId, choiceMap, groupMap, rowMap, generateGroupId, getRows, getChoices, getRowLabel, getChoiceLabel, scrollToLastRow } from '$lib/store/store.svelte';
     import type { Group } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';
@@ -288,23 +288,6 @@
                 count: rowCount()
             });
         }
-    }
-    
-    function getChoiceLabel(str: string) {
-        const cMap = choiceMap.get(str);
-        if (typeof cMap !== 'undefined') {
-            let choice = cMap.choice;
-            return `${choice.id} | ${choice.debugTitle ? choice.debugTitle : ''} ${choice.title}`;
-        }
-        return '';
-    }
-
-    function getRowLabel(str: string) {
-        const row = rowMap.get(str);
-        if (typeof row !== 'undefined') {
-            return `${row.id} | ${row.debugTitle ? row.debugTitle : ''} ${row.title}`;
-        }
-        return '';
     }
 
     function moveGroupDown(num: number) {

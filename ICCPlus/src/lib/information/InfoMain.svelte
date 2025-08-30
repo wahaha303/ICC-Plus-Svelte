@@ -172,6 +172,19 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.3 / ${getDate('2025-08-30T03:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where unnecessary line breaks were added when switching between editor and HTML view
+        - Fixed issue where copying a choice with no text inserted text from the right-hand choice.
+
+        <span style="color: green">Addon</span>
+        - Fixed issue where gradient in Addon Design was not displaying correctly.
+
+        <span style="color: green">Build Form</span>
+        - Fixed issue where HTML tags were displayed in Choice Title.
+        `
+    }, {
+        open: false,
         title: `v2.4.1 ~ 2.4.2 / ${getDate('2025-08-28T03:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where text editor was removing certain HTML tags and attributes.

@@ -150,8 +150,6 @@
         callback: () => void;
         exclude?: HTMLElement;
     };
-    const P_TAG_REGEX = /(<p\s?((style=")([a-zA-Z0-9:;.\s()\-,]*)("))?>)(<\/p>)/g;
-    const BR_TAG_REGEX = /(<p\s?((style=")([a-zA-Z0-9:;.\s()\-,]*)("))?>)<br>(<\/p>)/g;
 
     let { data, dataProp, textarea = false, rows = 5, label }: { data: Choice | Row | Addon; dataProp: string; textarea?: boolean; rows?: number; label: string } = $props();
 
@@ -316,6 +314,7 @@
 
 	onMount(() => {
         data[dataProp] = convertNewlinesToBr(data[dataProp]);
+        console.log(data.id);
 		editor = new Editor({
 			element: element,
 			extensions: [
@@ -374,8 +373,10 @@
             if (editor?.isEmpty) {
                 data[dataProp] = '';
             } else {
-                const str = convertBrToNewlines(editor?.getHTML());
-                data[dataProp] = insertBrTags(str);
+                let str = editor?.getHTML();
+                
+                str = convertBrToNewlines(str);
+                data[dataProp] = str;
             }
         });
 
@@ -389,8 +390,9 @@
 	});
 
     $effect(() => {
-        if (editor && !isRaw && data[dataProp]) {
-            const str = convertNewlinesToBr(data[dataProp]);
+        if (editor && !isRaw) {
+            
+            const str = convertNewlinesToBr(data[dataProp] || '');
             if (str !== editor.getHTML()) {
                 editor.commands.setContent(str);
             }
@@ -399,22 +401,27 @@
 
     function convertNewlinesToBr(str?: string) {
         if (!str) return '';
-        return str.includes('\n') ? str.replace(/\n/g, '<br>') : str;
+        let result = str;
+
+        result = result.replace(/\n/g, '<br>');
+        result = result.replace(/<p([^>]*)><br><\/p>/gi, '<p></p>');
+        result = result.replace(/<\/p><br><p([^>]*)>/gi, '</p><p></p><p$1>');
+        result = result.replace(/<\/p>(\s*<br\s*\/?>\s*)+(?=<p[^>]*>)/gi, (match) => {
+            const count = (match.match(/<br\s*\/?>/gi) || []).length;
+            return '</p>' + '<p></p>'.repeat(count);
+        });
+
+        return result;
     }
 
     function convertBrToNewlines(str?: string) {
         if (!str) return '';
-        return str.includes('<br>') ? str.replace(/<br\s*\/?>/gi, '\n') : str;
-    }
+        let result = str;
 
-    function insertBrTags(str?: string) {
-        if (!str) return '';
-        return str.replace(P_TAG_REGEX, '$1<br>$6');
-    }
+        result = result.replace(/<p[^>]*><\/p>/gi, '<br>');
+        result = result.replace(/<br\s?>/gi, '\n');
 
-    function removeBrTags(str?: string) {
-        if (!str) return '';
-        return str.replace(BR_TAG_REGEX, '$1$6');
+        return result;
     }
 
     function clickOutside(node: HTMLElement, params: Params): { destroy: () => void } {
@@ -516,13 +523,17 @@
                 if (editor?.isEmpty) {
                     data[dataProp] = '';
                 } else {
-                    const str = convertBrToNewlines(editor.getHTML());
-                    data[dataProp] = insertBrTags(str);
+                    let str = editor.getHTML();
+                    
+                    str = convertBrToNewlines(str)
+                    data[dataProp] = str;
                 }
                 isFocused = false;
             } else {
-                const str = convertNewlinesToBr(data[dataProp]);
-                editor.commands.setContent(removeBrTags(str));
+                let str = data[dataProp];
+
+                str = convertNewlinesToBr(data[dataProp]);
+                editor.commands.setContent(str);
             }
         }
         isRaw = !isRaw;

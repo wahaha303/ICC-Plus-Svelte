@@ -306,6 +306,17 @@
                 }
                 styles.push(`border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(borderColor)};`);
             }
+            if (addonStyle.addonGradientIsOn) {
+                if (isEnabled && addonEnabled) {
+                    if (isActive) {
+                        styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`);
+                    } else {
+                        styles.push(`background-image: linear-gradient(${addonStyle.addonGradient});`);
+                    }
+                } else {
+                    styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnReq});`);
+                }
+            }
             if (addonStyle.addonDropShadowIsOn) {
                 if (addonStyle.addonUseBoxShadowIsOn) {
                     styles.push(`box-shadow: ${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${hexToRgba(addonStyle.addonDropShadowColor)};`);
@@ -347,7 +358,11 @@
                     if (filterStyle.selFilterSepiaIsOn) {
                         styles.push(` sepia(${filterStyle.selFilterGray}%)`);
                     }
-                    
+                    if (styles.length === filterIndex) {
+                        styles.splice(filterIndex - 1, 1);
+                    } else {
+                        styles.push(`;`);
+                    }
                 } else {
                     if (filterStyle.unselFilterBlurIsOn) {
                         styles.push(` blur(${filterStyle.unselFilterBlur}px)`);
@@ -382,9 +397,6 @@
                 } else {
                     styles.push(`;`);
                 }
-            }
-            if (addonStyle.addonGradientIsOn) {
-                styles.push(`background-image: linear-gradient(${addonStyle.addonGradient});`);
             }
         }
         if ((app.showAllAddons > 0 || addon.showAddon) && isEnabled && !addonEnabled) {
@@ -435,11 +447,10 @@
                 }
                 styles.push(`background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`);
             }
-            if (addonStyle.addonGradientIsOn) {
+            if (useDesign && addonStyle.addonGradientIsOn) {
                 styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnReq});`);
             }
         }
-
         return styles.join(' ');
     });
 

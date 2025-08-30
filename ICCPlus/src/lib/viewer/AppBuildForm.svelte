@@ -17,10 +17,10 @@
                 </FormField>
             </div>
             <div class="col-sm-6 col-12 mb-4">
-                <Textfield textarea bind:this={choiceTitles} value={getSelectedObjectName()} label="Current Activated Choices Titles" variant="filled" input$rows={5} />
+                <Textfield textarea value={getSelectedObjectName()} label="Current Activated Choices Titles" variant="filled" input$rows={5} />
             </div>
             <div class="col-sm-6 col-12 mb-4">
-                <Textfield textarea bind:this={choiceIds} value={getSelectedObjectId()} label="Current Activated Choices ID's" variant="filled" input$rows={5} />
+                <Textfield textarea value={getSelectedObjectId()} label="Current Activated Choices ID's" variant="filled" input$rows={5} />
             </div>
             <div class="col-12">
                 <Textfield textarea bind:value={idList} label="Area To Import Activated Choices With Lists Of Id's" variant="filled" input$rows={5} />
@@ -51,8 +51,9 @@
     let seperateChoices = $state(false);
 
     function getSelectedObjectName() {
-        let result: string[] = [];
+        let titles: string[] = [];
         let idArray = Array.from(activatedMap.keys());
+        let titleText: string = '';
 
         idArray.sort((a, b) => {
             let aMap = choiceMap.get(a);
@@ -77,27 +78,29 @@
                     const choice = cMap.choice;
 
                     if (row.id !== prevRowId) {
-                        if (prevRowId !== '') result.push('\n');
-                        result.push(`**${row.title}**\n`);
-                        result.push(`${choice.title}`);
+                        if (prevRowId !== '') titles.push('\n');
+                        titles.push(`**${row.title}**\n`);
+                        titles.push(`${choice.title}`);
                         prevRowId = row.id;
                     } else {
-                        result.push(`, ${choice.title}`);
+                        titles.push(`, ${choice.title}`);
                     }
                 }
             }
-
-            return result.join('');
+            titleText = titles.join('');
         } else {
             for (let i = 0; i < idArray.length; i++) {
                 let cMap = choiceMap.get(idArray[i]);
 
                 if (typeof cMap !== 'undefined') {
-                    result.push(cMap.choice.title);
+                    titles.push(cMap.choice.title);
                 }
             }
-
-            return result.join(', ');
+            titleText = titles.join(', ');
         }
-    }    
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = titleText;
+        
+        return tempDiv.textContent;
+    }
 </script>
