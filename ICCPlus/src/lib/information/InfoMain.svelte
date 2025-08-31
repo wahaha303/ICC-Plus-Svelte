@@ -172,9 +172,17 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.4 / ${getDate('2025-08-31T01:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where &lt;span&gt; tags were being inserted multiple times in the text editor.
+        - Fixed issue where text disappeared when the editor contained only line breaks.
+        - Fixed issue where multiple spaces were collapsed into one when switching between editor and HTML modes.
+        `
+    }, {
+        open: false,
         title: `v2.4.3 / ${getDate('2025-08-30T03:00:00Z')}`,
         text: `<span style="color: green">UI</span>
-        - Fixed issue where unnecessary line breaks were added when switching between editor and HTML view
+        - Fixed issue where unnecessary line breaks were added when switching between editor and HTML view.
         - Fixed issue where copying a choice with no text inserted text from the right-hand choice.
 
         <span style="color: green">Addon</span>

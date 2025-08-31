@@ -1,22 +1,21 @@
 import { Node, Mark, Extension } from '@tiptap/core'
 import { sanitizeArg } from './store.svelte'
+import { TextStyle } from '@tiptap/extension-text-style'
 import Heading from '@tiptap/extension-heading'
 import Paragraph from '@tiptap/extension-paragraph'
 import Image from '@tiptap/extension-image'
 
 const BUILTIN_TAGS = new Set([
-  'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img'
+  'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img', 'p', 'span'
 ])
 
 const inlineTags = new Set([
-  'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'font', 'img', 'span'
+  'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'font', 'img'
 ])
 
 const leafTags = new Set([
   'img', 'iframe', 'br', 'hr', 'wbr', 'col', 'colgroup'
 ])
-
-const allowedAttrs = ['class', 'style', 'id', 'src', 'href', 'target', 'width', 'height', 'alt', 'title', 'color', 'face', 'span', 'value', 'reversed', 'start', 'type', 'download', 'rel', 'type', 'border', 'cellpadding', 'cellspacing', 'colspan', 'rowspan', 'headers', 'scope', 'abbr', 'size', 'name', 'lazy', 'allow', 'allowfullscreen', 'crossorigin'];
 
 function getAllAttributes(dom: HTMLElement): Record<string, string> {
   const attrs: Record<string, string> = {}
@@ -29,12 +28,20 @@ function getAllAttributes(dom: HTMLElement): Record<string, string> {
   return attrs
 }
 
-function createDynamicAttributes(attrs: string[]) {
-  const result: Record<string, any> = {}
-  for (const attr of attrs) {
-    result[attr] = { default: null }
+function createAllAttributesAttr() {
+  return {
+    default: {} as Record<string, string>,
+    parseHTML: (el: HTMLElement) => {
+      const attrs: Record<string, string> = {}
+      for (const { name, value } of Array.from(el.attributes)) {
+        attrs[name] = value
+      }
+      return attrs
+    },
+    renderHTML: (attrs: { all: Record<string, string> }) => {
+      return { ...attrs.all }
+    },
   }
-  return result
 }
 
 function createGenericNode(tag: string): Extension {
@@ -42,7 +49,7 @@ function createGenericNode(tag: string): Extension {
   const isLeaf = leafTags.has(tag)
 
   return Node.create({
-    name: tag === 'p' ? 'paragraph' : tag,
+    name: tag,
     group: isInline ? 'inline' : 'block',
     content: isInline ? 'text*' : 'inline*',
     inline: isInline,
@@ -65,13 +72,15 @@ function createGenericNode(tag: string): Extension {
     },
 
     addAttributes() {
-      return createDynamicAttributes(allowedAttrs)
+      return {
+        all: createAllAttributesAttr(),
+      }
     },
   }) as Extension
 }
 
 function createGenericMark(tag: string): Extension {
-  const markName = tag === 'span' ? 'spanStyle' : tag
+  const markName = tag
 
   return Mark.create({
     name: markName,
@@ -89,7 +98,9 @@ function createGenericMark(tag: string): Extension {
     },
 
     addAttributes() {
-      return createDynamicAttributes(allowedAttrs)
+      return {
+        all: createAllAttributesAttr(),
+      }
     },
   }) as Extension
 }
@@ -98,7 +109,7 @@ export const SanitizeExtensions: Extension[] =
   sanitizeArg.ALLOWED_TAGS
     .filter(tag => !BUILTIN_TAGS.has(tag))
     .map(tag =>
-      inlineTags.has(tag) || tag === 'span'
+      inlineTags.has(tag)
         ? createGenericMark(tag)
         : createGenericNode(tag)
     )
@@ -115,16 +126,17 @@ export const CustomParagraph = Paragraph.extend({
   renderHTML({ HTMLAttributes }) {
     return ['p', HTMLAttributes, 0]
   },
+  addAttributes() {
+    return {
+      all: createAllAttributesAttr(),
+    }
+  },
 })
 
 export const CustomImage = Image.extend({
   addAttributes() {
     return {
-      ...this.parent?.(),
-      width: { default: null },
-      height: { default: null },
-      class: { default: null },
-      style: { default: null },
+      all: createAllAttributesAttr(),
     }
   },
 })
@@ -132,10 +144,15 @@ export const CustomImage = Image.extend({
 export const CustomHeading = Heading.extend({
   addAttributes() {
     return {
-      ...this.parent?.(),
-      class: { default: null },
-      style: { default: null },
-      id: { default: null },
+      all: createAllAttributesAttr(),
+    }
+  },
+})
+
+export const CustomTextStyle = TextStyle.extend({
+  addAttributes() {
+    return {
+      all: createAllAttributesAttr(),
     }
   },
 })

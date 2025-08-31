@@ -144,7 +144,7 @@
 	import { Editor } from '@tiptap/core';
     import { BackgroundColor, Color, FontSize, LineHeight, TextStyle } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
-    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading } from './SanitizeExtensions';
+    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle } from './SanitizeExtensions';
 
     type Params = {
         callback: () => void;
@@ -312,9 +312,27 @@
         value: '3'
     }];
 
+    function isEmpty(editor: Editor | undefined): boolean {
+        if (!editor) return true
+
+        const json = editor.getJSON()
+        const content = json.content ?? []
+
+        if (content.length === 0) return true
+
+        if (
+            content.length === 1 &&
+            content[0].type === 'paragraph' &&
+            (!content[0].content || content[0].content.length === 0)
+        ) {
+            return true
+        }
+
+        return false
+    }
+
 	onMount(() => {
         data[dataProp] = convertNewlinesToBr(data[dataProp]);
-        console.log(data.id);
 		editor = new Editor({
 			element: element,
 			extensions: [
@@ -335,7 +353,7 @@
                 TextAlign.configure({
                     types: ['paragraph'],
                 }),
-                TextStyle,
+                CustomTextStyle,
                 ...SanitizeExtensions,
             ],
 			content: data[dataProp],
@@ -370,7 +388,7 @@
             }
 
             isFocused = false;
-            if (editor?.isEmpty) {
+            if (isEmpty(editor)) {
                 data[dataProp] = '';
             } else {
                 let str = editor?.getHTML();
@@ -392,7 +410,7 @@
     $effect(() => {
         if (editor && !isRaw) {
             
-            const str = convertNewlinesToBr(data[dataProp] || '');
+            const str = convertNewlinesToBr(data[dataProp]);
             if (str !== editor.getHTML()) {
                 editor.commands.setContent(str);
             }
@@ -410,6 +428,7 @@
             const count = (match.match(/<br\s*\/?>/gi) || []).length;
             return '</p>' + '<p></p>'.repeat(count);
         });
+        result = result.replace(/ {2,}/g, spaces => spaces.split('').map(() => '&nbsp;').join(''));
 
         return result;
     }
@@ -420,6 +439,7 @@
 
         result = result.replace(/<p[^>]*><\/p>/gi, '<br>');
         result = result.replace(/<br\s?>/gi, '\n');
+        result = result.replace(/&nbsp;/g, ' ');
 
         return result;
     }
@@ -520,7 +540,7 @@
     function toggleRawHTML() {
         if (editor) {
             if (!isRaw) {
-                if (editor?.isEmpty) {
+                if (isEmpty(editor)) {
                     data[dataProp] = '';
                 } else {
                     let str = editor.getHTML();
