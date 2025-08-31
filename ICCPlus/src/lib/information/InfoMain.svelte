@@ -172,6 +172,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.5 / ${getDate('2025-08-31T09:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where line breaks did not render correctly when closing the text editor without making any changes.
+        `
+    }, {
+        open: false,
         title: `v2.4.4 / ${getDate('2025-08-31T01:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where &lt;span&gt; tags were being inserted multiple times in the text editor.

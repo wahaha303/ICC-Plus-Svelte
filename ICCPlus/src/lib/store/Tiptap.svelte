@@ -399,7 +399,17 @@
         });
 
         return () => {
-            if (editor) editor.destroy();
+            if (editor) {
+                if (isEmpty(editor)) {
+                    data[dataProp] = '';
+                } else {
+                    let str = editor?.getHTML();
+                    
+                    str = convertBrToNewlines(str);
+                    data[dataProp] = str;
+                }
+                editor.destroy();
+            }
             if (element) {
                 element.removeEventListener('focusin', () => {});
                 element.removeEventListener('focusout', () => {});
