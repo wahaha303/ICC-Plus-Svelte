@@ -172,6 +172,17 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.6 / ${getDate('2025-09-01T12:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where previously applied text styles couldn't be changed when reopening the text editor.
+        - Fixed issue where the focused state color of the text editor did not update correctly in dark mode.
+
+        <span style="color: green">Choice</span>
+        - Fixed issue where multiple spaces were collapsed into a single space within choice text.
+        - Fixed issue where HTML tags in choice title were shown in score update notifications.
+        `
+    }, {
+        open: false,
         title: `v2.4.5 / ${getDate('2025-08-31T09:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where line breaks did not render correctly when closing the text editor without making any changes.

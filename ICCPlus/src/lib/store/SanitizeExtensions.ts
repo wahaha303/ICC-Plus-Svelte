@@ -1,9 +1,10 @@
-import { Node, Mark, Extension } from '@tiptap/core'
+import { Node, Mark, Extension, type CommandProps } from '@tiptap/core'
 import { sanitizeArg } from './store.svelte'
 import { TextStyle } from '@tiptap/extension-text-style'
 import Heading from '@tiptap/extension-heading'
 import Paragraph from '@tiptap/extension-paragraph'
 import Image from '@tiptap/extension-image'
+
 
 const BUILTIN_TAGS = new Set([
   'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img', 'p', 'span'
@@ -153,6 +154,94 @@ export const CustomTextStyle = TextStyle.extend({
   addAttributes() {
     return {
       all: createAllAttributesAttr(),
+      color: {
+        default: null,
+        parseHTML: el => el.style.color || null,
+        renderHTML: attrs => attrs.color ? { style: `color: ${attrs.color}` } : {},
+      },
+      backgroundColor: {
+        default: null,
+        parseHTML: el => el.style.backgroundColor || null,
+        renderHTML: attrs => attrs.backgroundColor ? { style: `background-color: ${attrs.backgroundColor}` } : {},
+      },
+      fontSize: {
+        parseHTML: el => el.style.fontSize || null,
+        renderHTML: attrs => attrs.fontSize ? { style: `font-size: ${attrs.fontSize}` } : {},
+      },
+      lineHeight: {
+        parseHTML: el => el.style.lineHeight || null,
+        renderHTML: attrs => attrs.lineHeight ? { style: `line-height: ${attrs.lineHeight}` } : {},
+      },
+    }
+  },
+
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      clearColor: () => ({ chain }: CommandProps) => {
+        const editor = this.editor
+        if (!editor) return false
+
+        const attrs = editor.getAttributes('textStyle') || {}
+        const updated = { ...attrs.all }
+
+        if (!updated || !updated.style) {
+          return chain().unsetColor().run()
+        }
+        
+        updated.style = updated.style.replace(/(^|;)\s*color\s*:\s*[^;]+;?/i, '');
+        if (!updated.style) delete updated.style;
+
+        return chain().updateAttributes(this.name, { all: updated, color: null }).run()
+      },
+      clearBackgroundColor: () => ({ chain }: CommandProps) => {
+        const editor = this.editor
+        if (!editor) return false
+
+        const attrs = editor.getAttributes('textStyle') || {}
+        const updated = { ...attrs.all }
+
+        if (!updated || !updated.style) {
+          return chain().unsetBackgroundColor().run()
+        }
+
+        updated.style = updated.style.replace(/(^|;)\s*background-color\s*:\s*[^;]+;?/i, '');
+        if (!updated.style) delete updated.style;
+
+        return chain().updateAttributes(this.name, { all: updated, backgroundColor: null }).run()
+      },
+      clearFontSize: () => ({ chain }: CommandProps) => {
+        const editor = this.editor
+        if (!editor) return false
+
+        const attrs = editor.getAttributes('textStyle') || {}
+        const updated = { ...attrs.all }
+
+        if (!updated || !updated.style) {
+          return chain().unsetFontSize().run()
+        }
+
+        updated.style = updated.style.replace(/(^|;)\s*font-size\s*:\s*[^;]+;?/i, '');
+        if (!updated.style) delete updated.style;
+
+        return chain().updateAttributes(this.name, { all: updated, fontSize: null }).run()
+      },
+      clearLineHeight: () => ({ chain }: CommandProps) => {
+        const editor = this.editor
+        if (!editor) return false
+
+        const attrs = editor.getAttributes('textStyle') || {}
+        const updated = { ...attrs.all }
+
+        if (!updated || !updated.style) {
+          return chain().unsetLineHeight().run()
+        }
+
+        updated.style = updated.style.replace(/(^|;)\s*line-height\s*:\s*[^;]+;?/i, '');
+        if (!updated.style) delete updated.style;
+
+        return chain().updateAttributes(this.name, { all: updated, lineHeight: null }).run()
+      },
     }
   },
 })

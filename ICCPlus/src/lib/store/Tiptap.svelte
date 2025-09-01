@@ -505,7 +505,7 @@
 
     function unsetTextColor() {
         if (editor && isTextColor) {
-            editor.chain().focus().unsetColor().run();
+            (editor.chain() as any).focus().extendMarkRange('textStyle').clearColor().run();
             isTextColor = false;
         }
     }
@@ -519,7 +519,7 @@
 
     function unsetBackgroundColor() {
         if (editor && isBackgroundColor) {
-            editor.chain().focus().unsetBackgroundColor().run();
+            (editor.chain() as any).focus().extendMarkRange('textStyle').clearBackgroundColor().run();
             isBackgroundColor = false;
         }
     }
@@ -531,7 +531,7 @@
     function setFontSize(size: string = '16px') {
         if (editor) {
             if (size === fontSize) {
-                editor.chain().focus().unsetFontSize().run();
+                (editor.chain() as any).focus().extendMarkRange('textStyle').clearFontSize().run();
             } else {
                 editor.chain().focus().setFontSize(size).run();
             }
@@ -576,7 +576,7 @@
     function setLineHeight(height: string = '1.0') {
         if (editor) {
             if (height === lineHeight) {
-                editor.chain().focus().unsetLineHeight().run();
+                (editor.chain() as any).focus().extendMarkRange('textStyle').clearLineHeight().run();
             } else {
                 editor.chain().focus().toggleTextStyle({ lineHeight: height }).run();
             }

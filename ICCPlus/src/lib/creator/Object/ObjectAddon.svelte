@@ -457,7 +457,7 @@
     let addonTitle = $derived.by(() => {
         let styles: string[] = [];
 
-        styles.push(`font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
+        styles.push(`white-space: pre-line; font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATitleColor)};`);
         } else if (isActive && filterStyle.selATitleColorIsOn) {
@@ -479,7 +479,7 @@
     let addonText = $derived.by(() => {
         let styles: string[] = [];
 
-        styles.push(`font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%; white-space: pre-line;`);
+        styles.push(`white-space: pre-wrap; font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATextColor)};`);
         } else if (isActive && filterStyle.selATextColorIsOn) {

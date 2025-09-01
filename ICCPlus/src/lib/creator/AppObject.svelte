@@ -1843,7 +1843,7 @@
     let objectTitle = $derived.by(() => {
         let styles: string[] = [];
 
-        styles.push(`font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
+        styles.push(`white-space: pre-line; font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTitleColor)};`);
         } else if (isActive && filterStyle.selCTitleColorIsOn) {
@@ -1877,7 +1877,7 @@
     let objectText = $derived.by(() => {
         let styles: string[] = [];
 
-        styles.push(`font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%; white-space: pre-line;`);
+        styles.push(`white-space: pre-wrap; font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterCTextColor)};`);
         } else if (isActive && filterStyle.selCTextColorIsOn) {
@@ -2957,7 +2957,10 @@
         }
         if (count === 0) {
             if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
-                snackbarVariables.labelText = scoreUpdate.join('');
+                const tempDiv = document.createElement('div');
+        
+                tempDiv.innerHTML = scoreUpdate.join('');
+                snackbarVariables.labelText = tempDiv.textContent;
                 snackbarVariables.isOpen = true;
             }
             scoreUpdate.splice(0);
@@ -3140,7 +3143,10 @@
         }
         if (count === 0) {
             if (scoreUpdate.length > 0 && !app.hideScoresUpdated) {
-                snackbarVariables.labelText = scoreUpdate.join('');
+                const tempDiv = document.createElement('div');
+        
+                tempDiv.innerHTML = scoreUpdate.join('');
+                snackbarVariables.labelText = tempDiv.textContent;
                 snackbarVariables.isOpen = true;
             }
             scoreUpdate.splice(0);

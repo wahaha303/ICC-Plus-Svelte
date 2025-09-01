@@ -14,11 +14,11 @@
                         You can use CTRL + F to find ID or Title.
                         {#each app.rows as row}
                             <div class="col-12 p-2 list__title">
-                                <b>{@html `${row.debugTitle || ''} ${row.title} / ${row.id}`}</b>
+                                <b>{@html DOMPurify.sanitize(`${row.debugTitle || ''} ${row.title} / ${row.id}`, sanitizeArg)}</b>
                                 <div class="row">
                                     {#each row.objects as choice}
                                         <div class="col-lg-2 col-sm-4 p-2 list__title">
-                                            {@html `${choice.debugTitle || ''} ${choice.title} / ${choice.id}`}
+                                            {@html DOMPurify.sanitize(`${choice.debugTitle || ''} ${choice.title} / ${choice.id}`, sanitizeArg)}
                                         </div>
                                     {/each}
                                 </div>
@@ -50,7 +50,8 @@
     import Button, { Label } from '@smui/button';
     import Card, { Content as CardContent } from '@smui/card';
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
-    import { app } from '$lib/store/store.svelte';
+    import DOMPurify from 'dompurify';
+    import { app, sanitizeArg } from '$lib/store/store.svelte';
     
     let { open, onclose }: { open: boolean; onclose: () => void } = $props();
     

@@ -307,7 +307,7 @@
     });
 
     let rowTitle = $derived.by(() => {
-        return `font-family: '${textStyle.rowTitle}'; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${hexToRgba(textStyle.rowTitleColor)}`;
+        return `white-space: pre-line; font-family: '${textStyle.rowTitle}'; font-size: ${textStyle.rowTitleTextSize}%; text-align: ${textStyle.rowTitleAlign}; color: ${hexToRgba(textStyle.rowTitleColor)}`;
     });
 
     let rowText = $derived.by(() => {
