@@ -172,6 +172,16 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.7 / ${getDate('2025-09-02T15:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where text alignment could not be changed after reopening the text editor.
+        - Fixed issue where bullet point lists were not functioning correctly in the text editor.
+
+        <span style="color: green">Viewer</span>
+        - Added tooltip explaining mouse actions to the menu button in the point bar.
+        `
+    }, {
+        open: false,
         title: `v2.4.6 / ${getDate('2025-09-01T12:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where previously applied text styles couldn't be changed when reopening the text editor.

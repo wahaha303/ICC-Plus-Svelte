@@ -1,6 +1,7 @@
 import { Node, Mark, Extension, type CommandProps } from '@tiptap/core'
 import { sanitizeArg } from './store.svelte'
 import { TextStyle } from '@tiptap/extension-text-style'
+import { BulletList, ListItem, OrderedList } from '@tiptap/extension-list'
 import Heading from '@tiptap/extension-heading'
 import Paragraph from '@tiptap/extension-paragraph'
 import Image from '@tiptap/extension-image'
@@ -124,20 +125,61 @@ export const CustomParagraph = Paragraph.extend({
       },
     ]
   },
+  
   renderHTML({ HTMLAttributes }) {
     return ['p', HTMLAttributes, 0]
   },
+
   addAttributes() {
     return {
       all: createAllAttributesAttr(),
     }
   },
+
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      customToggleTextAlign: (str: string) => ({ chain }: CommandProps) => {
+        const editor = this.editor
+        if (!editor) return false
+
+        const attrs = editor.getAttributes('paragraph') || {}
+        const updated = { ...attrs.all }
+
+        if (!updated || !updated.style || !updated.style.trim()) {
+          return chain().toggleTextAlign(str).run()
+        }
+
+        const currentAlign = attrs.textAlign
+
+        if (currentAlign === str) {
+          updated.style = updated.style.replace(/(^|;)\s*text-align\s*:\s*[^;]+;?/i, '')
+          if (!updated.style || !updated.style.trim()) delete updated.style
+          
+          return chain().updateAttributes('paragraph', { all: updated, textAlign: null }).run()
+        } else {
+          if (/text-align\s*:/i.test(updated.style)) {
+            updated.style = updated.style.replace(/(^|;)\s*text-align\s*:\s*[^;]+;?/i, `text-align: ${str}`)
+          } else {
+            updated.style = `${updated.style}${updated.style.endsWith(';') || !updated.style ? '' : ';'}text-align: ${str};`
+          }
+          updated.style = updated.style.trim()
+          return chain().updateAttributes('paragraph', { all: updated, textAlign: str }).run()
+        }
+      },
+    }
+  }
 })
 
 export const CustomImage = Image.extend({
   addAttributes() {
     return {
       all: createAllAttributesAttr(),
+      textAlign: {
+        default: null,
+        parseHTML: el => el.style.textAlign || null,
+        renderHTML: attrs => attrs.textAlign ? { style: `text-align: ${attrs.textAlign}` } : {},
+      }
     }
   },
 })
@@ -185,7 +227,7 @@ export const CustomTextStyle = TextStyle.extend({
         const attrs = editor.getAttributes('textStyle') || {}
         const updated = { ...attrs.all }
 
-        if (!updated || !updated.style) {
+        if (!updated || !updated.style || !updated.style.trim()) {
           return chain().unsetColor().run()
         }
         
@@ -201,7 +243,7 @@ export const CustomTextStyle = TextStyle.extend({
         const attrs = editor.getAttributes('textStyle') || {}
         const updated = { ...attrs.all }
 
-        if (!updated || !updated.style) {
+        if (!updated || !updated.style || !updated.style.trim()) {
           return chain().unsetBackgroundColor().run()
         }
 
@@ -217,7 +259,7 @@ export const CustomTextStyle = TextStyle.extend({
         const attrs = editor.getAttributes('textStyle') || {}
         const updated = { ...attrs.all }
 
-        if (!updated || !updated.style) {
+        if (!updated || !updated.style || !updated.style.trim()) {
           return chain().unsetFontSize().run()
         }
 
@@ -233,7 +275,7 @@ export const CustomTextStyle = TextStyle.extend({
         const attrs = editor.getAttributes('textStyle') || {}
         const updated = { ...attrs.all }
 
-        if (!updated || !updated.style) {
+        if (!updated || !updated.style || !updated.style.trim()) {
           return chain().unsetLineHeight().run()
         }
 
@@ -242,6 +284,30 @@ export const CustomTextStyle = TextStyle.extend({
 
         return chain().updateAttributes(this.name, { all: updated, lineHeight: null }).run()
       },
+    }
+  },
+})
+
+export const CustomBulletList = BulletList.extend({
+  addAttributes() {
+    return {
+      all: createAllAttributesAttr(),
+    }
+  },
+})
+
+export const CustomOrderList = OrderedList.extend({
+  addAttributes() {
+    return {
+      all: createAllAttributesAttr(),
+    }
+  },
+})
+
+export const CustomListItem = ListItem.extend({
+  addAttributes() {
+    return {
+      all: createAllAttributesAttr(),
     }
   },
 })

@@ -74,9 +74,11 @@
             <TopAppBar class="pointBar" style={pointBar} variant="fixed" color="secondary" >
                 <AppBarRow class="justify-space-around">
                     <AppBarSection class="py-0 justify-center">
-                        <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} oncontextmenu={buildContext} aria-label="Open Import Window" style={pointBarIcon}>
-                            <i class="mdi mdi-format-list-checks"></i>
-                        </IconButton>
+                        <Wrapper text="L-Click: Open Side Menu<br>R-Click: Open Build Form">
+                            <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} oncontextmenu={buildContext} aria-label="Open Import Window" style={pointBarIcon}>
+                                <i class="mdi mdi-format-list-checks"></i>
+                            </IconButton>
+                        </Wrapper>
                     </AppBarSection>
                     <AppBarSection class="pointbar-center--viewer">
                         {#each app.pointTypes as point}
@@ -146,6 +148,7 @@
     import DlgBackpack from './DlgBackpack.svelte';
 	import ImageUpload from '$lib/store/ImageUpload.svelte';
     import DlgCommon from './DlgCommon.svelte';
+    import { Wrapper } from '$lib/custom/tooltip';
 	import { get } from 'svelte/store';
 
     const confirmDialog = {

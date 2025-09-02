@@ -142,9 +142,9 @@
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 	import { onMount } from 'svelte';
 	import { Editor } from '@tiptap/core';
-    import { BackgroundColor, Color, FontSize, LineHeight, TextStyle } from '@tiptap/extension-text-style';
+    import { BackgroundColor, Color, FontSize, LineHeight } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
-    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle } from './SanitizeExtensions';
+    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle, CustomBulletList, CustomOrderList, CustomListItem } from './SanitizeExtensions';
 
     type Params = {
         callback: () => void;
@@ -339,6 +339,9 @@
                 StarterKit.configure({
                     paragraph: false,
                     heading: false,
+                    bulletList: false,
+                    orderedList: false,
+                    listItem: false,
                 }),
                 BackgroundColor,
                 Color,
@@ -354,6 +357,9 @@
                     types: ['paragraph'],
                 }),
                 CustomTextStyle,
+                CustomBulletList,
+                CustomOrderList,
+                CustomListItem,
                 ...SanitizeExtensions,
             ],
 			content: data[dataProp],
@@ -403,10 +409,12 @@
                 if (isEmpty(editor)) {
                     data[dataProp] = '';
                 } else {
-                    let str = editor?.getHTML();
+                    if (!isRaw) {
+                        let str = editor?.getHTML();
                     
-                    str = convertBrToNewlines(str);
-                    data[dataProp] = str;
+                        str = convertBrToNewlines(str);
+                        data[dataProp] = str;
+                    }
                 }
                 editor.destroy();
             }
@@ -427,10 +435,46 @@
         }
     })
 
+    function removeNewlinesInsideList(html: string): string {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        doc.querySelectorAll('li').forEach((li) => {
+            li.childNodes.forEach((node) => {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+                    node.textContent = node.textContent.replace(/\n/g, '__KEEP_NEWLINE__');
+                }
+            });
+        });
+        
+        doc.querySelectorAll('ul, ol').forEach((list) => {
+            list.innerHTML = list.innerHTML.replace(/\n/g, '');
+
+            const next = list.nextSibling;
+            const parent = list.parentNode;
+
+            if (next && parent && parent.lastChild === next) {
+                if (next.nodeType === Node.TEXT_NODE && /^\s*$/.test(next.textContent || '')) {
+                    next.remove();
+                }
+
+                if (next.nodeType === Node.ELEMENT_NODE) {
+                    const el = next as HTMLElement;
+                    if (el.tagName === 'P' && el.innerHTML.trim() === '') {
+                        el.remove();
+                    }
+                }
+            }
+        });
+
+        return doc.body.innerHTML;
+    }
+
     function convertNewlinesToBr(str?: string) {
         if (!str) return '';
         let result = str;
 
+        result = removeNewlinesInsideList(result);
         result = result.replace(/\n/g, '<br>');
         result = result.replace(/<p([^>]*)><br><\/p>/gi, '<p></p>');
         result = result.replace(/<\/p><br><p([^>]*)>/gi, '</p><p></p><p$1>');
@@ -439,6 +483,7 @@
             return '</p>' + '<p></p>'.repeat(count);
         });
         result = result.replace(/ {2,}/g, spaces => spaces.split('').map(() => '&nbsp;').join(''));
+        result = result.replace(/__KEEP_NEWLINE__/g, '<br>');
 
         return result;
     }
@@ -614,7 +659,7 @@
 
     function toggleAlign(str: string) {
         if (editor) {
-            editor.chain().focus().toggleTextAlign(str).run();
+            (editor.chain() as any).focus().customToggleTextAlign(str).run();
             openAlign = !openAlign;
         }
     }
