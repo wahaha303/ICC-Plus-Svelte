@@ -172,6 +172,14 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.8 / ${getDate('2025-09-06T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where disabling 'Select Individual Choices Instead of Groups' prevented setting groups.
+        - Fixed issue where loading a build with a discounted choice and selecting another discount option caused discounts to stack.
+        - Fixed issue where a choice activated by multiple other choices was incorrectly deactivated when only one of them was deselected.
+        `
+    }, {
+        open: false,
         title: `v2.4.7 / ${getDate('2025-09-02T15:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where text alignment could not be changed after reopening the text editor.

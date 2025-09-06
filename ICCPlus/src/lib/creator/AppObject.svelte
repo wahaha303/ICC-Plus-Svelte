@@ -662,6 +662,7 @@
                                                             choice.discountRows = [];
                                                             delete choice.discountGroups;
                                                         } else {
+                                                            choice.discountGroups = [];
                                                             delete choice.isDisChoices;
                                                             delete choice.discountChoices;
                                                             delete choice.discountRows;
@@ -2660,7 +2661,7 @@
         } else {
             if (typeof fChoice.activatedFrom !== 'undefined') {
                 fChoice.activatedFrom--;
-                if (fChoice.activatedFrom <= 0) {
+                if (fChoice.activatedFrom <= 0 || linkedObjects.indexOf(localChoice.id) !== -1) {
                     if (fChoice.isActive) {
                         delete fChoice.activatedFrom;
                         delete fChoice.forcedActivated;

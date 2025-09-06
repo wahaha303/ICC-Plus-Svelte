@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.4.7';
+export const appVersion = '2.4.8';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3897,6 +3897,7 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
         }
     }
 };
+const disChoiceSet = new Set<string>();
 function selectObject(str: string, newActivatedList: string[]) {
     let cStr = str.split('/IMG#');
     const strImg = cStr.length > 1 ? cStr[1] : '';
@@ -3938,6 +3939,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                                     const dChoice = dRow.objects[j];
                                     selectDiscount(localChoice, dChoice);
                                     dList.add(dChoice.id);
+                                    disChoiceSet.add(dChoice.id);
                                 }
                             }
                         }
@@ -3947,7 +3949,9 @@ function selectObject(str: string, newActivatedList: string[]) {
                             if (!dList.has(localChoice.discountChoices[i])) {
                                 const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                 if (typeof cMap !== 'undefined') {
-                                    selectDiscount(localChoice, cMap.choice);
+                                    const dChoice = cMap.choice;
+                                    selectDiscount(localChoice, dChoice);
+                                    disChoiceSet.add(dChoice.id);
                                 }
                             }
                         }
@@ -3960,7 +3964,9 @@ function selectObject(str: string, newActivatedList: string[]) {
                                 for (let j = 0; j < groupData.elements.length; j++) {
                                     const cMap = choiceMap.get(groupData.elements[j]);
                                     if (typeof cMap !== 'undefined') {
-                                        selectDiscount(localChoice, cMap.choice);
+                                        const dChoice = cMap.choice;
+                                        selectDiscount(localChoice, dChoice);
+                                        disChoiceSet.add(dChoice.id);
                                     }
                                 }
                             }
@@ -4089,6 +4095,11 @@ function selectObject(str: string, newActivatedList: string[]) {
                                 }
                                 rChoice.forcedActivated = true;
                             }
+
+                            if (!rChoice.isSelectableMultiple) {
+                                if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
+                                rChoice.activatedFrom += 1;
+                            }
                         }
                     }
                 } else {
@@ -4115,6 +4126,11 @@ function selectObject(str: string, newActivatedList: string[]) {
                                     }
                                 }
                                 rChoice.forcedActivated = true;
+                            }
+
+                            if (!rChoice.isSelectableMultiple) {
+                                if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
+                                rChoice.activatedFrom += 1;
                             }
                         }
                     }
@@ -4152,6 +4168,11 @@ function selectObject(str: string, newActivatedList: string[]) {
                             }
                             fChoice.forcedActivated = true;
                         }
+
+                        if (!fChoice.isSelectableMultiple) {
+                            if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                            fChoice.activatedFrom += 1;
+                        }
                     } else {
                         const groupData = groupMap.get(item[0]);
                         if (typeof groupData !== 'undefined') {
@@ -4184,6 +4205,11 @@ function selectObject(str: string, newActivatedList: string[]) {
                                             }
                                         }
                                         fChoice.forcedActivated = true;
+                                    }
+                                    
+                                    if (!fChoice.isSelectableMultiple) {
+                                        if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                                        fChoice.activatedFrom += 1;
                                     }
                                 }
                             }
@@ -4562,6 +4588,7 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                         const dChoice = dRow.objects[j];
                                         selectDiscount(localChoice, dChoice);
                                         dList.add(dChoice.id);
+                                        disChoiceSet.add(dChoice.id);
                                     }
                                 }
                             }
@@ -4571,7 +4598,9 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                 if (!dList.has(localChoice.discountChoices[i])) {
                                     const cMap = choiceMap.get(localChoice.discountChoices[i]);
                                     if (typeof cMap !== 'undefined') {
-                                        selectDiscount(localChoice, cMap.choice);
+                                        const dChoice = cMap.choice;
+                                        selectDiscount(localChoice, dChoice);
+                                        disChoiceSet.add(dChoice.id);
                                     }
                                 }
                             }
@@ -4584,7 +4613,9 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                     for (let j = 0; j < groupData.elements.length; j++) {
                                         const cMap = choiceMap.get(groupData.elements[j]);
                                         if (typeof cMap !== 'undefined') {
-                                            selectDiscount(localChoice, cMap.choice);
+                                            const dChoice = cMap.choice;
+                                            selectDiscount(localChoice, dChoice);
+                                            disChoiceSet.add(dChoice.id);
                                         }
                                     }
                                 }
@@ -5148,6 +5179,23 @@ export function loadActivated(str: string) {
             }
         }
     }
+
+    for (let key of disChoiceSet) {
+        const cMap = choiceMap.get(key);
+
+        if (typeof cMap !== 'undefined') {
+            const aChoice = cMap.choice;
+
+            for (let i = 0; i < aChoice.scores.length; i++) {
+                const aScore = aChoice.scores[i];
+
+                delete aScore.isChangeDiscount;
+                delete aScore.tmpDisScore;
+            }
+        }
+    }
+
+    disChoiceSet.clear();
 };
 export function duplicateRow(localChoice: Choice, localRow: Row) {
     if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
