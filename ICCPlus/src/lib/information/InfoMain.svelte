@@ -172,6 +172,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.9 / ${getDate('2025-09-07T15:00:00Z')}`,
+        text: `<span style="color: green">Viewer</span>
+        - Fixed issue where build form could be opened via right-clicking menu button even when Save/Load Build was disabled in Global Settings.
+        
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where entering non-numeric value in Color Picker number field caused page to freeze.
+        `
+    }, {
+        open: false,
         title: `v2.4.8 / ${getDate('2025-09-06T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where disabling 'Select Individual Choices Instead of Groups' prevented setting groups.

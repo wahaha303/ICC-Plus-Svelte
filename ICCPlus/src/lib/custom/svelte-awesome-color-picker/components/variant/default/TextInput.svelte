@@ -38,7 +38,7 @@
 	let h = $derived(Math.round(hsv.h));
 	let s = $derived(Math.round(hsv.s));
 	let v = $derived(Math.round(hsv.v));
-	let a = $derived(hsv.a === undefined ? 1 : Math.round(hsv.a * 100) / 100);
+	let a = $derived(hsv.a === undefined || typeof hsv.a !== 'number' ? 1 : Math.round(hsv.a * 100) / 100);
 
 	type InputEvent = Event & { currentTarget: EventTarget & HTMLInputElement };
 
@@ -52,14 +52,26 @@
 
 	function updateRgb(property: string) {
 		return function (e: InputEvent) {
-			rgb = { ...rgb, [property]: parseFloat((e.target as HTMLInputElement).value) };
+			const target = e.target as HTMLInputElement;
+			let num = parseFloat(target.value);
+			if (Number.isNaN(num)) {
+				target.value = '0';
+				num = 0;
+			}
+			rgb = { ...rgb, [property]: num };
 			onInput({ rgb });
 		};
 	}
 
 	function updateHsv(property: string) {
 		return function (e: InputEvent) {
-			hsv = { ...hsv, [property]: parseFloat((e.target as HTMLInputElement).value) };
+			const target = e.target as HTMLInputElement;
+			let num = parseFloat(target.value);
+			if (Number.isNaN(num)) {
+				target.value = '0';
+				num = 0;
+			}
+			hsv = { ...hsv, [property]: num };
 			onInput({ hsv });
 		};
 	}

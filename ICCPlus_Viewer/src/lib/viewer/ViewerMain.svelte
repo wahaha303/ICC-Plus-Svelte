@@ -74,11 +74,17 @@
             <TopAppBar class="pointBar" style={pointBar} variant="fixed" color="secondary" >
                 <AppBarRow class="justify-space-around">
                     <AppBarSection class="py-0 justify-center">
-                        <Wrapper text="L-Click: Open Side Menu<br>R-Click: Open Build Form">
-                            <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} oncontextmenu={buildContext} aria-label="Open Import Window" style={pointBarIcon}>
+                        {#if app.importedChoicesIsOpen}
+                            <Wrapper text="L-Click: Open Side Menu<br>R-Click: Open Build Form">
+                                <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} oncontextmenu={buildContext} aria-label="Open Import Window" style={pointBarIcon}>
+                                    <i class="mdi mdi-format-list-checks"></i>
+                                </IconButton>
+                            </Wrapper>
+                        {:else}
+                            <IconButton class="pointbar-icons" onclickcapture={() => menuOpen = true} aria-label="Open Import Window" style={pointBarIcon}>
                                 <i class="mdi mdi-format-list-checks"></i>
                             </IconButton>
-                        </Wrapper>
+                        {/if}
                     </AppBarSection>
                     <AppBarSection class="pointbar-center--viewer">
                         {#each app.pointTypes as point}
