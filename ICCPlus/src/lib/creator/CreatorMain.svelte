@@ -486,11 +486,12 @@
         let clone: Row = JSON.parse(JSON.stringify(row));
 
         clone.id = id;
+        clone.index = num + 1;
         app.rows.splice(num + 1, 0, clone);
-        rowMap.set(id, clone);
+        rowMap.set(id, app.rows[num + 1]);
 
-        for (let i = 0; i < clone.objects.length; i++) {
-            const cChoice = clone.objects[i];
+        for (let i = 0; i < app.rows[num + 1].objects.length; i++) {
+            const cChoice = app.rows[num + 1].objects[i];
 
             cChoice.id = generateObjectId(0, app.objectIdLength);
             cChoice.index = i;
@@ -531,6 +532,7 @@
                     }
                 }
             }
+
             if (cChoice.objectDesignGroups) {
                 for (let j = 0; j < cChoice.objectDesignGroups.length; j++) {
                     let dGroup = objectDesignMap.get(cChoice.objectDesignGroups[j]);

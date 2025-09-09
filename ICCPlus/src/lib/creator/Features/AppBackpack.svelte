@@ -96,11 +96,12 @@
         let clone: Row = JSON.parse(JSON.stringify(row));
 
         clone.id = id;
+        clone.index = num + 1;
         app.backpack.splice(num + 1, 0, clone);
-        rowMap.set(id, clone);
+        rowMap.set(id, app.backpack[num + 1]);
 
-        for (let i = 0; i < clone.objects.length; i++) {
-            const cChoice = clone.objects[i];
+        for (let i = 0; i < app.backpack[num + 1].objects.length; i++) {
+            const cChoice = app.backpack[num + 1].objects[i];
 
             cChoice.id = generateObjectId(0, app.objectIdLength);
             cChoice.index = i;
@@ -108,7 +109,7 @@
             delete cChoice.forcedActivated;
             delete cChoice.appliedDisChoices;
 
-            for (let j = 0; j < clone.scores.length; j++) {
+            for (let j = 0; j < cChoice.scores.length; j++) {
                 const score = cChoice.scores[j];
 
                 score.idx = generateScoreId(0, 5);
@@ -116,6 +117,12 @@
                 delete score.isActive;
                 delete score.setValue;
                 deleteDiscount(score);
+            }
+
+            for (let j = 0; j < cChoice.addons.length; j++) {
+                const addon = cChoice.addons[j];
+
+                addon.parentId = cChoice.id;
             }
 
             if (cChoice.backpackBtnRequirement) {
@@ -126,8 +133,6 @@
                 }
             }
 
-            choiceMap.set(cChoice.id, {choice: cChoice, row: clone});
-
             if (cChoice.groups) {
                 for (let j = 0; j < cChoice.groups.length; j++) {
                     let group = groupMap.get(cChoice.groups[j]);
@@ -137,6 +142,7 @@
                     }
                 }
             }
+
             if (cChoice.objectDesignGroups) {
                 for (let j = 0; j < cChoice.objectDesignGroups.length; j++) {
                     let dGroup = objectDesignMap.get(cChoice.objectDesignGroups[j]);
@@ -146,6 +152,8 @@
                     }
                 }
             }
+
+            choiceMap.set(cChoice.id, {choice: app.backpack[num + 1].objects[i], row: app.backpack[num + 1]});
         }
 
         if (clone.groups) {
@@ -168,7 +176,7 @@
             }
         }
 
-        for (let i = num + 1; i < app.rows.length; i++) {
+        for (let i = num + 1; i < app.backpack.length; i++) {
             app.backpack[i].index = i;
         }
     }

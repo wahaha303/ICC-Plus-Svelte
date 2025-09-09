@@ -609,6 +609,7 @@ export type Choice = {
     randomWeight?: number,
     useSeperateAddon?: boolean,
     useSlider?: boolean,
+    hideCounter?: boolean,
     templateStack?: {
         id: string,
         data: number

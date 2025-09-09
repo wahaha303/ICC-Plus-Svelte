@@ -1,14 +1,18 @@
 {#if !choice.hideCounterUntilSelect || choice.multipleUseVariable !== 0}
     <div class="d-row justify-space-around w-100">
-        <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterMinus}>
-            <i class="mdi mdi-minus" style={multiChoiceButton}></i>
-        </IconButton>
+        {#if !choice.hideCounter}
+            <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterMinus}>
+                <i class="mdi mdi-minus" style={multiChoiceButton}></i>
+            </IconButton>
+        {/if}
         <div translate="no" style={multiChoiceText}>
             {multipleNum}
         </div>
-        <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterPlus}>
-            <i class="mdi mdi-plus" style={multiChoiceButton}></i>
-        </IconButton>
+        {#if !choice.hideCounter}
+            <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterPlus}>
+                <i class="mdi mdi-plus" style={multiChoiceButton}></i>
+            </IconButton>
+        {/if}
     </div>
     {#if choice.useSlider}
         <div class="px-5 w-100">

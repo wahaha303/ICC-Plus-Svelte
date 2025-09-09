@@ -12,11 +12,15 @@ const BUILTIN_TAGS = new Set([
 ])
 
 const inlineTags = new Set([
-  'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'font', 'img'
+  'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 's', 'samp', 'small', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'font', 'img'
 ])
 
 const leafTags = new Set([
-  'img', 'iframe', 'br', 'hr', 'wbr', 'col', 'colgroup'
+  'img', 'br', 'hr', 'wbr', 'col'
+])
+
+const rubyTags = new Set([
+  'ruby', 'rb', 'rp', 'rt', 'rtc'
 ])
 
 function getAllAttributes(dom: HTMLElement): Record<string, string> {
@@ -49,16 +53,16 @@ function createAllAttributesAttr() {
 function createGenericNode(tag: string): Extension {
   const isInline = inlineTags.has(tag)
   const isLeaf = leafTags.has(tag)
+  const isRuby = rubyTags.has(tag)
 
   return Node.create({
     name: tag,
-    group: isInline ? 'inline' : 'block',
-    content: isInline ? 'text*' : 'inline*',
-    inline: isInline,
+    group: isInline || isRuby ? 'inline' : 'block',
+    content: isLeaf ? '' : (isInline && !isRuby ? 'text*' : 'inline*'),
+    inline: isInline || isRuby,
     atom: isLeaf,
     selectable: true,
     draggable: isLeaf,
-    ...(isLeaf ? {} : { content: isInline ? 'text*' : 'inline*' }),
 
     parseHTML() {
       return [{
@@ -125,7 +129,7 @@ export const CustomParagraph = Paragraph.extend({
       },
     ]
   },
-  
+
   renderHTML({ HTMLAttributes }) {
     return ['p', HTMLAttributes, 0]
   },

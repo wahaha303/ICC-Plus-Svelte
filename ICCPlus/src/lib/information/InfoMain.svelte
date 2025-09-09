@@ -172,8 +172,27 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.4.10 / ${getDate('2025-09-09T13:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where cloned rows did not function properly until reloading the project.
+
+        <span style="color: green">Choice</span>
+        - Added option to completely hide the counter when using the slider feature.
+        - Fixed issue where discount feature was not working correctly.
+
+        <span style="color: green">Build Form</span>
+        - Fixed issue where selection count for multi-select choices was not displayed.
+        
+        <span style="color: green">Export Project</span>
+        - Fixed issue where background image in choice function was not exported separately when exporting project as ZIP file.
+        `
+    }, {
+        open: false,
         title: `v2.4.9 / ${getDate('2025-09-07T15:00:00Z')}`,
-        text: `<span style="color: green">Viewer</span>
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where &lt;ruby&gt; tags did not work properly.
+        
+        <span style="color: green">Viewer</span>
         - Fixed issue where build form could be opened via right-clicking menu button even when Save/Load Build was disabled in Global Settings.
         
         <span style="color: green">Miscellaneous</span>

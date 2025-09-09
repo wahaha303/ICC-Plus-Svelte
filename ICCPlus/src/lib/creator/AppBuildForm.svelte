@@ -75,13 +75,23 @@
                     const row = cMap.row;
                     const choice = cMap.choice;
 
-                    if (row.id !== prevRowId) {
-                        if (prevRowId !== '') titles.push('\n');
-                        titles.push(`**${row.title}**\n`);
-                        titles.push(`${choice.title}`);
-                        prevRowId = row.id;
-                    } else {
-                        titles.push(`, ${choice.title}`);
+                    if (choice.title !== '') {
+                        if (row.id !== prevRowId) {
+                            if (prevRowId !== '') titles.push('\n');
+                            titles.push(`**${row.title !== '' ? row.title : row.debugTitle || ''}**\n`);
+                            if (choice.isSelectableMultiple) {
+                                titles.push(`${choice.title}(x${choice.multipleUseVariable})`);
+                            } else {
+                                titles.push(`${choice.title}`);
+                            }
+                            prevRowId = row.id;
+                        } else {
+                            if (choice.isSelectableMultiple) {
+                                titles.push(`, ${choice.title}(x${choice.multipleUseVariable})`);
+                            } else {
+                                titles.push(`, ${choice.title}`);
+                            }
+                        }
                     }
                 }
             }
@@ -91,7 +101,15 @@
                 let cMap = choiceMap.get(idArray[i]);
 
                 if (typeof cMap !== 'undefined') {
-                    titles.push(cMap.choice.title);
+                    const choice = cMap.choice;
+
+                    if (choice.title !== '') {
+                        if (choice.isSelectableMultiple) {
+                            titles.push(`${choice.title}(x${choice.multipleUseVariable})`);
+                        } else {
+                            titles.push(`${choice.title}`);
+                        }
+                    }
                 }
             }
             titleText = titles.join(', ');

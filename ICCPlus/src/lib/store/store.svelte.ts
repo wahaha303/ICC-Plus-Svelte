@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.4.9';
+export const appVersion = '2.4.10';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2451,7 +2451,7 @@ export function deselectDiscount(localChoice: Choice, targetChoice: Choice) {
                                 
                                 if (localChoice.useDiscountCount && score.appliedDiscount) {
                                     score.tmpDisScore = tmpDisScore - score.value;
-                                    score.isChangeDiscount = true;
+                                    if (targetChoice.isActive) score.isChangeDiscount = true;
                                     continue;
                                 }
                             } else {
@@ -2599,9 +2599,9 @@ export function deselectDiscount(localChoice: Choice, targetChoice: Choice) {
 
                 if (resultVal !== tmpDisScore && appliedDiscount) {
                     score.tmpDisScore = tmpDisScore - resultVal;
-                    score.isChangeDiscount = true;
+                    if (targetChoice.isActive) score.isChangeDiscount = true;
                 } else {
-                    score.isChangeDiscount = false;
+                    if (targetChoice.isActive) score.isChangeDiscount = false;
                 }
             }
         }
@@ -2649,7 +2649,7 @@ export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
                         
                             if (typeof score.discountScore !== 'undefined' && score.discountScore > discountVal) {
                                 score.tmpDisScore = score.discountScore - discountVal;
-                                score.isChangeDiscount = true;
+                                if (targetChoice.isActive) score.isChangeDiscount = true;
                                 aDiscount = {
                                     isStackable: false,
                                     discountedFrom: score.discountedFrom,
@@ -2690,7 +2690,7 @@ export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
                                 score.tmpDiscount.push(aDiscount);
                                 score.notStackableDiscount = false;
                             } else {
-                                score.isChangeDiscount = false;
+                                if (targetChoice.isActive) score.isChangeDiscount = false;
                                 discountedFrom.push(localChoice.id);
 
                                 if (localChoice.discountShow) {
@@ -2738,14 +2738,14 @@ export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
 
                         if (score.discountScore !== tmpDisScore) {
                             score.tmpDisScore = tmpDisScore - score.discountScore;
-                            score.isChangeDiscount = true;
+                            if (targetChoice.isActive) score.isChangeDiscount = true;
                         } else {
                             if (!score.appliedDiscount && localChoice.useDiscountCount && localChoice.discountCount) {
                                 if (typeof localChoice.appliedDisChoices === 'undefined') localChoice.appliedDisChoices = [];
                                 score.tmpDisScore = score.value - score.discountScore;
-                                score.isChangeDiscount = true;
+                                if (targetChoice.isActive) score.isChangeDiscount = true;
                             } else {
-                                score.isChangeDiscount = false;
+                                if (targetChoice.isActive) score.isChangeDiscount = false;
                             }
                         }
                     
@@ -2842,9 +2842,9 @@ export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
                 
                     if (typeof score.discountScore !== 'undefined' && score.discountScore !== tmpDisScore) {
                         score.tmpDisScore = tmpDisScore - score.discountScore;
-                        score.isChangeDiscount = true;
+                        if (targetChoice.isActive) score.isChangeDiscount = true;
                     } else {
-                        score.isChangeDiscount = false;
+                        if (targetChoice.isActive) score.isChangeDiscount = false;
                     }
                 }
             }
@@ -3897,7 +3897,6 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
         }
     }
 };
-const disChoiceSet = new Set<string>();
 function selectObject(str: string, newActivatedList: string[]) {
     let cStr = str.split('/IMG#');
     const strImg = cStr.length > 1 ? cStr[1] : '';
@@ -3939,7 +3938,6 @@ function selectObject(str: string, newActivatedList: string[]) {
                                     const dChoice = dRow.objects[j];
                                     selectDiscount(localChoice, dChoice);
                                     dList.add(dChoice.id);
-                                    disChoiceSet.add(dChoice.id);
                                 }
                             }
                         }
@@ -3951,7 +3949,6 @@ function selectObject(str: string, newActivatedList: string[]) {
                                 if (typeof cMap !== 'undefined') {
                                     const dChoice = cMap.choice;
                                     selectDiscount(localChoice, dChoice);
-                                    disChoiceSet.add(dChoice.id);
                                 }
                             }
                         }
@@ -3966,7 +3963,6 @@ function selectObject(str: string, newActivatedList: string[]) {
                                     if (typeof cMap !== 'undefined') {
                                         const dChoice = cMap.choice;
                                         selectDiscount(localChoice, dChoice);
-                                        disChoiceSet.add(dChoice.id);
                                     }
                                 }
                             }
@@ -4588,7 +4584,6 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                         const dChoice = dRow.objects[j];
                                         selectDiscount(localChoice, dChoice);
                                         dList.add(dChoice.id);
-                                        disChoiceSet.add(dChoice.id);
                                     }
                                 }
                             }
@@ -4600,7 +4595,6 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                     if (typeof cMap !== 'undefined') {
                                         const dChoice = cMap.choice;
                                         selectDiscount(localChoice, dChoice);
-                                        disChoiceSet.add(dChoice.id);
                                     }
                                 }
                             }
@@ -4615,7 +4609,6 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                                         if (typeof cMap !== 'undefined') {
                                             const dChoice = cMap.choice;
                                             selectDiscount(localChoice, dChoice);
-                                            disChoiceSet.add(dChoice.id);
                                         }
                                     }
                                 }
@@ -5179,23 +5172,6 @@ export function loadActivated(str: string) {
             }
         }
     }
-
-    for (let key of disChoiceSet) {
-        const cMap = choiceMap.get(key);
-
-        if (typeof cMap !== 'undefined') {
-            const aChoice = cMap.choice;
-
-            for (let i = 0; i < aChoice.scores.length; i++) {
-                const aScore = aChoice.scores[i];
-
-                delete aScore.isChangeDiscount;
-                delete aScore.tmpDisScore;
-            }
-        }
-    }
-
-    disChoiceSet.clear();
 };
 export function duplicateRow(localChoice: Choice, localRow: Row) {
     if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {

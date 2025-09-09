@@ -1,4 +1,4 @@
-<div class="row-{row.id}-bg text-center {!isEnabled ? 'hidden' : ''}" style={rowBody} bind:clientWidth={width}>
+<div class="row-{row.id}-bg text-center{!isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
     {#if isEnabled}
         <div class="row gx-0 row-{row.id}" style={row.title !== '' ? rowBackground : ''}>
             {#if row.template >= 4 || row.template === 1 || windowWidth <= 1280}
@@ -130,7 +130,7 @@
     import type { Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
-    const { row, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row:Row, windowWidth:number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
+    const { row, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row: Row, windowWidth: number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     
     let choiceRef = $state<any>();
     let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row));

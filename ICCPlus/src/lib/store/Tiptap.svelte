@@ -151,7 +151,7 @@
         exclude?: HTMLElement;
     };
 
-    let { data, dataProp, textarea = false, rows = 5, label }: { data: Choice | Row | Addon; dataProp: string; textarea?: boolean; rows?: number; label: string } = $props();
+    let { data, dataProp, textarea = false, rows = 5, label }: { data: Choice | Row | Addon, dataProp: string, textarea?: boolean, rows?: number, label: string } = $props();
 
 	let element = $state<HTMLElement>();
     let header = $state<HTMLElement>();

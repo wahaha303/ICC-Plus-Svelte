@@ -211,7 +211,6 @@
                                                         choice.numMultipleTimesPluss = 0;
                                                         choice.initMultipleTimesMinus = 0;
                                                         choice.isMultipleUseVariable = true;
-                                                        choice.useSlider = false;
                                                     } else {
                                                         delete choice.isSelectableMultiple;
                                                         delete choice.isMultipleUseVariable;
@@ -222,6 +221,7 @@
                                                         delete choice.initMultipleTimesMinus;
                                                         delete choice.allowSelectByClick;
                                                         delete choice.useSlider;
+                                                        delete choice.hideCounter;
                                                     }
                                                 }} />
                                                 {#snippet label()}
@@ -273,12 +273,25 @@
                                                     <Checkbox bind:checked={() => choice.useSlider ?? false, (e) => choice.useSlider = e} onchange={() => {
                                                         if (!choice.useSlider) {
                                                             delete choice.useSlider;
+                                                            delete choice.hideCounter;
                                                         }
                                                     }} />
                                                     {#snippet label()}
                                                         Enable Slider for Selection
                                                     {/snippet}
                                                 </FormField>
+                                                {#if choice.useSlider}
+                                                    <FormField class="col-12 m-1 p-0">
+                                                        <Checkbox bind:checked={() => choice.hideCounter ?? false, (e) => choice.hideCounter = e} onchange={() => {
+                                                            if (!choice.hideCounter) {
+                                                                delete choice.hideCounter;
+                                                            }
+                                                        }} />
+                                                        {#snippet label()}
+                                                            Hide Counter Completely
+                                                        {/snippet}
+                                                    </FormField>
+                                                {/if}
                                                 {#if !choice.isMultipleUseVariable}
                                                     <div class="col-12 m-1">The point type used here should only be used for this choice.</div>
                                                     <div class="col-12 m-1 px-2">
@@ -1403,7 +1416,7 @@
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''} w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
+            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
                     <div class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}

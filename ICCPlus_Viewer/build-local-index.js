@@ -23,10 +23,13 @@ const jsPath = match[1];
 
 html = html.replace(scriptTagRegex, '');
 
+const polyfillTag = `<script src="./js/polyfills.js"></script>`
+html = html.replace(/<\/head>/i, `  ${polyfillTag}\n  </head>`);
+
 const preloadTag = `<link href="${jsPath}" rel=preload as=script>`;
-html = html.replace(/<\/head>/i, `  ${preloadTag}\n</head>`);
+html = html.replace(/<\/head>/i, `  ${preloadTag}\n  </head>`);
 
 const normalScriptTag = `<script src="${jsPath}"></script>`;
-html = html.replace(/<\/body>/i, `  ${normalScriptTag}\n</body>`);
+html = html.replace(/<\/body>/i, `  ${normalScriptTag}\n  </body>`);
 
 fs.writeFileSync(indexPath, html, 'utf-8');

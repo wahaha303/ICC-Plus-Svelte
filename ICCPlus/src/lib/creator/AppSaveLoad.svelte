@@ -246,6 +246,14 @@
                             choice.image = addImage(path, choice.image, imgMap, zip);
                         }
 
+                        if (choice.changeBgImage && choice.bgImage && isDataURL(choice.bgImage)) {
+                            const mime = getMime(choice.bgImage);
+                            const ext = getExt(mime);
+                            const path = `images/R${i + 1}C${j + 1}_Change.${ext}`;
+
+                            choice.bgImage = addImage(path, choice.bgImage, imgMap, zip);
+                        }
+
                         if (typeof choice.addons !== 'undefined') {
                             for (let k = 0; k < choice.addons.length; k++) {
                                 const addon = choice.addons[k];
@@ -331,6 +339,14 @@
                                 const path = `images/BR${i + 1}C${j + 1}.${ext}`;
 
                                 choice.image = addImage(path, choice.image, imgMap, zip);
+                            }
+
+                            if (choice.changeBgImage && choice.bgImage && isDataURL(choice.bgImage)) {
+                                const mime = getMime(choice.bgImage);
+                                const ext = getExt(mime);
+                                const path = `images/R${i + 1}C${j + 1}_Change.${ext}`;
+
+                                choice.bgImage = addImage(path, choice.bgImage, imgMap, zip);
                             }
 
                             if (typeof choice.addons !== 'undefined') {

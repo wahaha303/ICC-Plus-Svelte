@@ -56,7 +56,6 @@
 	import { app, choiceMap, rowMap } from '$lib/store/store.svelte';
 	import type { Choice, Row } from '$lib/store/types';
 	import IconButton, { Icon } from '@smui/icon-button';
-    import { tick } from 'svelte';
 
     type DndItem = { id: string, debugTitle: string, title: string, objects: Choice[], open?: boolean };
     let { open, onclose, mainDiv }: { open: boolean; onclose: () => void; mainDiv: HTMLDivElement } = $props();

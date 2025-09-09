@@ -1,4 +1,4 @@
-<div class="row-{row.id}-bg text-center {!bCreatorMode && !isEnabled ? 'hidden' : ''}" style={rowBody} bind:clientWidth={width}>
+<div class="row-{row.id}-bg text-center{!bCreatorMode && !isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
     {#if bCreatorMode && (row.isEditModeOn || row.isSimpleEditMode)}
         <Card class="mt-n3">
             <CardContent class="p-0 mb-4">
@@ -429,12 +429,12 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor } from '$lib/store/store.svelte';
-    import type { Choice, Requireds, Row } from '$lib/store/types';
+    import type { Requireds, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { tick } from 'svelte';
     import Tiptap from '$lib/store/Tiptap.svelte';
 
-    const { row, bCreatorMode, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row:Row, bCreatorMode:boolean, windowWidth:number, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
+    const { row, bCreatorMode, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row: Row, bCreatorMode: boolean, windowWidth: number, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     const rowToolbarButtons = [{
         action: () => { createNewObject() },
         contextAction: (e: MouseEvent) => { e.preventDefault(); pasteObject(row, -1); (e.currentTarget as HTMLElement)?.blur(); },
