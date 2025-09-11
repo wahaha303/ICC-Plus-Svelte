@@ -273,7 +273,7 @@
             </CardContent>
         </Card>
     {:else if isEnabled}
-        <div class="row gx-0 row-{row.id}" class:row-edit-button__wrapper={app.useChoiceEditBtn && bCreatorMode} style={row.title !== '' ? rowBackground : ''}>
+        <div class="row gx-0 row-{row.id} row-{row.id}-header" class:row-edit-button__wrapper={app.useChoiceEditBtn && bCreatorMode} style={row.title !== '' ? rowBackground : ''}>
             {#if app.useChoiceEditBtn && bCreatorMode}
                 <div class="row-edit-button" style="width: auto;">
                     <IconButton onclickcapture={() => row.isSimpleEditMode = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
@@ -283,7 +283,7 @@
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || windowWidth <= 1280)}
                         {#if row.isButtonRow}
-                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -301,7 +301,7 @@
                     {/if}
                     {#if row.template === 5 && windowWidth > 1280}
                         {#if row.isButtonRow}
-                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -319,7 +319,7 @@
                     {/if}
                     {#if row.template === 4 && windowWidth > 1280}
                         {#if row.isButtonRow}
-                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -345,7 +345,7 @@
                     </div>
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}
@@ -359,7 +359,7 @@
                 {:else if row.template === 3}
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
                         {#if row.isButtonRow}
-                            <Button onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
+                            <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
                             </Button>
                         {:else if row.image}

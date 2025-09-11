@@ -135,6 +135,8 @@
     <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} />
 {:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.title !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
+{:else if dlgVariables.currentDialog === 'selectDialog' && typeof dlgVariables.choice !== 'undefined' && typeof dlgVariables.func !== 'undefined'}
+    <ObjectSelectDialog open={dlgVariables.currentDialog === 'selectDialog'} onclose={() => (dlgVariables.currentDialog = 'none')} submit={dlgVariables.func} changeNum={dlgVariables.choice.multipleUseVariable} minVal={dlgVariables.choice.numMultipleTimesMinus} maxVal={dlgVariables.choice.numMultipleTimesPluss} />
 {/if}
 <Tooltip />
 
@@ -154,6 +156,7 @@
     import DlgBackpack from './DlgBackpack.svelte';
 	import ImageUpload from '$lib/store/ImageUpload.svelte';
     import DlgCommon from './DlgCommon.svelte';
+    import ObjectSelectDialog from './Object/ObjectSelectDialog.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
 	import { get } from 'svelte/store';
 

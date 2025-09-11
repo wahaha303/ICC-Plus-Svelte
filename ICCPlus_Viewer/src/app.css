@@ -520,6 +520,9 @@ img {
 .picture-input input[type="file"] {
     display: none;
 }
+.text-prewrap {
+    white-space: pre-wrap;
+}
 @keyframes scrollText {
     0% {
         transform:translateX(150px)

@@ -5,7 +5,9 @@
   style="z-index: 9999;"
 >
   <div class="mdc-tooltip__surface">
-    {@html tooltipVariables.text}
+    {#key tooltipVariables.text}
+      {@html tooltipVariables.text}
+    {/key}
   </div>
 </div>
 

@@ -5,7 +5,7 @@
                 <i class="mdi mdi-minus" style={multiChoiceButton}></i>
             </IconButton>
         {/if}
-        <div translate="no" style={multiChoiceText}>
+        <div translate="no" style={multiChoiceText} onclickcapture={clickNumber}>
             {multipleNum}
         </div>
         {#if !choice.hideCounter}
@@ -24,7 +24,7 @@
 <script lang="ts">
     import IconButton from '@smui/icon-button';
     import type { Choice } from '$lib/store/types';
-    import { pointTypeMap } from '$lib/store/store.svelte';
+    import { pointTypeMap, dlgVariables } from '$lib/store/store.svelte';
     import Slider from '@smui/slider';
 
     const { isEnabled, multiChoiceButton, multiChoiceText, choice, selectedOneMore, selectedOneLess }: { isEnabled:boolean, multiChoiceButton:string, multiChoiceText:string, choice: Choice, selectedOneMore: () => void, selectedOneLess: () => void } = $props();
@@ -69,6 +69,25 @@
         }
         if (document.activeElement) {
             (document.activeElement as HTMLElement).blur();
+        }
+    }
+
+    function clickNumber(e: Event) {
+        if (isEnabled) {
+            dlgVariables.currentDialog = 'selectDialog';
+            dlgVariables.choice = choice;
+            dlgVariables.func = handleManually;
+        }
+    }
+
+    function handleManually(num: number) {
+        const loop = num - choice.multipleUseVariable;
+        for (let i = 0; i < Math.abs(loop); i++) {
+            if (loop > 0) {
+                selectedOneMore();
+            } else {
+                selectedOneLess();
+            }
         }
     }
 

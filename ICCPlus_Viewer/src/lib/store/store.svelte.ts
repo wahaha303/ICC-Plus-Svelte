@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.4.10';
+export const appVersion = '2.5.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1194,7 +1194,7 @@ export function getChoiceTitle(req: Requireds) {
             if (typeof cMap !== 'undefined') {
                 let thisChoice = cMap.choice;
 
-                return `${req.beforeText} ${id.length > 1 ? `${id[1]} ` : ''} ${thisChoice.title} ${req.afterText}`;
+                return `${req.beforeText}${id.length > 1 ? ` ${id[1]}` : ''} ${thisChoice.title} ${req.afterText}`;
             }
             break;
         }

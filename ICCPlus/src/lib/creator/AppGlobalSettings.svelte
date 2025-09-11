@@ -197,6 +197,14 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
+                                    <Switch bind:checked={() => app.useToolbarBtn ?? false, (e) => app.useToolbarBtn = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Use Toolbar Button to Add Row
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
                                     <Switch bind:checked={() => app.hideScoresUpdated?? false, (e) => app.hideScoresUpdated = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Hide 'Scores Updated On' Message
@@ -288,14 +296,6 @@
                                     }} />
                                     {#snippet label()}
                                         Show Background Music Player
-                                    {/snippet}
-                                </FormField>
-                            </div>
-                            <div class="col-12">
-                                <FormField>
-                                    <Switch bind:checked={() => app.useToolbarBtn ?? false, (e) => app.useToolbarBtn = e} color="secondary" class="switch-scale" />
-                                    {#snippet label()}
-                                        Use Toolbar Button to Add Row
                                     {/snippet}
                                 </FormField>
                             </div>

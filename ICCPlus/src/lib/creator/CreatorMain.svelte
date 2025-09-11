@@ -217,6 +217,8 @@
     <AppObjectList open={dlgVariables.currentDialog === 'appObjectList'} onclose={() => (dlgVariables.currentDialog = 'none')} row={dlgVariables.row} mainDiv={mainDiv} />
 {:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.title !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
+{:else if dlgVariables.currentDialog === 'selectDialog' && typeof dlgVariables.choice !== 'undefined' && typeof dlgVariables.func !== 'undefined'}
+    <ObjectSelectDialog open={dlgVariables.currentDialog === 'selectDialog'} onclose={() => (dlgVariables.currentDialog = 'none')} submit={dlgVariables.func} changeNum={dlgVariables.choice.multipleUseVariable} minVal={dlgVariables.choice.numMultipleTimesMinus} maxVal={dlgVariables.choice.numMultipleTimesPluss} />
 {/if}
 <Menu bind:this={menu} onSMUIMenuSurfaceClosed={removeAnchor} anchor={false} anchorElement={menuVariables.anchor || undefined} anchorCorner="BOTTOM_RIGHT" style={menuStyle}>
     <List>
@@ -265,6 +267,7 @@
 	import AppObjectList from './AppObjectList.svelte';
 	import AppGlobalSettings from './AppGlobalSettings.svelte';
     import DlgCommon from './DlgCommon.svelte';
+    import ObjectSelectDialog from './Object/ObjectSelectDialog.svelte';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
 

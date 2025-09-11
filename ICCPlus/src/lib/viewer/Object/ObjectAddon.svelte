@@ -1,4 +1,4 @@
-<div class="text-center" style={addonBackground}>
+<div class="text-center addon" style={addonBackground}>
     {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
         <div>
             {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}

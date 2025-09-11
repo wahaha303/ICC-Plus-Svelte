@@ -1,5 +1,5 @@
 <div style={pointBarText}>
-    <span class="d-flex align-items-center" style="{point.pointPrivateColorIsOn ? `color: ${point.startingSum >= 0 ? hexToRgba(point.privateColor) : hexToRgba(point.privateNegativeColor)}` : ''}">
+    <span class="d-flex text-prewrap align-items-center" style="{point.pointPrivateColorIsOn ? `color: ${point.startingSum >= 0 ? hexToRgba(point.privateColor) : hexToRgba(point.privateNegativeColor)}` : ''}">
         {#if point.iconIsOn}
             {#if point.negativeIconIsOn && point.startingSum < 0}
                 {#if !point.negativeImageOnSide && !point.negativeImageSidePlacement}
@@ -23,7 +23,7 @@
                 {/if}
             {/if}
         {/if}
-        <span translate="no" class="mx-1" style={pointSumText}>{point.startingSum % 1 === 0 ? point.startingSum : parseFloat(point.startingSum.toFixed(typeof point.decimalPlaces !== 'undefined' ? point.decimalPlaces : 2))}</span>
+        <span translate="no" style={pointSumText}>{point.startingSum % 1 === 0 ? point.startingSum : parseFloat(point.startingSum.toFixed(typeof point.decimalPlaces !== 'undefined' ? point.decimalPlaces : 2))}</span>
         {#if point.iconIsOn}
             {#if point.negativeIconIsOn && point.startingSum < 0}
                 {#if !point.negativeImageOnSide && point.negativeImageSidePlacement}
@@ -69,8 +69,7 @@
         const image = isNegative ? point.negativeImage : point.image;
         const width = isNegative ? point.negativeIconWidth : point.iconWidth;
         const height = isNegative ? point.negativeIconHeight : point.iconHeight;
-        const leftMargin = isNegative ? (point.negativeImageOnSide && point.negativeImageSidePlacement) || (point.negativeImageOnSide && !point.negativeImageSidePlacement) : (point.imageOnSide && point.imageSidePlacement) || (point.imageOnSide && !point.imageSidePlacement);
-        return image ? `<img src="${image}" class="${leftMargin ? 'ms-1' : 'me-1'}" style="width: ${width}px; height: ${height}px;" alt="">` : '';
+        return image ? `<img src="${image}" class="mx-1" style="width: ${width}px; height: ${height}px;" alt="">` : '';
     }
 
 </script>

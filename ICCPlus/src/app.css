@@ -669,6 +669,9 @@ img {
 .picture-input input[type="file"] {
     display: none;
 }
+.text-prewrap {
+    white-space: pre-wrap;
+}
 #dnd-action-dragged-el {
     opacity: 0.5 !important;
     font-size: 1rem !important;

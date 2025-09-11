@@ -1,27 +1,18 @@
 {#if isPointtypeActivated() && checkRequirements(score.requireds)}
     <div class="row m-0">
         <div class="col-12 p-0 m-0 d-flex align-items-center justify-center" style={scoreText}>
-            <p class="m-0 d-flex align-items-center">
-                {#if scoreIcon}
-                    {#if iconBeforeTextL}
-                        <img src={iconImage} class="me-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">
+            {#key scoreWholeText}
+                <p class="m-0 d-flex text-prewrap align-items-center">
+                    {#if scoreIcon}
+                        {#if iconBeforeTextL}<img src={iconImage} class="me-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">{/if}
+                        {@html DOMPurify.sanitize(scoreBeforeText, sanitizeArg)}{#if iconBeforeTextR}<img src={iconImage} class="mx-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">{/if}
+                        {@html DOMPurify.sanitize(scoreValueText, sanitizeArg)}{#if iconAfterTextL}<img src={iconImage} class="mx-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">{/if}
+                        {@html DOMPurify.sanitize(scoreAfterText, sanitizeArg)}{#if iconAfterTextR}<img src={iconImage} class="ms-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">{/if}
+                    {:else}
+                        {@html DOMPurify.sanitize(`${scoreBeforeText} ${scoreValueText} ${scoreAfterText}`, sanitizeArg)}
                     {/if}
-                    {@html DOMPurify.sanitize(scoreBeforeText, sanitizeArg)}
-                    {#if iconBeforeTextR}
-                        <img src={iconImage} class="mx-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">
-                    {/if}
-                    {@html DOMPurify.sanitize(scoreValueText, sanitizeArg)}
-                    {#if iconAfterTextL}
-                        <img src={iconImage} class="mx-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">
-                    {/if}
-                    {@html DOMPurify.sanitize(scoreAfterText, sanitizeArg)}
-                    {#if iconAfterTextR}
-                        <img src={iconImage} class="ms-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">
-                    {/if}
-                {:else}
-                    {@html DOMPurify.sanitize(`${scoreBeforeText} ${scoreValueText} ${scoreAfterText}`, sanitizeArg)}
-                {/if}
-            </p>
+                </p>
+            {/key}
         </div>
     </div>
 {/if}
@@ -61,7 +52,7 @@
     });
     let scoreAfterText = $derived.by(() => {
         let text = [];
-        if (score.discountIsOn && score.discountShow && typeof score.discountAfterText !== 'undefined') {
+        if (score.discountIsOn && score.discountShow && score.discountAfterText) {
             if (score.appliedDiscount) {
                 if (!score.replaceText) text.push(`${score.afterText}`);
                 text.push(`${score.discountAfterText}`);
@@ -99,7 +90,7 @@
     });
     let scoreBeforeText = $derived.by(() => {
         let text = [];
-        if (score.discountIsOn && score.discountShow && typeof score.discountBeforeText !== 'undefined') {
+        if (score.discountIsOn && score.discountShow && score.discountBeforeText) {
             if (score.appliedDiscount) {
                 if (!score.replaceText) text.push(`${score.beforeText}`);
                 text.push(`${score.discountBeforeText}`);
@@ -167,9 +158,9 @@
             if (score.isRandom && !score.setValue) {
                 if (typeof score.maxValue !== 'undefined') {
                     if (score.maxValue < 0) {
-                        return ` ${scoreMaxValue} ~ ${scoreMinValue} `;
+                        return `${scoreMaxValue} ~ ${scoreMinValue}`;
                     } else {
-                        return ` ${scoreMinValue} ~ ${scoreMaxValue} `;
+                        return `${scoreMinValue} ~ ${scoreMaxValue}`;
                     }
                 }
             }
@@ -181,9 +172,9 @@
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
-                return ` ${prefix}${value} `;
+                return `${prefix}${value}`;
             }
-            return ` ${value} `;
+            return `${value}`;
         }
         return '';
     });
@@ -301,6 +292,7 @@
     let iconBeforeTextR = $derived(!imageSidePlacement && imageOnSide);
     let iconAfterTextL = $derived(imageSidePlacement && !imageOnSide);
     let iconAfterTextR = $derived(imageSidePlacement && imageOnSide);
+    let scoreWholeText = $derived(`${scoreBeforeText} ${scoreValueText} ${scoreAfterText}`);
 
     function isPointtypeActivated() {
         if (score.showScore) {

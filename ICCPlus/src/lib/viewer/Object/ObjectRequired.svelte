@@ -2,13 +2,13 @@
     {#if required.type === 'gid'}
         {#each globalRequireds as globalRequired}
             {#if globalRequired.showRequired}
-                <div class="col req" style={scoreText}>
+                <div class="col req text-prewrap" style={scoreText}>
                     {@html DOMPurify.sanitize(replaceText(getChoiceTitle(globalRequired)), sanitizeArg)}
                 </div>
             {/if}
         {/each}
     {:else}
-        <div class="col req" style={scoreText}>
+        <div class="col req text-prewrap" style={scoreText}>
             {@html DOMPurify.sanitize(replaceText(getChoiceTitle(required)), sanitizeArg)}
         </div>
     {/if}

@@ -21,35 +21,39 @@
         {#if active === 'Changelog'}
             <Paper role="tabpanel" variant="unelevated">
                 <Content>
-                    <div class="col pb-2">
-                        <div class="d-row align-items-center justify-end">
-                            <IconButton onclick={() => logCurPage > 1 ? logCurPage -= 1 : logCurPage = logPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
-                            <span class="list-text px-2">Page {logCurPage}</span>
-                            <IconButton onclick={() => logCurPage < logPageLeng ? logCurPage += 1 : logCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                    {#key logCurPage}
+                        <div class="col pb-2">
+                            <div class="d-row align-items-center justify-end">
+                                <IconButton onclick={() => logCurPage > 1 ? logCurPage -= 1 : logCurPage = logPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
+                                <span class="list-text px-2">Page {logCurPage}</span>
+                                <IconButton onclick={() => logCurPage < logPageLeng ? logCurPage += 1 : logCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                            </div>
                         </div>
-                    </div>
-                    <Accordion>
-                        {#each logSlots as log, i}
-                            <InfoPanel title={log.title} text={log.text} open={log.open} />
-                        {/each}
-                    </Accordion>
+                        <Accordion>
+                            {#each logSlots as log, i}
+                                <InfoPanel title={log.title} text={log.text} open={log.open} />
+                            {/each}
+                        </Accordion>
+                    {/key}
                 </Content>
             </Paper>
         {:else if active === 'QnA'}
             <Paper role="tabpanel" variant="unelevated">
                 <Content>
-                    <div class="col pb-2">
-                        <div class="d-row align-items-center justify-end">
-                            <IconButton onclick={() => qnaCurPage > 1 ? qnaCurPage -= 1 : qnaCurPage = qnaPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
-                            <span class="list-text px-2">Page {qnaCurPage}</span>
-                            <IconButton onclick={() => qnaCurPage < qnaPageLeng ? qnaCurPage += 1 : qnaCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                    {#key qnaCurPage}
+                        <div class="col pb-2">
+                            <div class="d-row align-items-center justify-end">
+                                <IconButton onclick={() => qnaCurPage > 1 ? qnaCurPage -= 1 : qnaCurPage = qnaPageLeng}><i class="mdi mdi-menu-left"></i></IconButton>
+                                <span class="list-text px-2">Page {qnaCurPage}</span>
+                                <IconButton onclick={() => qnaCurPage < qnaPageLeng ? qnaCurPage += 1 : qnaCurPage = 1}><i class="mdi mdi-menu-right"></i></IconButton>
+                            </div>
                         </div>
-                    </div>
-                    <Accordion>
-                        {#each qnaSlots as qna}
-                            <InfoPanel title={qna.title} text={qna.text} />
-                        {/each}
-                    </Accordion>
+                        <Accordion>
+                            {#each qnaSlots as qna}
+                                <InfoPanel title={qna.title} text={qna.text} />
+                            {/each}
+                        </Accordion>
+                    {/key}
                 </Content>
             </Paper>
         {/if}
@@ -172,6 +176,27 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.0 / ${getDate('2025-09-11T12:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Assigned CSS class named 'row-button' to Row Button.
+
+        <span style="color: green">Choice</span>
+        - Enabled manual input of selection count for multi-select choices by clicking the number.
+        - Fixed issue where enabling the overlay option in filter design caused choice size to shrink.
+        - Fixed issue where spacing between score texts was not applied correctly.
+
+        <span style="color: green">Requirement</span>
+        - Fixed issue where spacing between requirement texts was not applied correctly.
+
+        <span style="color: green">Point Bar</span>
+        - Fixed issue where spacing between point texts was not applied correctly.
+
+        <span style="color: green">Custom CSS</span>
+        - Allow inserting tab character in input field using Tab key.
+        - Display class names assigned to rows and choices as placeholder text in empty input field.
+        `
+    }, {
+        open: false,
         title: `v2.4.10 / ${getDate('2025-09-09T13:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where cloned rows did not function properly until reloading the project.
