@@ -10,7 +10,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={row.imageSourceTooltip} oncontextmenu={copyTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -26,7 +26,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={row.imageSourceTooltip} oncontextmenu={copyTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -44,7 +44,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={row.imageSourceTooltip} oncontextmenu={copyTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -70,7 +70,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={row.imageSourceTooltip} oncontextmenu={copyTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -84,7 +84,7 @@
                             </Button>
                         {:else if row.image}
                             {#if row.imageSourceTooltip}
-                                <img use:tooltip={row.imageSourceTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={row.imageSourceTooltip} oncontextmenu={copyTooltip} src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={row.image} style={rowImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -126,7 +126,7 @@
     import AppObject from './AppObject.svelte';
     import Button, { Label } from '@smui/button';
     import DOMPurify from 'dompurify';
-    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap } from '$lib/store/store.svelte';
+    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap, snackbarVariables } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
@@ -428,5 +428,17 @@
                 }
             }
         }
+    }
+
+    function copyTooltip(e: Event) {
+        e.preventDefault();
+        navigator.clipboard.writeText(row.imageSourceTooltip!).then(() => {
+            snackbarVariables.labelText = 'Tooltip copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        }).catch(() => {
+            console.log(row.imageSourceTooltip);
+            snackbarVariables.labelText = 'Tooltip text logged to developer console.';
+            snackbarVariables.isOpen = true;
+        });
     }
 </script>

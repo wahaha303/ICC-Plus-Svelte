@@ -5,7 +5,7 @@
                 <IconButton onclickcapture={moveScoreUp}><i class="mdi mdi-chevron-up"></i></IconButton>
             </Wrapper>
             <div class="d-flex">
-                <Wrapper text="Create New Reqruirement">
+                <Wrapper text="Create New Requirement">
                     <IconButton onclickcapture={() => {dlgVariables.data = score; dlgVariables.currentDialog = 'appRequirement'}} ><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Score">
@@ -366,7 +366,7 @@
     });
     let checkNegative = $derived.by(() => {
         if (score.discountShow) {
-            return (typeof score.discountScore !== 'undefined' ? score.discountScore : score.value) < 0;
+            return (typeof score.discountScore !== 'undefined' && (score.appliedDiscount || discountFlags.isWithinCount || discountFlags.isSimple) ? score.discountScore : score.value) < 0;
         }
         return score.value < 0;
     });

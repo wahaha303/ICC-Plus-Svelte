@@ -5,7 +5,7 @@
                 <IconButton onclickcapture={moveReqLeft} size="mini"><i class="mdi mdi-chevron-left"></i></IconButton>
             </Wrapper>
             <div class="d-flex">
-                <Wrapper text="Create New Reqruirement">
+                <Wrapper text="Create New Requirement">
                     <IconButton onclickcapture={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Requirement">

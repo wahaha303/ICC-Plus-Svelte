@@ -5,7 +5,7 @@
                 <IconButton onclickcapture={moveAddonUp}><i class="mdi mdi-chevron-up"></i></IconButton>
             </Wrapper>
             <div class="d-flex">
-                <Wrapper text="Create New Reqruirement">
+                <Wrapper text="Create New Requirement">
                     <IconButton onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'}}><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Addon">
@@ -98,7 +98,7 @@
             <div>
                 {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                        <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
                         <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {/if}
@@ -125,7 +125,7 @@
                 {/if}
                 {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                        <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
                         <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {/if}
@@ -137,7 +137,7 @@
                 {/if}
                 {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
-                        <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                        <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
                         <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {/if}
@@ -149,7 +149,7 @@
                     <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                         {#if addon.image && !row?.addonImageRemoved}
                             {#if addon.imageSourceTooltip}
-                                <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -209,7 +209,7 @@
                     <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                         {#if addon.image && !row?.addonImageRemoved}
                             {#if addon.imageSourceTooltip}
-                                <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -554,4 +554,15 @@
         }
     }
 
+    function copyTooltip(e: Event) {
+        e.preventDefault();
+        navigator.clipboard.writeText(addon.imageSourceTooltip).then(() => {
+            snackbarVariables.labelText = 'Tooltip copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        }).catch(() => {
+            console.log(addon.imageSourceTooltip);
+            snackbarVariables.labelText = 'Tooltip text logged to developer console.';
+            snackbarVariables.isOpen = true;
+        });
+    }
 </script>

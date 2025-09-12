@@ -176,6 +176,18 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.1 / ${getDate('2025-09-12T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Allow copying tooltip text to clipboard by right-clicking on images with tooltips.
+        - Fixed issue where discount features and multiple conditional scores did not apply correctly when used together.
+        - Fixed issue where counter could not be set to 0 with slider when used with 'Allow First Selection by Clicking' option.
+        - Fixed issue where score sign was not displayed correctly when sign was reversed due to discount.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed typo in 'Create New Requirement' tooltip.
+        `
+    }, {
+        open: false,
         title: `v2.5.0 / ${getDate('2025-09-11T12:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Assigned CSS class named 'row-button' to Row Button.

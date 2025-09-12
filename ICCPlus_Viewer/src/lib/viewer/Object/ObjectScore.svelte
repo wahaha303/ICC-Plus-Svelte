@@ -214,7 +214,7 @@
     });
     let checkNegative = $derived.by(() => {
         if (score.discountShow) {
-            return (typeof score.discountScore !== 'undefined' ? score.discountScore : score.value) < 0;
+            return (typeof score.discountScore !== 'undefined' && (score.appliedDiscount || discountFlags.isWithinCount || discountFlags.isSimple) ? score.discountScore : score.value) < 0;
         }
         return score.value < 0;
     });

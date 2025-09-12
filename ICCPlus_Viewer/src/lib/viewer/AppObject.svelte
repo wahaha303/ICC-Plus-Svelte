@@ -13,7 +13,7 @@
                         {/if}
                         {#if (choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
                             {#if choice.imageSourceTooltip}
-                                <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
                                 <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {/if}
@@ -45,7 +45,7 @@
                             {/if}
                             {#if choice.template === 5 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -60,7 +60,7 @@
                             {/if}
                             {#if choice.template === 4 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -84,7 +84,7 @@
                         <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
                             {#if choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -202,7 +202,7 @@
                         <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
                             {#if choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
-                                    <img use:tooltip={choice.imageSourceTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
                                     <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {/if}
@@ -803,6 +803,8 @@
                 const aRow = cMap.row;
                 const aChoice = cMap.choice;
                 const thisTmpScores = new SvelteMap<string, number>();
+                const addCountSet = new Set<Choice>();
+                const removeCountSet = new Set<Choice>();
                 let disChoices = new Set<Choice>();
                 let isChanged = false;
                 let isRevoked = false;
@@ -812,7 +814,7 @@
                     if (!aScore.isNotRecalculatable) {
                         const point = pointTypeMap.get(aScore.id);
                         if (typeof point !== 'undefined') {
-                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined') {
+                            if (localChoice.discountOther && aScore.isChangeDiscount && aScore.isActive && typeof aScore.tmpDisScore !== 'undefined') {
                                 if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && localChoice.appliedDisChoices)) {
                                     const mul = aChoice.multipleUseVariable;
                                     let remainDiscount = false;
@@ -911,6 +913,7 @@
                                             if (beforeDeselected !== afterDeselected) {
                                                 let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
+                                                let isApplied = false;
                                                 if (beforeDeselected) {
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
@@ -930,6 +933,7 @@
                                                                     point.startingSum += scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
                                                                     aScore.isActiveMul[l] = false;
+                                                                    if (!isApplied) isApplied = true;
                                                                 }
                                                             }
                                                         }
@@ -942,6 +946,25 @@
                                                                 point.startingSum += scoreVal;
                                                                 thisTmpScores.set(aScore.id, scoreVal);
                                                                 delete aScore.isActive;
+                                                                isApplied = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (isApplied && aScore.discountIsOn && aScore.appliedDiscount && aScore.discountedFrom) {
+                                                        for (let l = 0; l < aScore.discountedFrom.length; l++) {
+                                                            const dcMap = choiceMap.get(aScore.discountedFrom[l]);
+
+                                                            if (typeof dcMap !== 'undefined') {
+                                                                const dChoice = dcMap.choice;
+
+                                                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && dChoice.appliedDisChoices && dChoice.appliedDisChoices.indexOf(aChoice.id) !== -1) {
+                                                                    delete aScore.appliedDiscount;
+                                                                    removeCountSet.add(dChoice);
+                                                                    break;
+                                                                } else {
+                                                                    delete aScore.appliedDiscount;
+                                                                    break;
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -964,6 +987,7 @@
                                                                     point.startingSum -= scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
                                                                     aScore.isActiveMul[l] = true;
+                                                                    if (!isApplied) isApplied = true;
                                                                 }
                                                             }
                                                         }
@@ -976,6 +1000,29 @@
                                                                 point.startingSum -= scoreVal;
                                                                 thisTmpScores.set(aScore.id, scoreVal);
                                                                 aScore.isActive = true;
+                                                                isApplied = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (isApplied && aScore.discountIsOn && !aScore.appliedDiscount && aScore.discountedFrom) {
+                                                        for (let l = 0; l < aScore.discountedFrom.length; l++) {
+                                                            const dcMap = choiceMap.get(aScore.discountedFrom[l]);
+
+                                                            if (typeof dcMap !== 'undefined') {
+                                                                const dChoice = dcMap.choice;
+
+                                                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                                                    const count = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable && dChoice.stackableDiscount ? dChoice.discountCount * dChoice.multipleUseVariable : dChoice.discountCount;
+                                                                    if (!dChoice.appliedDisChoices) dChoice.appliedDisChoices = [];
+                                                                    if (count > dChoice.appliedDisChoices.length || dChoice.appliedDisChoices.indexOf(aChoice.id) !== -1) {
+                                                                        aScore.appliedDiscount = true;
+                                                                        addCountSet.add(dChoice);
+                                                                        break;
+                                                                    }
+                                                                } else {
+                                                                    aScore.appliedDiscount = true;
+                                                                    break;
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -1005,6 +1052,24 @@
                 if (isRevoked && localChoice.appliedDisChoices && idx !== -1) {
                     localChoice.appliedDisChoices.splice(idx, 1);
                 }
+                if (removeCountSet.size > 0) {
+                    removeCountSet.forEach((dChoice) => {
+                        if (dChoice.appliedDisChoices) {
+                            if (!dChoice.scores.some(score => score.appliedDiscount)) {
+                                const index = dChoice.appliedDisChoices.indexOf(aChoice.id);
+
+                                if (index !== -1) dChoice.appliedDisChoices.splice(index, 1);
+                            }
+                        }
+                    });
+                }
+                if (addCountSet.size > 0) {
+                    addCountSet.forEach((dChoice) => {
+                        if (dChoice.appliedDisChoices) {
+                            if (dChoice.appliedDisChoices.indexOf(aChoice.id) === -1) dChoice.appliedDisChoices.push(aChoice.id);
+                        }
+                    });
+                }
                 if (isChanged) {
                     scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
                     deselectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores);
@@ -1033,6 +1098,8 @@
                 const aRow = cMap.row;
                 const aChoice = cMap.choice;
                 const thisTmpScores = new SvelteMap<string, number>();
+                const addCountSet = new Set<Choice>();
+                const removeCountSet = new Set<Choice>();
                 let isDiscounted = false;
                 let isChanged = false;
                 if (localChoice.useDiscountCount && !localChoice.appliedDisChoices) localChoice.appliedDisChoices = [];
@@ -1041,7 +1108,7 @@
                     if (!aScore.isNotRecalculatable) {
                         const point = pointTypeMap.get(aScore.id);
                         if (typeof point !== 'undefined') {
-                            if (localChoice.discountOther && aScore.isChangeDiscount && typeof aScore.tmpDisScore !== 'undefined' && aChoice.id !== localChoice.id) {
+                            if (localChoice.discountOther && aScore.isChangeDiscount && aScore.isActive && typeof aScore.tmpDisScore !== 'undefined' && aChoice.id !== localChoice.id) {
                                 const mul = aChoice.multipleUseVariable;
                                 const count = localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable && localChoice.stackableDiscount && localChoice.discountCount ? localChoice.discountCount * localChoice.multipleUseVariable : localChoice.discountCount;
 
@@ -1107,6 +1174,7 @@
                                             if (beforeSelected !== afterSelected) {
                                                 let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
+                                                let isApplied = false;
                                                 if (beforeSelected) {
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
@@ -1126,6 +1194,7 @@
                                                                     point.startingSum += scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
                                                                     aScore.isActiveMul[l] = false;
+                                                                    if (!isApplied) isApplied = true;
                                                                 }
                                                             }
                                                         }
@@ -1138,6 +1207,25 @@
                                                                 point.startingSum += scoreVal;
                                                                 thisTmpScores.set(aScore.id, scoreVal);
                                                                 delete aScore.isActive;
+                                                                isApplied = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (isApplied && aScore.discountIsOn && aScore.appliedDiscount && aScore.discountedFrom) {
+                                                        for (let l = 0; l < aScore.discountedFrom.length; l++) {
+                                                            const dcMap = choiceMap.get(aScore.discountedFrom[l]);
+
+                                                            if (typeof dcMap !== 'undefined') {
+                                                                const dChoice = dcMap.choice;
+
+                                                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && dChoice.appliedDisChoices && dChoice.appliedDisChoices.indexOf(aChoice.id) !== -1) {
+                                                                    delete aScore.appliedDiscount;
+                                                                    removeCountSet.add(dChoice);
+                                                                    break;
+                                                                } else {
+                                                                    delete aScore.appliedDiscount;
+                                                                    break;
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -1160,6 +1248,7 @@
                                                                     point.startingSum -= scoreVal;
                                                                     thisTmpScores.set(aScore.id, scoreVal);
                                                                     aScore.isActiveMul[l] = true;
+                                                                    if (!isApplied) isApplied = true;
                                                                 }
                                                             }
                                                         }
@@ -1172,6 +1261,29 @@
                                                                 point.startingSum -= scoreVal;
                                                                 thisTmpScores.set(aScore.id, scoreVal);
                                                                 aScore.isActive = true;
+                                                                isApplied = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    if (isApplied && aScore.discountIsOn && !aScore.appliedDiscount && aScore.discountedFrom) {
+                                                        for (let l = 0; l < aScore.discountedFrom.length; l++) {
+                                                            const dcMap = choiceMap.get(aScore.discountedFrom[l]);
+
+                                                            if (typeof dcMap !== 'undefined') {
+                                                                const dChoice = dcMap.choice;
+
+                                                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
+                                                                    const count = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable && dChoice.stackableDiscount ? dChoice.discountCount * dChoice.multipleUseVariable : dChoice.discountCount;
+                                                                    if (!dChoice.appliedDisChoices) dChoice.appliedDisChoices = [];
+                                                                    if (count > dChoice.appliedDisChoices.length || dChoice.appliedDisChoices.indexOf(aChoice.id) !== -1) {
+                                                                        aScore.appliedDiscount = true;
+                                                                        addCountSet.add(dChoice);
+                                                                        break;
+                                                                    }
+                                                                } else {
+                                                                    aScore.appliedDiscount = true;
+                                                                    break;
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -1190,6 +1302,24 @@
                 }
                 if (isDiscounted && localChoice.appliedDisChoices) {
                     if (localChoice.appliedDisChoices.indexOf(aChoice.id) === -1) localChoice.appliedDisChoices.push(aChoice.id);
+                }
+                if (removeCountSet.size > 0) {
+                    removeCountSet.forEach((dChoice) => {
+                        if (dChoice.appliedDisChoices) {
+                            if (!dChoice.scores.some(score => score.appliedDiscount)) {
+                                const index = dChoice.appliedDisChoices.indexOf(aChoice.id);
+
+                                if (index !== -1) dChoice.appliedDisChoices.splice(index, 1);
+                            }
+                        }
+                    });
+                }
+                if (addCountSet.size > 0) {
+                    addCountSet.forEach((dChoice) => {
+                        if (dChoice.appliedDisChoices) {
+                            if (dChoice.appliedDisChoices.indexOf(aChoice.id) === -1) dChoice.appliedDisChoices.push(aChoice.id);
+                        }
+                    });
                 }
                 if (isChanged) {
                     scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
@@ -1243,7 +1373,7 @@
                 if (e && e.target) {
                     const target = e.target as HTMLElement;
 
-                    if (target.classList.contains('counter-icons') || target.classList.contains('mdi-plus')) {
+                    if (target.classList.contains('counter-icons') || target.classList.contains('mdi-plus') || target.classList.contains('mdi-minus') || target.classList.contains('mdc-slider')) {
                         return;
                     }
                 }
@@ -3895,5 +4025,17 @@
                 }
             }
         }
+    }
+
+    function copyTooltip(e: Event) {
+        e.preventDefault();
+        navigator.clipboard.writeText(choice.imageSourceTooltip).then(() => {
+            snackbarVariables.labelText = 'Tooltip copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        }).catch(() => {
+            console.log(choice.imageSourceTooltip);
+            snackbarVariables.labelText = 'Tooltip text logged to developer console.';
+            snackbarVariables.isOpen = true;
+        });
     }
 </script>

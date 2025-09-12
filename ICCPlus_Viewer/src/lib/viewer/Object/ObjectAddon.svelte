@@ -3,7 +3,7 @@
         <div>
             {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
-                    <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                    <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
@@ -30,7 +30,7 @@
             {/if}
             {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
-                    <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                    <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
@@ -42,7 +42,7 @@
             {/if}
             {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
-                    <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                    <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
@@ -54,7 +54,7 @@
                 <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                     {#if addon.image && !row.addonImageRemoved}
                         {#if addon.imageSourceTooltip}
-                            <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                            <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {:else}
                             <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {/if}
@@ -114,7 +114,7 @@
                 <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                     {#if addon.image && !row.addonImageRemoved}
                         {#if addon.imageSourceTooltip}
-                            <img use:tooltip={addon.imageSourceTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                            <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {:else}
                             <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {/if}
@@ -128,7 +128,7 @@
 <script lang="ts">
     import DOMPurify from 'dompurify';
     import ObjectRequired from './ObjectRequired.svelte';
-    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba } from '$lib/store/store.svelte';
+    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import ObjectScore from './ObjectScore.svelte';
@@ -409,4 +409,15 @@
         return `font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
     });
 
+    function copyTooltip(e: Event) {
+        e.preventDefault();
+        navigator.clipboard.writeText(addon.imageSourceTooltip).then(() => {
+            snackbarVariables.labelText = 'Tooltip copied to clipboard.';
+            snackbarVariables.isOpen = true;
+        }).catch(() => {
+            console.log(addon.imageSourceTooltip);
+            snackbarVariables.labelText = 'Tooltip text logged to developer console.';
+            snackbarVariables.isOpen = true;
+        });
+    }
 </script>
