@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.5.1';
+export const appVersion = '2.5.2';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5848,7 +5848,7 @@ function initPrivateStyling(data: any, isRow: boolean) {
 export async function loadFromDisk(valueTypeFiles: FileList | null) {
     if (valueTypeFiles) {
         const file = valueTypeFiles[0];
-        const ext = file.type === 'application/json' ? 'json' : file.type === 'application/x-zip-compressed' ? 'zip' : 'error';
+        const ext = file.type === 'application/json' ? 'json' : (file.type === 'application/x-zip-compressed' || file.type === 'application/zip' || file.name.endsWith('.zip')) ? 'zip' : 'error';
         const reader = new FileReader;
         
         snackbarVariables.labelText = 'Loading data...';

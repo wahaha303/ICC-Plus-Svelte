@@ -176,6 +176,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.2 / ${getDate('2025-09-15T14:00:00Z')}`,
+        text: `<span style="color: green">Miscellaneous</span>
+        - Fixed issue where cursor moved to beginning of input field when deleting decimal point.
+        - Fixed issue where project files compressed as ZIP could not be read in some browsers.
+        `
+    }, {
+        open: false,
         title: `v2.5.1 / ${getDate('2025-09-12T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Allow copying tooltip text to clipboard by right-clicking on images with tooltips.

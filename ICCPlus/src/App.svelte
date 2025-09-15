@@ -11,12 +11,12 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2025-09-12T14:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2025-09-15T14:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
                 {#each menuComponentButtons as _undefined, i}
-                    <div class="col-12 {i === 0 ? 'mt-0' : ''}">
+                    <div class="col-12{i === 0 ? ' mt-0' : ''}">
                         <Button onclickcapture={() => {currentComponent.value = menuComponentButtons[i].component; document.body.classList.remove('mdc-dialog-scroll-lock');}} variant="raised">
                             <Label>{menuComponentButtons[i].text}</Label>
                         </Button>

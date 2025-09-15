@@ -43,7 +43,7 @@
                                                 <Textfield bind:value={app.rowDesignGroups![row.index].name} label="Name" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <Textfield bind:value={app.rowDesignGroups![row.index].activatedId} label="Id Needed To Show" variant="filled" />
+                                                <Textfield bind:value={app.rowDesignGroups![row.index].activatedId} label="Id Needed to Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
                                                 <CustomChipInput acValue={app.rowDesignGroups![row.index].elements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.rowDesignGroups![row.index]}/>
@@ -93,7 +93,7 @@
                                                 <Textfield bind:value={designGroup.name} label="Name" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <Textfield bind:value={designGroup.activatedId} label="Id Needed To Show" variant="filled" />
+                                                <Textfield bind:value={designGroup.activatedId} label="Id Needed to Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
                                                 <CustomChipInput acValue={designGroup.elements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={designGroup}/>
@@ -148,7 +148,7 @@
                                                 <Textfield bind:value={app.objectDesignGroups![row.index].name} label="Name" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <Textfield bind:value={app.objectDesignGroups![row.index].activatedId} label="Id Needed To Show" variant="filled" />
+                                                <Textfield bind:value={app.objectDesignGroups![row.index].activatedId} label="Id Needed to Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
                                                 <CustomChipInput acValue={app.objectDesignGroups![row.index].elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
@@ -198,7 +198,7 @@
                                                 <Textfield bind:value={designGroup.name} label="Name" variant="filled" />
                                             </div>
                                             <div class="col-12">
-                                                <Textfield bind:value={designGroup.activatedId} label="Id Needed To Show" variant="filled" />
+                                                <Textfield bind:value={designGroup.activatedId} label="Id Needed to Show" variant="filled" />
                                             </div>
                                             <div class="col-12">
                                                 <CustomChipInput acValue={designGroup.elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={designGroup}/>

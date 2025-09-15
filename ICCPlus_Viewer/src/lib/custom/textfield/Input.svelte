@@ -126,6 +126,13 @@
     return +value;
   }
 
+  function isInputEvent(e: Event): e is InputEvent & {
+    data: string | null,
+    inputType: string
+  } {
+    return 'inputType' in e && 'data' in e;
+  }
+
   function valueUpdater(
     e: Event & { currentTarget: EventTarget & HTMLInputElement },
   ) {
@@ -143,20 +150,36 @@
     }
     switch (type) {
       case 'number':
-        value = toNumber(e.currentTarget.value);
-        if (e.currentTarget.value === '' || e.currentTarget.value === '0') {
-          if (e.data === '-') {
-            value = '-0';
-            e.target.value = '-0';
-          } else if (e.inputType === 'deleteContentBackward') {
-            value = '0';
-            e.target.value = '0';
-          } else if (e.inputType === 'insertFromPaste' && !isNaN(parseInt(e.data))) { 
-            value = parseFloat(e.data);
-            e.target.value = parseFloat(e.data);
-          } else {
-            value = '0';
-            e.target.value = '0';
+        if (/^0\d+/.test(e.currentTarget.value)) {
+          e.currentTarget.value = e.currentTarget.value.split('0')[1];
+        }
+        if (typeof value !== 'number') {
+          value = toNumber(e.currentTarget.value);
+        }
+        if (isNaN(value)) {
+          value = 0;
+          e.currentTarget.value = '0';
+        }
+        if (isInputEvent(e)) {
+          if (e.currentTarget.value === '' || e.currentTarget.value === '0') {
+            if (e.data === '-') {
+              value = '-0';
+              e.currentTarget.value = '-0';
+            } else if (e.inputType === 'deleteContentBackward') {
+              if (e.currentTarget.value === '') {
+                value = 0;
+                e.currentTarget.value = '0';
+              }
+            } else if (e.inputType === 'insertFromPaste' && e.data && !isNaN(parseInt(e.data))) { 
+              value = parseFloat(e.data);
+              e.currentTarget.value = parseFloat(e.data).toString();
+            } else if (e.data === '0') {
+              value = 0;
+              e.currentTarget.value = '0'
+            } else if (e.data !== '.') {
+              value = 0;
+              e.currentTarget.value = '0';
+            }
           }
         }
         break;
@@ -175,6 +198,9 @@
   ) {
     if (type === 'file' || type === 'range') {
       valueUpdater(e);
+    }
+    if (type === 'number') {
+      value = parseFloat(e.currentTarget.value);
     }
     dirty = true;
     if (updateInvalid) {
