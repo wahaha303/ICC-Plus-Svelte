@@ -150,15 +150,17 @@
     }
     switch (type) {
       case 'number':
-        if (/^0\d+/.test(e.currentTarget.value)) {
-          e.currentTarget.value = e.currentTarget.value.split('0')[1];
+        if (/^-?0\d+/.test(e.currentTarget.value)) {
+          e.currentTarget.value = e.currentTarget.value.replace(/^(-?)0+(\d+)/, '$1$2');
         }
         if (typeof value !== 'number') {
-          value = toNumber(e.currentTarget.value);
-        }
-        if (isNaN(value)) {
-          value = 0;
-          e.currentTarget.value = '0';
+          if (e.currentTarget.value !== '-0') {
+            value = toNumber(e.currentTarget.value);
+            if (isNaN(value)) {
+              value = 0;
+              e.currentTarget.value = '0';
+            }
+          }
         }
         if (isInputEvent(e)) {
           if (e.currentTarget.value === '' || e.currentTarget.value === '0') {
@@ -167,15 +169,17 @@
               e.currentTarget.value = '-0';
             } else if (e.inputType === 'deleteContentBackward') {
               if (e.currentTarget.value === '') {
-                value = 0;
-                e.currentTarget.value = '0';
+                if (typeof value === 'number' && value < 0) {
+                  value = '-0'
+                  e.currentTarget.value = '-0'
+                } else {
+                  value = 0;
+                  e.currentTarget.value = '0';
+                }
               }
             } else if (e.inputType === 'insertFromPaste' && e.data && !isNaN(parseInt(e.data))) { 
               value = parseFloat(e.data);
               e.currentTarget.value = parseFloat(e.data).toString();
-            } else if (e.data === '0') {
-              value = 0;
-              e.currentTarget.value = '0'
             } else if (e.data !== '.') {
               value = 0;
               e.currentTarget.value = '0';

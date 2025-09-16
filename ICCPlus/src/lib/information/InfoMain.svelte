@@ -176,6 +176,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.3 / ${getDate('2025-09-16T14:00:00Z')}`,
+        text: `<span style="color: green">Miscellaneous</span>
+        - Fixed issue where minus sign was not preserved when deleting negative number in input field.
+        `
+    }, {
+        open: false,
         title: `v2.5.2 / ${getDate('2025-09-15T14:00:00Z')}`,
         text: `<span style="color: green">Miscellaneous</span>
         - Fixed issue where cursor moved to beginning of input field when deleting decimal point.

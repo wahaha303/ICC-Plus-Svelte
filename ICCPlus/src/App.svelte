@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2025-09-15T14:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2025-09-16T14:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -67,7 +67,7 @@
     const menuComponentButtons = [
         { component: 'appCyoaCreator', text: 'Open Cyoa Creator (Alt + 1)'},
         { component: 'appCyoaViewer', text: 'Open Cyoa Viewer (Alt + 2)'},
-        { component: 'appInformation', text: 'Help And Instructions (Alt + 3)'}
+        { component: 'appInformation', text: 'Help And Changelog (Alt + 3)'}
     ];
 
     function autoModeWatcher() {

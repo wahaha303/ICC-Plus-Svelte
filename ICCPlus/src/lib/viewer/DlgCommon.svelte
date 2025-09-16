@@ -40,7 +40,7 @@
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import Textfield from '$lib/custom/textfield';
 
-    let { open, onclose, title, context, closeHandler, isWord, prevText }: { open: boolean; onclose: () => void; title: string; context: string; closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void; isWord?: boolean; prevText?: string } = $props();
+    let { open, onclose, title, context, closeHandler, isWord, prevText }: { open: boolean; onclose: () => void, title: string, context: string, closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void, isWord?: boolean, prevText?: string } = $props();
     let wordText = $state(isWord && prevText ? prevText : '');
 
     function beforeClose(e: CustomEvent<{ action: string }>) {
