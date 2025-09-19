@@ -1678,7 +1678,7 @@
     import Tiptap from '$lib/store/Tiptap.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
-	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount } from '$lib/store/store.svelte';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, generateObjectId, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, applyTemplate, applyWidth, revertTemplate, revertWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount, exportData } from '$lib/store/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
@@ -2314,6 +2314,10 @@
         menuVariables.copy = () => copyObject();
         menuVariables.paste = () => pasteObject(row, choice.index + 1);
         menuVariables.clear = () => clearClipboard(1);
+        menuVariables.export = () => exportData(choice, 'choice');
+        menuVariables.parent = row;
+        menuVariables.importType = 'choice';
+        menuVariables.importNum = choice.index + 1;
         tick().then(() => {
             menuVariables.isOpen = true;
         });
@@ -2331,6 +2335,9 @@
         menuVariables.copy = () => copyRequireds();
         menuVariables.paste = () => pasteRequired();
         menuVariables.clear = () => clearClipboard(2);
+        menuVariables.export = () => exportData(choice.requireds, 'req');
+        menuVariables.parent = choice;
+        menuVariables.importType = 'req';
         tick().then(() => {
             menuVariables.isOpen = true;
         });
@@ -2348,6 +2355,9 @@
         menuVariables.copy = () => copyScores();
         menuVariables.paste = () => pasteScore();
         menuVariables.clear = () => clearClipboard(3);
+        menuVariables.export = () => exportData(choice.scores, 'score');
+        menuVariables.parent = choice;
+        menuVariables.importType = 'score';
         tick().then(() => {
             menuVariables.isOpen = true;
         });
@@ -2365,6 +2375,9 @@
         menuVariables.copy = () => copyAddons();
         menuVariables.paste = () => pasteAddon();
         menuVariables.clear = () => clearClipboard(4);
+        menuVariables.export = () => exportData(choice.addons, 'addon');
+        menuVariables.parent = choice;
+        menuVariables.importType = 'addon';
         tick().then(() => {
             menuVariables.isOpen = true;
         });
@@ -2402,7 +2415,12 @@
 
             score.idx = generateScoreId(0, 5);
             scoreSet.add(score.idx);
-            delete score.isActive;
+            if (clone.isSelectableMultiple) {
+                delete score.isActiveMul;
+                delete score.isActiveMulMinus;
+            } else {
+                delete score.isActive;
+            }
             delete score.setValue;
             deleteDiscount(score);
         }
@@ -4729,6 +4747,11 @@
                         linkedObjects.splice(0);
                     }
                 }
+            } else {
+                for (let i = 0; i < localChoice.scores.length; i++) {
+                    const score = localChoice.scores[i];
+                    if (score.setValue) delete score.setValue;
+                }
             }
         }
     }
@@ -5443,6 +5466,11 @@
                             }
                         }
                     }
+                }
+            } else {
+                for (let i = 0; i < localChoice.scores.length; i++) {
+                    const score = localChoice.scores[i];
+                    if (score.setValue) delete score.setValue;
                 }
             }
         }

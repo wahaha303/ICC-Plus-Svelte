@@ -980,9 +980,13 @@ export type ViewerSetting = {
 export type MenuVariables = {
     anchor: HTMLElement | null,
     isOpen: boolean,
+    importType: string,
+    importNum: number,
+    parent: Row | Choice | Addon | null,
     copy: () => void,
     paste: () => void,
-    clear: () => void
+    clear: () => void,
+    export: () => void
 };
 export type ExprNode = {
     left: number | ExprNode,

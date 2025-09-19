@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2025-09-16T14:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2025-09-19T15:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -28,6 +28,10 @@
                     </Button>
                 </div>
                 <div class="col-12">
+                    <Button variant="raised" href="https://github.com/wahaha303/ICCPlus-Desktop/releases/latest" target="_blank" class="m-1 w-auto">
+                        <BtnIcon class="mdi mdi-microsoft-windows" />
+                        <Label style="text-transform:none">Desktop Version</Label>
+                    </Button>
                     <Button variant="raised" href="https://github.com/wahaha303/ICCPlus" target="_blank" class="m-1 w-auto">
                         <BtnIcon class="mdi mdi-github" />
                         <Label style="text-transform:none">View on GitHub</Label>

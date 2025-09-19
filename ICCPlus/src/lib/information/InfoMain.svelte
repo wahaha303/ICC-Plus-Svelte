@@ -176,6 +176,22 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.4 / ${getDate('2025-09-19T15:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where score dropped below 0 via Row Button despite "This score is not allowed to go under 0" enabled.
+
+        <span style="color: green">Choice</span>
+        - Fixed issue where random score did not work correctly with score that had "This score is not allowed to go under 0" enabled.
+
+        <span style="color: green">Desktop Version</span>
+        - Added close button to update download dialog.
+        
+        <span style="color: green">Miscellaneous</span>
+        - Added context menu option to import/export Row, Choice, Addons, Scores, and Requirements as file.
+        - Added button on first screen to download desktop version.
+        `
+    }, {
+        open: false,
         title: `v2.5.3 / ${getDate('2025-09-16T14:00:00Z')}`,
         text: `<span style="color: green">Miscellaneous</span>
         - Fixed issue where minus sign was not preserved when deleting negative number in input field.

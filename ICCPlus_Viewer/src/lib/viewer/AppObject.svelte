@@ -2750,6 +2750,11 @@
                         linkedObjects.splice(0);
                     }
                 }
+            } else {
+                for (let i = 0; i < localChoice.scores.length; i++) {
+                    const score = localChoice.scores[i];
+                    if (score.setValue) delete score.setValue;
+                }
             }
         }
     }
@@ -3463,6 +3468,11 @@
                             }
                         }
                     }
+                }
+            } else {
+                for (let i = 0; i < localChoice.scores.length; i++) {
+                    const score = localChoice.scores[i];
+                    if (score.setValue) delete score.setValue;
                 }
             }
         }

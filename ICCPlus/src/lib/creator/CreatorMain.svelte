@@ -228,7 +228,15 @@
         <Item onclickcapture={menuVariables.paste}>
             <Text>Paste</Text>
         </Item>
-        <Separator style="border-bottom-color: rgba(0, 0, 0, 0.12)" />
+        <Separator style="opacity: .25;" />
+        <Item onclickcapture={menuVariables.export}>
+            <Text>Export</Text>
+        </Item>
+        <Item onclickcapture={() => fileInput.click()}>
+            <input type="file" accept=".{menuVariables.importType}" bind:this={fileInput} bind:files={valueTypeFiles} onchange={() => importData(valueTypeFiles, menuVariables.importNum, menuVariables.importType, menuVariables.parent)} style="display: none;">
+            <Text>Import</Text>
+        </Item>
+        <Separator style="opacity: .25;" />
         <Item onclickcapture={menuVariables.clear}>
             <Text>Clear</Text>
         </Item>
@@ -246,7 +254,7 @@
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
@@ -336,6 +344,9 @@
     let mainDiv = $state<HTMLDivElement>();
     let altMenuHeight = $state(0);
     let menu: Menu;
+    let valueTypeFiles: FileList | null = $state(null);
+    let fileInput: HTMLInputElement;
+    
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
     let pointBar = $derived.by(() => {
@@ -429,12 +440,12 @@
                 xPosText = `left: ${xPos - 120}px; right: auto;`;
             }
 
-            if (rect.top + 200 > viewportHeight) {
+            if (rect.top + 300 > viewportHeight) {
                 yPos = rect.bottom + window.scrollY;
-                yPosText = `top: ${yPos - 120}px; bottom: auto;`;
+                yPosText = `top: ${yPos - 300}px; bottom: auto;`;
             }
             
-            return `${xPosText} ${yPosText}`;
+            return `${xPosText} ${yPosText} height: 290px;`;
         }
         return '';
     });
@@ -469,6 +480,9 @@
         menuVariables.copy = () => copyRow(row);
         menuVariables.paste = () => pasteRow(num);
         menuVariables.clear = () => clearClipboard(0);
+        menuVariables.export = () => exportData(row, 'row');
+        menuVariables.importType = 'row';
+        menuVariables.importNum = num + 1;
         tick().then(() => {
             menuVariables.isOpen = true;
         });
@@ -665,13 +679,13 @@
             if (num === -1) {
                 app.rows.push(clone);
             } else {
-                app.rows.splice(num, 0, clone);
-                index = num;
+                app.rows.splice(num + 1, 0, clone);
+                index = num + 1;
             }
             rowMap.set(id, app.rows[index]);
 
-            for (let i = 0; i < clone.objects.length; i++) {
-                const cChoice = clone.objects[i];
+            for (let i = 0; i < app.rows[index].objects.length; i++) {
+                const cChoice = app.rows[index].objects[i];
 
                 cChoice.id = generateObjectId(0, app.objectIdLength);
                 cChoice.index = i;
@@ -750,7 +764,7 @@
                 const idx = app.rows.length - 1;
                 app.rows[idx].index = idx;
             } else {
-                for (let i = num; i < app.rows.length; i++) {
+                for (let i = num + 1; i < app.rows.length; i++) {
                     app.rows[i].index = i;
                 }
             }

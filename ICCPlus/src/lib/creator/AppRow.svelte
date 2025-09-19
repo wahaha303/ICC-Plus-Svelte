@@ -428,7 +428,7 @@
 	import IconButton from '@smui/icon-button';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor } from '$lib/store/store.svelte';
+    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData } from '$lib/store/store.svelte';
     import type { Requireds, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { tick } from 'svelte';
@@ -806,6 +806,9 @@
         menuVariables.copy = () => copyRequireds();
         menuVariables.paste = () => pasteRequired();
         menuVariables.clear = () => clearClipboard(2);
+        menuVariables.export = () => exportData(row.requireds, 'req');
+        menuVariables.parent = row;
+        menuVariables.importType = 'req';
         tick().then(() => {
             menuVariables.isOpen = true;
         });
@@ -868,6 +871,9 @@
             const point = pointTypeMap.get(row.pointTypeRandom);
 
             if (typeof point !== 'undefined') {
+                if (point.belowZeroNotAllowed && point.startingSum + rnd < 0) {
+                    return;
+                }
                 point.startingSum += rnd;
             }
             return;

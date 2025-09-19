@@ -352,6 +352,9 @@
             const point = pointTypeMap.get(row.pointTypeRandom);
 
             if (typeof point !== 'undefined') {
+                if (point.belowZeroNotAllowed && point.startingSum + rnd < 0) {
+                    return;
+                }
                 point.startingSum += rnd;
             }
             return;

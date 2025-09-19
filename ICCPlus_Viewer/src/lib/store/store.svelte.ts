@@ -5,7 +5,7 @@ import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 
-export const appVersion = '2.5.3';
+export const appVersion = '2.5.4';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3059,6 +3059,7 @@ export function cleanActivated() {
                 } else {
                     delete cScore.isActive;
                 }
+                if (!cChoice.notDeselectedByClean) delete cScore.setValue;
                 deleteDiscount(cScore);
             }
         }
@@ -3103,6 +3104,7 @@ export function cleanActivated() {
                 } else {
                     delete cScore.isActive;
                 }
+                if (!cChoice.notDeselectedByClean) delete cScore.setValue;
                 deleteDiscount(cScore);
             }
         }
@@ -4957,7 +4959,12 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
 
                     score.idx = generateScoreId(0, 5);
                     scoreSet.add(score.idx);
-                    delete score.isActive;
+                    if (newChoice.isSelectableMultiple) {
+                        delete score.isActiveMul;
+                        delete score.isActiveMulMinus;
+                    } else {
+                        delete score.isActive;
+                    }
                     delete score.setValue;
                     deleteDiscount(score);
                 }
@@ -5422,7 +5429,7 @@ export const AppSchema = z.object({
     pointTypes: z.array(PointTypeSchema).optional(),
     backpack: z.array(RowSchema).optional(),
     styling: StylingSchema.optional()
-}).passthrough();
+}).passthrough() as z.ZodObject<any>;
 const keysToRemove = ['autoSaveInterval', 'bgmFadeInterval', 'bgmFadeTimer', 'bgmIsPlaying', 'bgmObjectId', 'bgmPlayInterval', 'bgmTitle', 'bgmTitleInterval', 'cancelForcedActivated', 'comp', 'compG', 'compODG', 'compR', 'compRDG', 'curBgmTime', 'curBgmLength', 'isSeeking', 'isFadingOut', 'lastFadeTime', 'objectMap', 'pointTypeMap', 'wordMap'];
 export function removeNulls(obj: any): any {
     if (Array.isArray(obj)) {

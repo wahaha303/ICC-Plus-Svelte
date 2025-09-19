@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.5.3';
+export const appVersion = '2.5.4';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -660,9 +660,13 @@ export const viewerSettings = $state<ViewerSetting>({
 export const menuVariables = $state<MenuVariables>({
     anchor: null,
     isOpen: false,
+    importType: '',
+    importNum: 0,
+    parent: null,
     copy: () => {},
     paste: () => {},
-    clear: () => {}
+    clear: () => {},
+    export: () => {}
 })
 export const autoSaveSlot = $state<SaveSlot>({
    stored: false,
@@ -3322,6 +3326,7 @@ export function cleanActivated() {
                 } else {
                     delete cScore.isActive;
                 }
+                if (!cChoice.notDeselectedByClean) delete cScore.setValue;
                 deleteDiscount(cScore);
             }
         }
@@ -3367,6 +3372,7 @@ export function cleanActivated() {
                 } else {
                     delete cScore.isActive;
                 }
+                if (!cChoice.notDeselectedByClean) delete cScore.setValue;
                 deleteDiscount(cScore);
             }
         }
@@ -5221,7 +5227,12 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
 
                     score.idx = generateScoreId(0, 5);
                     scoreSet.add(score.idx);
-                    delete score.isActive;
+                    if (newChoice.isSelectableMultiple) {
+                        delete score.isActiveMul;
+                        delete score.isActiveMulMinus;
+                    } else {
+                        delete score.isActive;
+                    }
                     delete score.setValue;
                     deleteDiscount(score);
                 }
@@ -5666,6 +5677,21 @@ const RowDesignGroupSchema = z.object({
 const ObjectDesignGroupSchema = z.object({
     styling: StylingSchema.optional()
 }).passthrough();
+const RequiredSchema = z.object({
+    required: z.boolean(),
+    requireds: z.array(z.any()),
+    orRequired: z.array(z.any()),
+    id: z.string(),
+    type: z.string(),
+    reqId: z.string(),
+    reqId1: z.string(),
+    reqId2: z.string(),
+    reqId3: z.string(),
+    reqPoints: z.number(),
+    showRequired: z.boolean(),
+    afterText: z.string(),
+    beforeText: z.string(),
+}).passthrough();
 export const AppSchema = z.object({
     curVolume: z.coerce.number().optional(),
     fadeTransitionTime: z.coerce.number().optional(),
@@ -5679,7 +5705,7 @@ export const AppSchema = z.object({
     pointTypes: z.array(PointTypeSchema).optional(),
     backpack: z.array(RowSchema).optional(),
     styling: StylingSchema.optional()
-}).passthrough();
+}).passthrough() as z.ZodObject<any>;
 const keysToRemove = ['autoSaveInterval', 'bgmFadeInterval', 'bgmFadeTimer', 'bgmIsPlaying', 'bgmObjectId', 'bgmPlayInterval', 'bgmTitle', 'bgmTitleInterval', 'cancelForcedActivated', 'comp', 'compG', 'compODG', 'compR', 'compRDG', 'curBgmTime', 'curBgmLength', 'isSeeking', 'isFadingOut', 'lastFadeTime', 'objectMap', 'pointTypeMap', 'wordMap'];
 export function removeNulls(obj: any): any {
     if (Array.isArray(obj)) {
@@ -5931,6 +5957,283 @@ export async function loadFromDisk(valueTypeFiles: FileList | null) {
             reader.readAsText(file);
         } else if (ext === 'zip') {
             reader.readAsArrayBuffer(file);
+        } else {
+            snackbarVariables.labelText = 'Invalid file type.';
+            snackbarVariables.isOpen = true;
+        }
+    }
+}
+export function exportData(data: Row | Choice | Addon[] | Score[] | Requireds[], type: string) {
+    if (Array.isArray(data) && data.length === 0) {
+        snackbarVariables.labelText = `Cannot export empty data.`;
+        snackbarVariables.isOpen = true;
+
+        return;
+    }
+    const saveData = JSON.stringify(data);
+    const blob = new Blob([saveData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const filename = `${!Array.isArray(data) && 'id' in data ? data.id || type : type}_${getTimestamp()}.${type}`;
+    
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    snackbarVariables.labelText = `The exported ${type} has been downloaded.`;
+    snackbarVariables.isOpen = true;
+}
+export async function importData(valueTypeFiles: FileList | null, num: number, type: string, parent: Row | Choice | Addon | null = null) {
+    if (valueTypeFiles) {
+        const file = valueTypeFiles[0];
+        const ext = file.name.endsWith(`.${type}`) ? type : 'error';
+        const reader = new FileReader;
+        
+        snackbarVariables.labelText = 'Loading data...';
+        snackbarVariables.isOpen = true;
+        reader.onload = async () => {
+            try {
+                if (!reader.result) return;
+
+                if (ext === 'row') {
+                    const cleanedData = removeNulls(JSON.parse(reader.result as string));
+                    const parsed = RowSchema.safeParse(cleanedData);
+
+                    if (parsed.success) {
+                        const id = generateRowId(0, app.rowIdLength);
+                        const clone = parsed.data as Row;
+
+                        clone.id = id;
+                        app.rows.splice(num, 0, clone);
+                        app.rows[num].index = num;
+
+                        rowMap.set(id, app.rows[num]);
+                        
+                        for (let i = 0; i < app.rows[num].objects.length; i++) {
+                            const cChoice = app.rows[num].objects[i];
+
+                            cChoice.id = generateObjectId(0, app.objectIdLength);
+                            cChoice.index = i;
+                            cChoice.isActive = false;
+                            delete cChoice.forcedActivated;
+                            delete cChoice.appliedDisChoices;
+
+                            for (let j = 0; j < cChoice.scores.length; j++) {
+                                const score = cChoice.scores[j];
+
+                                score.idx = generateScoreId(0, 5);
+                                scoreSet.add(score.idx);
+                                if (clone.isSelectableMultiple) {
+                                    delete score.isActiveMul;
+                                    delete score.isActiveMulMinus;
+                                } else {
+                                    delete score.isActive;
+                                }
+                                delete score.setValue;
+                                deleteDiscount(score);
+                            }
+
+                            for (let j = 0; j < cChoice.addons.length; j++) {
+                                const addon = cChoice.addons[j];
+
+                                addon.parentId = cChoice.id;
+                            }
+
+                            if (cChoice.backpackBtnRequirement) {
+                                if (typeof app.hideBackpackBtn !== 'undefined') {
+                                    app.hideBackpackBtn += 1;
+                                } else {
+                                    delete cChoice.backpackBtnRequirement;
+                                }
+                            }
+
+                            if (cChoice.groups) {
+                                for (let j = 0; j < cChoice.groups.length; j++) {
+                                    let group = groupMap.get(cChoice.groups[j]);
+                                    if (typeof group !== 'undefined') {
+                                        let elementIndex = group.elements.indexOf(cChoice.id);
+                                        if (elementIndex === -1) group.elements.push(cChoice.id);
+                                    }
+                                }
+                            }
+
+                            if (cChoice.objectDesignGroups) {
+                                for (let j = 0; j < cChoice.objectDesignGroups.length; j++) {
+                                    let dGroup = objectDesignMap.get(cChoice.objectDesignGroups[j]);
+                                    if (typeof dGroup !== 'undefined') {
+                                        let elementIndex = dGroup.elements.indexOf(cChoice.id);
+                                        if (elementIndex === -1) dGroup.elements.push(cChoice.id);
+                                    }
+                                }
+                            }
+
+                            choiceMap.set(cChoice.id, {choice: app.rows[num].objects[i], row: app.rows[num]});
+                        }
+
+                        if (app.rows[num].groups) {
+                            for (let i = 0; i < app.rows[num].groups.length; i++) {
+                                let group = groupMap.get(app.rows[num].groups[i]);
+                                if (typeof group !== 'undefined') {
+                                    let elementIndex = group.rowElements.indexOf(app.rows[num].id);
+                                    if (elementIndex === -1) group.rowElements.push(app.rows[num].id);
+                                }
+                            }
+                        }
+
+                        if (app.rows[num].rowDesignGroups) {
+                            for (let i = 0; i < app.rows[num].rowDesignGroups.length; i++) {
+                                let dGroup = rowDesignMap.get(app.rows[num].rowDesignGroups[i]);
+                                if (typeof dGroup !== 'undefined') {
+                                    let elementIndex = dGroup.elements.indexOf(app.rows[num].id);
+                                    if (elementIndex === -1) dGroup.elements.push(app.rows[num].id);
+                                }
+                            }
+                        }
+
+                        for (let i = num + 1; i < app.rows.length; i++) {
+                            app.rows[i].index = i;
+                        }
+
+                        snackbarVariables.labelText = 'Row Imported successfully.';
+                        snackbarVariables.isOpen = true;
+                    } else {
+                        throw parsed.error;
+                    }
+                } else if (parent) {
+                    if (ext === 'choice') {
+                        const cleanedData = removeNulls(JSON.parse(reader.result as string));
+                        const parsed = ChoiceSchema.safeParse(cleanedData);
+
+                        if (parsed.success) {
+                            const id = generateObjectId(0, app.objectIdLength);
+                            const row = parent as Row;
+                            const clone = parsed.data as Choice;
+                            
+                            clone.isActive = false;
+                            clone.id = id;
+                            delete clone.forcedActivated;
+
+                            for (let i = 0; i < clone.scores.length; i++) {
+                                const score = clone.scores[i];
+
+                                score.idx = generateScoreId(0, 5);
+                                scoreSet.add(score.idx);
+                                if (clone.isSelectableMultiple) {
+                                    delete score.isActiveMul;
+                                    delete score.isActiveMulMinus;
+                                } else {
+                                    delete score.isActive;
+                                }
+                                delete score.setValue;
+                                deleteDiscount(score);
+                            }
+
+                            for (let i = 0; i < clone.addons.length; i++) {
+                                const addon = clone.addons[i];
+
+                                addon.parentId = clone.id;
+                            }
+
+                            if (clone.backpackBtnRequirement) {
+                                if (typeof app.hideBackpackBtn !== 'undefined') {
+                                    app.hideBackpackBtn += 1;
+                                } else {
+                                    delete clone.backpackBtnRequirement;
+                                }
+                            }
+
+                            row.objects.splice(num, 0, clone);
+                            choiceMap.set(id, {choice: row.objects[num], row: row});
+
+                            if (clone.groups) {
+                                for (let i = 0; i < clone.groups.length; i++) {
+                                    let group = groupMap.get(clone.groups[i]);
+                                    if (typeof group !== 'undefined') {
+                                        let elementIndex = group.elements.indexOf(id);
+                                        if (elementIndex === -1) group.elements.push(id);
+                                    }
+                                }
+                            }
+                            if (clone.objectDesignGroups) {
+                                for (let i = 0; i < clone.objectDesignGroups.length; i++) {
+                                    let dGroup = objectDesignMap.get(clone.objectDesignGroups[i]);
+                                    if (typeof dGroup !== 'undefined') {
+                                        let elementIndex = dGroup.elements.indexOf(id);
+                                        if (elementIndex === -1) dGroup.elements.push(id);
+                                    }
+                                }
+                            }
+
+                            for (let i = num; i < row.objects.length; i++) {
+                                row.objects[i].index = i;
+                            }
+
+                            snackbarVariables.labelText = 'Choice Imported successfully.';
+                            snackbarVariables.isOpen = true;
+                        } else {
+                            throw parsed.error;
+                        }
+                    } else if (ext === 'addon') {
+                        const cleanedData = removeNulls(JSON.parse(reader.result as string));
+                        const parsed = z.array(AddonSchema).safeParse(cleanedData);
+
+                        if (parsed.success) {
+                            const clone = parsed.data as Addon[];
+                            
+                            for (let i = 0; i < clone.length; i++) {
+                                clone[i].parentId = parent.id;
+                            }
+                            (parent as Choice).addons.push(...clone);
+
+                            snackbarVariables.labelText = 'Addon Imported successfully.';
+                            snackbarVariables.isOpen = true;
+                        } else {
+                            throw parsed.error;
+                        }
+                    } else if (ext === 'score') {
+                        const cleanedData = removeNulls(JSON.parse(reader.result as string));
+                        const parsed = z.array(ScoreSchema).safeParse(cleanedData);
+
+                        if (parsed.success) {
+                            const clone = parsed.data as Score[];
+
+                            for (let i = 0; i < clone.length; i++) {
+                                deleteDiscount(clone[i]);
+                            }
+                            (parent as Choice).scores.push(...clone);
+                            snackbarVariables.labelText = 'Score Imported successfully.';
+                            snackbarVariables.isOpen = true;
+                        } else {
+                            throw parsed.error;
+                        }
+                    } else if (ext === 'req') {
+                        const cleanedData = removeNulls(JSON.parse(reader.result as string));
+                        const parsed = z.array(RequiredSchema).safeParse(cleanedData);
+
+                        if (parsed.success) {
+                            const clone = parsed.data as Requireds[];
+                            parent.requireds.push(...clone);
+                            snackbarVariables.labelText = 'Requirement Imported successfully.';
+                            snackbarVariables.isOpen = true;
+                        } else {
+                            throw parsed.error;
+                        }
+                    }
+                }
+            } catch (error) {
+                snackbarVariables.labelText = 'Failed to import data.';
+                snackbarVariables.isOpen = true;
+                console.error(error);
+            } finally {
+                menuVariables.importType = '';
+                menuVariables.parent = null;
+            }
+        }
+        
+        if (ext === 'row' || ext === 'choice' || ext === 'addon' || ext === 'score' || ext === 'req') {
+            reader.readAsText(file);
         } else {
             snackbarVariables.labelText = 'Invalid file type.';
             snackbarVariables.isOpen = true;
@@ -6882,6 +7185,7 @@ export function removeAnchor() {
         menuVariables.copy = () => {};
         menuVariables.paste = () => {};
         menuVariables.clear = () => {};
+        menuVariables.export = () => {};
         menuVariables.anchor = null;
     }
 }
@@ -6904,7 +7208,12 @@ export function pasteObject(row: Row, num: number) {
 
             score.idx = generateScoreId(0, 5);
             scoreSet.add(score.idx);
-            delete score.isActive;
+            if (clone.isSelectableMultiple) {
+                delete score.isActiveMul;
+                delete score.isActiveMulMinus;
+            } else {
+                delete score.isActive;
+            }
             delete score.setValue;
             deleteDiscount(score);
         }
