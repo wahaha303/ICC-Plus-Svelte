@@ -29,7 +29,7 @@
                     </div>
                     <div class="col col-lg-8">
                         {#if (typeof getImage(imgObject, imgProp) !== 'undefined' && getImage(imgObject, imgProp) !== '')}
-                            <img src={getImage(imgObject, imgProp)} alt="Converted" loading="lazy">
+                            <img class="d-block w-100" src={getImage(imgObject, imgProp)} alt="Converted" loading="lazy">
                             <Button onclick={() => {setImage(imgObject, imgProp, ''); delete imgObject.imageLink}} variant="raised" class="my-3">
                                 <Label>Remove Photo</Label>
                             </Button>
@@ -107,7 +107,7 @@
                                     </div>
                                     {#if (isDataURL(getImage(imgObject, imgProp)))}
                                         <div class="pt-3 col col-12">
-                                            <img alt="Compress" src={getImage(imgObject, imgProp)} loading="lazy">
+                                            <img class="d-block w-100" alt="Compress" src={getImage(imgObject, imgProp)} loading="lazy">
                                         </div>
                                     {/if}
                                 </div>
@@ -153,7 +153,8 @@
     let original = $state<string>();
     let compressed = $state<string>();
     let imgIsUrl = $state(false);
-    let counter = 0;
+    let drawQueue: string[] = [];
+    let isProcessing = false;
 
     let originalSize = $derived.by(() => {
         if (original) {
@@ -180,6 +181,7 @@
                 viewMode: 3,
                 dragMode: 'move',
             });
+            changeAspect();
         } else {
             if (cropper) {
                 cropper.destroy();
@@ -206,7 +208,7 @@
 
     function compressImage() {
         if (compressed) {
-            setImage(imgObject, imgProp, compressed, false);
+            setImage(imgObject, imgProp, compressed);
         }
     }
 
@@ -223,41 +225,53 @@
             setImage(imgObject, imgProp, croppedImage);
         }
     }
-
+    
     function drawImage(str: string) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext("2d");
-        const img = new Image;
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-            const imgScale = scale / 100;
-            const imgWidth = img.width * imgScale;
-            const imgHeight = img.height * imgScale;
-            
-            canvas.setAttribute('width', imgWidth.toString());
-            canvas.setAttribute('height', imgHeight.toString());
-            ctx?.drawImage(img, 0, 0, imgWidth, imgHeight);
-            compressed = canvas.toDataURL("image/webp", quality / 100);
-            counter++;
-            if (autoCompressFlag && counter > 1) {
-                autoCompressFlag = false;
-                compressImage();
-                counter = 0;
-            }
+        drawQueue.push(str);
+        if (!isProcessing) {
+            processNextImage();
         }
-        img.src = str;
+    }
+
+    function processNextImage() {
+        const str = drawQueue.shift();
+        if (!str) {
+            isProcessing = false;
+            return;
+        } else {
+            isProcessing = true;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext("2d");
+            const img = new Image;
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                const imgScale = scale / 100;
+                const imgWidth = img.width * imgScale;
+                const imgHeight = img.height * imgScale;
+                
+                canvas.setAttribute('width', imgWidth.toString());
+                canvas.setAttribute('height', imgHeight.toString());
+                ctx?.drawImage(img, 0, 0, imgWidth, imgHeight);
+                compressed = canvas.toDataURL("image/webp", quality / 100);
+                if (autoCompressFlag) {
+                    autoCompressFlag = false;
+                    compressImage();
+                }
+
+                processNextImage();
+            }
+            img.src = str;
+        }
     }
     
-    function setImage(obj: CommonImage, str: string, value: string, isFirst: boolean = true) {
+    function setImage(obj: CommonImage, str: string, value: string) {
         if (obj) {
             obj[str] = value;
             original = value;
             if (cropper) {
                 cropper.replace(value);
             }
-            if (isFirst) {
-                drawImage(value);
-            }
+            drawImage(value);
         }
     }
 
@@ -353,9 +367,3 @@
     }
 
 </script>
-<style>
-    img {
-        display: block;
-        width: 100%;
-    }
-</style>

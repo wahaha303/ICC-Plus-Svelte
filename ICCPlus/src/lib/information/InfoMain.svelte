@@ -176,6 +176,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.5 / ${getDate('2025-09-21T13:00:00Z')}`,
+        text: `<span style="color: green">Miscellaneous</span>
+        - Fixed issue where cropper flickered repeatedly on image upload.
+        `
+    }, {
+        open: false,
         title: `v2.5.4 / ${getDate('2025-09-19T15:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where score dropped below 0 via Row Button despite "This score is not allowed to go under 0" enabled.

@@ -355,7 +355,7 @@
                 drawImage(imageObject!);
             };
             imageObject.src = image;
-            if (onchange) onchange(image);
+            if (!prefillFlag && onchange) onchange(image);
         };
         reader.readAsDataURL(file);
       });
