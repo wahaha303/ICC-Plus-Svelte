@@ -196,6 +196,25 @@
 
     onMount(() => {
         initAspect();
+        const prefill: string = getImage(imgObject, imgProp);
+        if (prefill) {
+            original = prefill;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext("2d");
+            const img = new Image;
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                const imgScale = scale / 100;
+                const imgWidth = img.width * imgScale;
+                const imgHeight = img.height * imgScale;
+                
+                canvas.setAttribute('width', imgWidth.toString());
+                canvas.setAttribute('height', imgHeight.toString());
+                ctx?.drawImage(img, 0, 0, imgWidth, imgHeight);
+                compressed = canvas.toDataURL("image/webp", quality / 100);
+            }
+            img.src = original;
+        }
     });
     
     function redraw() {
