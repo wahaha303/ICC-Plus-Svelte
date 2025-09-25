@@ -118,12 +118,29 @@
 
         When one of these buttons is pressed you a dialog opens up where you have to choose what condition you'll want.
 
-        1. The first one will let the user activate the choice if the choice with the id is already activated.
-        2. The second will let the user activate the choice only if the choice the id belongs to is not already pressed.
-        3. The third will only let the choice be activated if the selected point type is less than the value you write in.
-        4. The fourth will only let the choice be activated if the selected point type is equal or more to the value you write in.
+        <b>Add Global Requirement</b>:
+        - Use the Global Requirement defined in Manage Global Requirement.
+        <b>Add Word Requirement</b>:
+        - Insert a requirement to compare the current value of the word (Text to replace id with).
+        <b>Add Selected Choice Requirement</b>:
+        - Insert a requirement to check whether the user has selected the choice with the specified id.
+        - If the choice can be selected multiple times, you can append /ON#Number after the id to check whether it has been selected at least a certain number of times (e.g., choice-id/ON#2).
+        <b>Add Non-Selected Choice Requirement</b>:
+        - Insert a requirement to check whether the user has not selected the choice with the specified id.
+        <b>Add Point Requirement</b>
+        - Insert a requirement to compare the current value of the Point-type.
+        <b>Add Point Comparison Requirement</b>
+        - Insert a requirement to compare the values of two Point-types.
+        - Arithmetic operations can be added to the Point-type located on the right-hand side.
+        <b>'X of These is Selected' Requirement</b>
+        - Insert a requirement to check whether the user has selected at least X choices with the specified id.
+        <b>'X of These is Not Selected' Requirement</b>
+        - Insert a requirement to check whether the user has selected fewer than X choices with the specified id.
+        <b>'Selected X or more From' Requirements</b>
+        - Insert a requirement to check whether the user has selected at least X choices among those included in the Group / Row / All Rows.
 
-        More than one of these requirements can be added to each row and choice.`
+
+        More than one of these requirements can be added to each row, choice, addon, score and requirement.`
     }, {
         title: 'What is a Point-type and how do I create one?',
         text: `A point-type is a system where you can create some type of valuta, be it gold points, XP or just points, that the player can spend and earn trough their choices. These can be created in the dialog that pops up when you press the 'Feature' button in the top menu and can be added to choices by pressing the 'Score' button on a choice.
@@ -176,6 +193,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.6 / ${getDate('2025-09-25T15:00:00Z')}`,
+        text: `<span style="color: green">Miscellaneous</span>
+        - Added explanation about Requirement to QnA section in Help and Changelog.
+        - Fixed compatibility issue with projects created in old vanilla ICC.
+        `
+    }, {
+        open: false,
         title: `v2.5.5 / ${getDate('2025-09-21T13:00:00Z')}`,
         text: `<span style="color: green">Miscellaneous</span>
         - Fixed issue where cropper flickered repeatedly on image upload.

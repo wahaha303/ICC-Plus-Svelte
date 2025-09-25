@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.5.5';
+export const appVersion = '2.5.6';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5748,119 +5748,137 @@ function initFilterStyling(data: any) {
 function initPrivateStyling(data: any, isRow: boolean) {
     if (data.isPrivateStyling && typeof data.privateFilterIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
-            Object.keys(filterStyling).forEach(key => {
+            const keys = Object.keys(filterStyling);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
                 if (data.styling.hasOwnProperty(key)) {
                     data.privateFilterIsOn = true;
-                    return;
+                    break;
                 } else {
                     data.privateFilterIsOn = false;
                 }
-            });
+            }
         }
     }
 
     if (data.isPrivateStyling && typeof data.privateTextIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
-            Object.keys(textStyling).forEach(key => {
+            const keys = Object.keys(textStyling);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
                 if (data.styling.hasOwnProperty(key)) {
                     data.privateTextIsOn = true;
-                    return;
+                    break;
                 } else {
                     data.privateTextIsOn = false;
                 }
-            });
+            }
         }
     }
 
     if (data.isPrivateStyling && typeof data.privateObjectImageIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
-            Object.keys(objectImageStyling).forEach(key => {
+            const keys = Object.keys(objectImageStyling);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
                 if (data.styling.hasOwnProperty(key)) {
                     data.privateObjectImageIsOn = true;
-                    return;
+                    break;
                 } else {
                     data.privateObjectImageIsOn = false;
                 }
-            });
+            }
         }
     }
 
     if (data.isPrivateStyling && typeof data.privateObjectIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
-            Object.keys(objectStyling).forEach(key => {
+            const keys = Object.keys(objectStyling);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
                 if (data.styling.hasOwnProperty(key)) {
                     data.privateObjectIsOn = true;
-                    return;
+                    break;
                 } else {
                     data.privateObjectIsOn = false;
                 }
-            });
+            }
         }
     }
 
     if (data.isPrivateStyling && typeof data.privateAddonImageIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
-            Object.keys(addonImageStyling).forEach(key => {
+            const keys = Object.keys(addonImageStyling);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
                 if (data.styling.hasOwnProperty(key)) {
                     data.privateAddonImageIsOn = true;
-                    return;
+                    break;
                 } else {
                     data.privateAddonImageIsOn = false;
                 }
-            });
+            }
         }
     }
 
     if (data.isPrivateStyling && typeof data.privateAddonIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
-            Object.keys(addonStyling).forEach(key => {
+            const keys = Object.keys(addonStyling);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
                 if (data.styling.hasOwnProperty(key)) {
                     data.privateAddonIsOn = true;
-                    return;
+                    break;
                 } else {
                     data.privateAddonIsOn = false;
                 }
-            });
+            }
         }
     }
 
     if (data.isPrivateStyling && typeof data.privateBackgroundIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
-            Object.keys(backgroundStyling).forEach(key => {
+            const keys = Object.keys(backgroundStyling);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
                 if (data.styling.hasOwnProperty(key)) {
                     data.privateBackgroundIsOn = true;
-                    return;
+                    break;
                 } else {
                     data.privateBackgroundIsOn = false;
                 }
-            });
+            }
         }
     }
 
     if (isRow) {
         if (data.isPrivateStyling && typeof data.privateRowImageIsOn === 'undefined') {
             if (typeof data.styling !== 'undefined') {
-                Object.keys(rowImageStyling).forEach(key => {
+                const keys = Object.keys(rowImageStyling);
+                for (let i = 0; i < keys.length; i++) {
+                    const key = keys[i];
                     if (data.styling.hasOwnProperty(key)) {
                         data.privateRowImageIsOn = true;
-                        return;
+                        break;
                     } else {
                         data.privateRowImageIsOn = false;
                     }
-                });
+                }
             }
         }
 
         if (data.isPrivateStyling && typeof data.privateRowIsOn === 'undefined') {
             if (typeof data.styling !== 'undefined') {
-                Object.keys(rowStyling).forEach(key => {
+                const keys = Object.keys(rowStyling);
+                for (let i = 0; i < keys.length; i++) {
+                    const key = keys[i];
                     if (data.styling.hasOwnProperty(key)) {
                         data.privateRowIsOn = true;
-                        return;
+                        break;
                     } else {
                         data.privateRowIsOn = false;
                     }
-                });
+                }
             }
         }
     }

@@ -36,7 +36,7 @@
                     <div class={col2}>
                         <div class="d-column">
                             <FormField class="ml-4 mb-3">
-                                <Switch bind:checked={row.isButtonRow} onSMUISwitchChange={() => {
+                                <Switch bind:checked={() => row.isButtonRow ?? false, (e) => row.isButtonRow = e} onSMUISwitchChange={() => {
                                     if (row.isButtonRow) {
                                         row.image = '';
                                         row.buttonType = true;
@@ -65,13 +65,13 @@
                                 {/snippet}
                             </FormField>
                             <FormField class="ml-4 mb-3">
-                                <Switch bind:checked={row.isInfoRow} color="secondary" class="switch-scale" />
+                                <Switch bind:checked={() => row.isInfoRow ?? false, (e) => row.isInfoRow = e} color="secondary" class="switch-scale" />
                                 {#snippet label()}
                                     Non-activatable?
                                 {/snippet}
                             </FormField>
                             <FormField class="ml-4 mb-3">
-                                <Switch bind:checked={row.isResultRow} onSMUISwitchChange={() => {if (row.isResultRow) row.isGroupRow = false}} color="secondary" class="switch-scale" />
+                                <Switch bind:checked={() => row.isResultRow ?? false, (e) => row.isResultRow = e} onSMUISwitchChange={() => {if (row.isResultRow) row.isGroupRow = false}} color="secondary" class="switch-scale" />
                                 {#snippet label()}
                                     Selected Choices?
                                 {/snippet}
