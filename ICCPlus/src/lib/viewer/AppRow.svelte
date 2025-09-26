@@ -17,7 +17,7 @@
                         {/if}
                     {/if}
                     {#if row.title !== ''}
-                        <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
+                        {#key rowTitleKey}<h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(rowTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
                     {#if row.template === 5 && windowWidth > 1280}
                         {#if row.isButtonRow}
@@ -33,9 +33,11 @@
                         {/if}
                     {/if}
                     {#if row.titleText !== ''}
-                        <p class="mb-0" style={rowText}>
-                            {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
-                        </p>
+                        {#key rowTextKey}
+                            <p class="mb-0" style={rowText}>
+                                {@html DOMPurify.sanitize(rowTextKey, sanitizeArg)}
+                            </p>
+                        {/key}
                     {/if}
                     {#if row.template === 4 && windowWidth > 1280}
                         {#if row.isButtonRow}
@@ -55,12 +57,14 @@
                 {#if row.template === 2}
                     <div class="col p-0 text-center" style="max-width: {100 - rowImageBoxWidth}%">
                         {#if row.title !== ''}
-                            <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
+                            {#key rowTitleKey}<h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(rowTitleKey, sanitizeArg)}</h2>{/key}
                         {/if}
                         {#if row.titleText !== ''}
-                            <p class="mb-0" style={rowText}>
-                                {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
-                            </p>
+                            {#key rowTextKey}
+                                <p class="mb-0" style={rowText}>
+                                    {@html DOMPurify.sanitize(rowTextKey, sanitizeArg)}
+                                </p>
+                            {/key}
                         {/if}
                     </div>
                     <div class="col p-0 text-center" style="max-width: {rowImageBoxWidth}%">
@@ -92,12 +96,14 @@
                     </div>
                     <div class="col p-0 text-center" style="max-width: {100 - rowImageBoxWidth}%">
                         {#if row.title !== ''}
-                            <h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(replaceText(row.title), sanitizeArg)}</h2>
+                            {#key rowTitleKey}<h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(rowTitleKey, sanitizeArg)}</h2>{/key}
                         {/if}
                         {#if row.titleText !== ''}
-                            <p class="mb-0" style={rowText}>
-                                {@html DOMPurify.sanitize(replaceText(row.titleText), sanitizeArg)}
-                            </p>
+                            {#key rowTextKey}
+                                <p class="mb-0" style={rowText}>
+                                    {@html DOMPurify.sanitize(rowTextKey, sanitizeArg)}
+                                </p>
+                            {/key}
                         {/if}
                     </div>
                 {/if}
@@ -142,6 +148,8 @@
     let isEnabled = $derived(checkRequirements(row.requireds));
     let isButtonPressable = $derived(row.onlyIfNoChoices && row.currentChoices !== 0);
     let rowJustify = $derived(row.rowJustify ? `justify-${row.rowJustify}` : '');
+    let rowTitleKey = $derived(replaceText(row.title));
+    let rowTextKey = $derived(replaceText(row.titleText));
 
     let resultRow = $derived.by(() => {
         const result = [];

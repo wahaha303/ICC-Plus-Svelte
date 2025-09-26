@@ -14,7 +14,7 @@
                         {#if slot.stored}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclickcapture={() => {confirmDialog.action = () => loadLegacySave(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
+                                    <IconButton onclickcapture={() => {confirmDialog.action = () => loadLegacySave(pageNum + i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
                                 </div>
                                 <div class="col-sm-10 col-8">
                                     <div class="col-12 pt-1">
@@ -23,7 +23,7 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclickcapture={() => copyBuildCode(i)}><i class="mdi mdi-clipboard-outline"></i></IconButton>
+                                    <IconButton onclickcapture={() => copyBuildCode(pageNum + i)}><i class="mdi mdi-clipboard-outline"></i></IconButton>
                                 </div>
                             </div>
                         {:else}
@@ -52,7 +52,7 @@
                         {#if slot.stored}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclickcapture={() => {confirmDialog.action = () => loadApp(i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
+                                    <IconButton onclickcapture={() => {confirmDialog.action = () => loadApp(pageNum + i); confirmDialog.context = "Are you sure you want to load this build?<br>Any unsaved changes will be lost."; currentDialog = "dlgCommon";}}><i class="mdi mdi-play"></i></IconButton>
                                 </div>
                                 <div class="col-sm-10 col-8">
                                     <div class="col-12 pt-1">
@@ -61,17 +61,17 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclickcapture={() => {confirmDialog.action = () => removeSave(i); confirmDialog.context = "Are you sure you want to delete this build?<br>This action cannot be undone."; currentDialog = "dlgCommon";}}><i class="mdi mdi-trash-can"></i></IconButton>
+                                    <IconButton onclickcapture={() => {confirmDialog.action = () => removeSave(pageNum + i); confirmDialog.context = "Are you sure you want to delete this build?<br>This action cannot be undone."; currentDialog = "dlgCommon";}}><i class="mdi mdi-trash-can"></i></IconButton>
                                 </div>
                             </div>
                         {:else}
                             <div class="row gx-0" style="border-bottom: 1px solid">
                                 <div class="col-sm-1 col-2 d-flex align-items-center justify-center">
-                                    <IconButton onclickcapture={() => saveApp(i)}><i class="mdi mdi-content-save"></i></IconButton>
+                                    <IconButton onclickcapture={() => saveApp(pageNum + i)}><i class="mdi mdi-content-save"></i></IconButton>
                                 </div>
                                 <div class="col-sm-11 col-10">
                                     <div class="col-12">
-                                        <Textfield bind:value={slot.name} onclickcapture={() => slot.name = ''} onblur={() => {if (slot.name === '') slot.name = `Slot ${i + 1}`}} input$onkeydown={(e) => {if(e.key === 'Enter') saveApp(i)}} class="textbox-mini" variant="standard" />
+                                        <Textfield bind:value={slot.name} onclickcapture={() => slot.name = ''} onblur={() => {if (slot.name === '') slot.name = `Slot ${pageNum + i + 1}`}} input$onkeydown={(e) => {if(e.key === 'Enter') saveApp(pageNum + i)}} class="textbox-mini" variant="standard" />
                                     </div>
                                 </div>
                             </div>
@@ -148,6 +148,7 @@
     let slots = $derived(Array.from({ length: pageEnd - pageStart + 1}, (_, i) => buildSaveSlots[pageStart + i]));
     let legacySlots = $derived(Array.from({ length: pageEnd - pageStart + 1}, (_, i) => oldSaveSlots[pageStart + i]));
     let isLegacy = $state(false);
+    let pageNum = $derived((currentPage - 1) * 9);
 
     async function loadApp(index: number) {
         const key = `${location.pathname.replace(/\/index\.html$/, '/')}slot-${index}`;
@@ -202,7 +203,6 @@
             time: currentTimeString,
             app: getSelectedObjectId()
         }
-
         saveToSlot(slotData, key, index, 'buildStore', true);
     }
 

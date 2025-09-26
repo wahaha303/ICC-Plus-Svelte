@@ -83,15 +83,19 @@
         {#if required.type === 'gid'}
             {#each globalRequireds as globalRequired}
                 {#if globalRequired.showRequired}
-                    <div class="col req text-prewrap" style={scoreText}>
-                        {@html DOMPurify.sanitize(replaceText(getChoiceTitle(globalRequired)), sanitizeArg)}
-                    </div>
+                    {#key replaceText(getChoiceTitle(globalRequired))}
+                        <div class="col req text-prewrap" style={scoreText}>
+                            {@html DOMPurify.sanitize(replaceText(getChoiceTitle(globalRequired)), sanitizeArg)}
+                        </div>
+                    {/key}
                 {/if}
             {/each}
         {:else}
-            <div class="col req text-prewrap" style={scoreText}>
-                {@html DOMPurify.sanitize(replaceText(getChoiceTitle(required)), sanitizeArg)}
-            </div>
+            {#key reqTitle}
+                <div class="col req text-prewrap" style={scoreText}>
+                    {@html DOMPurify.sanitize(reqTitle, sanitizeArg)}
+                </div>
+            {/key}
         {/if}
     {/if}
 {/if}
@@ -139,6 +143,7 @@
         }
         return result;
     });
+    let reqTitle = $derived(replaceText(getChoiceTitle(required)));
 
     function copyRequirement() {
         if (typeof app.tmpRequired === 'undefined') app.tmpRequired = [];

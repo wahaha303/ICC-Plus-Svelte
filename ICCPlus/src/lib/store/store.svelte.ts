@@ -7,7 +7,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 
-export const appVersion = '2.5.6';
+export const appVersion = '2.5.7';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,

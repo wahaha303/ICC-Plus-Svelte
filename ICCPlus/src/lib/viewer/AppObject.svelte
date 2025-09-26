@@ -7,9 +7,11 @@
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
                     <div class="d-column w-100 p-0 align-items-center">
                         {#if row.resultShowRowTitle}
-                            <div class="col-12" style={scoreText}>
-                                {@html DOMPurify.sanitize(replaceText(oriRow.title !== '' ? oriRow.title : oriRow.debugTitle || ''), sanitizeArg)}
-                            </div>
+                            {#key oriTitleKey}
+                                <div class="col-12" style={scoreText}>
+                                    {@html DOMPurify.sanitize(oriTitleKey, sanitizeArg)}
+                                </div>
+                            {/key}
                         {/if}
                         {#if (choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
                             {#if choice.imageSourceTooltip}
@@ -20,9 +22,11 @@
                         {/if}
                         <div class="w-100">
                             {#if choice.title !== '' && !row.objectTitleRemoved}
-                                <h3 class="m-0" style={objectTitle}>
-                                    {@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}
-                                </h3>
+                                {#key choiceTitleKey}
+                                    <h3 class="m-0" style={objectTitle}>
+                                        {@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}
+                                    </h3>
+                                {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
@@ -51,9 +55,11 @@
                                 {/if}
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p class="mb-0" style={objectText}>
-                                    {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
-                                </p>
+                                {#key choiceTextKey}
+                                    <p class="mb-0 here" style={objectText}>
+                                        {@html DOMPurify.sanitize(choiceTextKey, sanitizeArg)}
+                                    </p>
+                                {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice}  selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
@@ -92,7 +98,7 @@
                         </div>
                         <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
                             {#if choice.title !== '' && !row.objectTitleRemoved}
-                                <h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}</h2>
+                                {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
@@ -114,9 +120,11 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p class="mb-0" style={objectText}>
-                                    {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
-                                </p>
+                                {#key choiceTextKey}
+                                    <p class="mb-0" style={objectText}>
+                                        {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
+                                    </p>
+                                {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
@@ -155,7 +163,7 @@
                     {:else if choice.template === 3}
                         <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
                             {#if choice.title !== '' && !row.objectTitleRemoved}
-                                <h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(replaceText(choice.title), sanitizeArg)}</h2>
+                                {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
@@ -177,9 +185,11 @@
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
-                                <p class="mb-0" style={objectText}>
-                                    {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
-                                </p>
+                                {#key choiceTextKey}
+                                    <p class="mb-0" style={objectText}>
+                                        {@html DOMPurify.sanitize(choiceTextKey, sanitizeArg)}
+                                    </p>
+                                {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
                                 <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row)} selectedOneLess={() => selectedOneLess(choice, row)} />
@@ -337,6 +347,9 @@
 
         return styles.join(' ');
     });
+    let oriTitleKey = $derived(replaceText(oriRow.title !== '' ? oriRow.title : oriRow.debugTitle || ''));
+    let choiceTitleKey = $derived(replaceText(choice.title));
+    let choiceTextKey = $derived(replaceText(choice.text));
 
     let multiChoiceText = $derived(`font-family: '${multiChoiceStyle.multiChoiceTextFont}'; color: ${hexToRgba(textStyle.scoreTextColor)}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`);
 

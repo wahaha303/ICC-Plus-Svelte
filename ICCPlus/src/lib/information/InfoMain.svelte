@@ -193,6 +193,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.7 / ${getDate('2025-09-26T15:00:00Z')}`,
+        text: `<span style="color: green">Save / Load</span>
+        - Fixed issue where saving project/build from pages other than page 1 overwrote slot on page 1
+        `
+    }, {
+        open: false,
         title: `v2.5.6 / ${getDate('2025-09-25T15:00:00Z')}`,
         text: `<span style="color: green">Miscellaneous</span>
         - Added explanation about Requirement to QnA section in Help and Changelog.

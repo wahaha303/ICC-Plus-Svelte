@@ -9,9 +9,11 @@
                 {/if}
             {/if}
             {#if addon.title !== '' && !row.addonTitleRemoved}
-                <h3 class="m-0" style={addonTitle}>
-                    {@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}
-                </h3>
+                {#key addonTitleKey}
+                    <h3 class="m-0" style={addonTitle}>
+                        {@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}
+                    </h3>
+                {/key}
             {/if}
             {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
                 {#each choice.scores as score}
@@ -36,9 +38,11 @@
                 {/if}
             {/if}
             {#if addon.text !== '' && !row.addonTextRemoved}
-                <p class="mb-0" style={addonText}>
-                    {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
-                </p>
+                {#key addonTextKey}
+                    <p class="mb-0" style={addonText}>
+                        {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
+                    </p>
+                {/key}
             {/if}
             {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
@@ -62,7 +66,7 @@
                 </div>
                 <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
                     {#if addon.title !== '' && !row.addonTitleRemoved}
-                        <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
+                        {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
                     {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
                         {#each choice.scores as score}
@@ -80,15 +84,17 @@
                         {/each}
                     {/if}
                     {#if addon.text !== '' && !row.addonTextRemoved}
-                        <p class="mb-0" style={addonText}>
-                            {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
-                        </p>
+                        {#key addonTextKey}
+                            <p class="mb-0" style={addonText}>
+                                {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
+                            </p>
+                        {/key}
                     {/if}
                 </div>
             {:else if addon.template === 3}
                 <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
                     {#if addon.title !== '' && !row.addonTitleRemoved}
-                        <h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(replaceText(addon.title), sanitizeArg)}</h2>
+                        {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
                     {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
                         {#each choice.scores as score}
@@ -106,9 +112,11 @@
                         {/each}
                     {/if}
                     {#if addon.text !== '' && !row.addonTextRemoved}
-                        <p class="mb-0" style={addonText}>
-                            {@html DOMPurify.sanitize(replaceText(addon.text), sanitizeArg)}
-                        </p>
+                        {#key addonTextKey}
+                            <p class="mb-0" style={addonText}>
+                                {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
+                            </p>
+                        {/key}
                     {/if}
                 </div>
                 <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
@@ -143,6 +151,8 @@
     let objectStyle = $derived(getStyling('privateObjectIsOn', row, choice));
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let addonEnabled = $derived(checkRequirements(addon.requireds));
+    let addonTitleKey = $derived(replaceText(addon.title));
+    let addonTextKey = $derived(replaceText(addon.text));
     
     let addonImageBoxWidth = $derived(typeof addonImageStyle.addonImageBoxWidth !== 'undefined' ? addonImageStyle.addonImageBoxWidth : 50);
 
