@@ -180,7 +180,6 @@
                 viewMode: 3,
                 dragMode: 'move',
             });
-            changeAspect();
         } else {
             if (cropper) {
                 cropper.destroy();

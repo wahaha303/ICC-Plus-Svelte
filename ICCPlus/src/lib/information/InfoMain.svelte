@@ -193,9 +193,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.5.8 / ${getDate('2025-09-27T04:00:00Z')}`,
+        text: `<span style="color: green">Miscellaneous</span>
+        - Fixed issue where aspect ratio was locked to 1:1 by default even before clicking Change Aspect.
+        `
+    }, {
+        open: false,
         title: `v2.5.7 / ${getDate('2025-09-26T15:00:00Z')}`,
         text: `<span style="color: green">Save / Load</span>
-        - Fixed issue where saving project/build from pages other than page 1 overwrote slot on page 1
+        - Fixed issue where saving project/build from pages other than page 1 overwrote slot on page 1.
         `
     }, {
         open: false,
