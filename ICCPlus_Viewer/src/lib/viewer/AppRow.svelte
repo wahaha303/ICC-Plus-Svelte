@@ -442,7 +442,6 @@
     }
 
     function copyTooltip(e: Event) {
-        e.preventDefault();
         navigator.clipboard.writeText(row.imageSourceTooltip!).then(() => {
             snackbarVariables.labelText = 'Tooltip copied to clipboard.';
             snackbarVariables.isOpen = true;

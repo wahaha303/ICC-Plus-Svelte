@@ -193,6 +193,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.6.1 / ${getDate('2025-10-05T16:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Allowed context menu to open on right-click for tooltip-enabled images.
+        `
+    }, {
+        open: false,
         title: `v2.6.0 / ${getDate('2025-10-05T10:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where color codes in Text Editor did not display actual applied color.

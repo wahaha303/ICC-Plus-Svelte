@@ -420,7 +420,6 @@
     });
 
     function copyTooltip(e: Event) {
-        e.preventDefault();
         navigator.clipboard.writeText(addon.imageSourceTooltip).then(() => {
             snackbarVariables.labelText = 'Tooltip copied to clipboard.';
             snackbarVariables.isOpen = true;

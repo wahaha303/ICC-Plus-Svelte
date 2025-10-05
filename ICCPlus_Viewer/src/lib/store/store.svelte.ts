@@ -6,7 +6,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.6.0';
+export const appVersion = '2.6.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,

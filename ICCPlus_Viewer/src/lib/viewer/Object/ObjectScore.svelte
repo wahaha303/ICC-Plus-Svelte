@@ -19,8 +19,9 @@
 
 <script lang="ts">
     import DOMPurify from 'dompurify';
-    import { checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, variableMap, hexToRgba, choiceMap } from '$lib/store/store.svelte';
+    import { checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, variableMap, hexToRgba, choiceMap, calcStackDiscount } from '$lib/store/store.svelte';
     import type { Choice, Row, Score } from '$lib/store/types';
+    import { evaluate } from '@antv/expr';
 
     let { score, row, choice }: { isEditModeOn?: boolean; score: Score; row: Row; choice: Choice } = $props();
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
