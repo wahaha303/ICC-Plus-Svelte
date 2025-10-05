@@ -85,7 +85,6 @@
         } else {
             text.push(`${score.afterText}`);
         }
-
         return text.join(' ');
     });
     let scoreBeforeText = $derived.by(() => {
@@ -128,6 +127,26 @@
     let scoreValueText = $derived.by(() => {
         let value = score.value;
         if (!score.hideValue) {
+            if (score.isRandom && !score.setValue) {
+                return scoreRandomValue;
+            }
+            if (!score.setValue && score.useExpression && score.expValue) {
+                const point = pointTypeMap.get(score.id);
+                if (typeof point !== 'undefined') {
+                    try {
+                        const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vPoint = pointTypeMap.get(vStr);
+                            if (typeof vPoint !== 'undefined') {
+                                return `${vPoint.startingSum}`;
+                            }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        value = evaluate(replaced);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
             if (score.discountShow) {
                 if (score.appliedDiscount) {
                     if (score.replaceText && score.hideDisValue) {
@@ -135,12 +154,25 @@
                     }
                     if (typeof score.discountScore !== 'undefined') value = score.discountScore;
                 } else {
-                    if (discountFlags.isWithinCount) {
+                    if (discountFlags.isWithinCount || discountFlags.isSimple) {
                         if (score.replaceText && score.hideDisValue) return '';
-                        if (typeof score.discountScore !== 'undefined') value = score.discountScore;
-                    } else if (discountFlags.isSimple) {
-                        if (score.hideDisValue) return '';
-                        if (typeof score.discountScore !== 'undefined') value = score.discountScore;
+                        if (score.useExpression && score.expValue) {
+                            if (score.discountedFrom && score.discountedFrom.length > 0) {
+                                for (let j = 0; j < score.discountedFrom.length; j++) {
+                                    const cMap = choiceMap.get(score.discountedFrom[j]);
+
+                                    if (typeof cMap !== 'undefined') {
+                                        const dChoice = cMap.choice;
+
+                                        value = calcStackDiscount(value, dChoice.discountOperator!, dChoice.discountValue!);
+
+                                        if (dChoice.discountLowLimitIsOn && typeof dChoice.discountLowLimit !== 'undefined') {
+                                            value = Math.max(value, dChoice.discountLowLimit);
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (typeof score.discountScore !== 'undefined') value = score.discountScore;
                     } else {
                         if (typeof score.tmpDiscount !== 'undefined') {
                             let hideValue = false;
@@ -152,15 +184,6 @@
                             }
                             if (hideValue) return '';
                         }
-                    }
-                }
-            }
-            if (score.isRandom && !score.setValue) {
-                if (typeof score.maxValue !== 'undefined') {
-                    if (score.maxValue < 0) {
-                        return `${scoreMaxValue} ~ ${scoreMinValue}`;
-                    } else {
-                        return `${scoreMinValue} ~ ${scoreMaxValue}`;
                     }
                 }
             }
@@ -178,39 +201,61 @@
         }
         return '';
     });
-    let scoreMaxValue = $derived.by(() => {
-        if (typeof score.maxValue !== 'undefined') {
-            let isNegative = score.maxValue < 0;
-            let value = Math.abs(score.maxValue);
-            if (!pointType?.allowFloat) {
-                value = Math.floor(value);
-            } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
+    let scoreRandomValue = $derived.by(() => {
+        let maxVal = 0;
+        let minVal = 0;
+        let isMaxNegative = false;
+        let isMinNegative = false;
+        if (score.useExpression) {
+            if (score.expMaxValue) {
+                try {
+                    const replaced = score.expMaxValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                        const vPoint = pointTypeMap.get(vStr);
+                        if (typeof vPoint !== 'undefined') {
+                            return `${vPoint.startingSum}`;
+                        }
+                        throw new Error(`Undefined variable: "${vStr}"`);
+                    });
+                    maxVal = evaluate(replaced);
+                    isMaxNegative = maxVal < 0;
+                } catch (e) {
+                    console.error(e);
+                }
             }
-            if (pointType?.plussOrMinusAdded) {
-                let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
-                return `${prefix}${value}`;
+            if (score.expMinValue) {
+                try {
+                    const replaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                        const vPoint = pointTypeMap.get(vStr);
+                        if (typeof vPoint !== 'undefined') {
+                            return `${vPoint.startingSum}`;
+                        }
+                        throw new Error(`Undefined variable: "${vStr}"`);
+                    });
+                    minVal = evaluate(replaced);
+                    isMinNegative = minVal < 0;
+                } catch (e) {
+                    console.error(e);
+                }
             }
-            return `${value}`;
+        } else if (typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
+            isMaxNegative = score.maxValue < 0;
+            isMinNegative = score.minValue < 0;
+            maxVal = Math.abs(score.maxValue);
+            minVal = Math.abs(score.minValue);
         }
-        return '';
-    });
-    let scoreMinValue = $derived.by(() => {
-        if (typeof score.minValue !== 'undefined') {
-            let isNegative = score.minValue < 0;
-            let value = Math.abs(score.minValue);
-            if (!pointType?.allowFloat) {
-                value = Math.floor(value);
-            } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
-            }
-            if (pointType?.plussOrMinusAdded) {
-                let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
-                return `${prefix}${value}`;
-            }
-            return `${value}`;
+        if (!pointType?.allowFloat) {
+            maxVal = Math.floor(maxVal);
+            minVal = Math.floor(minVal);
+        } else {
+            maxVal = maxVal % 1 === 0 ? maxVal : parseFloat(maxVal.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
+            minVal = minVal % 1 === 0 ? minVal : parseFloat(minVal.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
         }
-        return '';
+        if (pointType?.plussOrMinusAdded) {
+            let maxPrefix = pointType.plussOrMinusInverted ? (isMaxNegative ? '-' : '+') : (isMaxNegative ? '+' : '-');
+            let minPrefix = pointType.plussOrMinusInverted ? (isMinNegative ? '-' : '+') : (isMinNegative ? '+' : '-');
+            return isMaxNegative ? `${maxPrefix}${maxVal} ~ ${minPrefix}${minVal}` : `${minPrefix}${minVal} ~ ${maxPrefix}${maxVal}`;
+        }
+        return isMaxNegative ? `${maxVal} ~ ${minVal}` : `${minVal} ~ ${maxVal}`;
     });
     let checkNegative = $derived.by(() => {
         if (score.discountShow) {

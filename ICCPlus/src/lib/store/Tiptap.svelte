@@ -145,6 +145,7 @@
     import { BackgroundColor, Color, FontSize, LineHeight } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
     import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle, CustomBulletList, CustomOrderList, CustomListItem } from './SanitizeExtensions';
+    import { rgbToHex } from './store.svelte';
 
     type Params = {
         callback: () => void;
@@ -585,10 +586,16 @@
     }
 
     function toggleTextColor() {
+        if (editor) {
+            textColor = rgbToHex(editor.getAttributes('textStyle').color) || textColor;
+        }
         isTextColor = !isTextColor;
     }
 
     function toggleBackgroundColor() {
+        if (editor) {
+            backgroundColor = rgbToHex(editor.getAttributes('textStyle').backgroundColor) || backgroundColor;
+        }
         isBackgroundColor = !isBackgroundColor;
     }
 

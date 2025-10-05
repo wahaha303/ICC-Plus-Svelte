@@ -1,7 +1,7 @@
 {
   "name": "iccplus",
   "private": true,
-  "version": "2.5.8",
+  "version": "2.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -28,6 +28,7 @@
     "vite": "^7.1.5"
   },
   "dependencies": {
+    "@antv/expr": "^1.0.2",
     "@smui-extra/accordion": "^8.0.3",
     "@smui-extra/autocomplete": "^8.0.3",
     "@smui-extra/chip-input": "^8.0.3",

@@ -56,7 +56,7 @@
                             {/if}
                             {#if choice.text !== '' && !row.objectTextRemoved}
                                 {#key choiceTextKey}
-                                    <p class="mb-0 here" style={objectText}>
+                                    <p class="mb-0" style={objectText}>
                                         {@html DOMPurify.sanitize(choiceTextKey, sanitizeArg)}
                                     </p>
                                 {/key}
@@ -261,11 +261,12 @@
     import ObjectRequired from './Object/ObjectRequired.svelte';
     import ObjectScore from './Object/ObjectScore.svelte';
 	import type { ActivatedMap, Choice, Row, TempScore } from '$lib/store/types';
-	import { app, choiceMap, groupMap, getStyling, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, winWidth, applyWidth, applyTemplate, revertTemplate, revertWidth, hexToRgba } from '$lib/store/store.svelte';
+	import { app, choiceMap, groupMap, getStyling, checkRequirements, sanitizeArg, replaceText, pointTypeMap, activatedMap, variableMap, rowMap, wordMap, bgmPlayer, tmpActivatedMap, mdObjects, bgmVariables, objectWidthToNum, selectDiscount, deselectDiscount, checkPoints, cleanActivated, initYoutubePlayer, playBgm, dlgVariables, snackbarVariables, duplicateRow, winWidth, applyWidth, applyTemplate, revertTemplate, revertWidth, hexToRgba, expDiscount, setScoreValue } from '$lib/store/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
     import { tick } from 'svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
+    import { evaluate } from '@antv/expr';
 
     export { activateObject };
     
@@ -755,13 +756,26 @@
                 let group = groupMap.get(key);
                 if (typeof group !== 'undefined') {
                     for (let j = 0; j < group.elements.length; j++) {
-                        if (!activatedMap.has(group.elements[j])) {
-                            listMap.set(group.elements[j], num);
+                        const cMap = choiceMap.get(group.elements[j]);
+                        
+                        if (typeof cMap !== 'undefined') {
+                            const gChoice = cMap.choice;
+                            const reqCheck = gChoice.isSelectableMultiple && gChoice.isMultipleUseVariable && typeof gChoice.numMultipleTimesPluss !== 'undefined' && gChoice.numMultipleTimesPluss >= gChoice.multipleUseVariable + num && !gChoice.isInfoRow && !gChoice.isNotSelectable && checkRequirements(gChoice.requireds);
+                            if (!activatedMap.has(gChoice.id) || reqCheck) {
+                                listMap.set(gChoice.id, num);
+                            }
                         }
                     }
                 } else {
-                    if (!activatedMap.has(key)) {
-                        listMap.set(key, num);
+                    const cMap = choiceMap.get(key);
+
+                    if (typeof cMap !== 'undefined') {
+                        const lChoice = cMap.choice;
+                        const reqCheck = lChoice.isSelectableMultiple && lChoice.isMultipleUseVariable && typeof lChoice.numMultipleTimesPluss !== 'undefined' && lChoice.numMultipleTimesPluss >= lChoice.multipleUseVariable + num && !lChoice.isInfoRow && !lChoice.isNotSelectable && checkRequirements(lChoice.requireds);
+
+                        if (!activatedMap.has(key) || reqCheck) {
+                            listMap.set(key, num);
+                        }
                     }
                 }
             }
@@ -774,13 +788,15 @@
             }
             let result: string[] = [];
             for (let i = 0; i < actNum;) {
-                let id = listArray[i];
-                let cMap = choiceMap.get(id);
+                const id = listArray[i];
+                const cMap = choiceMap.get(id);
                 if (typeof cMap !== 'undefined') {
-                    let rndRow = cMap.row;
-                    let rndChoice = cMap.choice;
-                    selectForceActivate(localChoice, rndChoice, rndRow, listMap.get(id) || 0);
-                    if (!rndChoice.isActive) {
+                    const rndRow = cMap.row;
+                    const rndChoice = cMap.choice;
+                    const choiceNum = listMap.get(id) || 0;
+                    const rndNum = rndChoice.multipleUseVariable;
+                    selectForceActivate(localChoice, rndChoice, rndRow, choiceNum);
+                    if (!rndChoice.isActive || (rndChoice.isSelectableMultiple && rndChoice.isMultipleUseVariable && rndChoice.multipleUseVariable === rndNum)) {
                         if (result.length < actNum && listArray.length > repeatNum) {
                             listArray[i] = listArray[repeatNum++];
                             if (typeof rndChoice.activatedFrom !== 'undefined') {
@@ -792,7 +808,8 @@
                             break;
                         }
                     }
-                    result.push(id);
+                    let item = choiceNum > 0 ? `${id}/ON#${choiceNum}` : id;
+                    result.push(item);
                 }
                 i++;
             }
@@ -924,7 +941,8 @@
                                             aRow.currentChoices -= 1;
                                             if (lPoint) lPoint.startingSum -= tmpScore;
                                             if (beforeDeselected !== afterDeselected) {
-                                                let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                                                if (!aScore.setValue) setScoreValue(point, aScore);
+                                                let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.appliedDiscount ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
                                                 let isApplied = false;
                                                 if (beforeDeselected) {
@@ -932,7 +950,7 @@
                                                         const mul = aChoice.multipleUseVariable;
 
                                                         for (let l = mul - 1; l >= 0; l--) {
-                                                            if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[k]) {
+                                                            if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
                                                                 if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
                                                                     if (aChoice.forcedActivated && aChoice.isActive) {
                                                                         aChoice.forcedActivated = false;
@@ -981,6 +999,7 @@
                                                             }
                                                         }
                                                     }
+                                                    if (aScore.setValue) delete aScore.setValue;
                                                 } else {
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
@@ -1185,7 +1204,8 @@
                                             aRow.currentChoices += 1;
                                             if (lPoint) lPoint.startingSum -= tmpScore;
                                             if (beforeSelected !== afterSelected) {
-                                                let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                                                if (!aScore.setValue) setScoreValue(point, aScore);
+                                                let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.appliedDiscount ? aScore.discountScore : aScore.value;
                                                 scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
                                                 let isApplied = false;
                                                 if (beforeSelected) {
@@ -1242,6 +1262,7 @@
                                                             }
                                                         }
                                                     }
+                                                    if (aScore.setValue) delete aScore.setValue;
                                                 } else {
                                                     if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                         const mul = aChoice.multipleUseVariable;
@@ -1592,6 +1613,9 @@
                                     point.startingSum -= val;
                                     point.startingSum += mdChoice.startingSumAtDivide[i].value;
                                 }
+                                if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                                    point.startingSum = mdChoice.startingSumAtSet[i].value;
+                                }
                                 if (mdChoice.id === localChoice.id) {
                                     idx = j;
                                     break;
@@ -1610,13 +1634,18 @@
                                     point.startingSum /= mdChoice.startingSumAtDivide[i].calcVal;
                                     point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
                                 }
+                                if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                                    mdChoice.startingSumAtSet[i].value = point.startingSum;
+                                    point.startingSum = mdChoice.startingSumAtSet[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
                             }
                         }
                     }
 
                     delete localChoice.multiplyPointtypeIsOnCheck;
                     delete localChoice.startingSumAtMultiply;
-                    if (!localChoice.dividePointtypeIsOnCheck) mdObjects.splice(idx, 1);
+                    if (!localChoice.dividePointtypeIsOnCheck && !localChoice.setPointtypeIsOnCheck) mdObjects.splice(idx, 1);
                 }
 
                 if (localChoice.dividePointtypeIsOnCheck && typeof localChoice.pointTypeToDivide !== 'undefined') {
@@ -1640,6 +1669,9 @@
                                     point.startingSum -= val;
                                     point.startingSum += mdChoice.startingSumAtDivide[i].value;
                                 }
+                                if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                                    point.startingSum = mdChoice.startingSumAtSet[i].value;
+                                }
                                 if (mdChoice.id === localChoice.id) {
                                     idx = j;
                                     break;
@@ -1658,12 +1690,73 @@
                                     point.startingSum /= mdChoice.startingSumAtDivide[i].calcVal;
                                     point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
                                 }
+                                if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                                    mdChoice.startingSumAtSet[i].value = point.startingSum;
+                                    point.startingSum = mdChoice.startingSumAtSet[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
                             }
                         }
                     }
 
                     delete localChoice.dividePointtypeIsOnCheck;
                     delete localChoice.startingSumAtDivide;
+                    if (!localChoice.setPointtypeIsOnCheck) mdObjects.splice(idx, 1);
+                }
+
+                if (localChoice.setPointtypeIsOnCheck && typeof localChoice.pointTypeToSet !== 'undefined') {
+                    let idx = 0;
+                    for (let i = 0; i < localChoice.pointTypeToSet.length; i++) {
+                        let point = pointTypeMap.get(localChoice.pointTypeToSet[i]);
+
+                        if (typeof point !== 'undefined') {
+                            for (let j = mdObjects.length - 1; j >= 0; j--) {
+                                let mdChoice = mdObjects[j];
+
+                                if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                                    let val = mdChoice.startingSumAtMultiply[i].value * mdChoice.startingSumAtMultiply[i].calcVal;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    point.startingSum -= val;
+                                    point.startingSum += mdChoice.startingSumAtMultiply[i].value;
+                                }
+                                if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                                    let val = mdChoice.startingSumAtDivide[i].value / mdChoice.startingSumAtDivide[i].calcVal;
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                    point.startingSum -= val;
+                                    point.startingSum += mdChoice.startingSumAtDivide[i].value;
+                                }
+                                if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                                    point.startingSum = mdChoice.startingSumAtSet[i].value;
+                                }
+                                if (mdChoice.id === localChoice.id) {
+                                    idx = j;
+                                    break;
+                                }
+                            }
+                            for (let j = idx + 1;  j < mdObjects.length; j++) {
+                                let mdChoice = mdObjects[j];
+
+                                if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                                    mdChoice.startingSumAtMultiply[i].value = point.startingSum;
+                                    point.startingSum *= mdChoice.startingSumAtMultiply[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
+                                if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                                    mdChoice.startingSumAtDivide[i].value = point.startingSum;
+                                    point.startingSum /= mdChoice.startingSumAtDivide[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
+                                if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                                    mdChoice.startingSumAtSet[i].value = point.startingSum;
+                                    point.startingSum = mdChoice.startingSumAtSet[i].calcVal;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
+                                }
+                            }
+                        }
+                    }
+
+                    delete localChoice.setPointtypeIsOnCheck;
+                    delete localChoice.startingSumAtSet;
                     mdObjects.splice(idx, 1);
                 }
 
@@ -2064,10 +2157,8 @@
             for (let i = 0; i < localChoice.scores.length; i++) {
                 const score = localChoice.scores[i];
                 const point = pointTypeMap.get(score.id);
-                if (typeof point !== 'undefined' && score.isRandom && !score.setValue && typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
-                    score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
-                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
-                    score.setValue = true;
+                if (typeof point !== 'undefined' && !score.setValue){
+                    setScoreValue(point, score);
                 }
             }
             const pointCheck = checkPoints(localChoice, true);
@@ -2130,6 +2221,9 @@
                             const point = pointTypeMap.get(score.id);
                             if (typeof point !== 'undefined') {
                                 let val = score.value;
+                                if (score.useExpression && score.setValue) {
+                                    expDiscount(point, score);
+                                }
                                 if (score.appliedDiscount && typeof score.discountScore !== 'undefined') {
                                     val = score.discountScore;
                                 } else if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
@@ -2327,28 +2421,12 @@
                             let point = pointTypeMap.get(localChoice.pointTypeToDivide[i]);
 
                             if (typeof point !== 'undefined') {
-                                if (localChoice.dividePointtypeIsId && typeof localChoice.divideWithThis === 'string') {
-                                    let calcPoint = pointTypeMap.get(localChoice.divideWithThis);
-
-                                    if (typeof calcPoint !== 'undefined') {
-                                        if (calcPoint.startingSum === 0) {
-                                            count++;
-                                        } else {
-                                            localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: calcPoint.startingSum};
-                                            point.startingSum /= calcPoint.startingSum;
-                                            point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
-                                        }
-                                    } else {
-                                        count++;
-                                    }
-                                } else if (typeof localChoice.divideWithThis === 'number') {
-                                    if (localChoice.dividedWithThis === 0) {
-                                        count++;
-                                    } else {
-                                        localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: localChoice.divideWithThis};
-                                        point.startingSum /= localChoice.divideWithThis;
-                                        point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
-                                    }
+                                if (localChoice.dividedWithThis === 0) {
+                                    count++;
+                                } else {
+                                    localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: localChoice.divideWithThis};
+                                    point.startingSum /= localChoice.divideWithThis;
+                                    point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
                                 }
                             } else {
                                 count++;
@@ -2356,6 +2434,38 @@
                         }
                         if (count === localChoice.pointTypeToDivide.length) delete localChoice.dividePointtypeIsOnCheck;
                         if (!localChoice.multiplyPointtypeIsOnCheck && localChoice.dividePointtypeIsOnCheck) mdObjects.push(localChoice);
+                    }
+
+                    if (localChoice.setPointtypeIsOn && typeof localChoice.pointTypeToSet !== 'undefined' && typeof localChoice.setWithThis !== 'undefined') {
+                        let count = 0;
+                        localChoice.setPointtypeIsOnCheck = true;
+                        if (typeof localChoice.startingSumAtSet !== 'object') localChoice.startingSumAtSet = [];
+                        for (let i = 0; i < localChoice.pointTypeToSet.length; i++) {
+                            let point = pointTypeMap.get(localChoice.pointTypeToSet[i]);
+
+                            if (typeof point !== 'undefined') {
+                                let val = 0;
+                                try {
+                                    const replaced = localChoice.setWithThis.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                                        const vPoint = pointTypeMap.get(vStr);
+                                        if (typeof vPoint !== 'undefined') {
+                                            return `${vPoint.startingSum}`;
+                                        }
+                                        throw new Error(`Undefined variable: "${vStr}"`);
+                                    });
+                                    val = evaluate(replaced);
+                                    val = point.allowFloat ? val : Math.floor(val);
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                                localChoice.startingSumAtSet[i] = {value: point.startingSum, calcVal: val};
+                                point.startingSum = val;
+                            } else {
+                                count++;
+                            }
+                        }
+                        if (count === localChoice.pointTypeToSet.length) delete localChoice.setPointtypeIsOnCheck;
+                        if (!localChoice.multiplyPointtypeIsOnCheck && !localChoice.dividePointtypeIsOnCheck && localChoice.setPointtypeIsOnCheck) mdObjects.push(localChoice);
                     }
 
                     if (localChoice.isChangeVariables && typeof localChoice.changedVariables !== 'undefined') {
@@ -2679,30 +2789,30 @@
                     }
                 }
 
-                if (localChoice.customTextfieldIsOn && !isOverDlg) {
-                    wordDialog.choice = localChoice;
-                    wordDialog.row = localRow;
-                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                    wordDialog.prevText = localChoice.wordChangeSelect || '';
-                    wordDialog.isWord = true;
-                    currentDialog = 'dlgCommon';
-                    
-                    return;
-                }
-
-                if (localChoice.confirmIsOn && !isOverDlg) {
-                    wordDialog.choice = localChoice;
-                    wordDialog.row = localRow;
-                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                    wordDialog.isWord = false;
-                    currentDialog = 'dlgCommon';
-                    
-                    return;
-                }
-
                 if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
                     if (!localChoice.selectDelayTimer) {
                         localChoice.selectDelayTimer = window.setTimeout(() => {
+                            if (localChoice.customTextfieldIsOn && !isOverDlg) {
+                                wordDialog.choice = localChoice;
+                                wordDialog.row = localRow;
+                                wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                wordDialog.prevText = localChoice.wordChangeSelect || '';
+                                wordDialog.isWord = true;
+                                currentDialog = 'dlgCommon';
+                                
+                                return;
+                            }
+
+                            if (localChoice.confirmIsOn && !isOverDlg) {
+                                wordDialog.choice = localChoice;
+                                wordDialog.row = localRow;
+                                wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                wordDialog.isWord = false;
+                                currentDialog = 'dlgCommon';
+                                
+                                return;
+                            }
+
                             if (linkedObjects.indexOf(localChoice.id) === -1) {
                                 if (localChoice.isFadeTransition) {
                                     if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
@@ -2736,6 +2846,27 @@
                         }, localChoice.selectDelayTime);
                     }
                 } else {
+                    if (localChoice.customTextfieldIsOn && !isOverDlg) {
+                        wordDialog.choice = localChoice;
+                        wordDialog.row = localRow;
+                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                        wordDialog.prevText = localChoice.wordChangeSelect || '';
+                        wordDialog.isWord = true;
+                        currentDialog = 'dlgCommon';
+                        
+                        return;
+                    }
+
+                    if (localChoice.confirmIsOn && !isOverDlg) {
+                        wordDialog.choice = localChoice;
+                        wordDialog.row = localRow;
+                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                        wordDialog.isWord = false;
+                        currentDialog = 'dlgCommon';
+                        
+                        return;
+                    }
+
                     if (linkedObjects.indexOf(localChoice.id) === -1) {
                         if (localChoice.isFadeTransition) {
                             if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
@@ -2818,10 +2949,8 @@
             for (let i = 0; i < localChoice.scores.length; i++) {
                 const score = localChoice.scores[i];
                 const point = pointTypeMap.get(score.id);
-                if (typeof point !== 'undefined' && score.isRandom && !score.setValue && typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
-                    score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
-                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
-                    score.setValue = true;
+                if (typeof point !== 'undefined' && !score.setValue){
+                    setScoreValue(point, score);
                 }
             }
             const pointCheck = checkPoints(localChoice, true);
@@ -2899,6 +3028,9 @@
                                 const point = pointTypeMap.get(score.id);
                                 if (typeof point !== 'undefined') {
                                     let val = score.value;
+                                    if (score.useExpression && score.setValue) {
+                                        expDiscount(point, score);
+                                    }
                                     if (score.appliedDiscount && typeof score.discountScore !== 'undefined') {
                                         val = score.discountScore;
                                     } else if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
@@ -3540,11 +3672,13 @@
                     if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
                         if (localChoice.isActivateRandom && typeof localChoice.activatedRandomMul !== 'undefined' && typeof localChoice.activatedRandomMul[selNum] !== 'undefined') {
                             for (let i = 0; i < localChoice.activatedRandomMul[selNum].length; i++) {
-                                const cMap = choiceMap.get(localChoice.activatedRandomMul[selNum][i]);
+                                const cID = localChoice.activatedRandomMul[selNum][i].split('/ON#');
+                                const cMap = choiceMap.get(cID[0]);
                                 if (typeof cMap !== 'undefined') {
                                     const fRow = cMap.row;
                                     const fChoice = cMap.choice;
-                                    deselectForceActivate(localChoice, fChoice, fRow, 0);
+                                    const forceNum = cID.length > 1 ? Number(cID[1]) : 0;
+                                    deselectForceActivate(localChoice, fChoice, fRow, forceNum);
                                 }
                             }
                             localChoice.activatedRandomMul.splice(selNum, 1);

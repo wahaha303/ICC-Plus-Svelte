@@ -358,8 +358,8 @@ img {
 .w-14 {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 14.28% !important;
-    flex: 0 0 14.28% !important;
-    max-width: 14.28%;
+    flex: 0 0 calc(100% / 7) !important;
+    max-width: calc(100% / 7);
 }
 .w-12 {
     -webkit-box-flex: 0;
@@ -369,9 +369,9 @@ img {
 }
 .w-11 {
     -webkit-box-flex: 0;
-    -ms-flex: 0 0 11% !important;
-    flex: 0 0 11% !important;
-    max-width: 11%;
+    -ms-flex: 0 0 11.11% !important;
+    flex: 0 0 calc(100% / 9) !important;
+    max-width: calc(100% / 9);
 }
 .w-10 {
     -webkit-box-flex: 0;
@@ -382,8 +382,8 @@ img {
 .w-9 {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 9.09% !important;
-    flex: 0 0 9.09% !important;
-    max-width: 9.09%;
+    flex: 0 0 calc(100% / 11) !important;
+    max-width: calc(100% / 11);
 }
 .bordered-panel {
     border-top-width: 1px !important;

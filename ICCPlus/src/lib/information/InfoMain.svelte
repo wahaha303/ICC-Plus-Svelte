@@ -193,6 +193,23 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.6.0 / ${getDate('2025-10-05T10:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where color codes in Text Editor did not display actual applied color.
+
+        <span style="color: green">Row</span>
+        - Fixed issue where some Choice Per Row values had inaccurate widths.
+
+        <span style="color: green">Choice</span>
+        - Added option to use formulas instead of numbers in Score.
+        - Added option to set points to a specific value using formulas in Function. 
+        (<i>Note: If you use points in the formula, the score will not update when the point’s value is changed after a choice has been selected.</i>)
+        - Fixed issue where inserted player image was not displayed when loading build.
+        - Fixed issue where multiple selectable choices activated by another multiple selectable choice did not deselect when that choice was deselected.
+        - Fixed issue where random score value changed each time build code was loaded.
+        `
+    }, {
+        open: false,
         title: `v2.5.8 / ${getDate('2025-09-27T04:00:00Z')}`,
         text: `<span style="color: green">Miscellaneous</span>
         - Fixed issue where aspect ratio was locked to 1:1 by default even before clicking Change Aspect.

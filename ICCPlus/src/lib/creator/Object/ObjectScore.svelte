@@ -29,14 +29,14 @@
                     {/snippet}
                 </FormField>
             {/if}
-            <FormField class="col-12">
+            <FormField class={col6}>
                 <Checkbox bind:checked={() => score.isNotRecalculatable ?? false, (e) => score.isNotRecalculatable = e} onchange={() => {
                     if (!score.isNotRecalculatable) {
                         delete score.isNotDiscountable;
                     }
                 }} />
                 {#snippet label()}
-                    Prevent Recalculation
+                    No Recalculation
                 {/snippet}    
             </FormField>
             <FormField class={col6}>
@@ -46,7 +46,7 @@
                     }
                 }} />
                 {#snippet label()}
-                    Prevent Discount
+                    No Discount
                 {/snippet}
             </FormField>
             <FormField class={col6}>
@@ -54,18 +54,53 @@
                     if (score.isRandom) {
                         score.minValue = 0;
                         score.maxValue = 0;
-                        score.setValue = false;
+                        if (!score.setValue) score.setValue = false;
+                        if (score.useExpression) {
+                            score.expMinValue = '';
+                            score.expMaxValue = '';
+                        }
                     } else {
                         delete score.isRandom;
                         delete score.minValue;
                         delete score.maxValue;
-                        delete score.setValue;
+                        if (score.useExpression) {
+                            delete score.expMinValue;
+                            delete score.expMaxValue;
+                        } else {
+                            delete score.setValue;
+                        }
                     }
                 }} />
                 {#snippet label()}
                     Enable Random
                 {/snippet}
             </FormField>
+            <Wrapper innerClass={col6} text="Point IDs must be wrapped in curly braces. (e.g. {'{point ID}'} * 2)">
+                <FormField>
+                    <Checkbox bind:checked={() => score.useExpression ?? false, (e) => score.useExpression = e} onchange={() => {
+                        if (score.useExpression) {
+                            score.expValue = '';
+                            if (!score.setValue) score.setValue = false;
+                            if (score.isRandom) {
+                                score.expMinValue = '';
+                                score.expMaxValue = '';
+                            }
+                        } else {
+                            delete score.useExpression;
+                            delete score.expValue;
+                            if (score.isRandom) {
+                                delete score.expMinValue;
+                                delete score.expMaxValue;
+                            } else {
+                                delete score.setValue;
+                            }
+                        }
+                    }} />
+                    {#snippet label()}
+                        Enter expression
+                    {/snippet}
+                </FormField>
+            </Wrapper>
         </div>
         <div class="row gx-3">
             <div class={col6}>
@@ -80,16 +115,23 @@
                     class="col-12 my-1"
                 />
                 {#if score.isRandom}
-                    <Textfield class="mb-1" bind:value={() => score.minValue ?? 0, (e) => score.minValue = e} onchange={() => {
-                        if (score.minValue && !pointType?.allowFloat) {
-                            score.minValue = Math.floor(score.minValue);
-                        }
-                    }} label="Minimum Value" type="number" variant="filled" />
-                    <Textfield class="mb-1" bind:value={() => score.maxValue ?? 0, (e) => score.maxValue = e} onchange={() => {
-                        if (score.maxValue && !pointType?.allowFloat) {
-                            score.maxValue = Math.floor(score.maxValue);
-                        }
-                    }} label="Maximum Value" type="number" variant="filled" />
+                    {#if score.useExpression}
+                        <Textfield class="mb-1" bind:value={() => score.expMinValue ?? '', (e) => score.expMinValue = e} label="Min Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
+                        <Textfield class="mb-1" bind:value={() => score.expMaxValue ?? '', (e) => score.expMaxValue = e} label="Max Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
+                    {:else}
+                        <Textfield class="mb-1" bind:value={() => score.minValue ?? 0, (e) => score.minValue = e} onchange={() => {
+                            if (score.minValue && !pointType?.allowFloat) {
+                                score.minValue = Math.floor(score.minValue);
+                            }
+                        }} label="Minimum Value" type="number" variant="filled" />
+                        <Textfield class="mb-1" bind:value={() => score.maxValue ?? 0, (e) => score.maxValue = e} onchange={() => {
+                            if (score.maxValue && !pointType?.allowFloat) {
+                                score.maxValue = Math.floor(score.maxValue);
+                            }
+                        }} label="Maximum Value" type="number" variant="filled" />
+                    {/if}
+                {:else if score.useExpression}
+                    <Textfield class="mb-1" bind:value={() => score.expValue ?? '', (e) => score.expValue = e} label="Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
                 {:else}
                     <Textfield class="mb-1" bind:value={score.value} onchange={() => {
                         if (!pointType?.allowFloat) {
@@ -163,8 +205,9 @@
     import ObjectRequired from './ObjectRequired.svelte';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, getPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba, choiceMap, deleteDiscount } from '$lib/store/store.svelte';
+    import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, getPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba, choiceMap, deleteDiscount, calcStackDiscount } from '$lib/store/store.svelte';
     import type { Choice, Row, Score } from '$lib/store/types';
+    import { evaluate } from '@antv/expr';
 
     let { isEditModeOn = false, score, row, choice, num = 0 }: { isEditModeOn?: boolean; score: Score; row?: Row; choice: Choice; num?: number } = $props();
     let width = $state(0);
@@ -280,6 +323,26 @@
     let scoreValueText = $derived.by(() => {
         let value = score.value;
         if (!score.hideValue) {
+            if (score.isRandom && !score.setValue) {
+                return scoreRandomValue;
+            }
+            if (!score.setValue && score.useExpression && score.expValue) {
+                const point = pointTypeMap.get(score.id);
+                if (typeof point !== 'undefined') {
+                    try {
+                        const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vPoint = pointTypeMap.get(vStr);
+                            if (typeof vPoint !== 'undefined') {
+                                return `${vPoint.startingSum}`;
+                            }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        value = evaluate(replaced);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
             if (score.discountShow) {
                 if (score.appliedDiscount) {
                     if (score.replaceText && score.hideDisValue) {
@@ -287,12 +350,25 @@
                     }
                     if (typeof score.discountScore !== 'undefined') value = score.discountScore;
                 } else {
-                    if (discountFlags.isWithinCount) {
+                    if (discountFlags.isWithinCount || discountFlags.isSimple) {
                         if (score.replaceText && score.hideDisValue) return '';
-                        if (typeof score.discountScore !== 'undefined') value = score.discountScore;
-                    } else if (discountFlags.isSimple) {
-                        if (score.hideDisValue) return '';
-                        if (typeof score.discountScore !== 'undefined') value = score.discountScore;
+                        if (score.useExpression && score.expValue) {
+                            if (score.discountedFrom && score.discountedFrom.length > 0) {
+                                for (let j = 0; j < score.discountedFrom.length; j++) {
+                                    const cMap = choiceMap.get(score.discountedFrom[j]);
+
+                                    if (typeof cMap !== 'undefined') {
+                                        const dChoice = cMap.choice;
+
+                                        value = calcStackDiscount(value, dChoice.discountOperator!, dChoice.discountValue!);
+
+                                        if (dChoice.discountLowLimitIsOn && typeof dChoice.discountLowLimit !== 'undefined') {
+                                            value = Math.max(value, dChoice.discountLowLimit);
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (typeof score.discountScore !== 'undefined') value = score.discountScore;
                     } else {
                         if (typeof score.tmpDiscount !== 'undefined') {
                             let hideValue = false;
@@ -304,15 +380,6 @@
                             }
                             if (hideValue) return '';
                         }
-                    }
-                }
-            }
-            if (score.isRandom && !score.setValue) {
-                if (typeof score.maxValue !== 'undefined') {
-                    if (score.maxValue < 0) {
-                        return `${scoreMaxValue} ~ ${scoreMinValue}`;
-                    } else {
-                        return `${scoreMinValue} ~ ${scoreMaxValue}`;
                     }
                 }
             }
@@ -330,39 +397,61 @@
         }
         return '';
     });
-    let scoreMaxValue = $derived.by(() => {
-        if (typeof score.maxValue !== 'undefined') {
-            let isNegative = score.maxValue < 0;
-            let value = Math.abs(score.maxValue);
-            if (!pointType?.allowFloat) {
-                value = Math.floor(value);
-            } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
+    let scoreRandomValue = $derived.by(() => {
+        let maxVal = 0;
+        let minVal = 0;
+        let isMaxNegative = false;
+        let isMinNegative = false;
+        if (score.useExpression) {
+            if (score.expMaxValue) {
+                try {
+                    const replaced = score.expMaxValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                        const vPoint = pointTypeMap.get(vStr);
+                        if (typeof vPoint !== 'undefined') {
+                            return `${vPoint.startingSum}`;
+                        }
+                        throw new Error(`Undefined variable: "${vStr}"`);
+                    });
+                    maxVal = evaluate(replaced);
+                    isMaxNegative = maxVal < 0;
+                } catch (e) {
+                    console.error(e);
+                }
             }
-            if (pointType?.plussOrMinusAdded) {
-                let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
-                return `${prefix}${value}`;
+            if (score.expMinValue) {
+                try {
+                    const replaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                        const vPoint = pointTypeMap.get(vStr);
+                        if (typeof vPoint !== 'undefined') {
+                            return `${vPoint.startingSum}`;
+                        }
+                        throw new Error(`Undefined variable: "${vStr}"`);
+                    });
+                    minVal = evaluate(replaced);
+                    isMinNegative = minVal < 0;
+                } catch (e) {
+                    console.error(e);
+                }
             }
-            return `${value}`;
+        } else if (typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
+            isMaxNegative = score.maxValue < 0;
+            isMinNegative = score.minValue < 0;
+            maxVal = Math.abs(score.maxValue);
+            minVal = Math.abs(score.minValue);
         }
-        return '';
-    });
-    let scoreMinValue = $derived.by(() => {
-        if (typeof score.minValue !== 'undefined') {
-            let isNegative = score.minValue < 0;
-            let value = Math.abs(score.minValue);
-            if (!pointType?.allowFloat) {
-                value = Math.floor(value);
-            } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
-            }
-            if (pointType?.plussOrMinusAdded) {
-                let prefix = pointType.plussOrMinusInverted ? (isNegative ? '-' : '+') : (isNegative ? '+' : '-');
-                return `${prefix}${value}`;
-            }
-            return `${value}`;
+        if (!pointType?.allowFloat) {
+            maxVal = Math.floor(maxVal);
+            minVal = Math.floor(minVal);
+        } else {
+            maxVal = maxVal % 1 === 0 ? maxVal : parseFloat(maxVal.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
+            minVal = minVal % 1 === 0 ? minVal : parseFloat(minVal.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
         }
-        return '';
+        if (pointType?.plussOrMinusAdded) {
+            let maxPrefix = pointType.plussOrMinusInverted ? (isMaxNegative ? '-' : '+') : (isMaxNegative ? '+' : '-');
+            let minPrefix = pointType.plussOrMinusInverted ? (isMinNegative ? '-' : '+') : (isMinNegative ? '+' : '-');
+            return isMaxNegative ? `${maxPrefix}${maxVal} ~ ${minPrefix}${minVal}` : `${minPrefix}${minVal} ~ ${maxPrefix}${maxVal}`;
+        }
+        return isMaxNegative ? `${maxVal} ~ ${minVal}` : `${minVal} ~ ${maxVal}`;
     });
     let checkNegative = $derived.by(() => {
         if (score.discountShow) {

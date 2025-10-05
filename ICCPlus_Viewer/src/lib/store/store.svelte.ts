@@ -4,8 +4,9 @@ import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
+import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.5.8';
+export const appVersion = '2.6.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1142,8 +1143,21 @@ export function getSelectedObjectId() {
         if (typeof cMap !== 'undefined') {
             const aChoice = cMap.choice;
             let text = id;
+            let rnd: string[] = [];
 
             if (val.multiple === 0) {
+                for (let i = 0; i < aChoice.scores.length; i++) {
+                    const score = aChoice.scores[i];
+
+                    if (score.isRandom && score.setValue) {
+                        rnd.push(`${i}:${score.value}`);
+                    }
+                }
+
+                if (rnd.length > 0) {
+                    text += `/RS#${rnd.join('/AND#')}`;
+                }
+
                 if (aChoice.isActivateRandom && aChoice.activatedRandom) {
                     text += `/RND#${aChoice.activatedRandom.join('/AND#').replace(/\/ON#/g, '/RON#')}`;
                 }
@@ -1159,8 +1173,20 @@ export function getSelectedObjectId() {
                 result.push(text);
             } else {
                 text += `/ON#${val.multiple}`;
+
+                for (let i = 0; i < aChoice.scores.length; i++) {
+                    const score = aChoice.scores[i];
+
+                    if (score.isRandom && score.setValue) {
+                        rnd.push(`${i}:${score.value}`);
+                    }
+                }
+
+                if (rnd.length > 0) {
+                    text += `/RS#${rnd.join('/AND#')}`;
+                }
                 
-                if (aChoice.isActivateRandom&& aChoice.activatedRandomMul) {
+                if (aChoice.isActivateRandom && aChoice.activatedRandomMul) {
                     text += `/RND#${aChoice.activatedRandomMul.flat(2).join('/AND#').replace(/\/ON#/g, '/RON#')}`;
                 }
 
@@ -1549,11 +1575,11 @@ function getPriority(operator: string, priority: number = 1) {
             return priority * 10 + 2;
     }
 }
-function evaluate(node: number | ExprNode): number {
+function evaluateNode(node: number | ExprNode): number {
     if (typeof node === 'number') return node;
 
-    const left = evaluate(node.left);
-    const right = evaluate(node.right);
+    const left = evaluateNode(node.left);
+    const right = evaluateNode(node.right);
 
     switch (node.operator) {
         case '1': return left + right;
@@ -1629,7 +1655,7 @@ export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> =
                         }
                     }
 
-                    const result = evaluate(current);
+                    const result = evaluateNode(current);
 
                     switch (req.operator) {
                         case '1':
@@ -2060,7 +2086,7 @@ export function initStyling(styling: any, oldVersion: boolean, isMain = false) {
         }
     }
 }
-function calcStackDiscount(scoreVal: number, operator: string, value: number) {
+export function calcStackDiscount(scoreVal: number, operator: string, value: number) {
     switch (operator) {
         case '1': return scoreVal - value;
         case '2': return scoreVal + value;
@@ -2625,13 +2651,35 @@ function updateDiscountTexts(localChoice: Choice, score: Score) {
     score.hideDisValue = localChoice.hideScoreValue || false;
     score.hideDisIcon = localChoice.hideScoreIcon || false;
 };
+export function expDiscount(point: PointType, score: Score) {
+    if (score.discountedFrom && score.discountedFrom.length > 0) {
+        for (let i = 0; i < score.discountedFrom.length; i++) {
+            const cMap = choiceMap.get(score.discountedFrom[i]);
+
+            if (typeof cMap !== 'undefined') {
+                const dChoice = cMap.choice;
+
+                let discountVal = calcStackDiscount(score.value, dChoice.discountOperator!, dChoice.discountValue!);
+
+                discountVal = point.allowFloat ? discountVal : Math.floor(discountVal);
+                let discountCal = discountVal;
+                if (dChoice.discountLowLimitIsOn && typeof dChoice.discountLowLimit !== 'undefined') {
+                    discountVal = Math.max(discountVal, dChoice.discountLowLimit);
+                }
+
+                score.discountScore = discountVal;
+                score.discountScoreCal = discountCal;
+            }
+        }
+    }
+};
 export function checkPoints(localChoice: Choice, isSel: boolean) {
     let isPositve = true;
     let scoreMap = new Map<string, number>();
 
     for (let i = 0; i < localChoice.scores.length; i++) {
         let score = localChoice.scores[i];
-        let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value;
         if (score.multiplyByTimes) {
             scoreVal = scoreVal * (Math.abs(localChoice.multipleUseVariable) + 1);
         }
@@ -2653,70 +2701,214 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
         }
     }
 
-    /*
-
-    if (localChoice.multiplyPointtypeIsOn && typeof localChoice.pointTypeToMultiply !== 'undefined' && typeof localChoice.multiplyWithThis !== 'undefined') {
+    if (localChoice.multiplyPointtypeIsOnCheck && typeof localChoice.pointTypeToMultiply !== 'undefined') {
+        let idx = 0;
         for (let i = 0; i < localChoice.pointTypeToMultiply.length; i++) {
-            let id = localChoice.pointTypeToMultiply[i];
-            let point = pointTypeMap.get(id);
+            let point = pointTypeMap.get(localChoice.pointTypeToMultiply[i]);
 
             if (typeof point !== 'undefined' && point.belowZeroNotAllowed) {
-                let data = scoreMap.get(id);
+                let pointVal = point.startingSum;
+                for (let j = mdObjects.length - 1; j >= 0; j--) {
+                    let mdChoice = mdObjects[j];
 
-                if (typeof localChoice.multiplyWithThis === 'string') {
-                    let calPoint = pointTypeMap.get(localChoice.multiplyWithThis);
-
-                    if (typeof calPoint !== 'undefined') {
-                        if (typeof data !== 'undefined') {
-                            isNegative = isSel ? data * calPoint.startingSum < 0 : data / calPoint.startingSum < 0;
-                        } else {
-                            isNegative = isSel ? point.startingSum * calPoint.startingSum < 0 : point.startingSum / calPoint.startingSum < 0;
-                        }
+                    if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                        let val = mdChoice.startingSumAtMultiply[i].value * mdChoice.startingSumAtMultiply[i].calcVal;
+                        val = point.allowFloat ? val : Math.floor(val);
+                        pointVal -= val;
+                        pointVal += mdChoice.startingSumAtMultiply[i].value;
                     }
-                } else {
-                    if (typeof data !== 'undefined') {
-                        isNegative = isSel ? data * localChoice.multiplyWithThis < 0 : data / localChoice.multiplyWithThis < 0;
-                    } else {
-                        isNegative = isSel ? point.startingSum * localChoice.multiplyWithThis < 0 : point.startingSum / localChoice.multiplyWithThis < 0;
+                    if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                        let val = mdChoice.startingSumAtDivide[i].value / mdChoice.startingSumAtDivide[i].calcVal;
+                        val = point.allowFloat ? val : Math.floor(val);
+                        pointVal -= val;
+                        pointVal += mdChoice.startingSumAtDivide[i].value;
+                    }
+                    if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                        pointVal = mdChoice.startingSumAtSet[i].value;
+                    }
+                    if (mdChoice.id === localChoice.id) {
+                        idx = j;
+                        break;
                     }
                 }
+                for (let j = idx + 1;  j < mdObjects.length; j++) {
+                    let mdChoice = mdObjects[j];
+
+                    if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                        pointVal *= mdChoice.startingSumAtMultiply[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    } 
+                    if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                        pointVal /= mdChoice.startingSumAtDivide[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                    if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                        pointVal = mdChoice.startingSumAtSet[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                }
+
+                isPositve = isPositve && pointVal >= 0;
             }
         }
     }
 
-    if (localChoice.dividePointtypeIsOn && typeof localChoice.pointTypeToMultiply !== 'undefined' && typeof localChoice.divideWithThis !== 'undefined') {
-        for (let i = 0; i < localChoice.pointTypeToMultiply.length; i++) {
-            let id = localChoice.pointTypeToMultiply[i];
-            let point = pointTypeMap.get(id);
+    if (localChoice.dividePointtypeIsOnCheck && typeof localChoice.pointTypeToDivide !== 'undefined') {
+        let idx = 0;
+        for (let i = 0; i < localChoice.pointTypeToDivide.length; i++) {
+            let point = pointTypeMap.get(localChoice.pointTypeToDivide[i]);
 
             if (typeof point !== 'undefined' && point.belowZeroNotAllowed) {
-                let data = scoreMap.get(id);
+                let pointVal = point.startingSum;
+                for (let j = mdObjects.length - 1; j >= 0; j--) {
+                    let mdChoice = mdObjects[j];
 
-                if (typeof localChoice.divideWithThis === 'string') {
-                    let calPoint = pointTypeMap.get(localChoice.divideWithThis);
-
-                    if (typeof calPoint !== 'undefined') {
-                        if (typeof data !== 'undefined') {
-                            isNegative = isSel ? data / calPoint.startingSum < 0 : data * calPoint.startingSum < 0;
-                        } else {
-                            isNegative = isSel ? point.startingSum / calPoint.startingSum < 0 : point.startingSum * calPoint.startingSum < 0;
-                        }
+                    if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                        let val = mdChoice.startingSumAtMultiply[i].value * mdChoice.startingSumAtMultiply[i].calcVal;
+                        val = point.allowFloat ? val : Math.floor(val);
+                        pointVal -= val;
+                        pointVal += mdChoice.startingSumAtMultiply[i].value;
                     }
-                } else {
-                    if (typeof data !== 'undefined') {
-                        isNegative = isSel ? data / localChoice.divideWithThis < 0 : data * localChoice.divideWithThis < 0;
-                    } else {
-                        isNegative = isSel ? point.startingSum / localChoice.divideWithThis < 0 : point.startingSum * localChoice.divideWithThis < 0;
+                    if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                        let val = mdChoice.startingSumAtDivide[i].value / mdChoice.startingSumAtDivide[i].calcVal;
+                        val = point.allowFloat ? val : Math.floor(val);
+                        pointVal -= val;
+                        pointVal += mdChoice.startingSumAtDivide[i].value;
+                    }
+                    if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                        pointVal = mdChoice.startingSumAtSet[i].value;
+                    }
+                    if (mdChoice.id === localChoice.id) {
+                        idx = j;
+                        break;
                     }
                 }
+                for (let j = idx + 1;  j < mdObjects.length; j++) {
+                    let mdChoice = mdObjects[j];
+
+                    if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                        pointVal *= mdChoice.startingSumAtMultiply[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                    if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                        pointVal /= mdChoice.startingSumAtDivide[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                    if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                        pointVal = mdChoice.startingSumAtSet[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                }
+
+                isPositve = isPositve && pointVal >= 0;
             }
         }
     }
 
-    */
+    if (localChoice.setPointtypeIsOnCheck && typeof localChoice.pointTypeToSet !== 'undefined') {
+        let idx = 0;
+        for (let i = 0; i < localChoice.pointTypeToSet.length; i++) {
+            let point = pointTypeMap.get(localChoice.pointTypeToSet[i]);
+
+            if (typeof point !== 'undefined' && point.belowZeroNotAllowed) {
+                let pointVal = point.startingSum;
+                for (let j = mdObjects.length - 1; j >= 0; j--) {
+                    let mdChoice = mdObjects[j];
+
+                    if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                        let val = mdChoice.startingSumAtMultiply[i].value * mdChoice.startingSumAtMultiply[i].calcVal;
+                        val = point.allowFloat ? val : Math.floor(val);
+                        pointVal -= val;
+                        pointVal += mdChoice.startingSumAtMultiply[i].value;
+                    }
+                    if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                        let val = mdChoice.startingSumAtDivide[i].value / mdChoice.startingSumAtDivide[i].calcVal;
+                        val = point.allowFloat ? val : Math.floor(val);
+                        pointVal -= val;
+                        pointVal += mdChoice.startingSumAtDivide[i].value;
+                    }
+                    if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                        pointVal = mdChoice.startingSumAtSet[i].value;
+                    }
+                    if (mdChoice.id === localChoice.id) {
+                        idx = j;
+                        break;
+                    }
+                }
+                for (let j = idx + 1;  j < mdObjects.length; j++) {
+                    let mdChoice = mdObjects[j];
+
+                    if (mdChoice.multiplyPointtypeIsOnCheck && typeof mdChoice.startingSumAtMultiply !== 'undefined') {
+                        pointVal *= mdChoice.startingSumAtMultiply[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                    if (mdChoice.dividePointtypeIsOnCheck && typeof mdChoice.startingSumAtDivide !== 'undefined') {
+                        pointVal /= mdChoice.startingSumAtDivide[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                    if (mdChoice.setPointtypeIsOnCheck && typeof mdChoice.startingSumAtSet !== 'undefined') {
+                        pointVal = mdChoice.startingSumAtSet[i].calcVal;
+                        pointVal = point.allowFloat ? pointVal : Math.floor(pointVal);
+                    }
+                }
+
+                isPositve = isPositve && pointVal >= 0;
+            }
+        }
+    }
 
     return isPositve;
 };
+export function setScoreValue(point: PointType, score: Score) {
+    if (score.isRandom) {
+        if (score.useExpression) {
+            if (score.expMinValue && score.expMaxValue) {
+                try {
+                    const minReplaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                        const vPoint = pointTypeMap.get(vStr);
+                        if (typeof vPoint !== 'undefined') {
+                            return `${vPoint.startingSum}`;
+                        }
+                        throw new Error(`Undefined variable: "${vStr}"`);
+                    });
+                    const maxReplaced = score.expMaxValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                        const vPoint = pointTypeMap.get(vStr);
+                        if (typeof vPoint !== 'undefined') {
+                            return `${vPoint.startingSum}`;
+                        }
+                        throw new Error(`Undefined variable: "${vStr}"`);
+                    });
+                    const minValue = evaluate(minReplaced);
+                    const maxValue = evaluate(maxReplaced);
+                    score.value = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
+                    score.setValue = true;
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        } else if (typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
+            score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
+            score.value = point.allowFloat ? score.value : Math.floor(score.value);
+            score.setValue = true;
+        }
+    } else if (score.useExpression && score.expValue) {
+        try {
+            const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                const vPoint = pointTypeMap.get(vStr);
+                if (typeof vPoint !== 'undefined') {
+                    return `${vPoint.startingSum}`;
+                }
+                throw new Error(`Undefined variable: "${vStr}"`);
+            });
+            score.value = evaluate(replaced);
+            score.value = point.allowFloat ? score.value : Math.floor(score.value);
+            score.setValue = true;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
 export function cleanActivated() {
     const preserveList = new Set<string>();
     const reactivateList = new Set<string>();
@@ -3578,13 +3770,15 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
                                         aRow.currentChoices += 1;
                                         if (lPoint) lPoint.startingSum -= tmpScore;
                                         if (beforeSelected !== afterSelected) {
+                                            if (!aScore.setValue) setScoreValue(point, aScore);
                                             let scoreVal = aScore.discountIsOn && aScore.appliedDiscount && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                                            scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
                                             if (beforeSelected) {
                                                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                                                     const mul = aChoice.multipleUseVariable;
                                                     
                                                     for (let l = mul - 1; l >= 0; l--) {
-                                                        if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[k]) {
+                                                        if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
                                                             point.startingSum += scoreVal;
                                                             thisTmpScores.set(aScore.id, scoreVal);
                                                             aScore.isActiveMul[l] = false;
@@ -3637,27 +3831,47 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
 };
 function selectObject(str: string, newActivatedList: string[]) {
     let cStr = str.split('/IMG#');
-    const strImg = cStr.length > 1 ? cStr[1] : '';
+    const strImg = cStr.length > 1 ? cStr[1].replace(/\/CHAR#/g, ',') : '';
     cStr = cStr[0].split('/WORD#');
     const strWord = cStr.length > 1 ? cStr[1].replace(/\/CHAR#/g, ',') : '';
     cStr = cStr[0].split('/RND#');
     const strRnd = cStr.length > 1 ? cStr[1].split('/AND#') : '';
+    cStr = cStr[0].split('/RS#');
+    const strRS = cStr.length > 1 ? cStr[1] : '';
     const strId = cStr[0];
     const cMap = choiceMap.get(strId);
 
     if (typeof cMap !== 'undefined') {
         const localRow = cMap.row;
         const localChoice = cMap.choice;
+        const strRSMap = new Map<number, number>();
+
+        if (strRS) {
+            const rStr = strRS.split('/AND#');
+            for (let i = 0; i < rStr.length; i++) {
+                const sStr = rStr[i].split(':');
+                const index = Number(sStr[0]);
+                const value = Number(sStr[1]);
+
+                if (!Number.isNaN(index)) {
+                    strRSMap.set(index, Number.isNaN(value) ? 0 : value);
+                }
+            }
+        }
 
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             const point = pointTypeMap.get(score.id);
-            if (typeof point !== 'undefined' && score.isRandom && !score.setValue && typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
-                score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
-                score.value = point.allowFloat ? score.value : Math.floor(score.value);
-                score.setValue = true;
+            if (typeof point !== 'undefined' && !score.setValue){
+                if (strRSMap.size > 0 && strRSMap.has(i)) {
+                    score.value = strRSMap.get(i)!;
+                    score.setValue = true;
+                } else {
+                    setScoreValue(point, score);
+                }
             }
         }
+
         const tmpScores = new SvelteMap<string, number>();
 
         localChoice.isActive = true;
@@ -3717,6 +3931,9 @@ function selectObject(str: string, newActivatedList: string[]) {
                 const point = pointTypeMap.get(score.id);
                 if (typeof point !== 'undefined') {
                     let val = score.value;
+                    if (score.useExpression && score.setValue) {
+                        expDiscount(point, score);
+                    }
                     if (score.appliedDiscount && typeof score.discountScore !== 'undefined') {
                         val = score.discountScore;
                     } else if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
@@ -3992,28 +4209,12 @@ function selectObject(str: string, newActivatedList: string[]) {
                 let point = pointTypeMap.get(localChoice.pointTypeToDivide[i]);
 
                 if (typeof point !== 'undefined') {
-                    if (localChoice.dividePointtypeIsId && typeof localChoice.divideWithThis === 'string') {
-                        let calcPoint = pointTypeMap.get(localChoice.divideWithThis);
-
-                        if (typeof calcPoint !== 'undefined') {
-                            if (calcPoint.startingSum === 0) {
-                                count++;
-                            } else {
-                                localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: calcPoint.startingSum};
-                                point.startingSum /= calcPoint.startingSum;
-                                point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
-                            }
-                        } else {
-                            count++;
-                        }
-                    } else if (typeof localChoice.divideWithThis === 'number') {
-                        if (localChoice.dividedWithThis === 0) {
-                            count++;
-                        } else {
-                            localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: localChoice.divideWithThis};
-                            point.startingSum /= localChoice.divideWithThis;
-                            point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
-                        }
+                    if (localChoice.dividedWithThis === 0) {
+                        count++;
+                    } else {
+                        localChoice.startingSumAtDivide[i] = {value: point.startingSum, calcVal: localChoice.divideWithThis};
+                        point.startingSum /= localChoice.divideWithThis;
+                        point.startingSum = point.allowFloat ? point.startingSum : Math.floor(point.startingSum);
                     }
                 } else {
                     count++;
@@ -4021,6 +4222,38 @@ function selectObject(str: string, newActivatedList: string[]) {
             }
             if (count === localChoice.pointTypeToDivide.length) delete localChoice.dividePointtypeIsOnCheck;
             if (!localChoice.multiplyPointtypeIsOnCheck && localChoice.dividePointtypeIsOnCheck) mdObjects.push(localChoice);
+        }
+
+        if (localChoice.setPointtypeIsOn && typeof localChoice.pointTypeToSet !== 'undefined' && typeof localChoice.setWithThis !== 'undefined') {
+            let count = 0;
+            localChoice.setPointtypeIsOnCheck = true;
+            if (typeof localChoice.startingSumAtSet !== 'object') localChoice.startingSumAtSet = [];
+            for (let i = 0; i < localChoice.pointTypeToSet.length; i++) {
+                let point = pointTypeMap.get(localChoice.pointTypeToSet[i]);
+
+                if (typeof point !== 'undefined') {
+                    let val = 0;
+                    try {
+                        const replaced = localChoice.setWithThis.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vPoint = pointTypeMap.get(vStr);
+                            if (typeof vPoint !== 'undefined') {
+                                return `${vPoint.startingSum}`;
+                            }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        val = evaluate(replaced);
+                        val = point.allowFloat ? val : Math.floor(val);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    localChoice.startingSumAtSet[i] = {value: point.startingSum, calcVal: val};
+                    point.startingSum = val;
+                } else {
+                    count++;
+                }
+            }
+            if (count === localChoice.pointTypeToSet.length) delete localChoice.setPointtypeIsOnCheck;
+            if (!localChoice.multiplyPointtypeIsOnCheck && !localChoice.dividePointtypeIsOnCheck && localChoice.setPointtypeIsOnCheck) mdObjects.push(localChoice);
         }
 
         if (localChoice.isChangeVariables && typeof localChoice.changedVariables !== 'undefined') {
@@ -4278,22 +4511,42 @@ function selectObject(str: string, newActivatedList: string[]) {
         updateScores(localChoice, tmpScores, 0);
     }
 }
-function selectedOneMore(str: string[], newActivatedList: string[]) {
-    const strRnd = str.length > 1 ? str[1].split('/AND#') : '';
-    const strId = str[0].split('/ON#');
+function selectedOneMore(str: string, newActivatedList: string[]) {
+    let cStr = str.split('/RND#');
+    const strRnd = cStr.length > 1 ? str[1].split('/AND#') : '';
+    cStr = cStr[0].split('/RS#');
+    const strRS = cStr.length > 1 ? cStr[1] : '';
+    const strId = cStr[0].split('/ON#');
     const cMap = choiceMap.get(strId[0]);
 
     if (typeof cMap !== 'undefined') {
         const localChoice = cMap.choice;
         const localRow = cMap.row;
+        const strRSMap = new Map<number, number>();
+
+        if (strRS) {
+            const rStr = strRS.split('/AND#');
+            for (let i = 0; i < rStr.length; i++) {
+                const sStr = rStr[i].split(':');
+                const index = Number(sStr[0]);
+                const value = Number(sStr[1]);
+
+                if (!Number.isNaN(index)) {
+                    strRSMap.set(index, Number.isNaN(value) ? 0 : value);
+                }
+            }
+        }
 
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             const point = pointTypeMap.get(score.id);
-            if (typeof point !== 'undefined' && score.isRandom && !score.setValue && typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
-                score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
-                score.value = point.allowFloat ? score.value : Math.floor(score.value);
-                score.setValue = true;
+            if (typeof point !== 'undefined' && !score.setValue){
+                if (strRSMap.size > 0 && strRSMap.has(i)) {
+                    score.value = strRSMap.get(i)!;
+                    score.setValue = true;
+                } else {
+                    setScoreValue(point, score);
+                }
             }
         }
 
@@ -4365,6 +4618,9 @@ function selectedOneMore(str: string[], newActivatedList: string[]) {
                 const point = pointTypeMap.get(score.id);
                 if (typeof point !== 'undefined') {
                     let val = score.value;
+                    if (score.useExpression && score.setValue) {
+                        expDiscount(point, score);
+                    }
                     if (score.discountIsOn && typeof score.discountScore !== 'undefined' && score.discountedFrom && score.discountedFrom.length > 0) {
                         const cMap = choiceMap.get(score.discountedFrom[0]);
 
@@ -4887,7 +5143,7 @@ export function loadActivated(str: string) {
     const strList = str.split(',');
     
     for (let i = 0; i < strList.length; i++) {
-        const cStr = strList[i].split(/\/(IMG|WORD|RND)#/)[0];
+        const cStr = strList[i].split(/\/(IMG|WORD|RND|RS)#/)[0];
         const baseId = cStr.split('/ON#');
         const tmpNum = baseId.length > 1 ? parseInt(baseId[1]) : 0;
         const cMap = choiceMap.get(baseId[0]);
@@ -4897,10 +5153,8 @@ export function loadActivated(str: string) {
 
             if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
                 for (let j = 0; j < Math.abs(tmpNum); j++) {
-                    const mStr = strList[i].split('/RND#');
-
                     if (tmpNum > 0) { 
-                        selectedOneMore(mStr, strList);
+                        selectedOneMore(strList[i], strList);
                     } else {
                         selectedOneLess(aChoice, cMap.row);
                     }

@@ -445,7 +445,11 @@ export type Score = {
     appliedDiscount?: boolean,
     replaceText?: boolean,
     hideDisValue?: boolean,
-    hideDisIcon?: boolean
+    hideDisIcon?: boolean,
+    useExpression?: boolean,
+    expValue?: string,
+    expMinValue?: string,
+    expMaxValue?: string
 }
 export type Choice = {
     [key: string]: any,
@@ -587,8 +591,13 @@ export type Choice = {
         value: number,
         calcVal: number
     }[],
+    startingSumAtSet?: {
+        value: number,
+        calcVal: number
+    }[],
     multiplyPointtypeIsOnCheck?: boolean,
     dividePointtypeIsOnCheck?: boolean,
+    setPointtypeIsOnCheck?: boolean,
     isChangeVariables?: boolean,
     changedVariables?: string[],
     changeType?: string,
@@ -624,6 +633,9 @@ export type Choice = {
     selectDelayTimer?: number,
     showScoreInAddon?: boolean,
     showReqInAddon?: boolean,
+    setPointtypeIsOn?: boolean,
+    pointTypeToSet?: string[],
+    setWithThis?: string,
 };
 export type Row = {
     [key: string]: any,
