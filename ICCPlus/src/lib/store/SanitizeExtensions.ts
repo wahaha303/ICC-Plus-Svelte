@@ -5,6 +5,11 @@ import { BulletList, ListItem, OrderedList } from '@tiptap/extension-list'
 import Heading from '@tiptap/extension-heading'
 import Paragraph from '@tiptap/extension-paragraph'
 import Image from '@tiptap/extension-image'
+import Bold from '@tiptap/extension-bold';
+import Italic from '@tiptap/extension-italic'
+import Strike from '@tiptap/extension-strike'
+import Underline from '@tiptap/extension-underline'
+import Code from '@tiptap/extension-code'
 
 
 const BUILTIN_TAGS = new Set([
@@ -175,6 +180,16 @@ export const CustomParagraph = Paragraph.extend({
   }
 })
 
+function createCustomExtension(Ext : any) {
+  return Ext.extend({
+    addAttributes() {
+      return {
+        all: createAllAttributesAttr(),
+      }
+    },
+  })
+}
+
 export const CustomImage = Image.extend({
   addAttributes() {
     return {
@@ -184,14 +199,6 @@ export const CustomImage = Image.extend({
         parseHTML: el => el.style.textAlign || null,
         renderHTML: attrs => attrs.textAlign ? { style: `text-align: ${attrs.textAlign}` } : {},
       }
-    }
-  },
-})
-
-export const CustomHeading = Heading.extend({
-  addAttributes() {
-    return {
-      all: createAllAttributesAttr(),
     }
   },
 })
@@ -290,28 +297,42 @@ export const CustomTextStyle = TextStyle.extend({
       },
     }
   },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'span',
+        getAttrs: node => {
+          if (!(node instanceof HTMLElement)) return false
+
+          const hasClass = node.getAttribute('class')
+          const hasStyle = node.getAttribute('style')
+
+          if (hasClass || hasStyle) {
+            return {}
+          }
+
+          return false
+        },
+      },
+    ]
+  }
 })
 
-export const CustomBulletList = BulletList.extend({
-  addAttributes() {
-    return {
-      all: createAllAttributesAttr(),
-    }
-  },
-})
+export const CustomHeading = createCustomExtension(Heading)
 
-export const CustomOrderList = OrderedList.extend({
-  addAttributes() {
-    return {
-      all: createAllAttributesAttr(),
-    }
-  },
-})
+export const CustomBulletList = createCustomExtension(BulletList)
 
-export const CustomListItem = ListItem.extend({
-  addAttributes() {
-    return {
-      all: createAllAttributesAttr(),
-    }
-  },
-})
+export const CustomOrderList = createCustomExtension(OrderedList)
+
+export const CustomListItem = createCustomExtension(ListItem)
+
+export const CustomStrong = createCustomExtension(Bold)
+
+export const CustomItalic = createCustomExtension(Italic)
+
+export const CustomStrike = createCustomExtension(Strike)
+
+export const CustomUnderline = createCustomExtension(Underline)
+
+export const CustomCode = createCustomExtension(Code)

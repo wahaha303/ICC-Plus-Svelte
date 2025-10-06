@@ -1915,7 +1915,7 @@
                                 const tChoice = cMap.choice;
                                 revertTemplate(tChoice, localChoice.id);
 
-                                if(localChoice.changeAddonTemplate) {
+                                if (localChoice.changeAddonTemplate) {
                                     for (let j = 0; j < tChoice.addons.length; j++) {
                                         const tAddon = tChoice.addons[j];
                                         revertTemplate(tAddon, localChoice.id);
@@ -1930,7 +1930,7 @@
                                 continue;
                             }
 
-                            const groupData = groupMap.get(item[0]);
+                            const groupData = groupMap.get(item);
                             if (typeof groupData !== 'undefined') {
                                 const groupRowEle = groupData.rowElements;
 
@@ -1946,6 +1946,13 @@
                                     if (typeof gcMap !== 'undefined') {
                                         const gtChoice = gcMap.choice;
                                         revertTemplate(gtChoice, localChoice.id);
+
+                                        if (localChoice.changeAddonTemplate) {
+                                            for (let k = 0; k < gtChoice.addons.length; k++) {
+                                                const gtAddon = gtChoice.addons[k];
+                                                revertTemplate(gtAddon, localChoice.id);
+                                            }
+                                        }
                                     }
                                 }
                                 continue;
@@ -2594,7 +2601,7 @@
                                     const tChoice = cMap.choice;
                                     applyTemplate(tChoice, localChoice.id, localChoice.changeToThisTemplate);
 
-                                    if(localChoice.changeAddonTemplate) {
+                                    if (localChoice.changeAddonTemplate) {
                                         for (let j = 0; j < tChoice.addons.length; j++) {
                                             const tAddon = tChoice.addons[j];
                                             applyTemplate(tAddon, localChoice.id, localChoice.changeToThisTemplate);
@@ -2609,7 +2616,7 @@
                                     continue;
                                 }
 
-                                const groupData = groupMap.get(item[0]);
+                                const groupData = groupMap.get(item);
                                 if (typeof groupData !== 'undefined') {
                                     const groupRowEle = groupData.rowElements;
 
@@ -2625,6 +2632,13 @@
                                         if (typeof gcMap !== 'undefined') {
                                             const gtChoice = gcMap.choice;
                                             applyTemplate(gtChoice, localChoice.id, localChoice.changeToThisTemplate);
+
+                                            if (localChoice.changeAddonTemplate) {
+                                                for (let k = 0; k < gtChoice.addons.length; k++) {
+                                                    const gtAddon = gtChoice.addons[k];
+                                                    applyTemplate(gtAddon, localChoice.id, localChoice.changeToThisTemplate);
+                                                }
+                                            }
                                         }
                                     }
                                     continue;
@@ -3288,7 +3302,7 @@
                                         const tChoice = cMap.choice;
                                         applyTemplate(tChoice, localChoice.id, localChoice.changeToThisTemplate);
 
-                                        if(localChoice.changeAddonTemplate) {
+                                        if (localChoice.changeAddonTemplate) {
                                             for (let j = 0; j < tChoice.addons.length; j++) {
                                                 const tAddon = tChoice.addons[j];
                                                 applyTemplate(tAddon, localChoice.id, localChoice.changeToThisTemplate);
@@ -3303,7 +3317,7 @@
                                         continue;
                                     }
 
-                                    const groupData = groupMap.get(item[0]);
+                                    const groupData = groupMap.get(item);
                                     if (typeof groupData !== 'undefined') {
                                         const groupRowEle = groupData.rowElements;
 
@@ -3319,6 +3333,13 @@
                                             if (typeof gcMap !== 'undefined') {
                                                 const gtChoice = gcMap.choice;
                                                 applyTemplate(gtChoice, localChoice.id, localChoice.changeToThisTemplate);
+
+                                                if (localChoice.changeAddonTemplate) {
+                                                    for (let k = 0; k < gtChoice.addons.length; k++) {
+                                                        const gtAddon = gtChoice.addons[k];
+                                                        applyTemplate(gtAddon, localChoice.id, localChoice.changeToThisTemplate);
+                                                    }
+                                                }
                                             }
                                         }
                                         continue;
@@ -3425,61 +3446,6 @@
                                                 break;
                                             default:
                                                 break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (localChoice.changeTemplates) {
-                            if (localChoice.changeTemplatesList && localChoice.changeToThisTemplate) {
-                                const list = localChoice.changeTemplatesList.split(',');
-                                for (let i = 0; i < list.length; i++) {
-                                    const item = list[i];
-                                    const cMap = choiceMap.get(item);
-                                    if (typeof cMap !== 'undefined') {
-                                        const tChoice = cMap.choice;
-
-                                        if (tChoice.defaultTemplate)
-                                        tChoice.defaultTemplate = tChoice.template;
-                                        tChoice.template = localChoice.changeToThisTemplate;
-
-                                        if(localChoice.changeAddonTemplate) {
-
-                                        }
-                                    } else {
-                                        const tRow = rowMap.get(item);
-
-                                        if (typeof tRow !== 'undefined') {
-                                            tRow.defaultTemplate = tRow.template;
-                                            tRow.template = localChoice.changeToThisTemplate;
-                                        } else {
-                                            const groupData = groupMap.get(item[0]);
-
-                                            if (typeof groupData !== 'undefined') {
-                                                const groupRowEle = groupData.rowElements;
-
-                                                for (let j = 0; j < groupRowEle.length; j++) {
-                                                    const gtRow = rowMap.get(groupRowEle[j]);
-
-                                                    if (typeof gtRow !== 'undefined') {
-                                                        gtRow.defaultTemplate = gtRow.template;
-                                                        gtRow.template = localChoice.changeToThisTemplate;
-                                                    }
-                                                }
-                                                const groupEle = groupData.elements;
-                                                
-                                                for (let j = 0; j < groupEle.length; j++) {
-                                                    const gcMap = choiceMap.get(groupEle[j]);
-
-                                                    if (typeof gcMap !== 'undefined') {
-                                                        const gtChoice = gcMap.choice;
-
-                                                        gtChoice.defaultTemplate = gtChoice.template;
-                                                        gtChoice.template = localChoice.changeToThisTemplate;
-                                                    }
-                                                }
-                                            }
                                         }
                                     }
                                 }
@@ -3962,7 +3928,7 @@
                                     const tChoice = cMap.choice;
                                     revertTemplate(tChoice, localChoice.id);
 
-                                    if(localChoice.changeAddonTemplate) {
+                                    if (localChoice.changeAddonTemplate) {
                                         for (let j = 0; j < tChoice.addons.length; j++) {
                                             const tAddon = tChoice.addons[j];
                                             revertTemplate(tAddon, localChoice.id);
@@ -3977,7 +3943,7 @@
                                     continue;
                                 }
 
-                                const groupData = groupMap.get(item[0]);
+                                const groupData = groupMap.get(item);
                                 if (typeof groupData !== 'undefined') {
                                     const groupRowEle = groupData.rowElements;
 
@@ -3993,6 +3959,13 @@
                                         if (typeof gcMap !== 'undefined') {
                                             const gtChoice = gcMap.choice;
                                             revertTemplate(gtChoice, localChoice.id);
+
+                                            if (localChoice.changeAddonTemplate) {
+                                                for (let k = 0; k < gtChoice.addons.length; k++) {
+                                                    const gtAddon = gtChoice.addons[k];
+                                                    revertTemplate(gtAddon, localChoice.id);
+                                                }
+                                            }
                                         }
                                     }
                                     continue;

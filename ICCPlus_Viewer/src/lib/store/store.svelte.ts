@@ -6,7 +6,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.6.1';
+export const appVersion = '2.6.2';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4366,7 +4366,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                         const tChoice = cMap.choice;
                         applyTemplate(tChoice, localChoice.id, localChoice.changeToThisTemplate);
 
-                        if(localChoice.changeAddonTemplate) {
+                        if (localChoice.changeAddonTemplate) {
                             for (let j = 0; j < tChoice.addons.length; j++) {
                                 const tAddon = tChoice.addons[j];
                                 applyTemplate(tAddon, localChoice.id, localChoice.changeToThisTemplate);
@@ -4381,7 +4381,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                         continue;
                     }
 
-                    const groupData = groupMap.get(item[0]);
+                    const groupData = groupMap.get(item);
                     if (typeof groupData !== 'undefined') {
                         const groupRowEle = groupData.rowElements;
 
@@ -4397,6 +4397,13 @@ function selectObject(str: string, newActivatedList: string[]) {
                             if (typeof gcMap !== 'undefined') {
                                 const gtChoice = gcMap.choice;
                                 applyTemplate(gtChoice, localChoice.id, localChoice.changeToThisTemplate);
+
+                                if (localChoice.changeAddonTemplate) {
+                                    for (let k = 0; k < gtChoice.addons.length; k++) {
+                                        const gtAddon = gtChoice.addons[k];
+                                        applyTemplate(gtAddon, localChoice.id, localChoice.changeToThisTemplate);
+                                    }
+                                }
                             }
                         }
                         continue;
@@ -4937,7 +4944,7 @@ function selectedOneMore(str: string, newActivatedList: string[]) {
                             const tChoice = cMap.choice;
                             applyTemplate(tChoice, localChoice.id, localChoice.changeToThisTemplate);
 
-                            if(localChoice.changeAddonTemplate) {
+                            if (localChoice.changeAddonTemplate) {
                                 for (let j = 0; j < tChoice.addons.length; j++) {
                                     const tAddon = tChoice.addons[j];
                                     applyTemplate(tAddon, localChoice.id, localChoice.changeToThisTemplate);
@@ -4952,7 +4959,7 @@ function selectedOneMore(str: string, newActivatedList: string[]) {
                             continue;
                         }
 
-                        const groupData = groupMap.get(item[0]);
+                        const groupData = groupMap.get(item);
                         if (typeof groupData !== 'undefined') {
                             const groupRowEle = groupData.rowElements;
 
@@ -4968,6 +4975,13 @@ function selectedOneMore(str: string, newActivatedList: string[]) {
                                 if (typeof gcMap !== 'undefined') {
                                     const gtChoice = gcMap.choice;
                                     applyTemplate(gtChoice, localChoice.id, localChoice.changeToThisTemplate);
+
+                                    if (localChoice.changeAddonTemplate) {
+                                        for (let k = 0; k < gtChoice.addons.length; k++) {
+                                            const gtAddon = gtChoice.addons[k];
+                                            applyTemplate(gtAddon, localChoice.id, localChoice.changeToThisTemplate);
+                                        }
+                                    }
                                 }
                             }
                             continue;

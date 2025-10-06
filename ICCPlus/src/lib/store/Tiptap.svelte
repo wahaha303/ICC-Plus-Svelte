@@ -144,7 +144,7 @@
 	import { Editor } from '@tiptap/core';
     import { BackgroundColor, Color, FontSize, LineHeight } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
-    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle, CustomBulletList, CustomOrderList, CustomListItem } from './SanitizeExtensions';
+    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle, CustomBulletList, CustomOrderList, CustomListItem, CustomStrong, CustomItalic, CustomStrike, CustomUnderline, CustomCode } from './SanitizeExtensions';
     import { rgbToHex } from './store.svelte';
 
     type Params = {
@@ -361,6 +361,11 @@
                 CustomBulletList,
                 CustomOrderList,
                 CustomListItem,
+                CustomStrong,
+                CustomItalic,
+                CustomStrike,
+                CustomUnderline,
+                CustomCode,
                 ...SanitizeExtensions,
             ],
 			content: data[dataProp],
