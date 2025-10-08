@@ -193,6 +193,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.6.3 / ${getDate('2025-10-08T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where Change Choices Per Row did not work properly.
+        `
+    }, {
+        open: false,
         title: `v2.6.2 / ${getDate('2025-10-06T15:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where some tags could not be assigned classes.

@@ -8,7 +8,7 @@ import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.6.2';
+export const appVersion = '2.6.3';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3485,6 +3485,8 @@ export function cleanActivated() {
         cRow.currentChoices = 0;
         cRow.index = i;
         delete cRow.isSimpleEditMode;
+        delete cRow.templateStack;
+        delete cRow.widthStack;
 
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
@@ -3531,6 +3533,8 @@ export function cleanActivated() {
         cRow.currentChoices = 0;
         cRow.index = i;
         delete cRow.isSimpleEditMode;
+        delete cRow.templateStack;
+        delete cRow.widthStack;
 
         for (let j = 0; j < cRow.objects.length; j++) {
             const cChoice = cRow.objects[j];
@@ -3837,7 +3841,7 @@ export function cleanActivated() {
                                 continue;
                             }
 
-                            const groupData = groupMap.get(item[0]);
+                            const groupData = groupMap.get(item);
                             if (typeof groupData !== 'undefined') {
                                 const groupRowEle = groupData.rowElements;
 
@@ -3880,7 +3884,7 @@ export function cleanActivated() {
                                 continue;
                             }
 
-                            const groupData = groupMap.get(item[0]);
+                            const groupData = groupMap.get(item);
                             if (typeof groupData !== 'undefined') {
                                 const groupRowEle = groupData.rowElements;
 
@@ -4699,7 +4703,7 @@ function selectObject(str: string, newActivatedList: string[]) {
                         continue;
                     }
 
-                    const groupData = groupMap.get(item[0]);
+                    const groupData = groupMap.get(item);
                     if (typeof groupData !== 'undefined') {
                         const groupRowEle = groupData.rowElements;
 
@@ -5277,7 +5281,7 @@ function selectedOneMore(str: string, newActivatedList: string[]) {
                             continue;
                         }
 
-                        const groupData = groupMap.get(item[0]);
+                        const groupData = groupMap.get(item);
                         if (typeof groupData !== 'undefined') {
                             const groupRowEle = groupData.rowElements;
 
@@ -6565,6 +6569,14 @@ export function initializeApp(tempApp: any) {
                             if (typeof kRow.rowDesignGroups[j] === 'object') kRow.rowDesignGroups[j] = kRow.rowDesignGroups[j].id;
                         }
                     }
+
+                    if (typeof kRow.width === 'string') {
+                        kRow.width = false;
+                    }
+
+                    if (typeof kRow.defaultWidth === 'boolean') {
+                        delete kRow.defaultWidth;
+                    }
                     
                     if (typeof kRow.objects !== 'undefined') {
                         for (let j = 0; j < kRow.objects.length; j++) {
@@ -6618,6 +6630,14 @@ export function initializeApp(tempApp: any) {
 
                             if (kObj.isSelectableMultiple && typeof kObj.numMultipleTimesMinus !== 'undefined' && typeof kObj.initMultipleTimesMinus === 'undefined') {
                                 kObj.initMultipleTimesMinus = kObj.forcedActivated ? 0 : kObj.numMultipleTimesMinus;
+                            }
+
+                            if (typeof kObj.width === 'string') {
+                                delete kObj.width;
+                            }
+
+                            if (typeof kObj.defaultWidth === 'boolean') {
+                                delete kObj.defaultWidth;
                             }
 
                             for (let k = 0; k < kObj.addons.length; k++) {
@@ -7382,10 +7402,10 @@ export function revertTemplate(target: Row | Choice | Addon, id: string) {
 export function applyWidth(target: Row | Choice, id: string, width: string) {
     if (typeof target.widthStack === 'undefined') {
         target.widthStack = [];
-        target.defaultWidth = typeof target.width !== 'undefined' ? target.width : 'col-md-3';
+        target.defaultWidth = typeof target.objectWidth !== 'undefined' ? target.objectWidth : 'col-md-3';
     }
     target.widthStack.push({ id: id, data: width });
-    target.width = width;
+    target.objectWidth = width;
 }
 export function revertWidth(target: Row | Choice, id: string) {
     if (typeof target.widthStack !== 'undefined') {
@@ -7394,9 +7414,9 @@ export function revertWidth(target: Row | Choice, id: string) {
 
         const leng = target.widthStack.length;
         if (leng > 0) {
-            target.width = target.widthStack[leng - 1].data;
+            target.objectWidth = target.widthStack[leng - 1].data;
         } else {
-            target.width = typeof target.defaultWidth !== 'undefined' ? target.defaultWidth : 'col-md-3';
+            target.objectWidth = typeof target.defaultWidth !== 'undefined' ? target.defaultWidth : 'col-md-3';
             delete target.widthStack;
         }
     }

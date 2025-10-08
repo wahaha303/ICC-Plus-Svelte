@@ -1980,7 +1980,7 @@
                                 continue;
                             }
 
-                            const groupData = groupMap.get(item[0]);
+                            const groupData = groupMap.get(item);
                             if (typeof groupData !== 'undefined') {
                                 const groupRowEle = groupData.rowElements;
 
@@ -2666,7 +2666,7 @@
                                     continue;
                                 }
 
-                                const groupData = groupMap.get(item[0]);
+                                const groupData = groupMap.get(item);
                                 if (typeof groupData !== 'undefined') {
                                     const groupRowEle = groupData.rowElements;
 
@@ -3367,7 +3367,7 @@
                                         continue;
                                     }
 
-                                    const groupData = groupMap.get(item[0]);
+                                    const groupData = groupMap.get(item);
                                     if (typeof groupData !== 'undefined') {
                                         const groupRowEle = groupData.rowElements;
 
@@ -3993,7 +3993,7 @@
                                     continue;
                                 }
 
-                                const groupData = groupMap.get(item[0]);
+                                const groupData = groupMap.get(item);
                                 if (typeof groupData !== 'undefined') {
                                     const groupRowEle = groupData.rowElements;
 
