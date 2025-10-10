@@ -1719,7 +1719,7 @@
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { evaluate } from '@antv/expr';
 
-    export { activateObject };
+    export { activateObject, selectedOneMore, selectedOneLess };
     
     const { row, choice, index, windowWidth, bCreatorMode, preloadImages = false, isBackpack, mainDiv }: { row: Row, choice: Choice, index: number, windowWidth: number, bCreatorMode: boolean, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     const choiceToolbarButtons = [{

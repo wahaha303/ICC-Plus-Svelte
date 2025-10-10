@@ -268,7 +268,7 @@
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { evaluate } from '@antv/expr';
 
-    export { activateObject };
+    export { activateObject, selectedOneMore, selectedOneLess };
     
     const { row, choice, windowWidth, preloadImages = false, isBackpack, mainDiv }: { row: Row, choice: Choice, index: number, windowWidth: number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     const linkedObjects: string[] = [];

@@ -193,6 +193,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.6.4 / ${getDate('2025-10-10T15:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where 'Deselect choices if row doesn't meet requirements' option did not deselect multiple selectable choices.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where some UI elements were not clearly visible in Dark Theme.
+        `
+    }, {
+        open: false,
         title: `v2.6.3 / ${getDate('2025-10-08T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where Change Choices Per Row did not work properly.

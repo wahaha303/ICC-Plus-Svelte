@@ -1,6 +1,6 @@
 {#if isEditModeOn}
     <div bind:clientWidth={width}>
-        <div class="d-row justify-space-between overflow-auto">
+        <div class="d-row justify-space-between overflow-auto title--text">
             <Wrapper text="Move Up">
                 <IconButton onclickcapture={moveAddonUp}><i class="mdi mdi-chevron-up"></i></IconButton>
             </Wrapper>

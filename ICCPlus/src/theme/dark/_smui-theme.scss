@@ -14,6 +14,9 @@
 :root {
   --mdc-text-button-label-text-color: rgba(255, 255, 255, 0.87);
   --mdc-text-button-hover-state-layer-color: #fff;
+  --mdc-switch-handle-surface-color: #a1a1a1;
+  --mdc-switch-unselected-hover-handle-color: #a1a1a1;
+  --mdc-switch-unselected-pressed-handle-color: #a1a1a1;
 }
 html,
 body {
@@ -28,6 +31,12 @@ a:visited {
   color: color.scale(#40b3ff, $lightness: -35%);
 }
 
+.mdc-select:not(.mdc-select--disabled).mdc-select--focused .mdc-floating-label {
+  color: rgba(164.8, 164.8, 240, .87) !important;
+}
+.mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
+  color: rgba(164.8, 164.8, 240, .87) !important;
+}
 .toolbar {
   background-color: var(--bs-gray-600);
   color: rgba(255, 255, 255, .87);

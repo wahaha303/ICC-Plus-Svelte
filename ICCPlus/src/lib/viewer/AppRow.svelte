@@ -346,7 +346,22 @@
                 const choice = row.objects[i];
 
                 if (choice.isActive) {
-                    choiceRef.activateObject(choice, row);
+                    if (choice.isSelectableMultiple) {
+                        if (choice.isMultipleUseVariable) {
+                            const mul = choice.multipleUseVariable;
+                            if (mul > 0) {
+                                for (let j = 0; j < mul; j++) {
+                                    choiceRef.selectedOneLess(choice, row);
+                                }
+                            } else if (mul < 0) {
+                                for (let j = mul; j < 0; j++) {
+                                    choiceRef.selectedOneMore(choice, row);
+                                }
+                            }
+                        }
+                    } else {
+                        choiceRef.activateObject(choice, row);
+                    }
                 }
             }
         }
