@@ -6,7 +6,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.6.4';
+export const appVersion = '2.6.5';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2675,7 +2675,25 @@ export function expDiscount(point: PointType, score: Score) {
 };
 export function checkPoints(localChoice: Choice, isSel: boolean) {
     let isPositve = true;
-    let scoreMap = new Map<string, number>();
+    const scoreMap = new Map<string, number>();
+    const acMap: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+    const tChoice = acMap.get(localChoice.id);
+
+    if (isSel) {
+        if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
+            if (typeof tChoice !== 'undefined') {
+                tChoice.multiple += 1;
+            } else {
+                acMap.set(localChoice.id, { multiple: localChoice.multipleUseVariable + 1 });
+            }
+        } else {
+            acMap.set(localChoice.id, { multiple: 0 });
+        }
+    } else {
+        if (typeof tChoice !== 'undefined') {
+            acMap.delete(localChoice.id);
+        }
+    }
 
     for (let i = 0; i < localChoice.scores.length; i++) {
         let score = localChoice.scores[i];
@@ -2684,7 +2702,7 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
             scoreVal = scoreVal * (Math.abs(localChoice.multipleUseVariable) + 1);
         }
 
-        if (checkRequirements(score.requireds) && !score.isActive) {
+        if (checkRequirements(score.requireds, acMap) && !score.isActive) {
             let point = pointTypeMap.get(score.id);
 
             if (typeof point !== 'undefined' && point.belowZeroNotAllowed) {
