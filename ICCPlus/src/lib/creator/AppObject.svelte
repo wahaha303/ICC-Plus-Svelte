@@ -222,6 +222,13 @@
                                                         delete choice.allowSelectByClick;
                                                         delete choice.useSlider;
                                                         delete choice.hideCounter;
+                                                        if (typeof choice.scores !== 'undefined') {
+                                                            for (let i = 0; i < choice.scores.length; i++) {
+                                                                const score = choice.scores[i];
+                                                                delete score.multiplyByTimes;
+                                                                delete score.displayMulScore;
+                                                            }
+                                                        }
                                                     }
                                                 }} />
                                                 {#snippet label()}
@@ -236,6 +243,13 @@
                                                                 delete choice.multipleScoreId;
                                                             } else {
                                                                 delete choice.isMultipleUseVariable;
+                                                                if (typeof choice.scores !== 'undefined') {
+                                                                    for (let i = 0; i < choice.scores.length; i++) {
+                                                                        const score = choice.scores[i];
+                                                                        delete score.multiplyByTimes;
+                                                                        delete score.displayMulScore;
+                                                                    }
+                                                                }
                                                             }
                                                         }} />
                                                         {#snippet label()}

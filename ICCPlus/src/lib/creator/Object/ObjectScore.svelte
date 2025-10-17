@@ -17,17 +17,30 @@
             </Wrapper>
         </div>
         <div class="row gx-3">
-            {#if choice?.isSelectableMultiple}
+            {#if choice.isSelectableMultiple && choice.isMultipleUseVariable}
                 <FormField class="col-12">
                     <Checkbox bind:checked={() => score.multiplyByTimes ?? false, (e) => score.multiplyByTimes = e} onchange={() => {
                         if (!score.multiplyByTimes) {
                             delete score.multiplyByTimes;
+                            delete score.displayMulScore;
                         }
                     }} />
                     {#snippet label()}
                         Muliply by number of selections
                     {/snippet}
                 </FormField>
+                {#if score.multiplyByTimes}
+                    <FormField class="col-12">
+                        <Checkbox bind:checked={() => score.displayMulScore ?? false, (e) => score.displayMulScore = e} onchange={() => {
+                            if (!score.displayMulScore) {
+                                delete score.displayMulScore;
+                            }
+                        }} />
+                        {#snippet label()}
+                            Display multiplied score
+                        {/snippet}
+                    </FormField>
+                {/if}
             {/if}
             <FormField class={col6}>
                 <Checkbox bind:checked={() => score.isNotRecalculatable ?? false, (e) => score.isNotRecalculatable = e} onchange={() => {
@@ -388,6 +401,9 @@
                 value = Math.floor(value);
             } else {
                 value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
+            }
+            if (choice.isSelectableMultiple && score.multiplyByTimes && score.displayMulScore) {
+                value = value * (choice.multipleUseVariable + 1);
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');

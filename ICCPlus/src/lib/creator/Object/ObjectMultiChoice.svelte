@@ -1,5 +1,5 @@
 {#if !choice.hideCounterUntilSelect || choice.multipleUseVariable !== 0}
-    <div class="d-row justify-space-around w-100">
+    <div class="d-row justify-space-around w-100 multi-counter">
         {#if !choice.hideCounter}
             <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterMinus}>
                 <i class="mdi mdi-minus" style={multiChoiceButton}></i>
@@ -15,7 +15,7 @@
         {/if}
     </div>
     {#if choice.useSlider}
-        <div class="px-5 w-100">
+        <div class="px-5 w-100 multi-slider">
             <Slider bind:value={sliderNum} min={choice.numMultipleTimesMinus} max={choice.numMultipleTimesPluss} step={1} class="mx-2" onpointerup={handleSliderUp} disabled={!isEnabled} discrete />
         </div>
     {/if}

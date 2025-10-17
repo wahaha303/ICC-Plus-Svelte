@@ -193,6 +193,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.6.6 / ${getDate('2025-10-17T16:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Added option to display multiplied score when using 'Multiply by number of selection' option.
+        `
+    }, {
+        open: false,
         title: `v2.6.5 / ${getDate('2025-10-13T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where score with specific requirement could go below 0 despite "This score is not allowed to go under 0." option being enabled.

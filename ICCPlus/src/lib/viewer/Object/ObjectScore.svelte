@@ -194,6 +194,9 @@
             } else {
                 value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
             }
+            if (choice.isSelectableMultiple && score.multiplyByTimes && score.displayMulScore) {
+                value = value * (choice.multipleUseVariable + 1);
+            }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
                 return `${prefix}${value}`;

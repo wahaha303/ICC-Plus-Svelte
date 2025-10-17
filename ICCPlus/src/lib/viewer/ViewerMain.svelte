@@ -76,7 +76,7 @@
                         <IconButton class="music-player--button" onclickcapture={handleMuteButton} size="button" aria-label="Mute">
                             <i class={app.isMute ? 'mdi mdi-volume-off' : 'mdi mdi-volume-high'}></i>
                         </IconButton>
-                        <div class="px-1" style="max-width: 104px; width: 100%">
+                        <div class="px-1 music-player--volume" style="max-width: 104px; width: 100%">
                             <Slider bind:value={curVolume} min={0} max={100} step={1} class="mx-2" onpointerdown={handleVolumebarDown} onpointerup={handleVolumebarUp} disabled={app.isMute} />
                         </div>
                         <div class="ps-1" style="max-width:150px; overflow: hidden;">
@@ -84,7 +84,7 @@
                                 {bgmVariables.bgmTitle}
                             </span>
                         </div>
-                        <div class="px-1 col">
+                        <div class="px-1 col music-player--progress-bar">
                             <Slider bind:value={curBgmTime} min={0} max={bgmVariables.curBgmLength || 1} step={1} class="mx-2" onpointerdown={handlePlaybarDown} onpointerup={handlePlaybarUp} />
                         </div>
                         <div class="text-center" style="width: 180px">

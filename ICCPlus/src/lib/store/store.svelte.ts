@@ -8,7 +8,7 @@ import { toBlob } from 'html-to-image';
 import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.6.5';
+export const appVersion = '2.6.6';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,

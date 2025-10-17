@@ -442,6 +442,7 @@ export type Score = {
     discountTextB?: string[],
     notStackableDiscount?: boolean,
     multiplyByTimes?: boolean,
+    displayMulScore?: boolean,
     appliedDiscount?: boolean,
     replaceText?: boolean,
     hideDisValue?: boolean,
