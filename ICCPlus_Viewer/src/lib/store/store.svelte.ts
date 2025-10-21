@@ -6,7 +6,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.6.6';
+export const appVersion = '2.6.7';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2696,17 +2696,74 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
     }
 
     for (let i = 0; i < localChoice.scores.length; i++) {
-        let score = localChoice.scores[i];
-        let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value;
-        if (score.multiplyByTimes) {
-            scoreVal = scoreVal * (Math.abs(localChoice.multipleUseVariable) + 1);
-        }
+        const score = localChoice.scores[i];
+        const point = pointTypeMap.get(score.id);
 
-        if (checkRequirements(score.requireds, acMap) && !score.isActive) {
-            let point = pointTypeMap.get(score.id);
+        if (typeof point !== 'undefined') {
+            let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value;
+            if (score.useExpression) {
+                if (score.isRandom && score.expMinValue && score.expMaxValue) {
+                    try {
+                        const minReplaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vScore = scoreMap.get(vStr);
+                            if (typeof vScore !== 'undefined') {
+                                return `${vScore}`;
+                            } else {
+                                const vPoint = pointTypeMap.get(vStr);
+                                if (typeof vPoint !== 'undefined') {
+                                    return `${vPoint.startingSum}`;
+                                }
+                            }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        const maxReplaced = score.expMaxValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vScore = scoreMap.get(vStr);
+                            if (typeof vScore !== 'undefined') {
+                                return `${vScore}`;
+                            } else {
+                                const vPoint = pointTypeMap.get(vStr);
+                                if (typeof vPoint !== 'undefined') {
+                                    return `${vPoint.startingSum}`;
+                                }
+                            }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        const minValue = evaluate(minReplaced);
+                        const maxValue = evaluate(maxReplaced);
+                        score.value = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+                        score.value = point.allowFloat ? score.value : Math.floor(score.value);
+                        score.setValue = true;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                } else if (score.expValue) {
+                    try {
+                        const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vScore = scoreMap.get(vStr);
+                            if (typeof vScore !== 'undefined') {
+                                return `${vScore}`;
+                            } else {
+                                const vPoint = pointTypeMap.get(vStr);
+                                if (typeof vPoint !== 'undefined') {
+                                    return `${vPoint.startingSum}`;
+                                }
+                            }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        score.value = evaluate(replaced);
+                        score.value = point.allowFloat ? score.value : Math.floor(score.value);
+                        score.setValue = true;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
+            if (score.multiplyByTimes) {
+                scoreVal = scoreVal * (Math.abs(localChoice.multipleUseVariable) + 1);
+            }
 
-            if (typeof point !== 'undefined' && point.belowZeroNotAllowed) {
-                let data = scoreMap.get(score.id);
+            if (checkRequirements(score.requireds, acMap) && !score.isActive) {
+                const data = scoreMap.get(score.id);
 
                 if (typeof data !== 'undefined') {
                     isPositve = isPositve && (isSel ? data - scoreVal >= 0 : data + scoreVal >= 0);
@@ -2879,51 +2936,10 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
 };
 export function setScoreValue(point: PointType, score: Score) {
     if (score.isRandom) {
-        if (score.useExpression) {
-            if (score.expMinValue && score.expMaxValue) {
-                try {
-                    const minReplaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
-                        const vPoint = pointTypeMap.get(vStr);
-                        if (typeof vPoint !== 'undefined') {
-                            return `${vPoint.startingSum}`;
-                        }
-                        throw new Error(`Undefined variable: "${vStr}"`);
-                    });
-                    const maxReplaced = score.expMaxValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
-                        const vPoint = pointTypeMap.get(vStr);
-                        if (typeof vPoint !== 'undefined') {
-                            return `${vPoint.startingSum}`;
-                        }
-                        throw new Error(`Undefined variable: "${vStr}"`);
-                    });
-                    const minValue = evaluate(minReplaced);
-                    const maxValue = evaluate(maxReplaced);
-                    score.value = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
-                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
-                    score.setValue = true;
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-        } else if (typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
+        if (typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
             score.value = Math.floor(Math.random() * (score.maxValue - score.minValue + 1)) + score.minValue;
             score.value = point.allowFloat ? score.value : Math.floor(score.value);
             score.setValue = true;
-        }
-    } else if (score.useExpression && score.expValue) {
-        try {
-            const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
-                const vPoint = pointTypeMap.get(vStr);
-                if (typeof vPoint !== 'undefined') {
-                    return `${vPoint.startingSum}`;
-                }
-                throw new Error(`Undefined variable: "${vStr}"`);
-            });
-            score.value = evaluate(replaced);
-            score.value = point.allowFloat ? score.value : Math.floor(score.value);
-            score.setValue = true;
-        } catch (e) {
-            console.error(e);
         }
     }
 }
@@ -3099,8 +3115,8 @@ export function cleanActivated() {
             if (cChoice.muteBgm && bgmPlayer) {
                 const player = get(bgmPlayer);
 
+                app.isMute = false;
                 if (player && typeof player.unMute === 'function') {
-                    app.isMute = false;
                     player.unMute();
                 }
             }
@@ -4495,8 +4511,8 @@ function selectObject(str: string, newActivatedList: string[]) {
         if (localChoice.muteBgm && bgmPlayer) {
             const player = get(bgmPlayer);
 
+            app.isMute = true;
             if (player && typeof player.mute === 'function') {
-                app.isMute = true;
                 player.mute();
             }
         }
@@ -5073,8 +5089,8 @@ function selectedOneMore(str: string, newActivatedList: string[]) {
             if (localChoice.muteBgm && bgmPlayer) {
                 const player = get(bgmPlayer);
 
+                app.isMute = true;
                 if (player && typeof player.mute === 'function') {
-                    app.isMute = true;
                     player.mute();
                 }
             }

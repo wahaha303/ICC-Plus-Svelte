@@ -193,6 +193,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.6.7 / ${getDate('2025-10-21T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where Score Expression did not reflect score changes from selecting the choice itself.
+        - Fixed issue where BGM mute function did not work when loading build.
+        `
+    }, {
+        open: false,
         title: `v2.6.6 / ${getDate('2025-10-17T16:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Added option to display multiplied score when using 'Multiply by number of selection' option.

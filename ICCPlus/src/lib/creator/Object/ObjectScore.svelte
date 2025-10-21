@@ -110,7 +110,7 @@
                         }
                     }} />
                     {#snippet label()}
-                        Enter expression
+                        Enter Expression
                     {/snippet}
                 </FormField>
             </Wrapper>
