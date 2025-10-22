@@ -193,6 +193,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.6.8 / ${getDate('2025-10-22T11:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where points were always prevented from decreasing below 0.
+
+        <span style="color: green">Design</span>
+        - Fixed issue where box shadow spread was not applied.
+        `
+    }, {
+        open: false,
         title: `v2.6.7 / ${getDate('2025-10-21T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where Score Expression did not reflect score changes from selecting the choice itself.

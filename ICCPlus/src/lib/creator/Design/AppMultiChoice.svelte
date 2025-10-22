@@ -68,7 +68,7 @@
                         </div>
                         <div class="col-12 px-3 text-center">Counter</div>
                         <div class="col-sm-6 col-12 gy-2">
-                            <Select class="mb-4" bind:value={() => styling.multiChoiceCounterPosition?? 0, (e) => styling.multiChoiceCounterPosition = e} label="Text Font" variant="filled" alwaysFloat={true} >
+                            <Select class="mb-4" bind:value={() => styling.multiChoiceCounterPosition?? 0, (e) => styling.multiChoiceCounterPosition = e} label="Counter Position" variant="filled" alwaysFloat={true} >
                                 {#each counterPositions as position}
                                     <Option value={position.value}>{position.text}</Option>
                                 {/each}

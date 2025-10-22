@@ -6,7 +6,7 @@ import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 
-export const appVersion = '2.6.7';
+export const appVersion = '2.6.8';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2700,7 +2700,6 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
         const point = pointTypeMap.get(score.id);
 
         if (typeof point !== 'undefined') {
-            let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value;
             if (score.useExpression) {
                 if (score.isRandom && score.expMinValue && score.expMaxValue) {
                     try {
@@ -2758,6 +2757,9 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
                     }
                 }
             }
+
+            let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value;
+
             if (score.multiplyByTimes) {
                 scoreVal = scoreVal * (Math.abs(localChoice.multipleUseVariable) + 1);
             }
@@ -2766,10 +2768,10 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
                 const data = scoreMap.get(score.id);
 
                 if (typeof data !== 'undefined') {
-                    isPositve = isPositve && (isSel ? data - scoreVal >= 0 : data + scoreVal >= 0);
-                    scoreMap.set(score.id, data - score.value);
+                    if (point.belowZeroNotAllowed) isPositve = isPositve && (isSel ? data - scoreVal >= 0 : data + scoreVal >= 0);
+                    scoreMap.set(score.id, data - scoreVal);
                 } else {
-                    isPositve = isPositve && (isSel ? point.startingSum - scoreVal >= 0 : point.startingSum + scoreVal >= 0);
+                    if (point.belowZeroNotAllowed) isPositve = isPositve && (isSel ? point.startingSum - scoreVal >= 0 : point.startingSum + scoreVal >= 0);
                     scoreMap.set(score.id, point.startingSum - scoreVal);
                 }
             }

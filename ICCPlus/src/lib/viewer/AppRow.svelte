@@ -305,7 +305,7 @@
         }
         if (rowStyle.rowDropShadowIsOn) {
             if (rowStyle.rowUseBoxShadowIsOn) {
-                styles.push(`box-shadow: ${rowStyle.rowDropShadowH}px ${rowStyle.rowDropShadowV}px ${rowStyle.rowDropShadowBlur}px ${hexToRgba(rowStyle.rowDropShadowColor)};`);
+                styles.push(`box-shadow: ${rowStyle.rowDropShadowH}px ${rowStyle.rowDropShadowV}px ${rowStyle.rowDropShadowBlur}px ${rowStyle.rowDropShadowSpread}px ${hexToRgba(rowStyle.rowDropShadowColor)};`);
             } else {
                 styles.push(`filter: drop-shadow(${rowStyle.rowDropShadowH}px ${rowStyle.rowDropShadowV}px ${rowStyle.rowDropShadowBlur}px ${hexToRgba(rowStyle.rowDropShadowColor)});`);
             }

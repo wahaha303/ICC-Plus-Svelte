@@ -86,7 +86,7 @@
                                 <Textfield class="mb-4" bind:value={() => styling.objectDropShadowH?? 0, (e) => styling.objectDropShadowH = e} label="Horizontal Shadow" type="number" suffix="px" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.objectDropShadowV?? 0, (e) => styling.objectDropShadowV = e} label="Vertical Shadow" type="number" suffix="px" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.objectDropShadowBlur?? 0, (e) => styling.objectDropShadowBlur = e} label="Shadow Blur" type="number" suffix="px" variant="filled" />
-                                <Textfield class="mb-4" bind:value={() => styling.objectDropShadowSpread?? 0, (e) => styling.objectDropShadowSpread = e} label="Shadow Spread" type="number" suffix="px" variant="filled" />
+                                <Textfield class="mb-4{styling.objectUseBoxShadowIsOn ? '' : ' disabled'}" bind:value={() => styling.objectDropShadowSpread?? 0, (e) => styling.objectDropShadowSpread = e} label="Shadow Spread" type="number" suffix="px" variant="filled" />
                                 <FormField class="w-100">
                                     <Switch bind:checked={() => styling.objectUseBoxShadowIsOn?? false, (e) => styling.objectUseBoxShadowIsOn = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
@@ -96,7 +96,7 @@
                                 <FormField class="w-100">
                                     <Checkbox bind:checked={() => styling.objectDropShadowIsOn?? false, (e) => styling.objectDropShadowIsOn = e} />
                                     {#snippet label()}
-                                        Shadow Is turned on
+                                        Shadow is turned on
                                     {/snippet}
                                 </FormField>
                             </div>

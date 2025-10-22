@@ -76,7 +76,7 @@
                                 <Textfield class="mb-4" bind:value={() => styling.rowDropShadowH ?? 0, (e) => styling.rowDropShadowH = e} label="Horizontal Shadow" type="number" suffix="px" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.rowDropShadowV ?? 0, (e) => styling.rowDropShadowV = e} label="Vertical Shadow" type="number" suffix="px" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.rowDropShadowBlur ?? 0, (e) => styling.rowDropShadowBlur = e} label="Shadow Blur" type="number" suffix="px" variant="filled" />
-                                <Textfield class="mb-4" bind:value={() => styling.rowDropShadowSpread ?? 0, (e) => styling.rowDropShadowSpread = e} label="Shadow Spread" type="number" suffix="px" variant="filled" />
+                                <Textfield class="mb-4{styling.rowUseBoxShadowIsOn ? '' : ' disabled'}" bind:value={() => styling.rowDropShadowSpread ?? 0, (e) => styling.rowDropShadowSpread = e} label="Shadow Spread" type="number" suffix="px" variant="filled" />
                                 <div class="col-12 px-3">The Width and Height of the buttons</div>
                                 <Textfield class="mb-4" bind:value={() => styling.rowButtonXPadding ?? 0, (e) => styling.rowButtonXPadding = e} label="Button Height" type="number" suffix="px" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.rowButtonYPadding ?? 0, (e) => styling.rowButtonYPadding = e} label="Button Width" type="number" suffix="px" variant="filled" />
@@ -89,7 +89,7 @@
                                 <FormField class="w-100">
                                     <Checkbox bind:checked={() => styling.rowDropShadowIsOn?? false, (e) => styling.rowDropShadowIsOn = e} />
                                     {#snippet label()}
-                                        Shadow Is turned on
+                                        Shadow is turned on
                                     {/snippet}
                                 </FormField>
                             </div>
