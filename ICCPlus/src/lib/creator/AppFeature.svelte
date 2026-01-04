@@ -35,11 +35,11 @@
     </Actions>
 </Dialog>
 {#if currentDialog === 'appPoints'}
-    <AppPoints open={currentDialog === 'appPoints'} onclose={() => (currentDialog = 'none')} />
+    <AppCategories open={currentDialog === 'appPoints'} onclose={() => (currentDialog = 'none')} type='point' />
 {:else if currentDialog === 'appVariables'}
-    <AppVariables open={currentDialog === 'appVariables'} onclose={() => (currentDialog = 'none')} />
+    <AppCategories open={currentDialog === 'appVariables'} onclose={() => (currentDialog = 'none')} type='variable' />
 {:else if currentDialog === 'appGroups'}
-    <AppGroups open={currentDialog === 'appGroups'} onclose={() => (currentDialog = 'none')} />
+    <AppCategories open={currentDialog === 'appGroups'} onclose={() => (currentDialog = 'none')} type='group' />
 {:else if currentDialog === 'appBackpack'}
     <AppBackpack open={currentDialog === 'appBackpack'} onclose={() => (currentDialog = 'none')} />
 {:else if currentDialog === 'appTemplates'}
@@ -49,16 +49,17 @@
 {:else if currentDialog === 'appSymbols'}
     <AppSymbols open={currentDialog === 'appSymbols'} onclose={() => (currentDialog = 'none')} />
 {:else if currentDialog === 'appWords'}
-    <AppWords open={currentDialog === 'appWords'} onclose={() => (currentDialog = 'none')} />
+    <AppCategories open={currentDialog === 'appWords'} onclose={() => (currentDialog = 'none')} type='word' />
 {:else if currentDialog === 'appIdSearch'}
     <AppIdSearch open={currentDialog === 'appIdSearch'} onclose={() => (currentDialog = 'none')} />
 {:else if currentDialog === 'appDesignGroups'}
-    <AppDesignGroups open={currentDialog === 'appDesignGroups'} onclose={() => (currentDialog = 'none')} />
+    <AppCategories open={currentDialog === 'appDesignGroups'} onclose={() => (currentDialog = 'none')} type='designGroup' />
 {:else if currentDialog === 'appGlobalRequirements'}
-    <AppGlobalRequirements open={currentDialog === 'appGlobalRequirements'} onclose={() => (currentDialog = 'none')} />
+    <AppCategories open={currentDialog === 'appGlobalRequirements'} onclose={() => (currentDialog = 'none')} type='globalReq' />
 {/if}
 
-<script lang="ts">    
+<script lang="ts">
+    import AppCategories from './Features/AppCategories.svelte';
     import AppPoints from './Features/AppPoints.svelte';
     import AppVariables from './Features/AppVariables.svelte';
     import AppGroups from './Features/AppGroups.svelte';

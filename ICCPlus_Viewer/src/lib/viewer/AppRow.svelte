@@ -132,11 +132,13 @@
     import AppObject from './AppObject.svelte';
     import Button, { Label } from '@smui/button';
     import DOMPurify from 'dompurify';
-    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap, snackbarVariables } from '$lib/store/store.svelte';
-    import type { Row } from '$lib/store/types';
+    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap, snackbarVariables, selectUpdateScore, selectedOneMore, selectedOneLess } from '$lib/store/store.svelte';
+    import type { choiceOptions, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
+    import { SvelteMap } from 'svelte/reactivity';
 
     const { row, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row: Row, windowWidth: number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
+    const blankOptions: choiceOptions = {linkedObjects: []}
     
     let choiceRef = $state<any>();
     let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row));
@@ -327,6 +329,13 @@
         let styles: string[] = [];
         
         styles.push(`width: ${rowImageStyle.rowImageWidth}%; margin-top: ${rowImageStyle.rowImageMarginTop}%; margin-bottom: ${rowImageStyle.rowImageMarginBottom}%;`);
+        if (rowImageStyle.rowImgObjectFillIsOn) {
+            styles.push(`object-fit: ${rowImageStyle.rowImgObjectFillStyle};`);
+            const imgHeight = rowImageStyle.rowImgObjectFillHeight;
+            if (imgHeight) {
+                styles.push(`height: ${imgHeight}px;`);
+            }
+        }
         styles.push(`border-radius: ${rowImageStyle.rowImgBorderRadiusTopLeft}${suffix} ${rowImageStyle.rowImgBorderRadiusTopRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomRight}${suffix} ${rowImageStyle.rowImgBorderRadiusBottomLeft}${suffix};`);
         if (rowImageStyle.rowImgOverflowIsOn) {
             styles.push(`overflow: hidden;`);
@@ -351,11 +360,11 @@
                             const mul = choice.multipleUseVariable;
                             if (mul > 0) {
                                 for (let j = 0; j < mul; j++) {
-                                    choiceRef.selectedOneLess(choice, row);
+                                    selectedOneLess(choice, row, choiceRef.options);
                                 }
                             } else if (mul < 0) {
                                 for (let j = mul; j < 0; j++) {
-                                    choiceRef.selectedOneMore(choice, row);
+                                    selectedOneMore(choice, row, choiceRef.options);
                                 }
                             }
                         }
@@ -372,13 +381,26 @@
             const rndMax = row.randomMax || 0;
             const rndMin = row.randomMin || 0;
             const rnd = Math.floor(Math.random() * (rndMax - rndMin) + rndMin);
+            const tmpScores = new SvelteMap<string, number>();
             const point = pointTypeMap.get(row.pointTypeRandom);
 
             if (typeof point !== 'undefined') {
                 if (point.belowZeroNotAllowed && point.startingSum + rnd < 0) {
                     return;
                 }
+
+                const actRow = activatedMap.get(row.id);
+                let pNum = 0;
+
                 point.startingSum += rnd;
+
+                if (typeof actRow !== 'undefined' && actRow.pointNum) {
+                    pNum = actRow.pointNum;
+                }
+                activatedMap.set(row.id, {multiple: 0, isRowButton: true, rndPoint: row.pointTypeRandom, pointNum: pNum + rnd});
+                tmpScores.set(point.id, rnd);
+
+                selectUpdateScore(null, tmpScores, 0, undefined, undefined, blankOptions);
             }
             return;
         }
@@ -409,7 +431,15 @@
                             runningTotal += weight;
 
                             if (rnd < runningTotal) {
-                                choiceRef.activateObject(vChoice, row);
+                                if (vChoice.isSelectableMultiple && vChoice.isMultipleUseVariable && vChoice.numMultipleTimesPluss) {
+                                    if (vChoice.numMultipleTimesPluss > vChoice.multipleUseVariable) {
+                                        selectedOneMore(vChoice, row, choiceRef.options);
+                                    } else {
+                                        selectedOneLess(vChoice, row, choiceRef.options);
+                                    }
+                                } else {
+                                    choiceRef.activateObject(vChoice, row);
+                                }
                                 break;
                             }
                         }
@@ -434,7 +464,16 @@
 
                         if (choice && selectedIndexes.indexOf(index) === -1) {
                             selectedIndexes.push(index);
-                            choiceRef.activateObject(choice, row);
+                            
+                            if (choice.isSelectableMultiple && choice.isMultipleUseVariable && choice.numMultipleTimesPluss) {
+                                if (choice.numMultipleTimesPluss > choice.multipleUseVariable) {
+                                    selectedOneMore(choice, row, choiceRef.options);
+                                } else {
+                                    selectedOneLess(choice, row, choiceRef.options);
+                                }
+                            } else {
+                                choiceRef.activateObject(choice, row);
+                            }
                         }
                     }
                 }

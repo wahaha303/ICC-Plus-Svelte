@@ -1,78 +1,65 @@
 <Dialog
     bind:open
-    surface$style="width: 800px; max-width: calc(100vw - 32px);"
+    surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
     <Title class="dialog-title" tabindex={0} autofocus>
         Variables
     </Title>
     <Content id="dialog--variables" class="pb-2">
-        {#if app.variables.length > 4}
-            <div style="position: relative; height: {totalHeight}px; width: 100%;">
-                {#each items as row (row.index)}
-                    <div class="py-3" data-index={row.index} use:observeResize={row.index} style="position: absolute; top: {row.start}px; width: 100%;">
-                        {#if app.variables[row.index]}
-                            <div class="point-slot">
-                                <div class="toolbar grey lighten-3 justify-space-around">
-                                    <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveVariableUp(row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Delete Group">
-                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteVariable(app.variables[row.index].id, row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveVariableDown(row.index)} />
-                                    </Wrapper>
-                                </div>
-                                <div class="row gy-4 p-3">
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={app.variables[row.index].id} onfocus={() => variableId = app.variables[row.index].id} onchange={() => changeVariableId(app.variables[row.index])} label="Id" variant="filled" />
+        <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
+            {#each $virtualizer.getVirtualItems() as vRow (vRow.index)}
+                <div class="py-3" data-index={vRow.index} use:observeResize={vRow.index} style="position: absolute; top: {vRow.start}px; width: 100%;">
+                    <div class="row g-3 pb-3">
+                        {#each variableRows[vRow.index] as variable, i}
+                            <div class="col-xl-4 col-12">
+                                <div class="point-slot">
+                                    <div class="toolbar grey lighten-3 justify-space-around">
+                                        <Wrapper text="Move Up">
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveVariableUp(variable, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Delete Word">
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteVariable(variable, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Move Down">
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveVariableDown(variable, i)} />
+                                        </Wrapper>
                                     </div>
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={() => app.variables[row.index].isTrue ? 'true' : 'false', (e) => {}} label="Status" variant="filled" disabled />
+                                    <div class="row gy-4 p-3">
+                                        <div class="col-12">
+                                            <CustomAutocomplete
+                                                options={vCats}
+                                                getOptionLabel={getCategoryLabel}
+                                                bindObj={variable}
+                                                bindVal="category"
+                                                label="Category"
+                                                toggle={true}
+                                                showMenuWithNoInput={true}
+                                                textfield$variant="filled"
+                                                innerClass="w-100 p-0"
+                                            />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={variable.id} onfocus={() => variableId = variable.id} onchange={() => changeVariableId(variable)} label="Id" variant="filled" />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={() => variable.isTrue ? 'true' : 'false', (e) => {}} label="Status" variant="filled" disabled />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        {:else if row.index === app.variables.length}
-                            <div>
-                                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewVariable} aria-label="Create New Variable">
+                        {/each}
+                        {#if vRow.index === variableRows.length - 1}
+                            <div class="col-xl-4 col-12">
+                                <button type="button" class="create-box col-12" style="min-height: 210px; font-size: 40px;" onclickcapture={createNewVariable} aria-label="Create New Word">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
                         {/if}
                     </div>
-                {/each}
-            </div>
-        {:else}
-            {#each app.variables as variable, i}
-                <div class="point-slot my-5">
-                    <div class="toolbar grey lighten-3 justify-space-around">
-                        <Wrapper text="Move Up">
-                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveVariableUp(i)} />
-                        </Wrapper>
-                        <Wrapper text="Delete Group">
-                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteVariable(variable.id, i)} />
-                        </Wrapper>
-                        <Wrapper text="Move Down">
-                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveVariableDown(i)} />
-                        </Wrapper>
-                    </div>
-                    <div class="row gy-4 p-3">
-                        <div class="col-sm-6 col-12">
-                            <Textfield bind:value={variable.id} onfocus={() => variableId = variable.id} onchange={() => changeVariableId(variable)} label="Id" variant="filled" />
-                        </div>
-                        <div class="col-sm-6 col-12">
-                            <Textfield bind:value={() => variable.isTrue ? 'true' : 'false', (e) => {}} label="Status" variant="filled" disabled />
-                        </div>
-                    </div>
                 </div>
             {/each}
-            <div class="my-5">
-                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewVariable} aria-label="Create New Variable">
-                    <i class="mdi mdi-plus-thick"></i>
-                </button>
-            </div>
-        {/if}
+        </div>
     </Content>
     <Actions>
         <div class="container-fluid">
@@ -97,38 +84,42 @@
     import IconButton from '@smui/icon-button'; 
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, variableMap, generateVariableId, scrollToLastRow } from '$lib/store/store.svelte';
-    import type { Variable } from '$lib/store/types';
+    import { app, checkDupId, variableMap, generateVariableId, scrollToLastRow, categoryMap } from '$lib/store/store.svelte';
+    import type { Category, Variable } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';
+    import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     
-    let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'word'}, showAll }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean } = $props();
     let variableId = '';
-    const rowCount = () => app.variables.length + 1;
-    let virtualListEl = $state<HTMLDivElement>(document.getElementById('dialog--vairables') as HTMLDivElement);
+    let catVariable = $derived(showAll ? app.variables : app.variables.filter(item => item.category === category.idx));
+    let variableRows = $derived.by(() => {
+        const result: any[][] = [];
+        for (let i = 0; i < catVariable.length; i += 3) {
+            result.push(catVariable.slice(i, i + 3));
+        }
+        if (result.length === 0) result.push([]);
+        return result;
+    });
+    const rowCount = () => variableRows.length;
+    let virtualListEl = $state<HTMLDivElement>(document.getElementById('dialog--variables') as HTMLDivElement);
     let virtualizer = $state(createVirtualizer({
         count: rowCount(),
         getScrollElement: () => virtualListEl,
-        estimateSize: () => 180,
+        estimateSize: () => 252,
         overscan: 1,
-        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 180),
+        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 252) //+72px
     }));
-    let totalHeight = $derived.by(() => {
-        return $virtualizer.getTotalSize()
-    });
-    let items = $derived.by(() => {
-        return $virtualizer.getVirtualItems();
-    });
+    let vCats = $derived(app.categories.filter(item => item.type === category.type).map(item => item.idx));
+
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--variables') as HTMLDivElement;
-        setTimeout(() => {
-            $virtualizer.setOptions({
-                getScrollElement: () => virtualListEl,
-                estimateSize: () => 180,
-                measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 180),
-            });
-        }, 0);
+        $virtualizer.setOptions({
+            getScrollElement: () => virtualListEl,
+            estimateSize: () => 252,
+            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 252)
+        });
     });
 
     function observeResize(el: HTMLDivElement, index: number) {
@@ -160,7 +151,7 @@
 
     function createNewVariable() {
         let id = generateVariableId(0, 4);
-        app.variables.push({id: id, isTrue: false});
+        app.variables.push({id: id, isTrue: false, category: showAll ? -1 : category.idx});
         variableMap.set(id, app.variables[app.variables.length - 1]);
 
         if (app.variables.length > 4) {
@@ -182,15 +173,27 @@
         }
     }
 
-    function moveVariableDown(num: number) {
-        if (num < app.variables.length - 1) {
-            app.variables.splice(num, 2, app.variables[num + 1], app.variables[num]);
+    function moveVariableUp(variable: Variable, num: number) {
+        if (num > 0) {
+            const prevIdx = app.variable.indexOf(catVariable[num - 1]);
+            const curIdx = app.variable.indexOf(variable);
+            [app.variables[prevIdx], app.variables[curIdx]] = [app.variables[curIdx], app.variables[prevIdx]];
         }
     }
 
-    function moveVariableUp(num: number) {
-        if (num > 0) {
-            app.variables.splice(num - 1, 2, app.variables[num], app.variables[num - 1]);
+    function moveVariableDown(variable: Variable, num: number) {
+        if (num < catVariable.length - 1) {
+            const nextIdx = app.variables.indexOf(catVariable[num + 1]);
+            const curIdx = app.variables.indexOf(variable);
+            [app.variables[curIdx], app.variables[nextIdx]] = [app.variables[nextIdx], app.variables[curIdx]];
         }
     }
+
+    function getCategoryLabel(idx: number) {
+        const cat = categoryMap.get(`variable_${idx}`);
+        if (typeof cat !== 'undefined') {
+            return `${cat.idx + 1}. ${cat.name}`;
+        }
+        return '';
+    };
 </script>

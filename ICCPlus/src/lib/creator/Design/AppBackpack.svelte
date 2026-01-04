@@ -20,7 +20,7 @@
                 <div class="container-fluid">
                     <div class="col-12 pb-3">
                         <FormField>
-                            <Switch bind:checked={() => styling.useBackpackDesign?? false, (e) => styling.useBackpackDesign = e} color="secondary" class="switch-scale" />
+                            <Switch bind:checked={() => styling.useBackpackDesign ?? false, (e) => styling.useBackpackDesign = e} color="secondary" class="switch-scale" />
                             {#snippet label()}
                                 Use a Seperate Design?
                             {/snippet}
@@ -28,11 +28,11 @@
                     </div>
                     <div class:disabled={!styling.useBackpackDesign} class="row">
                         <div class="col-sm-6 col-12 gy-2 text-center">
-                            <ColorPicker bind:hex={() => styling.backpackBgColor?? '#000000', (e) => styling.backpackBgColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                            <ColorPicker bind:hex={() => styling.backpackBgColor ?? '#000000', (e) => styling.backpackBgColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                         </div>
                         <div class="col-sm-6 col-12 gy-2">                                
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isBackpackBgRepeat?? false, (e) => styling.isBackpackBgRepeat = e} onchange={() => {
+                                <Checkbox bind:checked={() => styling.isBackpackBgRepeat ?? false, (e) => styling.isBackpackBgRepeat = e} onchange={() => {
                                     if (styling.isBackpackBgFitIn) styling.isBackpackBgFitIn = false;
                                 }} />
                                 {#snippet label()}
@@ -40,7 +40,7 @@
                                 {/snippet}
                             </FormField>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isBackpackBgFitIn?? false, (e) => styling.isBackpackBgFitIn = e} onchange={() => {
+                                <Checkbox bind:checked={() => styling.isBackpackBgFitIn ?? false, (e) => styling.isBackpackBgFitIn = e} onchange={() => {
                                     if (styling.isBackpackBgRepeat) styling.isBackpackBgRepeat = false;
                                 }} />
                                 {#snippet label()}

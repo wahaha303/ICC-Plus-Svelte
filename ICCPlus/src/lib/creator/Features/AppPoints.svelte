@@ -17,19 +17,19 @@
                                 <div class="point-slot">
                                     <div class="toolbar grey lighten-3 justify-space-around">
                                         <Wrapper text="Move Left">
-                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => movePointTypeUp(pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => movePointTypeUp(point, pRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Delete Point">
-                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deletePointType(point, pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deletePointType(point)} />
                                         </Wrapper>
                                         <Wrapper text="Open Point Settings">
                                             <IconButton class="mdi mdi-cog" onclickcapture={() => {dlgVariables.currentDialog = 'appPointSettings'; dlgVariables.point = point}} />
                                         </Wrapper>
                                         <Wrapper text="Clone Point">
-                                            <IconButton class="mdi mdi-content-copy" onclickcapture={() => clonePointType(point, pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-content-copy" onclickcapture={() => clonePointType(point)} />
                                         </Wrapper>
                                         <Wrapper text="Move Right">
-                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => movePointTypeDown(pRow.index * 3 + i)} />
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => movePointTypeDown(point, pRow.index * 3 + i)} />
                                         </Wrapper>
                                     </div>
                                     <div class="row p-3">
@@ -87,6 +87,19 @@
                                                 {/if}
                                             </div>
                                         </div>
+                                        <div class="col-12 my-2">
+                                            <CustomAutocomplete
+                                                options={pCats}
+                                                getOptionLabel={getCategoryLabel}
+                                                bindObj={point}
+                                                bindVal="category"
+                                                label="Category"
+                                                toggle={true}
+                                                showMenuWithNoInput={true}
+                                                textfield$variant="filled"
+                                                innerClass="w-100 p-0"
+                                            />
+                                        </div>
                                         <div class="col-sm-4 col-12 my-2">
                                             <Textfield bind:value={point.id} onfocus={() => pointId = point.id} onchange={() => changePointId(point)} label="The Pointtype Id" variant="filled" required />
                                         </div>
@@ -125,7 +138,7 @@
                         {/each}
                         {#if pRow.index === pointRows.length - 1}
                             <div class="col-xl-4 col-12">
-                                <button type="button" class="create-box col-12" style="min-height: 426px; font-size: 40px;" onclickcapture={createNewPointType} aria-label="Create New Point Type">
+                                <button type="button" class="create-box col-12" style="min-height: 528px; font-size: 40px;" onclickcapture={createNewPointType} aria-label="Create New Point Type">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
@@ -154,23 +167,25 @@
 </Dialog>
 <script lang="ts">
     import Button, { Label } from '@smui/button';
+    import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import FormField from '@smui/form-field';
     import IconButton from '@smui/icon-button';
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, pointTypeMap, generatePointTypeId, dlgVariables, checkDupId, scrollToLastRow } from '$lib/store/store.svelte';
-    import type { PointType } from '$lib/store/types';
+    import { app, pointTypeMap, generatePointTypeId, dlgVariables, checkDupId, scrollToLastRow, categoryMap } from '$lib/store/store.svelte';
+    import type { Category, PointType } from '$lib/store/types';
     import { onMount } from 'svelte';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     
-    let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'point'}, showAll }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean } = $props();
     let pointId = '';
+    let catPoint = $derived(showAll ? app.pointTypes : app.pointTypes.filter(item => item.category === category.idx));
     let pointRows = $derived.by(() => {
         const result: any[][] = [];
-        for (let i = 0; i < app.pointTypes.length; i += 3) {
-            result.push(app.pointTypes.slice(i, i + 3));
+        for (let i = 0; i < catPoint.length; i += 3) {
+            result.push(catPoint.slice(i, i + 3));
         }
         if (result.length === 0) result.push([]);
         return result;
@@ -180,18 +195,19 @@
     let virtualizer = $state(createVirtualizer({
         count: pointCount(),
         getScrollElement: () => virtualListEl,
-        estimateSize: () => 504,
+        estimateSize: () => 576,
         overscan: 1,
-        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 504)
+        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 576)
     }));
+    let pCats = $derived(app.categories.filter(item => item.type === category.type).map(item => item.idx));
 
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--point') as HTMLDivElement;
         $virtualizer.setOptions({
             getScrollElement: () => virtualListEl,
-            estimateSize: () => 504,
-            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 504)
+            estimateSize: () => 576,
+            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 576)
         });
     });
 
@@ -252,9 +268,10 @@
         }
     }
 
-    function clonePointType(point: PointType, num: number) {
+    function clonePointType(point: PointType) {
         let id = generatePointTypeId(0, 4);
         let clone = JSON.parse(JSON.stringify(point));
+        let num = app.pointTypes.indexOf(point);
         clone.id = id;
         app.pointTypes.splice(num + 1, 0, clone);
         pointTypeMap.set(id, app.pointTypes[num + 1]);
@@ -275,7 +292,8 @@
             initValue: 0,
             activatedId: '',
             beforeText: `Point ${app.pointTypes.length + 1}:`,
-            afterText: ''
+            afterText: '',
+            category: showAll ? -1 : category.idx
         });
         pointTypeMap.set(id, app.pointTypes[app.pointTypes.length - 1]);
         
@@ -287,23 +305,35 @@
     }
 
 
-    function deletePointType(point: PointType, num: number) {
-        app.pointTypes.splice(num, 1);
+    function deletePointType(point: PointType) {
+        app.pointTypes.splice(app.pointTypes.indexOf(point), 1);
         pointTypeMap.delete(point.id);
         $virtualizer.setOptions({
             count: pointCount()
         });
     }
 
-    function movePointTypeUp(num: number) {
+    function movePointTypeUp(point: PointType, num: number) {
         if (num > 0) {
-            app.pointTypes.splice(num - 1, 2, app.pointTypes[num], app.pointTypes[num - 1]);
+            const prevIdx = app.pointTypes.indexOf(catPoint[num - 1]);
+            const curIdx = app.pointTypes.indexOf(point);
+            [app.pointTypes[prevIdx], app.pointTypes[curIdx]] = [app.pointTypes[curIdx], app.pointTypes[prevIdx]];
         }
     }
 
-    function movePointTypeDown(num: number) {
-        if (num < app.pointTypes.length - 1) {
-            app.pointTypes.splice(num, 2, app.pointTypes[num + 1], app.pointTypes[num]);
+    function movePointTypeDown(point: PointType, num: number) {
+        if (num < catPoint.length - 1) {
+            const nextIdx = app.pointTypes.indexOf(catPoint[num + 1]);
+            const curIdx = app.pointTypes.indexOf(point);
+            [app.pointTypes[curIdx], app.pointTypes[nextIdx]] = [app.pointTypes[nextIdx], app.pointTypes[curIdx]];
         }
     }
+
+    function getCategoryLabel(idx: number) {
+        const cat = categoryMap.get(`point_${idx}`);
+        if (typeof cat !== 'undefined') {
+            return `${cat.idx + 1}. ${cat.name}`;
+        }
+        return '';
+    };
 </script>

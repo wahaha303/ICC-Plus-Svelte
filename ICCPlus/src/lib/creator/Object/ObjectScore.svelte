@@ -1,6 +1,6 @@
 {#if isEditModeOn}
     <div bind:clientWidth={width} class="pb-1">
-        <div class="d-row justify-space-between overflow-auto title--text">
+        <div class:disabled={choice.isActive} class="d-row justify-space-between overflow-auto title--text">
             <Wrapper text="Move Up">
                 <IconButton onclickcapture={moveScoreUp}><i class="mdi mdi-chevron-up"></i></IconButton>
             </Wrapper>
@@ -16,7 +16,7 @@
                 <IconButton onclickcapture={moveScoreDown}><i class="mdi mdi-chevron-down"></i></IconButton>
             </Wrapper>
         </div>
-        <div class="row gx-3">
+        <div class:disabled={choice.isActive} class="row gx-3">
             {#if choice.isSelectableMultiple && choice.isMultipleUseVariable}
                 <FormField class="col-12">
                     <Checkbox bind:checked={() => score.multiplyByTimes ?? false, (e) => score.multiplyByTimes = e} onchange={() => {
@@ -116,7 +116,7 @@
             </Wrapper>
         </div>
         <div class="row gx-3">
-            <div class={col6}>
+            <div class:disabled={choice.isActive} class={col6}>
                 <Autocomplete
                     options={getPointTypes()}
                     getOptionLabel={getPointTypeLabel}
@@ -178,7 +178,7 @@
                 </FormField>
             {/if}
         </div>
-        <div class="row gy-3 p-2">
+        <div class:disabled={choice.isActive} class="row gy-3 p-2">
             {#each score.requireds as required, i}
                 <div class="{required.requireds.length > 0 ? 'col-12' : reqCol} p-2">
                     <ObjectRequired required={required} isEditModeOn={true} data={score} index={i} isNotShown={true} />

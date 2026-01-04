@@ -1,5 +1,5 @@
 {#if isEditModeOn}
-    <div bind:clientWidth={width}>
+    <div class:disabled={data?.isActive} bind:clientWidth={width}>
         <div class="d-row justify-space-between overflow-auto title--text">
             <Wrapper text="Move Left">
                 <IconButton onclickcapture={moveReqLeft} size="mini"><i class="mdi mdi-chevron-left"></i></IconButton>

@@ -13,7 +13,7 @@ import Code from '@tiptap/extension-code'
 
 
 const BUILTIN_TAGS = new Set([
-  'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img', 'p', 'span'
+  'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img', 'p', 'span', 'div'
 ])
 
 const inlineTags = new Set([
@@ -317,6 +317,30 @@ export const CustomTextStyle = TextStyle.extend({
       },
     ]
   }
+})
+
+export const CustomDiv = Node.create({
+  name: 'div',
+  group: 'block',
+  content: 'block*',
+  defining: true,
+
+  parseHTML() {
+    return [{
+      tag: 'div',
+      getAttrs: (dom: HTMLElement) => getAllAttributes(dom),
+    }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['div', HTMLAttributes, 0]
+  },
+
+  addAttributes() {
+    return {
+      all: createAllAttributesAttr(),
+    }
+  },
 })
 
 export const CustomHeading = createCustomExtension(Heading)

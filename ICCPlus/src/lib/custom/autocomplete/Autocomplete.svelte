@@ -268,6 +268,7 @@
     multiple?: boolean;
     multipleValue?: string[];
     parentElement?: HTMLDivElement;
+    onfocuslost?: () => void;
   };
   let {
     use = [],
@@ -320,6 +321,7 @@
     multiple = false,
     multipleValue,
     parentElement,
+    onfocuslost,
     ...restProps
   }: OwnProps &
     SmuiAttrs<'div', keyof OwnProps> & {
@@ -628,6 +630,7 @@
       // Focus is remaining in the container.
       return;
     }
+    if (focused && onfocuslost) onfocuslost();
     // Clear the focus and input.
     focusedIndex = -1;
     focused = false;
@@ -678,6 +681,10 @@
 
   export function getElement() {
     return element;
+  }
+
+  export function isExpanded() {
+    return menuOpen;
   }
 
   function selectAll() {

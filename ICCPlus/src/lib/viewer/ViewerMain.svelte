@@ -157,7 +157,7 @@
 {/if}
 {#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
     <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} />
-{:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.title !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
+{:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
 {:else if dlgVariables.currentDialog === 'selectDialog' && typeof dlgVariables.choice !== 'undefined' && typeof dlgVariables.func !== 'undefined'}
     <ObjectSelectDialog open={dlgVariables.currentDialog === 'selectDialog'} onclose={() => (dlgVariables.currentDialog = 'none')} submit={dlgVariables.func} changeNum={dlgVariables.choice.multipleUseVariable} minVal={dlgVariables.choice.numMultipleTimesMinus} maxVal={dlgVariables.choice.numMultipleTimesPluss} />
@@ -172,7 +172,7 @@
     import Slider from '@smui/slider';
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, bgmPlayer, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba } from '$lib/store/store.svelte';
+    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba, musicPlayer } from '$lib/store/store.svelte';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppGlobalSettings from './AppGlobalSettings.svelte';
     import AppPointBar from './AppPointBar.svelte';
@@ -302,97 +302,91 @@
     }
 
     function handlePlayButton() {
-        if (bgmPlayer && bgmVariables.curBgmLength !== 0) {
-            const player = get(bgmPlayer);
+        const player = get(musicPlayer);
+        if (player) {
+            if (bgmVariables.bgmIsPlaying) {
+                player.pause();
+                bgmVariables.bgmIsPlaying = false;
 
-            if (player) {
-                if (bgmVariables.bgmIsPlaying) {
-                    player.pauseVideo();
-                    bgmVariables.bgmIsPlaying = false;
+                if (bgmVariables.bgmPlayInterval !== 0) {
+                    clearInterval(bgmVariables.bgmPlayInterval);
+                    bgmVariables.bgmPlayInterval = 0;
+                }
+            } else {
+                let bgmTime = 0;
+                let checkTime = 0;
 
-                    if (bgmVariables.bgmPlayInterval !== 0) {
-                        clearInterval(bgmVariables.bgmPlayInterval);
-                        bgmVariables.bgmPlayInterval = 0;
-                    }
-                } else {
-                    let bgmTime = 0;
-                    let checkTime = 0;
+                if (bgmVariables.bgmPlayInterval !== 0) {
+                    clearInterval(bgmVariables.bgmPlayInterval);
+                    bgmVariables.bgmPlayInterval = 0;
+                }
 
-                    if (bgmVariables.bgmPlayInterval !== 0) {
-                        clearInterval(bgmVariables.bgmPlayInterval);
-                        bgmVariables.bgmPlayInterval = 0;
-                    }
+                player.play();
+                bgmVariables.bgmIsPlaying = true;
+                bgmVariables.bgmPlayInterval = window.setInterval(() => {
+                    if (!bgmVariables.isSeeking && player.isPlaying()) {
+                        const curTime = Math.floor(player.getCurrentTime());
 
-                    player.playVideo();
-                    bgmVariables.bgmIsPlaying = true;
-                    bgmVariables.bgmPlayInterval = window.setInterval(() => {
-                        if (typeof player.playerInfo.videoData !== 'undefined' && !bgmVariables.isSeeking && player.getPlayerState() === 1) {
-                            const curTime = Math.floor(player.getCurrentTime());
-
-                            if (curTime !== bgmVariables.curBgmTime) {
-                                if (bgmTime !== curTime) {
-                                    bgmVariables.curBgmTime = curTime
-                                } else {
-                                    checkTime++;
-                                    if (checkTime > bgmVariables.curBgmLength) checkTime = 1;
-                                    bgmVariables.curBgmTime = checkTime;
-                                }
+                        if (curTime !== bgmVariables.curBgmTime) {
+                            if (bgmTime !== curTime) {
+                                bgmVariables.curBgmTime = curTime
                             } else {
-                                bgmTime = curTime;
-                                checkTime = curTime + 1;
+                                checkTime++;
+                                if (checkTime > bgmVariables.curBgmLength) checkTime = 1;
                                 bgmVariables.curBgmTime = checkTime;
                             }
+                        } else {
+                            bgmTime = curTime;
+                            checkTime = curTime + 1;
+                            bgmVariables.curBgmTime = checkTime;
                         }
-                    }, 1000);
-                }
+                    }
+                }, 1000);
             }
         }
     }
 
     function handleStopButton() {
-        if (bgmPlayer && bgmVariables.bgmIsPlaying && bgmVariables.curBgmLength !== 0) {
-            const player = get(bgmPlayer);
+        const player = get(musicPlayer);
 
-            if (player) {
-                player.stopVideo();
-                bgmVariables.bgmIsPlaying = false;
-                bgmVariables.curBgmTime = 0;
-                
-                if (bgmVariables.bgmPlayInterval !== 0) {
-                    clearInterval(bgmVariables.bgmPlayInterval);
-                    bgmVariables.bgmPlayInterval = 0;
-                }
+        if (player && bgmVariables.bgmIsPlaying) {
+            player.stop();
+            bgmVariables.bgmIsPlaying = false;
+            bgmVariables.curBgmTime = 0;
+            
+            if (bgmVariables.bgmPlayInterval !== 0) {
+                clearInterval(bgmVariables.bgmPlayInterval);
+                bgmVariables.bgmPlayInterval = 0;
             }
         }
     }
 
     function handleMuteButton() {
-        app.isMute = !app.isMute;
-        if (bgmPlayer) {
-            const player = get(bgmPlayer);
+        const player = get(musicPlayer);
 
-            if (player) {
-                if (app.isMute) {
-                    player.mute();
-                } else {
-                    player.unMute();
-                }
+        app.isMute = !app.isMute;
+        if (player) {
+            if (app.isMute) {
+                player.mute();
+            } else {
+                player.unMute();
             }
         }
     }
 
     function handlePlaybarDown() {
-        if (bgmPlayer && bgmVariables.bgmIsPlaying) {
+        const player = get(musicPlayer);
+        
+        if (player && bgmVariables.bgmIsPlaying) {
             bgmVariables.isSeeking = true;
         }
     }
 
     function handlePlaybarUp() {
-        if (bgmPlayer && bgmVariables.bgmIsPlaying) {
-            const player = get(bgmPlayer);
+        if (bgmVariables.bgmIsPlaying) {
+            const player = get(musicPlayer);
 
-            if (player) {
-                player.seekTo(curBgmTime, true);
+            if (player && player.seekTo?.(curBgmTime)) {
                 bgmVariables.curBgmTime = curBgmTime;
             }
             bgmVariables.isSeeking = false;
@@ -405,16 +399,14 @@
     }
 
     function handleVolumebarUp() {
-        app.curVolume = curVolume;
-        if (bgmPlayer) {
-            const player = get(bgmPlayer);
+        const player = get(musicPlayer);
 
-            if (player) {
-                player.setVolume(curVolume);
-            }
+        app.curVolume = curVolume;
+        if (player) {
+            player.setVolume(curVolume);
         }
         isChangingVol = false;
         (document.activeElement as HTMLElement)?.blur();
     }
-    
+
 </script>

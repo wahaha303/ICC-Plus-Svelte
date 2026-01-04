@@ -1,143 +1,97 @@
 <Dialog
     bind:open
     escapeKeyAction={currentDialog === 'none' ? 'close' : ''}
-    surface$style="width: 800px; max-width: calc(100vw - 32px);"
+    surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
     <Title class="dialog-title" tabindex={0} autofocus>
         Global Requirements
     </Title>
     <Content id="dialog--global-req" class="pb-2">
-        {#if app.globalRequirements && app.globalRequirements.length > 3}
-            <div style="position: relative; height: {totalHeight}px; width: 100%;">
-                {#each items as row (row.index)}
-                    <div class="py-3" data-index={row.index} use:observeResize={row.index} style="position: absolute; top: {row.start}px; width: 100%;">
-                        {#if app.globalRequirements && app.globalRequirements[row.index]}
-                            <div class="point-slot">
-                                <div class="toolbar grey lighten-3 justify-space-around">
-                                    <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveReqUp(row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Delete Global Requirement">
-                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(app.globalRequirements![row.index].id, row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Add Requirement">
-                                        <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = app.globalRequirements![row.index]}} />
-                                    </Wrapper>
-                                    <Wrapper text="Clone Global Requirement">
-                                        <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(app.globalRequirements![row.index], row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveReqDown(row.index)} />
-                                    </Wrapper>
-                                </div>
-                                <div class="row gy-3 p-3">
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={app.globalRequirements[row.index].id} onfocus={() => reqId = app.globalRequirements![row.index].id} onchange={() => changeReqId(app.globalRequirements![row.index])} label="Id" variant="filled" />
+        <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
+            {#each $virtualizer.getVirtualItems() as rRow (rRow.index)}
+                <div class="py-3" data-index={rRow.index} use:observeResize={rRow.index} style="position: absolute; top: {rRow.start}px; width: 100%;">
+                    <div class="row g-3 pb-3">
+                        {#each reqRows[rRow.index] as req, i}
+                            <div class="col-xl-4 col-12">
+                                <div class="point-slot">
+                                    <div class="toolbar grey lighten-3 justify-space-around">
+                                        <Wrapper text="Move Up">
+                                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveReqUp(req, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Delete Global Requirement">
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(req.id, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Add Requirement">
+                                            <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = req}} />
+                                        </Wrapper>
+                                        <Wrapper text="Clone Global Requirement">
+                                            <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(req, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Move Down">
+                                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveReqDown(req, i)} />
+                                        </Wrapper>
                                     </div>
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={app.globalRequirements![row.index].name} label="Name" variant="filled" />
+                                    <div class="row gy-3 p-3">
+                                        <div class="col-12">
+                                            <CustomAutocomplete
+                                                options={rCats}
+                                                getOptionLabel={getCategoryLabel}
+                                                bindObj={req}
+                                                bindVal="category"
+                                                label="Category"
+                                                toggle={true}
+                                                showMenuWithNoInput={true}
+                                                textfield$variant="filled"
+                                                innerClass="w-100 p-0"
+                                            />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={req.id} onfocus={() => reqId = req.id} onchange={() => changeReqId(req)} label="Id" variant="filled" />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={req.name} label="Name" variant="filled" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row gx-0">
-                                    <div class="col p-2">
-                                        {#if app.globalRequirements[row.index].requireds.length > 0}
-                                            <Accordion>
-                                                <Panel variant="unelevated">
-                                                    <Header class="p-0">
-                                                        Requirements: {app.globalRequirements![row.index].requireds.length}
-                                                    </Header>
-                                                    <AcdContent>
-                                                        <div class="row gy-4">
-                                                            {#each app.globalRequirements[row.index].requireds as required, i}
-                                                                <div class="{required.requireds.length > 0 ? 'col-12' : 'col-sm-6 col-12'} p-2">
-                                                                    <ObjectRequired required={required} isEditModeOn={true} />
-                                                                    <Button onclickcapture={() => app.globalRequirements![row.index].requireds.splice(i, 1)} class="mt-1" variant="raised">
-                                                                        <Label>Delete</Label>
-                                                                    </Button>
-                                                                </div>
-                                                            {/each}
-                                                        </div>
-                                                    </AcdContent>
-                                                </Panel>
-                                            </Accordion>
-                                        {/if}
+                                    <div class="row gx-0">
+                                        <div class="col p-2">
+                                            {#if req.requireds.length > 0}
+                                                <Accordion>
+                                                    <Panel variant="unelevated">
+                                                        <Header class="p-0">
+                                                            Requirements: {req.requireds.length}
+                                                        </Header>
+                                                        <AcdContent>
+                                                            <div class="row gy-4">
+                                                                {#each req.requireds as required, j}
+                                                                    <div class="{required.requireds.length > 0 ? 'col-12' : 'col-sm-6 col-12'} p-2">
+                                                                        <ObjectRequired required={required} isEditModeOn={true} />
+                                                                        <Button onclickcapture={() => req.requireds.splice(j, 1)} class="mt-1" variant="raised">
+                                                                            <Label>Delete</Label>
+                                                                        </Button>
+                                                                    </div>
+                                                                {/each}
+                                                            </div>
+                                                        </AcdContent>
+                                                    </Panel>
+                                                </Accordion>
+                                            {/if}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        {:else if row.index === app.globalRequirements.length}
-                            <div>
-                                <button type="button" class="create-box col-12" style="min-height: 154px; font-size: 40px;" onclickcapture={createNewGlobalReq} aria-label="Create New Group">
+                        {/each}
+                        {#if rRow.index === reqRows.length - 1}
+                            <div class="col-xl-4 col-12">
+                                <button type="button" class="create-box col-12" style="min-height: 226px; font-size: 40px;" onclickcapture={createNewGlobalReq} aria-label="Create New Requirement">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
                         {/if}
                     </div>
-                {/each}
-            </div>
-        {:else if app.globalRequirements}
-            <div class="py-3">
-                {#each app.globalRequirements as req, i}
-                    <div class="point-slot my-5">
-                        <div class="toolbar grey lighten-3 justify-space-around">
-                            <Wrapper text="Move Up">
-                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveReqUp(i)} />
-                            </Wrapper>
-                            <Wrapper text="Delete Global Requirement">
-                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(req.id, i)} />
-                            </Wrapper>
-                            <Wrapper text="Add Requirement">
-                                <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = req}} />
-                            </Wrapper>
-                            <Wrapper text="Clone Global Requirement">
-                                <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(req, i)} />
-                            </Wrapper>
-                            <Wrapper text="Move Down">
-                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveReqDown(i)} />
-                            </Wrapper>
-                        </div>
-                        <div class="row gy-3 p-3">
-                            <div class="col-sm-6 col-12">
-                                <Textfield bind:value={req.id} onfocus={() => reqId = req.id} onchange={() => changeReqId(req)} label="Id" variant="filled" />
-                            </div>
-                            <div class="col-sm-6 col-12">
-                                <Textfield bind:value={req.name} label="Name" variant="filled" />
-                            </div>
-                        </div>
-                        <div class="row gx-0">
-                            <div class="col p-2">
-                                {#if req.requireds.length > 0}
-                                    <Accordion>
-                                        <Panel variant="unelevated">
-                                            <Header class="p-0">
-                                                Requirements: {req.requireds.length}
-                                            </Header>
-                                            <AcdContent>
-                                                <div class="row gy-4">
-                                                    {#each req.requireds as required, j}
-                                                        <div class="{required.requireds.length > 0 ? 'col-12' : 'col-sm-6 col-12'} p-2">
-                                                            <ObjectRequired required={required} isEditModeOn={true} />
-                                                            <Button onclickcapture={() => req.requireds.splice(j, 1)} class="mt-1" variant="raised">
-                                                                <Label>Delete</Label>
-                                                            </Button>
-                                                        </div>
-                                                    {/each}
-                                                </div>
-                                            </AcdContent>
-                                        </Panel>
-                                    </Accordion>
-                                {/if}
-                            </div>
-                        </div>
-                    </div>
-                {/each}
-                <div class="my-5">
-                    <button type="button" class="create-box col-12" style="min-height: 154px; font-size: 40px;" onclickcapture={createNewGlobalReq} aria-label="Create New Group">
-                        <i class="mdi mdi-plus-thick"></i>
-                    </button>
                 </div>
-            </div>
-        {/if}
+            {/each}
+        </div>
     </Content>
     <Actions>
         <div class="container-fluid">
@@ -169,37 +123,43 @@
     import ObjectRequired from '../Object/ObjectRequired.svelte';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, globalReqMap, scrollToLastRow } from '$lib/store/store.svelte';
-	import type { GlobalRequirement, Requireds } from '$lib/store/types';
+    import { app, categoryMap, checkDupId, globalReqMap, scrollToLastRow } from '$lib/store/store.svelte';
+	import type { Category, GlobalRequirement, Requireds } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';
+    import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     
-    let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'word'}, showAll }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean } = $props();
     let currentDialog = $state<'none' | 'appRequirement'>('none');
     let data = $state<GlobalRequirement | Requireds>();
     let reqId = '';
-    const rowCount = () => (app.globalRequirements?.length ?? 0) + 1;
-    let virtualListEl = $state<HTMLDivElement>(document.getElementById('dialog--group') as HTMLDivElement);
+    let catReq = $derived(showAll ? app.globalRequirements! : app.globalRequirements!.filter(item => item.category === category.idx));
+    let reqRows = $derived.by(() => {
+        const result: any[][] = [];
+        for (let i = 0; i < catReq.length; i += 3) {
+            result.push(catReq.slice(i, i + 3));
+        }
+        if (result.length === 0) result.push([]);
+        return result;
+    });
+    const rowCount = () => reqRows.length;
+    let virtualListEl = $state<HTMLDivElement>(document.getElementById('dialog--global-req') as HTMLDivElement);
     let virtualizer = $state(createVirtualizer({
         count: rowCount(),
         getScrollElement: () => virtualListEl,
-        estimateSize: () => 232,
+        estimateSize: () => 252,
         overscan: 1,
-        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 232)
+        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 305) //+72px
     }));
-    let totalHeight = $derived.by(() => {
-        return $virtualizer.getTotalSize()
-    });
-    let items = $derived.by(() => {
-        return $virtualizer.getVirtualItems();
-    });
+    let rCats = $derived(app.categories.filter(item => item.type === category.type).map(item => item.idx));
+
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--global-req') as HTMLDivElement;
         $virtualizer.setOptions({
             getScrollElement: () => virtualListEl,
-            estimateSize: () => 232,
-            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 232)
+            estimateSize: () => 305,
+            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 305)
         });
     });
 
@@ -255,6 +215,7 @@
         app.globalRequirements.push({
             id: id,
             name: `Requirement ${index + 1}`,
+            category: showAll ? -1 : category.idx,
             requireds: [],
         });
         globalReqMap.set(id, app.globalRequirements[index]);
@@ -298,20 +259,27 @@
         }
     }
 
-    function moveReqDown(num: number) {
-        if (typeof app.globalRequirements !== 'undefined') {
-            if (num < app.globalRequirements.length - 1) {
-                app.globalRequirements.splice(num, 2, app.globalRequirements[num + 1], app.globalRequirements[num]);
-            }
+    function moveReqUp(req: GlobalRequirement, num: number) {
+        if (typeof app.globalRequirements !== 'undefined' && num > 0) {
+            const prevIdx = app.globalRequirements.indexOf(catReq[num - 1]);
+            const curIdx = app.globalRequirements.indexOf(req);
+            [app.globalRequirements[prevIdx], app.globalRequirements[curIdx]] = [app.globalRequirements[curIdx], app.globalRequirements[prevIdx]];
         }
     }
 
-    function moveReqUp(num: number) {
-        if (typeof app.globalRequirements !== 'undefined') {
-            if (num > 0) {
-                app.globalRequirements.splice(num - 1, 2, app.globalRequirements[num], app.globalRequirements[num - 1]);
-            }
+    function moveReqDown(req: GlobalRequirement, num: number) {
+        if (typeof app.globalRequirements !== 'undefined' && num < catReq.length - 1) {
+            const nextIdx = app.globalRequirements.indexOf(catReq[num + 1]);
+            const curIdx = app.globalRequirements.indexOf(req);
+            [app.globalRequirements[curIdx], app.globalRequirements[nextIdx]] = [app.globalRequirements[nextIdx], app.globalRequirements[curIdx]];
         }
     }
-    
+
+    function getCategoryLabel(idx: number) {
+        const cat = categoryMap.get(`req_${idx}`);
+        if (typeof cat !== 'undefined') {
+            return `${cat.idx + 1}. ${cat.name}`;
+        }
+        return '';
+    }
 </script>

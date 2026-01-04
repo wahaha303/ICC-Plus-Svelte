@@ -100,7 +100,7 @@
                         </div>
                     </div>
                     <div class:disabled={styling.selFilterVisibleIsOn} class="row">
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selBgColorIsOn ?? false, (e) => styling.selBgColorIsOn = e} />
                                 {#snippet label()}
@@ -117,7 +117,7 @@
                                 <ColorPicker bind:hex={() => styling.selFilterBgColor ?? '#000000', (e) => styling.selFilterBgColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selBorderColorIsOn ?? false, (e) => styling.selBorderColorIsOn = e} />
                                 {#snippet label()}
@@ -128,7 +128,18 @@
                                 <ColorPicker bind:hex={() => styling.selFilterBorderColor ?? '#000000', (e) => styling.selFilterBorderColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
+                            <FormField class="w-100">
+                                <Checkbox bind:checked={() => styling.selImgBorderColorIsOn ?? false, (e) => styling.selImgBorderColorIsOn = e} />
+                                {#snippet label()}
+                                    Image Border Color
+                                {/snippet}
+                            </FormField>
+                            <div class:disabled={!styling.selImgBorderColorIsOn}>
+                                <ColorPicker bind:hex={() => styling.selFilterImgBorderColor ?? '#000000', (e) => styling.selFilterImgBorderColor = e} components={ChromeVariant} sliderDirection="horizontal" />
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.selCTitleColorIsOn ?? false, (e) => styling.selCTitleColorIsOn = e} />
                                 {#snippet label()}
@@ -242,7 +253,7 @@
                         </div>
                     </div>
                     <div class:disabled={styling.reqFilterVisibleIsOn} class="row">
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqBgColorIsOn ?? false, (e) => styling.reqBgColorIsOn = e} />
                                 {#snippet label()}
@@ -259,7 +270,7 @@
                                 <ColorPicker bind:hex={() => styling.reqFilterBgColor ?? '#000000', (e) => styling.reqFilterBgColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqBorderColorIsOn ?? false, (e) => styling.reqBorderColorIsOn = e} />
                                 {#snippet label()}
@@ -270,7 +281,18 @@
                                 <ColorPicker bind:hex={() => styling.reqFilterBorderColor ?? '#000000', (e) => styling.reqFilterBorderColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                             </div>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
+                            <FormField class="w-100">
+                                <Checkbox bind:checked={() => styling.reqImgBorderColorIsOn ?? false, (e) => styling.reqImgBorderColorIsOn = e} />
+                                {#snippet label()}
+                                    Image Border Color
+                                {/snippet}
+                            </FormField>
+                            <div class:disabled={!styling.reqImgBorderColorIsOn}>
+                                <ColorPicker bind:hex={() => styling.reqFilterImgBorderColor ?? '#000000', (e) => styling.reqFilterImgBorderColor = e} components={ChromeVariant} sliderDirection="horizontal" />
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-12 gy-2">
                             <FormField class="w-100">
                                 <Checkbox bind:checked={() => styling.reqCTitleColorIsOn ?? false, (e) => styling.reqCTitleColorIsOn = e} />
                                 {#snippet label()}

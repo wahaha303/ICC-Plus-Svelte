@@ -13,7 +13,11 @@
             </div>
             {#if isWord}
                 <div class="col-12">
-                    <Textfield textarea bind:value={wordText} label="" variant="filled" input$rows={5} />
+                    {#if defaultRow === 1}
+                        <Textfield bind:value={wordText} label={textLabel} variant="filled" />
+                    {:else}
+                        <Textfield textarea bind:value={wordText} label={textLabel} variant="filled" input$rows={defaultRow} />
+                    {/if}
                 </div>
             {/if}
         </div>
@@ -40,7 +44,7 @@
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import Textfield from '$lib/custom/textfield';
 
-    let { open, onclose, title, context, closeHandler, isWord, prevText }: { open: boolean; onclose: () => void, title: string, context: string, closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void, isWord?: boolean, prevText?: string } = $props();
+    let { open, onclose, title = '', context, closeHandler, isWord, prevText, defaultRow = 5, textLabel = '' }: { open: boolean; onclose: () => void, title?: string, context: string, closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void, isWord?: boolean, prevText?: string, defaultRow?: number, textLabel?: string } = $props();
     let wordText = $state(isWord && prevText ? prevText : '');
 
     function beforeClose(e: CustomEvent<{ action: string }>) {

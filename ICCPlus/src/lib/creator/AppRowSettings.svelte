@@ -51,7 +51,7 @@
                 </div>
                 {#if app.styling.objectImgObjectFillIsOn}
                     <div class="col-12 gy-2">
-                        <Textfield bind:value={() => row.objectImgObjectFillHeight ?? 0, (e) => row.objectImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} onchange={() => {
+                        <Textfield bind:value={() => row.objectImgObjectFillHeight ?? 0, (e) => row.objectImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} suffix="px" onchange={() => {
                             if (typeof row.objectImgObjectFillHeight !== 'undefined' && row.objectImgObjectFillHeight < 0) {
                                 row.objectImgObjectFillHeight = 0;
                             }
@@ -74,7 +74,7 @@
                 </div>
                 <div class="col-12 gy-2">
                     <FormField class="ml-4 mb-2">
-                        <Switch bind:checked={() => row.isPrivateStyling?? false, (e) => {
+                        <Switch bind:checked={() => row.isPrivateStyling ?? false, (e) => {
                             if (e) {
                                 row.isPrivateStyling = true;
                                 row.styling = {};

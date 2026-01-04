@@ -1,26 +1,26 @@
-<div class="text-center addon" style={addonBackground}>
+<div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''} {addonWidthClass()}" style={addonBackground}>
     {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
         <div>
-            {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}
+            {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row?.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
                     <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
             {/if}
-            {#if addon.title !== '' && !row.addonTitleRemoved}
+            {#if addon.title !== '' && !row?.addonTitleRemoved}
                 {#key addonTitleKey}
                     <h3 class="m-0" style={addonTitle}>
                         {@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}
                     </h3>
                 {/key}
             {/if}
-            {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+            {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
                 {#each choice.scores as score}
                     <ObjectScore score={score} row={row} choice={choice} />
                 {/each}
             {/if}
-            {#if !row.objectRequirementRemoved}
+            {#if !row?.objectRequirementRemoved}
                 {#if choice.showReqInAddon && isFirst}
                     {#each choice.requireds as required}
                         <ObjectRequired required={required} scoreText={scoreText} />
@@ -30,21 +30,21 @@
                     <ObjectRequired required={required} scoreText={scoreText} />
                 {/each}
             {/if}
-            {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
+            {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
                     <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
             {/if}
-            {#if addon.text !== '' && !row.addonTextRemoved}
+            {#if addon.text !== '' && !row?.addonTextRemoved}
                 {#key addonTextKey}
                     <p class="mb-0" style={addonText}>
                         {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
                     </p>
                 {/key}
             {/if}
-            {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
+            {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
                     <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
@@ -56,7 +56,7 @@
         <div class="row m-0 p-0 w-100">
             {#if addon.template === 2}
                 <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
-                    {#if addon.image && !row.addonImageRemoved}
+                    {#if addon.image && !row?.addonImageRemoved}
                         {#if addon.imageSourceTooltip}
                             <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {:else}
@@ -65,15 +65,15 @@
                     {/if}
                 </div>
                 <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
-                    {#if addon.title !== '' && !row.addonTitleRemoved}
+                    {#if addon.title !== '' && !row?.addonTitleRemoved}
                         {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
-                    {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                    {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
                         {#each choice.scores as score}
                             <ObjectScore score={score} row={row} choice={choice} />
                         {/each}
                     {/if}
-                    {#if !row.objectRequirementRemoved}
+                    {#if !row?.objectRequirementRemoved}
                         {#if choice.showReqInAddon && isFirst}
                             {#each choice.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
@@ -83,7 +83,7 @@
                             <ObjectRequired required={required} scoreText={scoreText} />
                         {/each}
                     {/if}
-                    {#if addon.text !== '' && !row.addonTextRemoved}
+                    {#if addon.text !== '' && !row?.addonTextRemoved}
                         {#key addonTextKey}
                             <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
@@ -93,15 +93,15 @@
                 </div>
             {:else if addon.template === 3}
                 <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
-                    {#if addon.title !== '' && !row.addonTitleRemoved}
+                    {#if addon.title !== '' && !row?.addonTitleRemoved}
                         {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
-                    {#if !row.objectScoreRemoved && choice.showScoreInAddon && isFirst}
+                    {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
                         {#each choice.scores as score}
                             <ObjectScore score={score} row={row} choice={choice} />
                         {/each}
                     {/if}
-                    {#if !row.objectRequirementRemoved}
+                    {#if !row?.objectRequirementRemoved}
                         {#if choice.showReqInAddon && isFirst}
                             {#each choice.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
@@ -111,7 +111,7 @@
                             <ObjectRequired required={required} scoreText={scoreText} />
                         {/each}
                     {/if}
-                    {#if addon.text !== '' && !row.addonTextRemoved}
+                    {#if addon.text !== '' && !row?.addonTextRemoved}
                         {#key addonTextKey}
                             <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
@@ -120,7 +120,7 @@
                     {/if}
                 </div>
                 <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
-                    {#if addon.image && !row.addonImageRemoved}
+                    {#if addon.image && !row?.addonImageRemoved}
                         {#if addon.imageSourceTooltip}
                             <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {:else}
@@ -136,7 +136,7 @@
 <script lang="ts">
     import DOMPurify from 'dompurify';
     import ObjectRequired from './ObjectRequired.svelte';
-    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables } from '$lib/store/store.svelte';
+    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables, winWidth, objectWidthToNum } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import ObjectScore from './ObjectScore.svelte';
@@ -388,27 +388,37 @@
 
         if (useDesign) {
             styles.push(`width: ${addonImageStyle.addonImageWidth}%; margin-top: ${addonImageStyle.addonImageMarginTop}%; margin-bottom: ${addonImageStyle.addonImageMarginBottom}%;`);
-            if (addonImageStyle.addonImgObjectFillIsOn && choice.addonImgObjectFillHeight) {
-                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice.addonImgObjectFillHeight}px;`);
+            if (addonImageStyle.addonImgObjectFillIsOn) {
+                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle};`);
+                const imgHeight = choice.addonImgObjectFillHeight || objectImageStyle.addonImgObjectFillHeight;
+                if (imgHeight) {
+                    styles.push(`height: ${imgHeight}px`);
+                }
             }
             styles.push(`border-radius: ${addonImageStyle.addonImgBorderRadiusTopLeft}${suffix} ${addonImageStyle.addonImgBorderRadiusTopRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomLeft}${suffix};`);
             if (addonImageStyle.addonImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (addonImageStyle.addonImgBorderIsOn) {
-                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${hexToRgba(addonImageStyle.addonImgBorderColor)};`);
-            }    
+                const borderColor = isEnabled ? (isActive && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || addonImageStyle.addonImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || addonImageStyle.addonImgBorderColor;
+                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${hexToRgba(borderColor)};`);
+            }
         } else {
             styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
-            if (objectImageStyle.objectImgObjectFillIsOn && row.objectImgObjectFillHeight) {
-                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row.objectImgObjectFillHeight}px;`);
+            if (objectImageStyle.objectImgObjectFillIsOn) {
+                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle};`);
+                const imgHeight = row?.objectImgObjectFillHeight || objectImageStyle.objectImgObjectFillHeight;
+                if (imgHeight) {
+                    styles.push(`height: ${imgHeight}px;`);
+                }
             }
             styles.push(`border-radius: ${objectImageStyle.objectImgBorderRadiusTopLeft}${suffix} ${objectImageStyle.objectImgBorderRadiusTopRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomLeft}${suffix};`);
             if (objectImageStyle.objectImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (objectImageStyle.objectImgBorderIsOn) {
-                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(objectImageStyle.objectImgBorderColor)};`);
+                const borderColor = isEnabled ? (isActive && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || objectImageStyle.objectImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || objectImageStyle.objectImgBorderColor;
+                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(borderColor)};`);
             }
         }
 
@@ -418,6 +428,27 @@
     let scoreText = $derived.by(() => {
         return `font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
     });
+
+    function addonWidthClass() {
+        let addonWidth = (addon.addonWidth || 'col-12');
+        let addonWidthNum = objectWidthToNum(addonWidth);
+        let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
+        if ($winWidth > 1280) {
+            return addonWidth;
+        } else if ($winWidth > 720) {
+            switch(addonWidthNum) {
+                case 1: return 'col-12';
+                case 2: return 'col-6';
+                case 3: return objectsPerRowNum > 2 ? 'col-4' : app.objectsPerRow;
+                case 4: return objectsPerRowNum > 3 ? 'col-3' : app.objectsPerRow;
+                default: return app.objectsPerRow;
+            }
+        } else if ($winWidth > 480) {
+            return addonWidthNum === 1 ? 'col-12' : 'col-6';
+        } else {
+            return 'col-12';
+        }
+    }
 
     function copyTooltip(e: Event) {
         navigator.clipboard.writeText(addon.imageSourceTooltip).then(() => {

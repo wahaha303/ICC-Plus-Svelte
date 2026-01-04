@@ -190,9 +190,65 @@
         The compressor cuts down the size of the image at the cost of its quality, which everyone should do to keep the project file small and thus the same with the bandwidth and storage cost. The image quality and the image scale text field shows the percentage to cut down to in quality and scale.
 
         Cutting down to 40sih percent quality will make little visible difference in most cases, but shave off up to 60-70 percent of the image file size.`
+    }, {
+        title: 'What is an Expression, and what kinds of formulas can be used?',
+        text: `An Expression is a formula that can be used to calculate a score. When an Expression is used, the calculation is performed based on the moment the corresponding Choice is selected. Even if the values used in the formula change afterward, the score will not be updated.
+
+        The following types of formulas can be used in an Expression:
+
+        <b>1. Arithmetic and modulo operations (+, -, *, /, %)</b>
+        
+        Examples: {point} + x, {point} - x, {point} * x, {point} / x, {point} % x
+
+        <b>2. Built-in functions with one argument</b>
+        - @abs: absolute value
+        - @ceil: rounds up to the nearest integer
+        - @floor: rounds down to the nearest integer
+        - @round: rounds to the nearest integer
+        - @sqrt: square root
+        
+        Example: @abs({point})
+
+        <b>3. Built-in functions with two arguments</b>
+        - @pow: exponentiation
+        - @max: maximum value
+        - @min: minimum value
+        
+        Example: @pow({point}, x)`
     }];
     const changelogList = [{
         open: true,
+        title: `v2.7.0 / ${getDate('2026-01-04T08:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where nested div structure could not be used in raw HTML mode.
+
+        <span style="color: green">Row</span>
+        - Fixed issue where score wasn’t recalculated by Row Button action.
+        - Fixed issue where Row Button action wasn’t saved in build.
+
+        <span style="color: green">Choice</span>
+        - Added option to use external audio file instead of YouTube when using BGM feature.
+        - Disabled some edit actions while Choice active.
+        - Fixed issue where Score Expression didn’t work properly when Choice deselected.
+
+        <span style="color: green">Addon</span>
+        - Added option to set Addons per row.
+
+        <span style="color: green">Features</span>
+        - Added feature to categorize Point, Variable, Word, Group, Design Group, Global Requirement.
+
+        <span style="color: green">Design</span>
+        - Added option to set image height in Row / Choice / Addon Image Design.
+        - Added option to set image border color in Filter Design.
+
+        <span style="color: green">Desktop Version</span>
+        - Fixed issue where BGM did not play.
+
+        <span style="color: green">Miscellaneous</span>
+        - Added QnA explaining usage of expressions and supported formulas.
+        `
+    }, {
+        open: false,
         title: `v2.6.8 / ${getDate('2025-10-22T11:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where points were always prevented from decreasing below 0.

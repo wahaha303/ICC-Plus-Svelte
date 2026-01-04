@@ -7,7 +7,7 @@
     <Title class="dialog-title" tabindex={0} autofocus>
         {#if typeof data !== 'undefined'}
             <FormField>
-                <Checkbox bind:checked={() => data.privateMultiChoiceIsOn?? false, (e) => data.privateMultiChoiceIsOn = e} onchange={() => {
+                <Checkbox bind:checked={() => data.privateMultiChoiceIsOn ?? false, (e) => data.privateMultiChoiceIsOn = e} onchange={() => {
                     if (data.privateMultiChoiceIsOn) {
                         let temp = JSON.parse(JSON.stringify(multiChoiceStyling));
                         Object.keys(multiChoiceStyling).forEach(key => {
@@ -48,15 +48,15 @@
                         <div class="col-12 px-3 text-center">Tier number</div>
                         <div class="col-sm-6 col-12 gy-2">
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customMultiTextFont?? false, (e) => styling.customMultiTextFont = e} />
+                                <Checkbox bind:checked={() => styling.customMultiTextFont ?? false, (e) => styling.customMultiTextFont = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customMultiTextFont}
-                                <Textfield class="mb-4" bind:value={() => styling.multiChoiceTextFont?? '', (e) => styling.multiChoiceTextFont = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.multiChoiceTextFont ?? '', (e) => styling.multiChoiceTextFont = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.multiChoiceTextFont?? '', (e) => styling.multiChoiceTextFont = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.multiChoiceTextFont ?? '', (e) => styling.multiChoiceTextFont = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
@@ -64,18 +64,18 @@
                             {/if}
                         </div>
                         <div class="col-sm-6 col-12 gy-2 d-column justify-end">
-                            <Textfield class="mb-4" bind:value={() => styling.multiChoiceTextSize?? 0, (e) => styling.multiChoiceTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Textfield class="mb-4" bind:value={() => styling.multiChoiceTextSize ?? 0, (e) => styling.multiChoiceTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
                         </div>
                         <div class="col-12 px-3 text-center">Counter</div>
                         <div class="col-sm-6 col-12 gy-2">
-                            <Select class="mb-4" bind:value={() => styling.multiChoiceCounterPosition?? 0, (e) => styling.multiChoiceCounterPosition = e} label="Counter Position" variant="filled" alwaysFloat={true} >
+                            <Select class="mb-4" bind:value={() => styling.multiChoiceCounterPosition ?? 0, (e) => styling.multiChoiceCounterPosition = e} label="Counter Position" variant="filled" alwaysFloat={true} >
                                 {#each counterPositions as position}
                                     <Option value={position.value}>{position.text}</Option>
                                 {/each}
                             </Select>
                         </div>
                         <div class="col-sm-6 col-12 gy-2">
-                            <Textfield class="mb-4" bind:value={() => styling.multiChoiceCounterSize?? 0, (e) => styling.multiChoiceCounterSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Textfield class="mb-4" bind:value={() => styling.multiChoiceCounterSize ?? 0, (e) => styling.multiChoiceCounterSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
                         </div>
                     </div>
                 </div>

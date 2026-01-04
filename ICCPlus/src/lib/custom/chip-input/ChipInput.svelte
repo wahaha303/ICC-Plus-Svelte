@@ -21,12 +21,14 @@
     'ripple$',
   ])}
 >
-  <div class="w-100">
+  <div class="d-row w-100 justify-content-between">
     <Set
       bind:chips
       class={classMap({
         [chipSet$class]: true,
         'smui-chip-input__chip-set': true,
+        'align-items-center': true,
+        'flex-nowrap': !isExpanded
       })}
       input
       nonInteractive={disabled}
@@ -56,6 +58,14 @@
         </Chip>
       {/snippet}
     </Set>
+    {#if chips.length > 1}
+      <div>
+        <IconButton toggle pressed={isExpanded} onclick={() => isExpanded = !isExpanded} size="button">
+            <Icon class="mdi mdi-chevron-up" on></Icon>
+            <Icon class="mdi mdi-chevron-down"></Icon>
+        </IconButton>
+      </div>
+    {/if}
   </div>
   <Autocomplete
     bind:this={autocomplete}
@@ -126,7 +136,7 @@
 </div>
 
 <script lang="ts">
-  import type { ComponentProps, Snippet } from 'svelte';
+  import { type ComponentProps, type Snippet } from 'svelte';
   import type { SmuiAttrs } from '@smui/common';
   import type { ActionArray } from '@smui/common/internal';
   import {
@@ -142,6 +152,7 @@
   import LineRipple from '@smui/line-ripple';
   import Chip, { Set, TrailingAction, Text as ChipText } from '@smui/chips';
   import { Text as ListText } from '@smui/list';
+  import IconButton, { Icon } from '@smui/icon-button';
 
   type OwnProps = {
     /**
@@ -309,6 +320,7 @@
   let input: Input | undefined = $state();
   let floatingLabel: FloatingLabel | undefined = $state();
   let lineRipple: LineRipple | undefined = $state();
+  let isExpanded: boolean = $state(false);
 
   let previousValue = value;
   $effect(() => {

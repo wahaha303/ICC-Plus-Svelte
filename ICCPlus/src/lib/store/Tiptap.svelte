@@ -144,7 +144,7 @@
 	import { Editor } from '@tiptap/core';
     import { BackgroundColor, Color, FontSize, LineHeight } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
-    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle, CustomBulletList, CustomOrderList, CustomListItem, CustomStrong, CustomItalic, CustomStrike, CustomUnderline, CustomCode } from './SanitizeExtensions';
+    import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle, CustomBulletList, CustomOrderList, CustomListItem, CustomStrong, CustomItalic, CustomStrike, CustomUnderline, CustomCode, CustomDiv } from './SanitizeExtensions';
     import { rgbToHex } from './store.svelte';
 
     type Params = {
@@ -366,6 +366,7 @@
                 CustomStrike,
                 CustomUnderline,
                 CustomCode,
+                CustomDiv,
                 ...SanitizeExtensions,
             ],
 			content: data[dataProp],
@@ -480,6 +481,7 @@
         if (!str) return '';
         let result = str;
 
+        result = result.replace(/>(\s+)</g, (_m, gap) => {return `>__KEEP_TAG__${btoa(gap)}__<`;});
         result = removeNewlinesInsideList(result);
         result = result.replace(/\n/g, '<br>');
         result = result.replace(/<p([^>]*)><br><\/p>/gi, '<p></p>');
@@ -491,6 +493,7 @@
         result = result.replace(/ {2,}/g, spaces => spaces.split('').map(() => '&nbsp;').join(''));
         result = result.replace(/__KEEP_NEWLINE__/g, '<br>');
 
+        result = result.replace(/>__KEEP_TAG__(.*?)__</g,(_m, encoded) => `>${atob(encoded)}<`);
         return result;
     }
 

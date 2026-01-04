@@ -86,7 +86,7 @@
         for (let i = 0; i < app.rows.length; i++) {
             let appRow = app.rows[i];
             if (appRow.id.length > 2 && appRow.title !== app.defaultRowTitle) {
-                let rowTitle = appRow.title.replace(/ /g, '_');
+                let rowTitle = appRow.title.replace(/[ ,]/g, '_');
                 let id = checkDupId(rowTitle, rowMap);
                 let data = rowMap.get(appRow.id);
                 if (typeof data !== 'undefined') {
@@ -98,7 +98,7 @@
             for (let j = 0; j < appRow.objects.length; j++) {
                 let appChoice = appRow.objects[j];
                 if (appChoice.id.length > 2 && appChoice.title !== app.defaultChoiceTitle) {
-                    let choiceTitle = appChoice.title.replace(/ /g, '_');
+                    let choiceTitle = appChoice.title.replace(/[ ,]/g, '_');
                     let id = checkDupId(choiceTitle, choiceMap);
                     let data = choiceMap.get(appChoice.id);
                     if (typeof data !== 'undefined') {
@@ -112,7 +112,7 @@
         for (let i = 0; i < app.backpack.length; i++) {
             let appRow = app.backpack[i];
             if (appRow.id.length > 2 && appRow.title !== app.defaultRowTitle) {
-                let rowTitle = appRow.title.replace(/ /g, '_');
+                let rowTitle = appRow.title.replace(/[ ,]/g, '_');
                 let id = checkDupId(rowTitle, rowMap);
                 let data = rowMap.get(appRow.id);
                 if (typeof data !== 'undefined') {
@@ -124,7 +124,7 @@
             for (let j = 0; j < appRow.objects.length; j++) {
                 let appChoice = appRow.objects[j];
                 if (appChoice.id.length > 2 && appChoice.title !== app.defaultChoiceTitle) {
-                    let choiceTitle = appChoice.title.replace(/ /g, '_');
+                    let choiceTitle = appChoice.title.replace(/[ ,]/g, '_');
                     let id = checkDupId(choiceTitle, choiceMap);
                     let data = choiceMap.get(appChoice.id);
                     if (typeof data !== 'undefined') {

@@ -59,12 +59,41 @@
                     {/snippet}
                 </FormField>
             {/if}
+            <!-- <FormField class="col-12">
+                <Checkbox bind:checked={() => addon.isSelectable ?? false, (e) => addon.isSelectable = e} onchange={() => {
+                    if (!addon.isSelectable) {
+                        addon.id = '';
+                        delete addon.isSelectable;
+                    } else {
+                        addon.id = generateObjectId(0, app.objectIdLength, true);
+                    }
+                }} />
+                {#snippet label()}
+                    This addon is selectable
+                {/snippet}
+            </FormField> -->
             <div class="col-12">
-                <Select bind:value={addon.template} label="Template" variant="filled" alwaysFloat={true}>
-                    {#each templates as template (template.text)}
-                        <Option value={template.value}>{template.text}</Option>
-                    {/each}
-                </Select>
+                <div class="row g-1">
+                    {#if addon.isSelectable}
+                        <div class="col-12">
+                            <Textfield bind:value={addon.id} label="Addon Id" variant="filled" />
+                        </div>
+                    {/if}
+                    <div class={col6}>
+                        <Select bind:value={addon.template} label="Template" variant="filled" alwaysFloat={true}>
+                            {#each templates as template (template.text)}
+                                <Option value={template.value}>{template.text}</Option>
+                            {/each}
+                        </Select>
+                    </div>
+                    <div class={col6}>
+                        <Select bind:value={addon.addonWidth} label="Addons per row" variant="filled">
+                            {#each addonWidths as addonWidth (addonWidth.text)}
+                                <Option value={addonWidth.value}>{addonWidth.text}</Option>
+                            {/each}
+                        </Select>
+                    </div>
+                </div>
                 <div class="py-2 col-12">
                     {#if app.useTextEditor}
                         <Tiptap data={addon} dataProp="title" label="Addon Title" />
@@ -93,7 +122,7 @@
         </div>
     </div>
 {:else}
-    <div class="text-center addon" style={addonBackground}>
+    <div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''} {addonWidthClass()}" style={addonBackground}>
         {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
             <div>
                 {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row?.addonImageRemoved}
@@ -239,7 +268,7 @@
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba } from '$lib/store/store.svelte';
+    import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba, winWidth, objectWidthToNum } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import Tiptap from '$lib/store/Tiptap.svelte';
@@ -263,11 +292,70 @@
         text: "Image center",
         value: 5
     }];
+    const addonWidths = [{
+        text: '1 per Choice',
+        value: 'col-12'
+    }, {
+        text: '11/12',
+        value: 'col-sm-11'
+    }, {
+        text: '10/12',
+        value: 'col-sm-10'
+    }, {
+        text: '9/12',
+        value: 'col-sm-9'
+    }, {
+        text: '8/12',
+        value: 'col-sm-8'
+    }, {
+        text: '7/12',
+        value: 'col-sm-7'
+    }, {
+        text: '2 per Choice',
+        value: 'col-sm-6'
+    }, {
+        text: '5/12',
+        value: 'col-sm-5'
+    }, {
+        text: '3 per Choice',
+        value: 'col-md-4'
+    }, {
+        text: '4 per Choice',
+        value: 'col-md-3'
+    }, {
+        text: '5 per Choice',
+        value: 'w-20'
+    }, {
+        text: '6 per Choice',
+        value: 'col-lg-2'
+    }, {
+        text: '7 per Choice ',
+        value: 'w-14'
+    }, {
+        text: '8 per Choice ',
+        value: 'w-12'
+    }, {
+        text: '9 per Choice ',
+        value: 'w-11'
+    }, {
+        text: '10 per Choice',
+        value: 'w-10'
+    }, {
+        text: '11 per Choice ',
+        value: 'w-9'
+    }, {
+        text: '12 per Choice',
+        value: 'col-xl-1'
+    }];
     let width = $state(0);
     let reqCol = $derived.by(() => {
         if (width > 400) return 'col-6';
         else return 'col-12';
-    })
+    });
+    let col6 = $derived.by(() => {
+        if (width > 278) return 'col-6';
+        else return 'col-12';
+    });
     let isActive = $derived(typeof choice !== 'undefined' ? choice.isActive : false);
     let addonImageStyle = $derived(getStyling('privateAddonImageIsOn', row, choice));
     let addonStyle = $derived(getStyling('privateAddonIsOn', row, choice));
@@ -513,27 +601,37 @@
 
         if (useDesign) {
             styles.push(`width: ${addonImageStyle.addonImageWidth}%; margin-top: ${addonImageStyle.addonImageMarginTop}%; margin-bottom: ${addonImageStyle.addonImageMarginBottom}%;`);
-            if (addonImageStyle.addonImgObjectFillIsOn && choice.addonImgObjectFillHeight) {
-                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle}; height: ${choice.addonImgObjectFillHeight}px;`);
+            if (addonImageStyle.addonImgObjectFillIsOn) {
+                styles.push(`object-fit: ${addonImageStyle.addonImgObjectFillStyle};`);
+                const imgHeight = choice.addonImgObjectFillHeight || objectImageStyle.addonImgObjectFillHeight;
+                if (imgHeight) {
+                    styles.push(`height: ${imgHeight}px`);
+                }
             }
             styles.push(`border-radius: ${addonImageStyle.addonImgBorderRadiusTopLeft}${suffix} ${addonImageStyle.addonImgBorderRadiusTopRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomRight}${suffix} ${addonImageStyle.addonImgBorderRadiusBottomLeft}${suffix};`);
             if (addonImageStyle.addonImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (addonImageStyle.addonImgBorderIsOn) {
-                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${hexToRgba(addonImageStyle.addonImgBorderColor)};`);
-            }    
+                const borderColor = isEnabled ? (isActive && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || addonImageStyle.addonImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || addonImageStyle.addonImgBorderColor;
+                styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${hexToRgba(borderColor)};`);
+            }
         } else {
             styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
-            if (objectImageStyle.objectImgObjectFillIsOn && row?.objectImgObjectFillHeight) {
-                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle}; height: ${row?.objectImgObjectFillHeight}px;`);
+            if (objectImageStyle.objectImgObjectFillIsOn) {
+                styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle};`);
+                const imgHeight = row?.objectImgObjectFillHeight || objectImageStyle.objectImgObjectFillHeight;
+                if (imgHeight) {
+                    styles.push(`height: ${imgHeight}px;`);
+                }
             }
             styles.push(`border-radius: ${objectImageStyle.objectImgBorderRadiusTopLeft}${suffix} ${objectImageStyle.objectImgBorderRadiusTopRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomRight}${suffix} ${objectImageStyle.objectImgBorderRadiusBottomLeft}${suffix};`);
             if (objectImageStyle.objectImgOverflowIsOn) {
                 styles.push(`overflow: hidden;`);
             }
             if (objectImageStyle.objectImgBorderIsOn) {
-                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(objectImageStyle.objectImgBorderColor)};`);
+                const borderColor = isEnabled ? (isActive && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || objectImageStyle.objectImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || objectImageStyle.objectImgBorderColor;
+                styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(borderColor)};`);
             }
         }
 
@@ -543,6 +641,27 @@
     let scoreText = $derived.by(() => {
         return `font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
     });
+
+    function addonWidthClass() {
+        let addonWidth = (addon.addonWidth || 'col-12');
+        let addonWidthNum = objectWidthToNum(addonWidth);
+        let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
+        if ($winWidth > 1280) {
+            return addonWidth;
+        } else if ($winWidth > 720) {
+            switch(addonWidthNum) {
+                case 1: return 'col-12';
+                case 2: return 'col-6';
+                case 3: return objectsPerRowNum > 2 ? 'col-4' : app.objectsPerRow;
+                case 4: return objectsPerRowNum > 3 ? 'col-3' : app.objectsPerRow;
+                default: return app.objectsPerRow;
+            }
+        } else if ($winWidth > 480) {
+            return addonWidthNum === 1 ? 'col-12' : 'col-6';
+        } else {
+            return 'col-12';
+        }
+    }
 
     function copyAddon() {
         if (typeof app.tmpAddon === 'undefined') app.tmpAddon = [];

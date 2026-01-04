@@ -1,240 +1,91 @@
 <Dialog
     bind:open
     escapeKeyAction={currentDialog === 'none' ? 'close' : ''}
-    surface$style="width: 1200px; max-width: calc(100vw - 32px);"
+    surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
     <Title class="dialog-title" tabindex={0} autofocus>
-        Design Groups
+        {isRow ? 'Row' : 'Choice'} Design Groups
     </Title>
     <Content id="dialog--design-group" class="pb-2">
-        <div class="row gy-4 text-center">
-            <div class="col-md-6 col-12">
-                <h5>Row Design Groups</h5>
-                <div bind:this={rowVirtualListEl} style="max-height: 680px; overflow-y: auto; overflow-x: hidden;">
-                    {#if app.rowDesignGroups && app.rowDesignGroups.length > 1}
-                    <div style="position: relative; height: {rowTotalHeight}px; width: 100%;">
-                        {#each rowItems as row (row.index)}
-                            <div class="py-3" data-index={row.index} use:rowObserveResize={row.index} style="position: absolute; top: {row.start}px; width: 100%;">
-                                {#if app.rowDesignGroups[row.index]}
-                                    <div class="point-slot">
-                                        <div class="toolbar grey lighten-3 justify-space-around">
-                                            <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(row.index, true)} />
-                                            </Wrapper>
-                                            <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(app.rowDesignGroups![row.index].id, row.index, true)} />
-                                            </Wrapper>
-                                            <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = app.rowDesignGroups![row.index], bRow = true}} />
-                                            </Wrapper>
-                                            <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(app.rowDesignGroups![row.index], row.index, true)} />
-                                            </Wrapper>
-                                            <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(row.index, true)} />
-                                            </Wrapper>
+        <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
+            {#each $virtualizer.getVirtualItems() as gRow (gRow.index)}
+                <div class="py-3" data-index={gRow.index} use:observeResize={gRow.index} style="position: absolute; top: {gRow.start}px; width: 100%;">
+                    <div class="row g-3 pb-3">
+                        {#each groupRows[gRow.index] as group, i}
+                            <div class="col-xl-4 col-12">
+                                <div class="point-slot">
+                                    <div class="toolbar grey lighten-3 justify-space-around">
+                                        <Wrapper text="Move Up">
+                                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(group, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Delete Design">
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(group.id, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Open Design Settings">
+                                            <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = group}} />
+                                        </Wrapper>
+                                        <Wrapper text="Clone Design">
+                                            <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(group, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Move Down">
+                                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(group, i)} />
+                                        </Wrapper>
+                                    </div>
+                                    <div class="row gy-4 p-3">
+                                        <div class="col-12">
+                                        <CustomAutocomplete
+                                            options={gCats}
+                                            getOptionLabel={getCategoryLabel}
+                                            bindObj={group}
+                                            bindVal="category"
+                                            label="Category"
+                                            toggle={true}
+                                            showMenuWithNoInput={true}
+                                            textfield$variant="filled"
+                                            innerClass="w-100 p-0"
+                                        />
+                                    </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={group.id} onfocus={() => designId = group.id} onchange={() => changeDesignId(group)} label="Id" variant="filled" />
                                         </div>
-                                        <div class="row gy-4 p-3">
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={app.rowDesignGroups![row.index].id} onfocus={() => designId = app.rowDesignGroups![row.index].id} onchange={() => changeDesignId(app.rowDesignGroups![row.index], true)} label="Id" variant="filled" />
-                                            </div>
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={app.rowDesignGroups![row.index].name} label="Name" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <Textfield bind:value={app.rowDesignGroups![row.index].activatedId} label="Id Needed to Show" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={app.rowDesignGroups![row.index].elements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.rowDesignGroups![row.index]}/>
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={app.rowDesignGroups![row.index].backpackElements} acOptions={getBackpackRows()} inputLabel="Backpack Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.rowDesignGroups![row.index]}/>
-                                            </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={group.name} label="Name" variant="filled" />
+                                        </div>
+                                        <div class="col-12">
+                                            <Textfield bind:value={group.activatedId} label="Id Needed to Show" variant="filled" />
+                                        </div>
+                                        <div class="col-12">
+                                            <CustomChipInput acValue={group.elements} acOptions={isRow ? getRows() : getChoices()} inputLabel="Row Id" getLabel={isRow ? getRowLabel : getChoiceLabel} onSelected={isRow ? setRowElement : setChoiceElement} onDeselected={isRow ? releaseRowElement : releaseChoiceElement} selectProp={group}/>
+                                        </div>
+                                        <div class="col-12">
+                                            <CustomChipInput acValue={group.backpackElements} acOptions={isRow ? getBackpackRows() : getBackpackChoices()} inputLabel="Backpack Row Id" getLabel={isRow ? getRowLabel : getChoiceLabel} onSelected={isRow ? setRowElement : setChoiceElement} onDeselected={isRow ? releaseRowElement : releaseChoiceElement} selectProp={group}/>
                                         </div>
                                     </div>
-                                {:else if row.index === app.rowDesignGroups.length}
-                                    <div class="pb-2">
-                                        <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(true)} aria-label="Create New Point Type">
-                                            <i class="mdi mdi-plus-thick"></i>
-                                        </button>
-                                    </div>
-                                {/if}
+                                </div>
                             </div>
                         {/each}
-                    </div>
-                    {:else}
-                        <div class="py-3">
-                            {#if app.rowDesignGroups}
-                                {#each app.rowDesignGroups as designGroup, i}
-                                    <div class="point-slot mb-5">
-                                        <div class="toolbar grey lighten-3 justify-space-around">
-                                            <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(i, true)} />
-                                            </Wrapper>
-                                            <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(designGroup.id, i, true)} />
-                                            </Wrapper>
-                                            <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = designGroup, bRow = true}} />
-                                            </Wrapper>
-                                            <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(designGroup, i, true)} />
-                                            </Wrapper>
-                                            <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(i, true)} />
-                                            </Wrapper>
-                                        </div>
-                                        <div class="row gy-4 p-3">
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={designGroup.id} onfocus={() => designId = designGroup.id} onchange={() => changeDesignId(designGroup, true)} label="Id" variant="filled" />
-                                            </div>
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={designGroup.name} label="Name" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <Textfield bind:value={designGroup.activatedId} label="Id Needed to Show" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.elements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={designGroup}/>
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.backpackElements} acOptions={getBackpackRows()} inputLabel="Backpack Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={designGroup}/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {/each}
-                            {/if}
-                            <div class="mb-5">
-                                <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(true)} aria-label="Create New Point Type">
+                        {#if gRow.index === groupRows.length - 1}
+                            <div class="col-xl-4 col-12">
+                                <button type="button" class="create-box col-12" style="min-height: 450px; font-size: 40px;" onclickcapture={createNewDesignGroup} aria-label="Create New Design Group">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
-                        </div>
-                    {/if}
-                </div>
-            </div>
-            <div class="col-md-6 col-12">
-                <h5>Choice Design Groups</h5>
-                <div bind:this={objectVirtualListEl} style="max-height: 680px; overflow-y: auto; overflow-x: hidden;">
-                    {#if app.objectDesignGroups && app.objectDesignGroups.length > 1}
-                    <div style="position: relative; height: {objectTotalHeight}px; width: 100%;">
-                        {#each objectItems as row (row.index)}
-                            <div class="py-3" data-index={row.index} use:objectObserveResize={row.index} style="position: absolute; top: {row.start}px; width: 100%;">
-                                {#if app.objectDesignGroups[row.index]}
-                                    <div class="point-slot">
-                                        <div class="toolbar grey lighten-3 justify-space-around">
-                                            <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(row.index, false)} />
-                                            </Wrapper>
-                                            <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(app.objectDesignGroups![row.index].id, row.index, false)} />
-                                            </Wrapper>
-                                            <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = app.objectDesignGroups![row.index], bRow = false}} />
-                                            </Wrapper>
-                                            <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(app.objectDesignGroups![row.index], row.index, false)} />
-                                            </Wrapper>
-                                            <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(row.index, false)} />
-                                            </Wrapper>
-                                        </div>
-                                        <div class="row gy-4 p-3">
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={app.objectDesignGroups![row.index].id} onfocus={() => designId = app.objectDesignGroups![row.index].id} onchange={() => changeDesignId(app.objectDesignGroups![row.index], false)} label="Id" variant="filled" />
-                                            </div>
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={app.objectDesignGroups![row.index].name} label="Name" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <Textfield bind:value={app.objectDesignGroups![row.index].activatedId} label="Id Needed to Show" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={app.objectDesignGroups![row.index].backpackElements} acOptions={getBackpackChoices()} inputLabel="Backpack Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.objectDesignGroups![row.index]}/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {:else if row.index === app.objectDesignGroups.length}
-                                    <div class="pb-2">
-                                        <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(false)} aria-label="Create New Point Type">
-                                            <i class="mdi mdi-plus-thick"></i>
-                                        </button>
-                                    </div>
-                                {/if}
-                            </div>
-                        {/each}
+                        {/if}
                     </div>
-                    {:else}
-                        <div class="py-3">
-                            {#if app.objectDesignGroups}
-                                {#each app.objectDesignGroups as designGroup, i}
-                                    <div class="point-slot mb-5">
-                                        <div class="toolbar grey lighten-3 justify-space-around">
-                                            <Wrapper text="Move Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(i, false)} />
-                                            </Wrapper>
-                                            <Wrapper text="Delete Design">
-                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(designGroup.id, i, false)} />
-                                            </Wrapper>
-                                            <Wrapper text="Open Design Settings">
-                                                <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = designGroup, bRow = false}} />
-                                            </Wrapper>
-                                            <Wrapper text="Clone Design">
-                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(designGroup, i, false)} />
-                                            </Wrapper>
-                                            <Wrapper text="Move Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(i, false)} />
-                                            </Wrapper>
-                                        </div>
-                                        <div class="row gy-4 p-3">
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={designGroup.id} onfocus={() => designId = designGroup.id} onchange={() => changeDesignId(designGroup, false)} label="Id" variant="filled" />
-                                            </div>
-                                            <div class="col-sm-6 col-12">
-                                                <Textfield bind:value={designGroup.name} label="Name" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <Textfield bind:value={designGroup.activatedId} label="Id Needed to Show" variant="filled" />
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={designGroup}/>
-                                            </div>
-                                            <div class="col-12">
-                                                <CustomChipInput acValue={designGroup.backpackElements} acOptions={getBackpackChoices()} inputLabel="Backpack Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={designGroup}/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {/each}
-                            {/if}
-                            <div class="mb-5">
-                                <button type="button" class="create-box col-12" style="min-height: 378px; font-size: 40px;" onclickcapture={() => createNewDesignGroup(false)} aria-label="Create New Point Type">
-                                    <i class="mdi mdi-plus-thick"></i>
-                                </button>
-                            </div>
-                        </div>
-                    {/if}
                 </div>
-            </div>
+            {/each}
         </div>
     </Content>
     <Actions>
         <div class="container-fluid">
             <div class="row p-0">
                 <div class="col-md-6 col-12">
-                    <Button action="" onclickcapture={() => createNewDesignGroup(true)}>
-                        <Label class="dialog-actions--btn">Create New Row Group</Label>
+                    <Button action="" onclickcapture={() => createNewDesignGroup()}>
+                        <Label class="dialog-actions--btn">Create New Design Group</Label>
                     </Button>
                 </div>
                 <div class="col-md-6 col-12">
-                    <Button action="" onclickcapture={() => createNewDesignGroup(false)}>
-                        <Label class="dialog-actions--btn">Create New Choice Group</Label>
-                    </Button>
-                </div>
-                <div class="col-12">
                     <Button action="close">
                         <Label class="dialog-actions--btn">Close</Label>
                     </Button>
@@ -244,7 +95,7 @@
     </Actions>
 </Dialog>
 {#if currentDialog === 'privateDesign' && typeof data !== 'undefined'}
-    <AppPrivateDesign open={currentDialog === 'privateDesign'} onclose={() => (currentDialog = 'none')} data={data} isRow={bRow} />
+    <AppPrivateDesign open={currentDialog === 'privateDesign'} onclose={() => (currentDialog = 'none')} data={data} isRow={isRow} />
 {/if}
 <script lang="ts">
     import Button, { Label } from '@smui/button';
@@ -254,82 +105,51 @@
     import AppPrivateDesign from './AppPrivateDesign.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
-    import { app, checkDupId, choiceMap, rowDesignMap, rowMap, objectDesignMap, generateDesignId, getRows, getChoices, getBackpackRows, getBackpackChoices, getRowLabel, getChoiceLabel, scrollToLastRow } from '$lib/store/store.svelte';
-	import type { RowDesignGroup, ObjectDesignGroup } from '$lib/store/types';
+    import { app, checkDupId, choiceMap, rowDesignMap, rowMap, objectDesignMap, generateDesignId, getRows, getChoices, getBackpackRows, getBackpackChoices, getRowLabel, getChoiceLabel, scrollToLastRow, categoryMap } from '$lib/store/store.svelte';
+	import type { RowDesignGroup, ObjectDesignGroup, Category } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';
+    import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     
-    let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'rDesign'}, showAll, isRow }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean; isRow: boolean } = $props();
     let currentDialog = $state<'none' | 'privateDesign'>('none');
     let data = $state<RowDesignGroup | ObjectDesignGroup>();
     let designId = '';
-    let bRow = $state(false);
-    const rowCount = () => (app.rowDesignGroups?.length ?? 0) + 1;
-    const objectCount = () => (app.objectDesignGroups?.length ?? 0) + 1;
-    let rowVirtualListEl = $state<HTMLDivElement | null>(null);
-    let objectVirtualListEl = $state<HTMLDivElement | null>(null);
-    let rowVirtualizer = $state(createVirtualizer({
+    let designGroup = (isRow ? app.rowDesignGroups : app.objectDesignGroups) || [];
+    let catGroup = $derived(showAll ? designGroup : designGroup.filter(item => item.category === category.idx));
+    let groupRows = $derived.by(() => {
+        const result: any[][] = [];
+        for (let i = 0; i < catGroup.length; i += 3) {
+            result.push(catGroup.slice(i, i + 3));
+        }
+        if (result.length === 0) result.push([]);
+        return result;
+    });
+    const rowCount = () => groupRows.length;
+    let virtualListEl = $state<HTMLDivElement>(document.getElementById('dialog--design-group') as HTMLDivElement);
+    let virtualizer = $state(createVirtualizer({
         count: rowCount(),
-        getScrollElement: () => rowVirtualListEl,
-        estimateSize: () => 410,
+        getScrollElement: () => virtualListEl,
+        estimateSize: () => 482,
         overscan: 1,
-        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
+        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 482) //+72px
     }));
-    let objectVirtualizer = $state(createVirtualizer({
-        count: objectCount(),
-        getScrollElement: () => objectVirtualListEl,
-        estimateSize: () => 410,
-        overscan: 1,
-        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
-    }));
-    let rowTotalHeight = $derived.by(() => {
-        return $rowVirtualizer.getTotalSize()
-    });
-    let objectTotalHeight = $derived.by(() => {
-        return $objectVirtualizer.getTotalSize()
-    });
-    let rowItems = $derived.by(() => {
-        return $rowVirtualizer.getVirtualItems();
-    });
-    let objectItems = $derived.by(() => {
-        return $objectVirtualizer.getVirtualItems();
-    });
+    let gCats = $derived(app.categories.filter(item => item.type === category.type).map(item => item.idx));
+
 
     onMount(() => {
-        $rowVirtualizer.setOptions({
-            getScrollElement: () => rowVirtualListEl,
-            estimateSize: (index) => rowEstimateSize(index - 1),
-            measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
-        });
-        $objectVirtualizer.setOptions({
-            getScrollElement: () => objectVirtualListEl,
-            estimateSize: (index) => objectEstimateSize(index - 1),
-            measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 410)
+        virtualListEl = document.getElementById('dialog--design-group') as HTMLDivElement;
+        $virtualizer.setOptions({
+            getScrollElement: () => virtualListEl,
+            estimateSize: () => 482,
+            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 482)
         });
     });
 
-    function rowEstimateSize(index: number) {
-        const group = typeof app.rowDesignGroups !== 'undefined' ? app.rowDesignGroups[index] : null;
-        if (!group) {
-            return 410;
-        }
-        const height = 410 + (Math.max(group.backpackElements.length, group.elements.length) * 24);
-        return height;
-    }
-
-    function objectEstimateSize(index: number) {
-        const group = typeof app.objectDesignGroups !== 'undefined' ? app.objectDesignGroups[index] : null;
-        if (!group) {
-            return 410;
-        }
-        const height = 410 + (Math.max(group.backpackElements.length, group.elements.length) * 24);
-        return height;
-    }
-
-    function rowObserveResize(el: HTMLDivElement, index: number) {
+    function observeResize(el: HTMLDivElement, index: number) {
 
         const observer = new ResizeObserver(() => {
-            $rowVirtualizer.measureElement(el);
+            $virtualizer.measureElement(el);
         });
         observer.observe(el);
 
@@ -340,21 +160,7 @@
         };
     }
 
-    function objectObserveResize(el: HTMLDivElement, index: number) {
-
-        const observer = new ResizeObserver(() => {
-            $objectVirtualizer.measureElement(el);
-        });
-        observer.observe(el);
-
-        return {
-            destroy() {
-                observer.disconnect();
-            }
-        };
-    }
-
-    function changeDesignId(design: RowDesignGroup | ObjectDesignGroup, isRow: boolean) {
+    function changeDesignId(design: RowDesignGroup | ObjectDesignGroup) {
         if (design.id === '') {
             design.id = designId;
         } else {
@@ -388,87 +194,64 @@
         }
     }
 
-    function cloneDesign(designGroup: RowDesignGroup | ObjectDesignGroup, num: number, isRow: boolean) {
+    function cloneDesign(group: RowDesignGroup | ObjectDesignGroup, num: number) {
         let id = generateDesignId(0, 4, isRow);
         let clone = JSON.parse(JSON.stringify(designGroup));
         clone.id = id;
-        let group = isRow ? app.rowDesignGroups : app.objectDesignGroups;
         let designMap = isRow ? rowDesignMap : objectDesignMap;
-        if (typeof group !== 'undefined') {
-            group.splice(num + 1, 0, clone);
-            designMap.set(id, group[num + 1]);
-            let ori = designMap.get(designGroup.id);
-            if (typeof ori !== 'undefined') {
-                for (let i = 0; i < ori.elements.length; i++) {
-                    if (isRow) {
-                        let rMap = rowMap.get(ori.elements[i]);
-                        if (typeof rMap !== 'undefined') {
-                            let design = rMap.rowDesignGroups;
-                            design?.push(id);
-                        }
-                    } else {
-                        let cMap = choiceMap.get(ori.elements[i]);
-                        if (typeof cMap !== 'undefined') {
-                            let design = cMap.choice.objectDesignGroups;
-                            design?.push(id);
-                        }
+
+        designGroup.splice(num + 1, 0, clone);
+        designMap.set(id, designGroup[num + 1]);
+        let ori = designMap.get(group.id);
+
+        if (typeof ori !== 'undefined') {
+            for (let i = 0; i < ori.elements.length; i++) {
+                if (isRow) {
+                    let rMap = rowMap.get(ori.elements[i]);
+                    if (typeof rMap !== 'undefined') {
+                        let design = rMap.rowDesignGroups;
+                        design?.push(id);
+                    }
+                } else {
+                    let cMap = choiceMap.get(ori.elements[i]);
+                    if (typeof cMap !== 'undefined') {
+                        let design = cMap.choice.objectDesignGroups;
+                        design?.push(id);
                     }
                 }
             }
         }
 
-        if (isRow) {
-            if (rowVirtualListEl) {
-                $rowVirtualizer.setOptions({
-                    count: rowCount()
-                });
-                scrollToLastRow($rowVirtualizer, rowVirtualListEl, num + 1);
-            }
-        } else {
-            if (objectVirtualListEl) {
-                $objectVirtualizer.setOptions({
-                    count: objectCount()
-                });
-                scrollToLastRow($objectVirtualizer, objectVirtualListEl, num + 1);
-            }
-        }
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
+
+        scrollToLastRow($virtualizer, virtualListEl, Math.floor(num / 3) + (num % 3 === 2 ? 1 : 0));
     }
     
-    function createNewDesignGroup(isRow: boolean) {
+    function createNewDesignGroup() {
         let id = generateDesignId(0, 4, isRow);
-        let designGroup = isRow ? app.rowDesignGroups : app.objectDesignGroups;
         let designMap = isRow ? rowDesignMap : objectDesignMap;
-        if (typeof designGroup === 'undefined') designGroup = [];
+
         designGroup.push({
             id: id,
             name: `Design Group ${designGroup.length + 1}`,
             activatedId: '',
+            category: showAll ? -1 : category.idx,
             elements: [],
             backpackElements: [],
             styling: {}
         });
         designMap.set(id, designGroup[designGroup.length - 1]);
 
-        if (isRow) {
-            if (rowVirtualListEl) {
-                $rowVirtualizer.setOptions({
-                    count: rowCount()
-                });
-                scrollToLastRow($rowVirtualizer, rowVirtualListEl, designGroup.length - 1);
-            }
-        } else {
-            if (objectVirtualListEl) {
-                $objectVirtualizer.setOptions({
-                    count: objectCount()
-                });
-                scrollToLastRow($objectVirtualizer, objectVirtualListEl, designGroup.length - 1);
-            }
-        }
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
 
+        scrollToLastRow($virtualizer, virtualListEl, groupRows.length - 1);
     }
 
-    function deleteDesign(id: string, num: number, isRow: boolean) {
-        let designGroup = isRow ? app.rowDesignGroups : app.objectDesignGroups;
+    function deleteDesign(id: string, num: number) {
         let designMap = isRow ? rowDesignMap : objectDesignMap;
         let design = designMap.get(id);
         if (typeof design !== 'undefined') {
@@ -507,32 +290,25 @@
             designGroup.splice(num, 1);
             designMap.delete(id);
         }
-        if (isRow) {
-            $rowVirtualizer.setOptions({
-                count: rowCount()
-            });
-        } else {
-            $objectVirtualizer.setOptions({
-                count: objectCount()
-            });
-        }
+        
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
     }
 
-    function moveDesignDown(num: number, isRow: boolean) {
-        let designGroup = isRow ? app.rowDesignGroups : app.objectDesignGroups;
-        if (typeof designGroup !== 'undefined') {
-            if (num < designGroup.length - 1) {
-                designGroup.splice(num, 2, designGroup[num + 1], designGroup[num]);
-            }
-        }
-    }
-
-    function moveDesignUp(num: number, isRow: boolean) {
-        let designGroup = isRow ? app.rowDesignGroups : app.objectDesignGroups;
+    function moveDesignUp(design: RowDesignGroup | ObjectDesignGroup, num: number) {
         if (num > 0) {
-            if (typeof designGroup !== 'undefined') {
-                designGroup.splice(num - 1, 2, designGroup[num], designGroup[num - 1]);
-            }
+            const prevIdx = designGroup.indexOf(catGroup[num - 1]);
+            const curIdx = designGroup.indexOf(design);
+            [designGroup[prevIdx], designGroup[curIdx]] = [designGroup[curIdx], designGroup[prevIdx]];
+        }
+    }
+
+    function moveDesignDown(group: RowDesignGroup | ObjectDesignGroup, num: number) {
+        if (num < catGroup.length - 1) {
+            const nextIdx = designGroup.indexOf(catGroup[num + 1]);
+            const curIdx = designGroup.indexOf(group);
+            [designGroup[curIdx], designGroup[nextIdx]] = [designGroup[nextIdx], designGroup[curIdx]];
         }
     }
 
@@ -574,4 +350,11 @@
         }
     }
 
+    function getCategoryLabel(idx: number) {
+        const cat = categoryMap.get(`${isRow ? 'rDesign' : 'cDesign'}_${idx}`);
+        if (typeof cat !== 'undefined') {
+            return `${cat.idx + 1}. ${cat.name}`;
+        }
+        return '';
+    }
 </script>

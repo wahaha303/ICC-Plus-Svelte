@@ -43,6 +43,7 @@
                                 {#if row.btnPointAddon}
                                     <Autocomplete
                                         options={getPointTypes()}
+                                        getOptionLabel={getPointTypeLabel}
                                         bind:value={row.pointTypeRandom}
                                         label="Point-Type to use"
                                         toggle={true}
@@ -166,7 +167,7 @@
     import Radio from '@smui/radio';
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
-    import { getPointTypes, getVariables } from '$lib/store/store.svelte';
+    import { getPointTypeLabel, getPointTypes, getVariables } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
 
     let { open, onclose, row }: { open: boolean; onclose: () => void; row: Row } = $props();

@@ -21,12 +21,12 @@
                     <div class="container-fluid p-0">
                         <div class="row gy-3">
                             <div class="col-12">
-                                <Select bind:value={app.objectsPerRow} label="Choices Per Row" variant="standard" alwaysFloat={true}>
+                                <Select bind:value={app.objectsPerRow} label="Choices per row" variant="standard" alwaysFloat={true}>
                                     {#each objectWidths as objectWidth (objectWidth.text)}
                                         <Option value={objectWidth.value}>{objectWidth.text}</Option>
                                     {/each}
                                     {#snippet helperText()}
-                                        Maximum number of choices per row for screens between 720px and 1280px.
+                                        Maximum Number of Choices per Row for Screens Between 720px and 1280px.
                                     {/snippet}
                                 </Select>
                             </div>
@@ -82,7 +82,7 @@
                                 <FormField>
                                     <Switch bind:checked={() => app.showMusicPlayer || false, (e) => app.showMusicPlayer = e} color="secondary" class="switch-scale" onchange={() => {
                                         if (app.showMusicPlayer) {
-                                            const player = get(bgmPlayer);
+                                            const player = get(musicPlayer);
 
                                             if (player) {
                                                 let bgmTime = 0;
@@ -93,14 +93,14 @@
                                                     bgmVariables.bgmTitleInterval = 0;
                                                 }
                                                 bgmVariables.bgmTitleInterval = window.setInterval(() => {
-                                                    if (typeof player.playerInfo.videoData !== 'undefined' && bgmVariables.bgmObjectId !== '') {
+                                                    if (bgmVariables.bgmObjectId !== '') {
                                                         const cMap = choiceMap.get(bgmVariables.bgmObjectId);
 
                                                         if (typeof cMap !== 'undefined') {
                                                             const choice = cMap.choice;
 
-                                                            if (player.playerInfo.videoData.video_id === choice.bgmId && typeof player.playerInfo.videoData.title !== 'undefined' && player.playerInfo.videoData.title !== '') {
-                                                                bgmVariables.bgmTitle = player.playerInfo.videoData.title;
+                                                            if (player.getId() === choice.bgmId && player.getTitle() !== '') {
+                                                                bgmVariables.bgmTitle = player.getTitle();
                                                                 bgmVariables.curBgmLength = player.getDuration();
                                                                 clearInterval(bgmVariables.bgmTitleInterval);
                                                                 bgmVariables.bgmTitleInterval = 0;
@@ -113,7 +113,7 @@
                                                     bgmVariables.bgmPlayInterval = 0;
                                                 }
                                                 bgmVariables.bgmPlayInterval = window.setInterval(() => {
-                                                    if (typeof player.playerInfo.videoData !== 'undefined' && !bgmVariables.isSeeking && player.getPlayerState() === 1) {
+                                                    if (!bgmVariables.isSeeking && player.isPlaying()) {
                                                         const curTime = Math.floor(player.getCurrentTime());
 
                                                         if (curTime !== bgmVariables.curBgmTime) {
@@ -194,19 +194,19 @@
     import Tab, { Label as TabLabel } from '@smui/tab';
     import TabBar from '@smui/tab-bar';
     import Textfield from '$lib/custom/textfield';
-	import { app, bgmPlayer, bgmVariables, choiceMap, buildAutoSave, buildAbortController, appVersion, viewerSettings } from '$lib/store/store.svelte';
+	import { app, musicPlayer, bgmVariables, choiceMap, buildAutoSave, buildAbortController, appVersion, viewerSettings } from '$lib/store/store.svelte';
 	import { get } from 'svelte/store';
     import { Wrapper } from '$lib/custom/tooltip';
 
     let { open, onclose }: { open: boolean; onclose: () => void; } = $props();
     const objectWidths = [{
-        text: "2 Per Row",
+        text: "2 per row",
         value: "col-6"
     }, {
-        text: "3 Per Row",
+        text: "3 per row",
         value: "col-4"
     }, {
-        text: "4 Per Row",
+        text: "4 per row",
         value: "col-3"
     }];
     let active = $state('General');

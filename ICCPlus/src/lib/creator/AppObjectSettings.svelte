@@ -11,7 +11,7 @@
     <Content>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-12 gy-2 pb-5">
+                <div class:disabled={choice.isActive} class="col-12 gy-2 pb-5">
                     <div class="col-12">Copy Choice Into Another Row</div>
                     <Autocomplete
                         options={[...getRows(), ...getBackpackRows()]}
@@ -31,7 +31,7 @@
                 </div>
                 {#if app.styling.useAddonDesign && app.styling.addonImgObjectFillIsOn}
                     <div class="col-12 gy-2">
-                        <Textfield bind:value={() => choice.addonImgObjectFillHeight ?? 0, (e) => choice.addonImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} onchange={() => {
+                        <Textfield bind:value={() => choice.addonImgObjectFillHeight ?? 0, (e) => choice.addonImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} suffix="px" onchange={() => {
                             if (typeof choice.addonImgObjectFillHeight !== 'undefined' && choice.addonImgObjectFillHeight < 0) {
                                 choice.addonImgObjectFillHeight = 0;
                             }
@@ -40,7 +40,7 @@
                 {/if}
                 <div class="col-12 gy-2">
                     <FormField class="ml-4 mb-2">
-                        <Switch bind:checked={() => choice.isPrivateStyling?? false, (e) => choice.isPrivateStyling = e} onSMUISwitchChange={() => {
+                        <Switch bind:checked={() => choice.isPrivateStyling ?? false, (e) => choice.isPrivateStyling = e} onSMUISwitchChange={() => {
                             if (choice.isPrivateStyling) {
                                 choice.styling = {};
                             } else {

@@ -1,99 +1,74 @@
 <Dialog
     bind:open
-    surface$style="width: 800px; max-width: calc(100vw - 32px);"
+    surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
     <Title class="dialog-title" tabindex={0} autofocus>
         Groups
     </Title>
     <Content id="dialog--group" class="pb-2">
-        {#if app.groups.length > 3}
-            <div style="position: relative; height: {totalHeight}px; width: 100%;">
-                {#each items as row (row.index)}
-                    <div class="py-3" data-index={row.index} use:observeResize={row.index} style="position: absolute; top: {row.start}px; width: 100%; min-height: 262px;">
-                        {#if app.groups[row.index]}
-                            <div class="point-slot">
-                                <div class="toolbar grey lighten-3 justify-space-around">
-                                    <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveGroupUp(row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Delete Group">
-                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteGroup(app.groups[row.index].id, row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Clone Group">
-                                        <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneGroup(row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveGroupDown(row.index)} />
-                                    </Wrapper>
-                                </div>
-                                <div class="row gy-4 p-3">
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={app.groups[row.index].id} onfocus={() => groupId = app.groups[row.index].id} onchange={() => changeGroupId(app.groups[row.index])} label="Group Id" variant="filled" />
+        <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
+            {#each $virtualizer.getVirtualItems() as gRow (gRow.index)}
+                <div class="py-3" data-index={gRow.index} use:observeResize={gRow.index} style="position: absolute; top: {gRow.start}px; width: 100%;">
+                    <div class="row g-3 pb-3">
+                        {#each groupRows[gRow.index] as group, i}
+                            <div class="col-xl-4 col-12">
+                                <div class="point-slot">
+                                    <div class="toolbar grey lighten-3 justify-space-around">
+                                        <Wrapper text="Move Up">
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveGroupUp(group, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Delete Group">
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteGroup(group, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Clone Group">
+                                            <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneGroup(group)} />
+                                        </Wrapper>
+                                        <Wrapper text="Move Down">
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveGroupDown(group, i)} />
+                                        </Wrapper>
                                     </div>
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={app.groups[row.index].name} label="Group Name" variant="filled" />
-                                    </div>
-                                    <div class="col-sm-6 col-12">
-                                        <CustomChipInput acValue={app.groups[row.index].rowElements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={app.groups[row.index]} />
-                                    </div>
-                                    <div class="col-sm-6 col-12">
-                                        <CustomChipInput acValue={app.groups[row.index].elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={app.groups[row.index]}/>
+                                    <div class="row gy-4 p-3">
+                                        <div class="col-12">
+                                            <CustomAutocomplete
+                                                options={gCats}
+                                                getOptionLabel={getCategoryLabel}
+                                                bindObj={group}
+                                                bindVal="category"
+                                                label="Category"
+                                                toggle={true}
+                                                showMenuWithNoInput={true}
+                                                textfield$variant="filled"
+                                                innerClass="w-100 p-0"
+                                            />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={group.id} onfocus={() => groupId = group.id} onchange={() => changeGroupId(group)} label="Group Id" variant="filled" />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={group.name} label="Group Name" variant="filled" />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <CustomChipInput acValue={group.rowElements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={group} />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <CustomChipInput acValue={group.elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={group}/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        {/if}
-                        {#if row.index === app.groups.length}
-                            <div>
-                                <button type="button" class="create-box col-12" style="min-height: 218px; font-size: 40px;" onclickcapture={createNewGroup} aria-label="Create New Group">
+                        {/each}
+                        {#if gRow.index === groupRows.length - 1}
+                            <div class="col-xl-4 col-12">
+                                <button type="button" class="create-box col-12" style="min-height: 290px; font-size: 40px;" onclickcapture={createNewGroup} aria-label="Create New Word">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
                         {/if}
                     </div>
-                {/each}
-            </div>
-        {:else}
-            <div class="py-3">
-                {#each app.groups as group, i}
-                    <div class="point-slot my-5">
-                        <div class="toolbar grey lighten-3 justify-space-around">
-                            <Wrapper text="Move Up">
-                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveGroupUp(i)} />
-                            </Wrapper>
-                            <Wrapper text="Delete Group">
-                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteGroup(group.id, i)} />
-                            </Wrapper>
-                            <Wrapper text="Clone Group">
-                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneGroup(i)} />
-                            </Wrapper>
-                            <Wrapper text="Move Down">
-                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveGroupDown(i)} />
-                            </Wrapper>
-                        </div>
-                        <div class="row gy-4 p-3">
-                            <div class="col-sm-6 col-12">
-                                <Textfield bind:value={group.id} onfocus={() => groupId = group.id} onchange={() => changeGroupId(group)} label="Group Id" variant="filled" />
-                            </div>
-                            <div class="col-sm-6 col-12">
-                                <Textfield bind:value={group.name} label="Group Name" variant="filled" />
-                            </div>
-                            <div class="col-sm-6 col-12">
-                                <CustomChipInput acValue={group.rowElements} acOptions={getRows()} inputLabel="Row Id" getLabel={getRowLabel} onSelected={setRowElement} onDeselected={releaseRowElement} selectProp={group} />
-                            </div>
-                            <div class="col-sm-6 col-12">
-                                <CustomChipInput acValue={group.elements} acOptions={getChoices()} inputLabel="Choice Id" getLabel={getChoiceLabel} onSelected={setChoiceElement} onDeselected={releaseChoiceElement} selectProp={group}/>
-                            </div>
-                        </div>
-                    </div>
-                {/each}
-                <div class="my-5">
-                    <button type="button" class="create-box col-12" style="min-height: 218px; font-size: 40px;" onclickcapture={createNewGroup} aria-label="Create New Group">
-                        <i class="mdi mdi-plus-thick"></i>
-                    </button>
                 </div>
-            </div>
-        {/if}
+            {/each}
+        </div>
     </Content>
     <Actions>
         <div class="container-fluid">
@@ -119,49 +94,44 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
-    import { app, checkDupId, choiceMap, groupMap, rowMap, generateGroupId, getRows, getChoices, getRowLabel, getChoiceLabel, scrollToLastRow } from '$lib/store/store.svelte';
-    import type { Group } from '$lib/store/types';
+    import { app, checkDupId, choiceMap, groupMap, rowMap, generateGroupId, getRows, getChoices, getRowLabel, getChoiceLabel, scrollToLastRow, categoryMap } from '$lib/store/store.svelte';
+    import type { Category, Group } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';
+    import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     
-    let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'word'}, showAll }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean } = $props();
 
     let groupId = '';
-    const rowCount = () => app.groups.length + 1;
+    let catGroup = $derived(showAll ? app.groups : app.groups.filter(item => item.category === category.idx));
+    let groupRows = $derived.by(() => {
+        const result: any[][] = [];
+        for (let i = 0; i < catGroup.length; i += 3) {
+            result.push(catGroup.slice(i, i + 3));
+        }
+        if (result.length === 0) result.push([]);
+        return result;
+    });
+    const rowCount = () => groupRows.length;
     let virtualListEl = $state<HTMLDivElement>(document.getElementById('dialog--group') as HTMLDivElement);
     let virtualizer = $state(createVirtualizer({
         count: rowCount(),
         getScrollElement: () => virtualListEl,
-        estimateSize: () => 262,
-        overscan: 2,
-        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 262),
+        estimateSize: () => 334,
+        overscan: 1,
+        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 334) //+72px
     }));
-    let totalHeight = $derived.by(() => {
-        return $virtualizer.getTotalSize()
-    });
-    let items = $derived.by(() => {
-        return $virtualizer.getVirtualItems();
-    });
+    let gCats = $derived(app.categories.filter(item => item.type === category.type).map(item => item.idx));
+
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--group') as HTMLDivElement;
-        setTimeout(() => {
-            $virtualizer.setOptions({
-                getScrollElement: () => virtualListEl,
-                estimateSize: (index) => estimateSize(index - 1),
-                measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 262),
-            });
-        }, 0);
+        $virtualizer.setOptions({
+            getScrollElement: () => virtualListEl,
+            estimateSize: () => 334,
+            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 334)
+        });
     });
-
-    function estimateSize(index: number) {
-        const group = app.groups[index];
-        if (!group) {
-            return 262;
-        }
-        const height = 262 + (Math.max(group.rowElements.length, group.elements.length) * 24);
-        return height;
-    }
 
     function observeResize(el: HTMLDivElement, index: number) {
 
@@ -215,6 +185,7 @@
         app.groups.push({
             id: id,
             name: `Group ${index + 1}`,
+            category: showAll ? -1 : category.idx,
             elements: [],
             rowElements: []
         });
@@ -290,15 +261,19 @@
         }
     }
 
-    function moveGroupDown(num: number) {
-        if (num < app.groups.length - 1) {
-            app.groups.splice(num, 2, app.groups[num + 1], app.groups[num]);
+    function moveGroupUp(group: Group, num: number) {
+        if (num > 0) {
+            const prevIdx = app.group.indexOf(catGroup[num - 1]);
+            const curIdx = app.group.indexOf(group);
+            [app.groups[prevIdx], app.groups[curIdx]] = [app.groups[curIdx], app.groups[prevIdx]];
         }
     }
 
-    function moveGroupUp(num: number) {
-        if (num > 0) {
-            app.groups.splice(num - 1, 2, app.groups[num], app.groups[num - 1]);
+    function moveGroupDown(group: Group, num: number) {
+        if (num < catGroup.length - 1) {
+            const nextIdx = app.groups.indexOf(catGroup[num + 1]);
+            const curIdx = app.groups.indexOf(group);
+            [app.groups[curIdx], app.groups[nextIdx]] = [app.groups[nextIdx], app.groups[curIdx]];
         }
     }
 
@@ -357,6 +332,14 @@
                 }
             }
         }
+    }
+
+    function getCategoryLabel(idx: number) {
+        const cat = categoryMap.get(`group_${idx}`);
+        if (typeof cat !== 'undefined') {
+            return `${cat.idx + 1}. ${cat.name}`;
+        }
+        return '';
     }
     
 </script>

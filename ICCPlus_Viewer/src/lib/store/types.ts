@@ -22,6 +22,8 @@ export type filterStyling = {
     selFilterBgColor?: string,
     selBorderColorIsOn?: boolean,
     selFilterBorderColor?: string,
+    selImgBorderColorIsOn?: boolean,
+    selFilterImgBorderColor?: string,
     selCTitleColorIsOn?: boolean,
     selFilterCTitleColor?: string,
     selCTextColorIsOn?: boolean,
@@ -56,6 +58,8 @@ export type filterStyling = {
     reqFilterBgColor?: string,
     reqBorderColorIsOn?: boolean,
     reqFilterBorderColor?: string,
+    reqImgBorderColorIsOn?: boolean,
+    reqFilterImgBorderColor?: string,
     reqCTitleColorIsOn?: boolean,
     reqFilterCTitleColor?: string,
     reqCTextColorIsOn?: boolean,
@@ -140,7 +144,8 @@ export type objectImageStyling = {
     objectImgBorderColor?: string,
     objectImgObjectFillStyle?: string,
     objectImgObjectFillIsOn?: boolean,
-    objectImageBoxWidth?: number
+    objectImageBoxWidth?: number,
+    objectImgObjectFillHeight?: number
 };
 export type rowImageStyling = {
     rowImgBorderStyle?: string,
@@ -156,7 +161,10 @@ export type rowImageStyling = {
     rowImgBorderIsOn?: boolean,
     rowImgOverflowIsOn?: boolean,
     rowImgBorderColor?: string,
-    rowImageBoxWidth?: number
+    rowImageBoxWidth?: number,
+    rowImgObjectFillStyle?: string,
+    rowImgObjectFillIsOn?: boolean,
+    rowImgObjectFillHeight?: number
 };
 export type addonImageStyling = {
     useAddonImage?: boolean,
@@ -175,7 +183,8 @@ export type addonImageStyling = {
     addonImgBorderColor?: string,
     addonImgObjectFillStyle?: string,
     addonImgObjectFillIsOn?: boolean,
-    addonImageBoxWidth?: number
+    addonImageBoxWidth?: number,
+    addonImgObjectFillHeight?: number
 };
 export type backgroundStyling = {
     bgColorIsOn?: boolean,
@@ -388,7 +397,9 @@ export type Addon = {
     templateStack?: {
         id: string,
         data: number
-    }[]
+    }[],
+    isSelectable?: boolean,
+    addonWidth?: string
 };
 export type Discount = {
     isStackable: boolean,
@@ -450,7 +461,8 @@ export type Score = {
     useExpression?: boolean,
     expValue?: string,
     expMinValue?: string,
-    expMaxValue?: string
+    expMaxValue?: string,
+    mulValue?: number[],
 }
 export type Choice = {
     [key: string]: any,
@@ -572,6 +584,7 @@ export type Choice = {
     bgmFadeOutSec?: number,
     bgmNoLoop?: boolean,
     muteBgm?: boolean,
+    useAudioURL?: boolean,
     isFadeTransition?: boolean,
     fadeTransitionColor?: string,
     fadeTransitionTime?: number,    
@@ -757,17 +770,20 @@ export type PointType = {
     privateNegativeColor?: string,
     imageIsURL?: boolean,
     allowFloat?: boolean,
-    decimalPlaces?: number
+    decimalPlaces?: number,
+    category?: number
 };
 export type Variable = {
     id: string,
-    isTrue: boolean
+    isTrue: boolean,
+    category?: number
 }
 export type Group = {
     id: string,
     name: string,
+    category?: number
     elements: string[],
-    rowElements: string[]
+    rowElements: string[],
 };
 export type CommonImage = {
     [key: string]: any,
@@ -778,11 +794,13 @@ export type CommonImage = {
 export type GlobalRequirement = {
     id: string,
     name: string,
+    category?: number,
     requireds: Requireds[]
 }
 export type Word = {
     id: string,
-    replaceText: string
+    replaceText: string,
+    category?: number
 }
 export type RowDesignGroup = {
     [key: string]: any,
@@ -800,6 +818,7 @@ export type RowDesignGroup = {
     privateAddonImageIsOn?: boolean,
     privateAddonIsOn?: boolean,
     privateBackgroundIsOn?: boolean,
+    category?: number
     styling: Styling
 }
 export type ObjectDesignGroup = {
@@ -816,16 +835,13 @@ export type ObjectDesignGroup = {
     privateAddonImageIsOn?: boolean,
     privateAddonIsOn?: boolean,
     privateBackgroundIsOn?: boolean,
+    category?: number
     styling: Styling
 }
 export type App = {
     [key: string]: any,
     version?: string,
     isEditModeOnAll: boolean,
-    isStyleOpen: boolean,
-    isPointsOpen: boolean,
-    isChoicesOpen: boolean,
-    isDesignOpen: boolean,
     isPointerCursor: boolean,
     importedChoicesIsOpen: boolean,
     curVolume: number,
@@ -855,6 +871,8 @@ export type App = {
     customFonts: string[],
     compressImageAuto: boolean,
     useTextEditor: boolean,
+    useToolbarBtn: boolean,
+    useChoiceEditBtn: boolean,
     hideScoresUpdated: boolean,
     hideChoiceDT: boolean,
     hideImages: boolean,
@@ -918,7 +936,8 @@ export type App = {
     activated: string[],
     rows: Row[],
     backpack: Row[],
-    styling: Styling
+    styling: Styling,
+    categories: Category[]
 };
 export type RowMap = {
     rows: number,
@@ -942,7 +961,10 @@ export type ActivatedMap = {
     multiple: number,
     activatedFrom?: number,
     isAllowDeselect?: boolean,
-    isVariable?: boolean
+    isVariable?: boolean,
+    isRowButton?: boolean,
+    rndPoint?: string,
+    pointNum?: number
 };
 export type ChoiceMap = {
     choice: Choice,
@@ -962,6 +984,7 @@ export type BgmPlayer = {
     lastFadeTime: number,
     isFadingOut: boolean,
     bgmObjectId: string,
+    noCors: boolean
 };
 export type SaveSlot = {
     stored: boolean,
@@ -981,7 +1004,8 @@ export type DlgVariables = {
     imgProp?: string,
     title?: string,
     context?: string,
-    isWord?: boolean
+    isWord?: boolean,
+    prevText?: string
 };
 export type SnackBarVariables = {
     labelText: string,
@@ -997,4 +1021,49 @@ export type ExprNode = {
     operator: string,
     right: number | ExprNode,
     priority: number
+};
+export type WordDialog = {
+    choice: Choice | null,
+    row: Row | null,
+    context: string,
+    prevText: string,
+    isWord: boolean
+};
+export type Category = {
+    idx: number,
+    name: string,
+    type: string
+};
+export type MusicPlayer = {
+    type: 'audio' | 'youtube';
+    load(idOrUrl: string, options?: {
+        loop?: boolean;
+    }): void;
+    play(): void;
+    pause(): void;
+    stop(): void;
+    mute(): void;
+    unMute(): void;
+
+    setVolume(v: number): void;
+    getVolume?(): number;
+
+    isPlaying(): boolean;
+    isStopped(): boolean;
+    isMuted(): boolean;
+
+    seekTo?(sec: number): boolean,
+
+    getCurrentTime(): number;
+    getDuration(): number;
+
+    getTitle(): string;
+    getId(): string;
+};
+export type choiceOptions = {
+    linkedObjects: string[];
+    mainDiv?: HTMLDivElement;
+    bCreatorMode?: boolean;
+    isBackpack?: boolean;
+    isOverDlg?: boolean;
 };

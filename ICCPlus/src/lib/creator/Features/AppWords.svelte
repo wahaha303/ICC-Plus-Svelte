@@ -1,78 +1,65 @@
 <Dialog
     bind:open
-    surface$style="width: 800px; max-width: calc(100vw - 32px);"
+    surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
     <Title class="dialog-title" tabindex={0} autofocus>
         Words
     </Title>
     <Content id="dialog--word" class="pb-2">
-        {#if app.words.length > 4}
-            <div style="position: relative; height: {totalHeight}px; width: 100%;">
-                {#each items as row (row.index)}
-                    <div class="py-3" data-index={row.index} use:observeResize={row.index} style="position: absolute; top: {row.start}px; width: 100%;">
-                        {#if app.words[row.index]}
-                            <div class="point-slot">
-                                <div class="toolbar grey lighten-3 justify-space-around">
-                                    <Wrapper text="Move Up">
-                                        <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveWordUp(row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Delete Group">
-                                        <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteWord(app.words[row.index].id, row.index)} />
-                                    </Wrapper>
-                                    <Wrapper text="Move Down">
-                                        <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveWordDown(row.index)} />
-                                    </Wrapper>
-                                </div>
-                                <div class="row gy-4 p-3">
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={app.words[row.index].id} onfocus={() => wordId = app.words[row.index].id} onchange={() => changeWordId(app.words[row.index])} label="Id that can be placed in the text" variant="filled" />
+        <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
+            {#each $virtualizer.getVirtualItems() as wRow (wRow.index)}
+                <div class="py-3" data-index={wRow.index} use:observeResize={wRow.index} style="position: absolute; top: {wRow.start}px; width: 100%;">
+                    <div class="row g-3 pb-3">
+                        {#each wordRows[wRow.index] as word, i}
+                            <div class="col-xl-4 col-12">
+                                <div class="point-slot">
+                                    <div class="toolbar grey lighten-3 justify-space-around">
+                                        <Wrapper text="Move Up">
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveWordUp(word, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Delete Word">
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteWord(word, i)} />
+                                        </Wrapper>
+                                        <Wrapper text="Move Down">
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveWordDown(word, i)} />
+                                        </Wrapper>
                                     </div>
-                                    <div class="col-sm-6 col-12">
-                                        <Textfield bind:value={app.words[row.index].replaceText} label="Text to replace id with" variant="filled" />
+                                    <div class="row gy-4 p-3">
+                                        <div class="col-12">
+                                            <CustomAutocomplete
+                                                options={wCats}
+                                                getOptionLabel={getCategoryLabel}
+                                                bindObj={word}
+                                                bindVal="category"
+                                                label="Category"
+                                                toggle={true}
+                                                showMenuWithNoInput={true}
+                                                textfield$variant="filled"
+                                                innerClass="w-100 p-0"
+                                            />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={word.id} onfocus={() => wordId = word.id} onchange={() => changeWordId(word)} label="Id that can be placed in the text" variant="filled" />
+                                        </div>
+                                        <div class="col-sm-6 col-12">
+                                            <Textfield bind:value={word.replaceText} label="Text to replace id with" variant="filled" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        {:else if row.index === app.words.length}
-                            <div>
-                                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewWord} aria-label="Create New Word">
+                        {/each}
+                        {#if wRow.index === wordRows.length - 1}
+                            <div class="col-xl-4 col-12">
+                                <button type="button" class="create-box col-12" style="min-height: 210px; font-size: 40px;" onclickcapture={createNewWord} aria-label="Create New Word">
                                     <i class="mdi mdi-plus-thick"></i>
                                 </button>
                             </div>
                         {/if}
                     </div>
-                {/each}
-            </div>
-        {:else}
-            {#each app.words as word, i}
-                <div class="point-slot my-5">
-                    <div class="toolbar grey lighten-3 justify-space-around">
-                        <Wrapper text="Move Up">
-                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveWordUp(i)} />
-                        </Wrapper>
-                        <Wrapper text="Delete Group">
-                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteWord(word.id, i)} />
-                        </Wrapper>
-                        <Wrapper text="Move Down">
-                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveWordDown(i)} />
-                        </Wrapper>
-                    </div>
-                    <div class="row gy-4 p-3">
-                        <div class="col-sm-6 col-12">
-                            <Textfield bind:value={word.id} onfocus={() => wordId = word.id} onchange={() => changeWordId(word)} label="Id that can be placed in the text" variant="filled" />
-                        </div>
-                        <div class="col-sm-6 col-12">
-                            <Textfield bind:value={word.replaceText} label="Text to replace id with" variant="filled" />
-                        </div>
-                    </div>
                 </div>
             {/each}
-            <div class="my-5">
-                <button type="button" class="create-box col-12" style="min-height: 138px; font-size: 40px;" onclickcapture={createNewWord} aria-label="Create New Word">
-                    <i class="mdi mdi-plus-thick"></i>
-                </button>
-            </div>
-        {/if}
+        </div>
     </Content>
     <Actions>
         <div class="container-fluid">
@@ -93,42 +80,47 @@
 </Dialog>
 <script lang="ts">
     import Button, { Label } from '@smui/button';
+    import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import IconButton from '@smui/icon-button'; 
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, wordMap, generateWordId, scrollToLastRow } from '$lib/store/store.svelte';
-    import type { Word } from '$lib/store/types';
+    import { app, checkDupId, wordMap, generateWordId, scrollToLastRow, categoryMap } from '$lib/store/store.svelte';
+    import type { Category, Word } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';
     
-    let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'word'}, showAll }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean } = $props();
     let wordId = '';
-    const rowCount = () => app.words.length + 1;
+
+    let catWord = $derived(showAll ? app.words : app.words.filter(item => item.category === category.idx));
+    let wordRows = $derived.by(() => {
+        const result: any[][] = [];
+        for (let i = 0; i < catWord.length; i += 3) {
+            result.push(catWord.slice(i, i + 3));
+        }
+        if (result.length === 0) result.push([]);
+        return result;
+    });
+    const rowCount = () => wordRows.length;
     let virtualListEl = $state<HTMLDivElement>(document.getElementById('dialog--word') as HTMLDivElement);
     let virtualizer = $state(createVirtualizer({
         count: rowCount(),
         getScrollElement: () => virtualListEl,
-        estimateSize: () => 180,
+        estimateSize: () => 252,
         overscan: 1,
-        measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 180),
+        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 252) //+72px
     }));
-    let totalHeight = $derived.by(() => {
-        return $virtualizer.getTotalSize()
-    });
-    let items = $derived.by(() => {
-        return $virtualizer.getVirtualItems();
-    });
+    let wCats = $derived(app.categories.filter(item => item.type === category.type).map(item => item.idx));
+
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--word') as HTMLDivElement;
-        setTimeout(() => {
-            $virtualizer.setOptions({
-                getScrollElement: () => virtualListEl,
-                estimateSize: () => 180,
-                measureElement: (el) => Math.max((el as HTMLElement).offsetHeight, 180),
-            });
-        }, 0);
+        $virtualizer.setOptions({
+            getScrollElement: () => virtualListEl,
+            estimateSize: () => 252,
+            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 252)
+        });
     });
 
     function observeResize(el: HTMLDivElement, index: number) {
@@ -160,14 +152,14 @@
 
     function createNewWord() {
         let id = generateWordId(0, 4);
-        app.words.push({id: id, replaceText: ''});
+        app.words.push({id: id, replaceText: '', category: showAll ? -1 : category.idx});
         wordMap.set(id, app.words[app.words.length - 1]);
 
-        if (app.words.length > 4) {
+        if (catWord.length > 4) {
             $virtualizer.setOptions({
                 count: rowCount()
             });
-            scrollToLastRow($virtualizer, virtualListEl, app.words.length - 1);
+            scrollToLastRow($virtualizer, virtualListEl, catWord.length - 1);
         }
     }
 
@@ -175,23 +167,34 @@
         app.words.splice(num, 1);
         wordMap.delete(id);
 
-        if (app.words.length > 4) {
+        if (catWord.length > 4) {
             $virtualizer.setOptions({
                 count: rowCount()
             });
         }
     }
 
-    function moveWordDown(num: number) {
-        if (num < app.words.length - 1) {
-            app.words.splice(num, 2, app.words[num + 1], app.words[num]);
+    function moveWordUp(word: Word, num: number) {
+        if (num > 0) {
+            const prevIdx = app.words.indexOf(catWord[num - 1]);
+            const curIdx = app.words.indexOf(word);
+            [app.words[prevIdx], app.words[curIdx]] = [app.words[curIdx], app.words[prevIdx]];
         }
     }
 
-    function moveWordUp(num: number) {
-        if (num > 0) {
-            app.words.splice(num - 1, 2, app.words[num], app.words[num - 1]);
+    function moveWordDown(word: Word, num: number) {
+        if (num < catWord.length - 1) {
+            const nextIdx = app.words.indexOf(catWord[num + 1]);
+            const curIdx = app.words.indexOf(word);
+            [app.words[curIdx], app.words[nextIdx]] = [app.words[nextIdx], app.words[curIdx]];
         }
     }
     
+    function getCategoryLabel(idx: number) {
+        const cat = categoryMap.get(`word_${idx}`);
+        if (typeof cat !== 'undefined') {
+            return `${cat.idx + 1}. ${cat.name}`;
+        }
+        return '';
+    }
 </script>

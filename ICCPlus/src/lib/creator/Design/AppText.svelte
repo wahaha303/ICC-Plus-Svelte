@@ -7,7 +7,7 @@
     <Title class="dialog-title" tabindex={0} autofocus>
         {#if typeof data !== 'undefined'}
             <FormField>
-                <Checkbox bind:checked={() => data.privateTextIsOn?? false, (e) => data.privateTextIsOn = e} onchange={() => {
+                <Checkbox bind:checked={() => data.privateTextIsOn ?? false, (e) => data.privateTextIsOn = e} onchange={() => {
                     if (data.privateTextIsOn) {
                         let temp = JSON.parse(JSON.stringify(textStyling));
                         Object.keys(textStyling).forEach(key => {
@@ -48,82 +48,82 @@
                         <div class="col-lg-4 gy-2">
                             <div class="col-12 px-3">Row Title</div>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customRowTitle?? false, (e) => styling.customRowTitle = e} />
+                                <Checkbox bind:checked={() => styling.customRowTitle ?? false, (e) => styling.customRowTitle = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customRowTitle}
-                                <Textfield class="mb-4" bind:value={() => styling.rowTitle?? '', (e) => styling.rowTitle = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.rowTitle ?? '', (e) => styling.rowTitle = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.rowTitle?? '', (e) => styling.rowTitle = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.rowTitle ?? '', (e) => styling.rowTitle = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
                                 </Select>
                             {/if}
-                            <Textfield class="mb-4" bind:value={() => styling.rowTitleTextSize?? 0, (e) => styling.rowTitleTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
-                            <Select class="mb-4" bind:value={() => styling.rowTitleAlign?? '', (e) => styling.rowTitleAlign = e} label="Text Alignment" variant="filled">
+                            <Textfield class="mb-4" bind:value={() => styling.rowTitleTextSize ?? 0, (e) => styling.rowTitleTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Select class="mb-4" bind:value={() => styling.rowTitleAlign ?? '', (e) => styling.rowTitleAlign = e} label="Text Alignment" variant="filled">
                                 {#each textAlignments as textAlignment}
                                     <Option value={textAlignment}>{textAlignment}</Option>
                                 {/each}
                             </Select>
                             <div class="text-center">
-                                <ColorPicker bind:hex={() => styling.rowTitleColor?? '#000000', (e) => styling.rowTitleColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                                <ColorPicker bind:hex={() => styling.rowTitleColor ?? '#000000', (e) => styling.rowTitleColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
                         </div>
                         <div class="col-lg-4 gy-2">
                             <div class="col-12 px-3">Row Text</div>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customRowText?? false, (e) => styling.customRowText = e} />
+                                <Checkbox bind:checked={() => styling.customRowText ?? false, (e) => styling.customRowText = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customRowText}
-                                <Textfield class="mb-4" bind:value={() => styling.rowText?? '', (e) => styling.rowText = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.rowText ?? '', (e) => styling.rowText = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.rowText?? '', (e) => styling.rowText = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.rowText ?? '', (e) => styling.rowText = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
                                 </Select>
                             {/if}
-                            <Textfield class="mb-4" bind:value={() => styling.rowTextTextSize?? 0, (e) => styling.rowTextTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
-                            <Select class="mb-4" bind:value={() => styling.rowTextAlign?? '', (e) => styling.rowTextAlign = e} label="Text Alignment" variant="filled">
+                            <Textfield class="mb-4" bind:value={() => styling.rowTextTextSize ?? 0, (e) => styling.rowTextTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Select class="mb-4" bind:value={() => styling.rowTextAlign ?? '', (e) => styling.rowTextAlign = e} label="Text Alignment" variant="filled">
                                 {#each textAlignments as textAlignment}
                                     <Option value={textAlignment}>{textAlignment}</Option>
                                 {/each}
                             </Select>
                             <div class="text-center">
-                                <ColorPicker bind:hex={() => styling.rowTextColor?? '#000000', (e) => styling.rowTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                                <ColorPicker bind:hex={() => styling.rowTextColor ?? '#000000', (e) => styling.rowTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
                         </div>
                         <div class="col-lg-4 gy-2">
                             <div class="col-12 px-3">Choice Title</div>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customObjectTitle?? false, (e) => styling.customObjectTitle = e} />
+                                <Checkbox bind:checked={() => styling.customObjectTitle ?? false, (e) => styling.customObjectTitle = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customObjectTitle}
-                                <Textfield class="mb-4" bind:value={() => styling.objectTitle?? '', (e) => styling.objectTitle = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.objectTitle ?? '', (e) => styling.objectTitle = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.objectTitle?? '', (e) => styling.objectTitle = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.objectTitle ?? '', (e) => styling.objectTitle = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
                                 </Select>
                             {/if}
-                            <Textfield class="mb-4" bind:value={() => styling.objectTitleTextSize?? 0, (e) => styling.objectTitleTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
-                            <Select class="mb-4" bind:value={() => styling.objectTitleAlign?? '', (e) => styling.objectTitleAlign = e} label="Text Alignment" variant="filled">
+                            <Textfield class="mb-4" bind:value={() => styling.objectTitleTextSize ?? 0, (e) => styling.objectTitleTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Select class="mb-4" bind:value={() => styling.objectTitleAlign ?? '', (e) => styling.objectTitleAlign = e} label="Text Alignment" variant="filled">
                                 {#each textAlignments as textAlignment}
                                     <Option value={textAlignment}>{textAlignment}</Option>
                                 {/each}
                             </Select>
                             <div class="text-center">
-                                <ColorPicker bind:hex={() => styling.objectTitleColor?? '#000000', (e) => styling.objectTitleColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                                <ColorPicker bind:hex={() => styling.objectTitleColor ?? '#000000', (e) => styling.objectTitleColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
                         </div>
                     </div>
@@ -131,82 +131,82 @@
                         <div class="col-lg-4 gy-2">
                             <div class="col-12 px-3">Choice Text</div>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customObjectText?? false, (e) => styling.customObjectText = e} />
+                                <Checkbox bind:checked={() => styling.customObjectText ?? false, (e) => styling.customObjectText = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customObjectText}
-                                <Textfield class="mb-4" bind:value={() => styling.objectText?? '', (e) => styling.objectText = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.objectText ?? '', (e) => styling.objectText = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.objectText?? '', (e) => styling.objectText = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.objectText ?? '', (e) => styling.objectText = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
                                 </Select>
                             {/if}
-                            <Textfield class="mb-4" bind:value={() => styling.objectTextTextSize?? 0, (e) => styling.objectTextTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
-                            <Select class="mb-4" bind:value={() => styling.objectTextAlign?? '', (e) => styling.objectTextAlign = e} label="Text Alignment" variant="filled">
+                            <Textfield class="mb-4" bind:value={() => styling.objectTextTextSize ?? 0, (e) => styling.objectTextTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Select class="mb-4" bind:value={() => styling.objectTextAlign ?? '', (e) => styling.objectTextAlign = e} label="Text Alignment" variant="filled">
                                 {#each textAlignments as textAlignment}
                                     <Option value={textAlignment}>{textAlignment}</Option>
                                 {/each}
                             </Select>
                             <div class="text-center">
-                                <ColorPicker bind:hex={() => styling.objectTextColor?? '#000000', (e) => styling.objectTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                                <ColorPicker bind:hex={() => styling.objectTextColor ?? '#000000', (e) => styling.objectTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
                         </div>
                         <div class="col-lg-4 gy-2">
                             <div class="col-12 px-3">Addon Title</div>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customAddonTitle?? false, (e) => styling.customAddonTitle = e} />
+                                <Checkbox bind:checked={() => styling.customAddonTitle ?? false, (e) => styling.customAddonTitle = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customAddonTitle}
-                                <Textfield class="mb-4" bind:value={() => styling.addonTitle?? '', (e) => styling.addonTitle = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.addonTitle ?? '', (e) => styling.addonTitle = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.addonTitle?? '', (e) => styling.addonTitle = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.addonTitle ?? '', (e) => styling.addonTitle = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
                                 </Select>
                             {/if}
-                            <Textfield class="mb-4" bind:value={() => styling.addonTitleTextSize?? 0, (e) => styling.addonTitleTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
-                            <Select class="mb-4" bind:value={() => styling.addonTitleAlign?? '', (e) => styling.addonTitleAlign = e} label="Text Alignment" variant="filled">
+                            <Textfield class="mb-4" bind:value={() => styling.addonTitleTextSize ?? 0, (e) => styling.addonTitleTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Select class="mb-4" bind:value={() => styling.addonTitleAlign ?? '', (e) => styling.addonTitleAlign = e} label="Text Alignment" variant="filled">
                                 {#each textAlignments as textAlignment}
                                     <Option value={textAlignment}>{textAlignment}</Option>
                                 {/each}
                             </Select>
                             <div class="text-center">
-                                <ColorPicker bind:hex={() => styling.addonTitleColor?? '#000000', (e) => styling.addonTitleColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                                <ColorPicker bind:hex={() => styling.addonTitleColor ?? '#000000', (e) => styling.addonTitleColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
                         </div>
                         <div class="col-lg-4 gy-2">
                             <div class="col-12 px-3">Addon Text</div>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customAddonText?? false, (e) => styling.customAddonText = e} />
+                                <Checkbox bind:checked={() => styling.customAddonText ?? false, (e) => styling.customAddonText = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customAddonText}
-                                <Textfield class="mb-4" bind:value={() => styling.addonText?? '', (e) => styling.addonText = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.addonText ?? '', (e) => styling.addonText = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.addonText?? '', (e) => styling.addonText = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.addonText ?? '', (e) => styling.addonText = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
                                 </Select>
                             {/if}
-                            <Textfield class="mb-4" bind:value={() => styling.addonTextTextSize?? 0, (e) => styling.addonTextTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
-                            <Select class="mb-4" bind:value={() => styling.addonTextAlign?? '', (e) => styling.addonTextAlign = e} label="Text Alignment" variant="filled">
+                            <Textfield class="mb-4" bind:value={() => styling.addonTextTextSize ?? 0, (e) => styling.addonTextTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Select class="mb-4" bind:value={() => styling.addonTextAlign ?? '', (e) => styling.addonTextAlign = e} label="Text Alignment" variant="filled">
                                 {#each textAlignments as textAlignment}
                                     <Option value={textAlignment}>{textAlignment}</Option>
                                 {/each}
                             </Select>
                             <div class="text-center">
-                                <ColorPicker bind:hex={() => styling.addonTextColor?? '#000000', (e) => styling.addonTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                                <ColorPicker bind:hex={() => styling.addonTextColor ?? '#000000', (e) => styling.addonTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
                         </div>
                     </div>
@@ -214,28 +214,28 @@
                         <div class="col-12 gy-2">
                             <div class="col-12 px-3">Score and Requirement Text</div>
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.customScoreText?? false, (e) => styling.customScoreText = e} />
+                                <Checkbox bind:checked={() => styling.customScoreText ?? false, (e) => styling.customScoreText = e} />
                                 {#snippet label()}
                                     Use Local Custom Font?
                                 {/snippet}
                             </FormField>
                             {#if styling.customScoreText}
-                                <Textfield class="mb-4" bind:value={() => styling.scoreText?? '', (e) => styling.scoreText = e} label="Text Font" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.scoreText ?? '', (e) => styling.scoreText = e} label="Text Font" variant="filled" />
                             {:else}
-                                <Select class="mb-4" bind:value={() => styling.scoreText?? '', (e) => styling.scoreText = e} label="Text Font" variant="filled">
+                                <Select class="mb-4" bind:value={() => styling.scoreText ?? '', (e) => styling.scoreText = e} label="Text Font" variant="filled">
                                     {#each textFonts as textFont}
                                         <Option value={textFont}>{textFont}</Option>
                                     {/each}
                                 </Select>
                             {/if}
-                            <Textfield class="mb-4" bind:value={() => styling.scoreTextSize?? 0, (e) => styling.scoreTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
-                            <Select class="mb-4" bind:value={() => styling.scoreTextAlign?? '', (e) => styling.scoreTextAlign = e} label="Text Alignment" variant="filled">
+                            <Textfield class="mb-4" bind:value={() => styling.scoreTextSize ?? 0, (e) => styling.scoreTextSize = e} label="Text Size" type="number" suffix="%" variant="filled" />
+                            <Select class="mb-4" bind:value={() => styling.scoreTextAlign ?? '', (e) => styling.scoreTextAlign = e} label="Text Alignment" variant="filled">
                                 {#each textAlignments as textAlignment}
                                     <Option value={textAlignment}>{textAlignment}</Option>
                                 {/each}
                             </Select>
                             <div class="text-center">
-                                <ColorPicker bind:hex={() => styling.scoreTextColor?? '#000000', (e) => styling.scoreTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
+                                <ColorPicker bind:hex={() => styling.scoreTextColor ?? '#000000', (e) => styling.scoreTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
                         </div>
                     </div>
