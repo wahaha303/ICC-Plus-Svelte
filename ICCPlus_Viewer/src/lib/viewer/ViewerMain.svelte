@@ -132,7 +132,7 @@
     }}/>
 {/if}
 {#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
-    <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} />
+    <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={dlgVariables.cFunc} />
 {:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
 {:else if dlgVariables.currentDialog === 'selectDialog' && typeof dlgVariables.choice !== 'undefined' && typeof dlgVariables.func !== 'undefined'}
@@ -141,7 +141,6 @@
 <Tooltip />
 
 <script lang="ts">
-    import Button, { Label, Icon as BtnIcon } from '@smui/button';
     import Drawer, { Content, Scrim } from '@smui/drawer';
     import IconButton from '@smui/icon-button';
     import List, { Item, Text, Graphic, Separator } from '@smui/list';

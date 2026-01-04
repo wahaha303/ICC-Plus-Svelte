@@ -73,7 +73,7 @@
                             {/if}
                         </div>
                         {#if choice.addons && choice.addons.length > 0}
-                            <div class="row p-0 w-100{addonJustify}">
+                            <div class="row g-0 p-0 w-100{addonJustify}">
                                 {#each choice.addons as addon, i}
                                     {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -131,7 +131,7 @@
                             {/if}
                             {#if !choice.useSeperateAddon}
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -147,7 +147,7 @@
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -196,7 +196,7 @@
                             {/if}
                             {#if !choice.useSeperateAddon}
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -221,7 +221,7 @@
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -240,22 +240,26 @@
         </div>
     </div>
 {/if}
+{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
+    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
+{/if}
 
 <script lang="ts">
+    import DlgCommon from './DlgCommon.svelte';
     import DOMPurify from 'dompurify';
     import ObjectAddon from './Object/ObjectAddon.svelte';
     import ObjectMultiChoice from './Object/ObjectMultiChoice.svelte';
     import ObjectRequired from './Object/ObjectRequired.svelte';
     import ObjectScore from './Object/ObjectScore.svelte';
 	import type { Choice, choiceOptions, Row } from '$lib/store/types';
-	import { app, choiceMap, getStyling, checkRequirements, sanitizeArg, replaceText, objectWidthToNum, snackbarVariables, winWidth, hexToRgba, selectObject, deselectObject, selectedOneMore, selectedOneLess } from '$lib/store/store.svelte';
+	import { app, choiceMap, getStyling, checkRequirements, sanitizeArg, replaceText, objectWidthToNum, snackbarVariables, winWidth, hexToRgba, selectObject, deselectObject, selectedOneMore, selectedOneLess, wordDialog } from '$lib/store/store.svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     export { activateObject, options };
     
     const { row, choice, windowWidth, preloadImages = false, isBackpack, mainDiv }: { row: Row, choice: Choice, index: number, windowWidth: number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
     const linkedObjects: string[] = [];
-    const options: choiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false};
+    const options: choiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
 
     let firstAddonIndex = $derived.by(() => {
         if (choice.addons) {
@@ -621,6 +625,9 @@
         const target = e && e.target ? e.target as HTMLElement : null
         let origRow = localRow;
 
+        options.isOverDlg = false;
+        options.isOverImg = false;
+
         if (target && localChoice.isActive && localChoice.addons && localChoice.addons.length > 0) {
             if (closestByClassPrefix(target, 'addon-', 'addon')) return;
         }
@@ -642,7 +649,7 @@
                 selectedOneMore(localChoice, origRow, options);
             }
         } else {
-            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated) {
+            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated && !localChoice.activatedFrom) {
                 if (localChoice.isActive) {
                     if (!localChoice.selectOnce) deselectObject(localChoice, origRow, options);
                 } else {

@@ -25,6 +25,13 @@
     <Actions>
         <div class="container-fluid">
             <div class="row">
+                {#if isDeselect}
+                    <div class="col-12">
+                        <Button action="deselect">
+                            <Label>Deselect</Label>
+                        </Button>
+                    </div>
+                {/if}
                 <div class="col-6">
                     <Button action="close">
                         <Label>Cancel</Label>
@@ -44,7 +51,7 @@
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import Textfield from '$lib/custom/textfield';
 
-    let { open, onclose, title = '', context, closeHandler, isWord, prevText, defaultRow = 5, textLabel = '' }: { open: boolean; onclose: () => void, title?: string, context: string, closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void, isWord?: boolean, prevText?: string, defaultRow?: number, textLabel?: string } = $props();
+    let { open, onclose, title = '', context, closeHandler, isWord, prevText, defaultRow = 5, textLabel = '', isDeselect }: { open: boolean; onclose: () => void, title?: string, context: string, closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void, isWord?: boolean, prevText?: string, defaultRow?: number, textLabel?: string, isDeselect?: boolean } = $props();
     let wordText = $state(isWord && prevText ? prevText : '');
 
     function beforeClose(e: CustomEvent<{ action: string }>) {

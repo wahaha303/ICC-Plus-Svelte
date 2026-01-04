@@ -1535,7 +1535,7 @@
                             {/if}
                         </div>
                         {#if choice.addons && choice.addons.length > 0}
-                            <div class="row p-0 w-100{addonJustify}">
+                            <div class="row g-0 p-0 w-100{addonJustify}">
                                 {#each choice.addons as addon, i}
                                     {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -1593,7 +1593,7 @@
                             {/if}
                             {#if !choice.useSeperateAddon}
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -1609,7 +1609,7 @@
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -1658,7 +1658,7 @@
                             {/if}
                             {#if !choice.useSeperateAddon}
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -1683,7 +1683,7 @@
                         {#if choice.useSeperateAddon}
                             <div class="col-12 text-center">
                                 {#if choice.addons && choice.addons.length > 0}
-                                    <div class="d-column p-0 col w-100{addonJustify}">
+                                    <div class="row g-0 p-0 col w-100{addonJustify}">
                                         {#each choice.addons as addon, i}
                                             {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
@@ -1702,6 +1702,9 @@
         </div>
     </div>
 {/if}
+{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
+    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
+{/if}
 
 <script lang="ts">
     import Accordion, { Panel, Header, Content as AcdContent} from '$lib/custom/accordion';
@@ -1711,6 +1714,7 @@
     import Checkbox from '@smui/checkbox';
     import ColorPicker, { ChromeVariant } from '$lib/custom/svelte-awesome-color-picker';
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
+    import DlgCommon from './DlgCommon.svelte';
     import DOMPurify from 'dompurify';
     import FormField from '@smui/form-field';
     import IconButton, { Icon } from '@smui/icon-button';
@@ -1724,7 +1728,7 @@
     import Tiptap from '$lib/store/Tiptap.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { Choice, choiceOptions, Row } from '$lib/store/types';
-	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, activatedMap, tmpActivatedMap, objectWidthToNum, generateObjectId, dlgVariables, snackbarVariables, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount, exportData, selectObject, deselectObject, selectedOneMore, selectedOneLess } from '$lib/store/store.svelte';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, activatedMap, tmpActivatedMap, objectWidthToNum, generateObjectId, dlgVariables, snackbarVariables, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount, exportData, selectObject, deselectObject, selectedOneMore, selectedOneLess, wordDialog } from '$lib/store/store.svelte';
     import { tick } from 'svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
@@ -1820,7 +1824,7 @@
     }];
     const justifies = ['start', 'center', 'end', 'space-around', 'space-between'];
     const linkedObjects: string[] = [];
-    const options: choiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false};
+    const options: choiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     
     let panelScore = $state(false);
     let panelReq = $state(false);
@@ -2648,6 +2652,9 @@
         const target = e && e.target ? e.target as HTMLElement : null
         let origRow = localRow;
 
+        options.isOverDlg = false;
+        options.isOverImg = false;
+
         if (target && localChoice.isActive && localChoice.addons && localChoice.addons.length > 0) {
             if (closestByClassPrefix(target, 'addon-', 'addon')) return;
         }
@@ -2669,7 +2676,7 @@
                 selectedOneMore(localChoice, origRow, options);
             }
         } else {
-            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated) {
+            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated && !localChoice.activatedFrom) {
                 if (localChoice.isActive) {
                     if (!localChoice.selectOnce) deselectObject(localChoice, origRow, options);
                 } else {

@@ -434,7 +434,6 @@
 
     $effect(() => {
         if (editor && !isRaw) {
-            
             const str = convertNewlinesToBr(data[dataProp]);
             if (str !== editor.getHTML()) {
                 editor.commands.setContent(str);
@@ -443,6 +442,13 @@
     })
 
     function removeNewlinesInsideList(html: string): string {
+        let tempInserted = false;
+
+        if (html.startsWith('\n')) {
+            html = '__TEMP_NEWLINE__' + html;
+            tempInserted = true;
+        }
+
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
@@ -453,7 +459,7 @@
                 }
             });
         });
-        
+
         doc.querySelectorAll('ul, ol').forEach((list) => {
             list.innerHTML = list.innerHTML.replace(/\n/g, '');
 
@@ -474,7 +480,13 @@
             }
         });
 
-        return doc.body.innerHTML;
+        let result = doc.body.innerHTML;
+
+        if (tempInserted) {
+            result = result.replace('__TEMP_NEWLINE__\n', '');
+        }
+
+        return result;
     }
 
     function convertNewlinesToBr(str?: string) {

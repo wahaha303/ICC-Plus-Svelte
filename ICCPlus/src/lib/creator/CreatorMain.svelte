@@ -200,7 +200,7 @@
     <AppGlobalSettings open={currentDialog === 'appGlobalSettings'} onclose={() => (currentDialog = 'none')} />
 {/if}
 {#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
-    <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} />
+    <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={dlgVariables.cFunc} />
 {:else if dlgVariables.currentDialog === 'appPointSettings' && typeof dlgVariables.point !== 'undefined'}
     <AppPointSettings open={dlgVariables.currentDialog === 'appPointSettings'} onclose={() => (dlgVariables.currentDialog = 'none')} currentPoint={dlgVariables.point} />
 {:else if dlgVariables.currentDialog === 'appButtonSettings' && typeof dlgVariables.row !== 'undefined'}

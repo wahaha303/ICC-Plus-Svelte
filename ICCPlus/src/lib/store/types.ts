@@ -1006,7 +1006,8 @@ export type DlgVariables = {
     title?: string,
     context?: string,
     isWord?: boolean,
-    prevText?: string
+    prevText?: string,
+    isDeselect?: boolean
 };
 export type SnackBarVariables = {
     labelText: string,
@@ -1035,11 +1036,15 @@ export type ExprNode = {
     priority: number
 };
 export type WordDialog = {
-    choice: Choice | null,
-    row: Row | null,
-    context: string,
-    prevText: string,
-    isWord: boolean
+    currentDialog: string,
+    choice?: Choice | null,
+    row?: Row | null,
+    context?: string,
+    prevText?: string,
+    isWord?: boolean
+    cFunc?: (e: any, word?: string) => void,
+    title?: string,
+    isDeselect?: boolean
 };
 export type Category = {
     idx: number,
@@ -1078,4 +1083,5 @@ export type choiceOptions = {
     bCreatorMode?: boolean;
     isBackpack?: boolean;
     isOverDlg?: boolean;
+    isOverImg?: boolean;
 };

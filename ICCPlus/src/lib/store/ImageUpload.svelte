@@ -2,7 +2,7 @@
     bind:open
     surface$style="width: 1200px; max-width: calc(100vw - 32px);"
     style="text-align: center"
-    onSMUIDialogClosed={onclose}
+    onSMUIDialogClosed={beforeClose}
 >
     <Title tabindex={0} autofocus>
         Image
@@ -119,9 +119,22 @@
         </div>
     </Content>
     <Actions>
-        <Button action="close">
-            <Label class="dialog-actions--btn">Close</Label>
-        </Button>
+        {#if isDeselect}
+            <div class="col-sm-6 col-12">
+                <Button action="deselect">
+                    <Label class="dialog-actions--btn">Deselect Choice</Label>
+                </Button>
+            </div>
+            <div class="col-sm-6 col-12">
+                <Button action="close">
+                    <Label class="dialog-actions--btn">Close</Label>
+                </Button>
+            </div>
+        {:else}
+            <Button action="close">
+                <Label class="dialog-actions--btn">Close</Label>
+            </Button>
+        {/if}
     </Actions>
 </Dialog>
 <script lang="ts">
@@ -140,7 +153,7 @@
 	import { app, choiceMap, getDataURL, isDataURL, rowMap } from './store.svelte';
     import { onMount } from 'svelte';
     
-    let { open, onclose, imgObject, imgProp, canHaveURL = true }: { open: boolean; onclose: () => void; imgObject: CommonImage; imgProp: string; canHaveURL?: boolean } = $props();
+    let { open, onclose, imgObject, imgProp, canHaveURL = true, isDeselect = false, closeHandler = (e: CustomEvent<{ action: string }>) => {} }: { open: boolean; onclose: () => void; imgObject: CommonImage; imgProp: string; canHaveURL?: boolean; isDeselect?: boolean; closeHandler?: (e: CustomEvent<{ action: string }>) => void } = $props();
 
     let active = $state('Cropper');
     let cropper: Cropper;
@@ -216,6 +229,11 @@
             img.src = original;
         }
     });
+
+    function beforeClose(e: CustomEvent<{ action: string }>) {
+        closeHandler(e);
+        onclose();
+    }
     
     function redraw() {
         const str = getImage(imgObject, imgProp);

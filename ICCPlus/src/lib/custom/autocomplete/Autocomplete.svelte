@@ -705,16 +705,16 @@
     }
 
     if (app.checkSelectAll) {
-        dlgVariables.currentDialog = 'dlgCommon';
-        dlgVariables.context = `Are you sure you want to ${isAllSelected ? 'deselect' : 'select'} all items?`;
-        dlgVariables.title = '';
-        dlgVariables.cFunc = (e: CustomEvent) => {
-            if (e.detail.action === 'accept') {
-                selectProc();
-            }
-        }
+      dlgVariables.currentDialog = 'dlgCommon';
+      dlgVariables.context = `Are you sure you want to ${isAllSelected ? 'deselect' : 'select'} all items?`;
+      dlgVariables.title = '';
+      dlgVariables.cFunc = (e: CustomEvent) => {
+          if (e.detail.action === 'accept') {
+              selectProc();
+          }
+      }
     } else {
-        selectProc();
+      selectProc();
     }
   }
 

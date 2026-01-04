@@ -218,6 +218,19 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.7.2 / ${getDate('2026-01-04T17:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where line breaks removed in Text Editor.
+
+        <span style="color: green">Choice</span>
+        - Added feature to modify content instead of immediately deselecting Choice with player custom image / word.
+        - Fixed issue where word input dialog did not appear when reselecting Choice with player custom word.
+
+        <span style="color: green">Addon</span>
+        - Fixed issue where unintended spacing appeared in addon.
+        `
+    }, {
+        open: false,
         title: `v2.7.1 / ${getDate('2026-01-04T10:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where line breaks removed in Text Editor.

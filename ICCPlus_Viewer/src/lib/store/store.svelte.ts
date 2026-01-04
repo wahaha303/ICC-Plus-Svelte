@@ -1,5 +1,5 @@
 import { get, readable, writable } from 'svelte/store';
-import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting, ExprNode, MusicPlayer, choiceOptions } from './types';
+import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting, ExprNode, MusicPlayer, choiceOptions, WordDialog } from './types';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
@@ -7,7 +7,7 @@ import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.7.0';
+export const appVersion = '2.7.2';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -100,7 +100,7 @@ export const filterStyling = {
     unselFilterSepiaIsOn: false,
     unselFilterSepia: 0,
     unselFilterVisibleIsOn: false,
-};
+}
 export const textStyling = {
     customRowTitle: false,
     rowTitle: 'Times New Roman',
@@ -137,7 +137,7 @@ export const textStyling = {
     addonTitleAlign: 'center',
     addonTextAlign: 'center',
     scoreTextAlign: 'center'
-};
+}
 export const objectImageStyling = {
     objectImgBorderStyle: 'solid',
     objectImgBorderWidth: 2,
@@ -156,7 +156,7 @@ export const objectImageStyling = {
     objectImgObjectFillIsOn: false,
     objectImgObjectFillHeight: 0,
     objectImageBoxWidth: 50
-};
+}
 export const rowImageStyling = {
     rowImgBorderStyle: 'solid',
     rowImgBorderWidth: 2,
@@ -175,7 +175,7 @@ export const rowImageStyling = {
     rowImgObjectFillStyle: '',
     rowImgObjectFillIsOn: false,
     rowImgObjectFillHeight: 0
-};
+}
 export const addonImageStyling = {
     useAddonImage: false,
     addonImgBorderStyle: 'solid',
@@ -195,7 +195,7 @@ export const addonImageStyling = {
     addonImgObjectFillIsOn: false,
     addonImgObjectFillHeight: 0,
     addonImageBoxWidth: 50
-};
+}
 export const backgroundStyling = {
     bgColorIsOn: false,
     backgroundColor: '#FFFFFFFF',
@@ -212,7 +212,7 @@ export const backgroundStyling = {
     isObjectBackgroundRepeat: false,
     isObjectBackgroundFitIn: false,
     objectBackgroundImage: ''
-};
+}
 export const objectStyling = {
     objectHeight: true,
     objectDesignIsAdvanced: false,
@@ -248,7 +248,7 @@ export const objectStyling = {
     objectBorderImageSliceRight: 5,
     removeSpaceAddonIsOn: false,
     titlePaddingIsOn: false
-};
+}
 export const rowStyling = {
     rowDesignIsAdvanced: false,
     rowMargin: 10,
@@ -285,7 +285,7 @@ export const rowStyling = {
     rowBorderImageSliceBottom: 5,
     rowBorderImageSliceLeft: 5,
     rowBorderImageSliceRight: 5
-};
+}
 export const addonStyling = {
     useAddonDesign: false,
     addonDesignIsAdvanced: false,
@@ -326,14 +326,14 @@ export const addonStyling = {
     addonBgColorIsOn: false,
     addonBgColor: '#FFFFFFFF',
     addonTitlePaddingIsOn: false
-};
+}
 export const multiChoiceStyling = {
     customMultiTextFont: false,
     multiChoiceCounterPosition: 0,
     multiChoiceCounterSize: 170,
     multiChoiceTextFont: 'Times New Roman',
     multiChoiceTextSize: 100
-};
+}
 export const pointBarStyling = {
     barTextPadding: 17,
     barTextMargin: 0,
@@ -563,7 +563,7 @@ export const defaultApp: App = {
         rowDesignGroups: []
     }],
     styling: {...filterStyling, ...textStyling, ...objectImageStyling, ...rowImageStyling, ...addonImageStyling, ...backgroundStyling, ...objectStyling, ...rowStyling, ...addonStyling, ...multiChoiceStyling, ...pointBarStyling, ...backpackStyling}
-};
+}
 export const objectWidths = [{
     text: 'Row',
     value: ''
@@ -640,7 +640,7 @@ export const currentTheme = $state({ value: 'light' });
 export const sanitizeArg = {
     ALLOWED_TAGS: ['address', 'article', 'aside', 'footer', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup', 'nav', 'section', 'blockquote', 'dd', 'div', 'dl', 'dt', 'figcaption', 'figure', 'hr', 'li', 'main', 'ol', 'p', 'pre', 'ul', 'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rb', 'rp', 'rt', 'rtc', 'ruby', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'caption', 'col', 'colgroup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'font', 'iframe', 'img'],
     ADD_ATTR: ['href', 'target', 'style', 'class']
-};
+}
 export const musicPlayer = writable<MusicPlayer | null>(null);
 export const bgmPlayer = writable<YT.Player | null>(null);
 export const bgmVariables = $state<BgmPlayer>({
@@ -660,6 +660,9 @@ export const bgmVariables = $state<BgmPlayer>({
     noCors: false
 });
 export const dlgVariables = $state<DlgVariables>({
+    currentDialog: 'none',
+});
+export const wordDialog = $state<WordDialog>({
     currentDialog: 'none',
 });
 export const snackbarVariables = $state<SnackBarVariables>({
@@ -734,7 +737,7 @@ function getOldDB(): Promise<IDBDatabase> {
         }
         return reject();
     });
-};
+}
 function getDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
         if (dbInstance) {
@@ -976,7 +979,7 @@ function getDB(): Promise<IDBDatabase> {
             reject(e);
         };
     });
-};
+}
 export let buildAbortController: AbortController | null = null;
 function delay(ms: number, signal?: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -1056,7 +1059,7 @@ export async function saveToSlot(slotData: SaveSlot, key: string, index: number,
     } catch (error) {
         console.error(error);
     }
-};
+}
 export async function deleteSlot(key: string, index: number, storeKey: string, isBuild?: boolean) {
     const db = await getDB();
     const tx = db.transaction(storeKey, 'readwrite');
@@ -1075,7 +1078,7 @@ export async function deleteSlot(key: string, index: number, storeKey: string, i
     } catch (error) {
         console.error(error);
     }
-};
+}
 export async function loadFromSlot(key: string, storeKey: string, isLegacy: boolean = false): Promise<any | null> {
     const db = isLegacy ? await getOldDB() : await getDB();
     return new Promise((resolve, reject) => {
@@ -1085,7 +1088,7 @@ export async function loadFromSlot(key: string, storeKey: string, isLegacy: bool
         request.onsuccess = () => resolve(typeof request.result !== 'undefined' ? request.result : null);
         request.onerror = reject;
     });
-};
+}
 export async function initBuildSaves(): Promise<void> {
     const db = await getDB();
 
@@ -1128,7 +1131,7 @@ export async function initBuildSaves(): Promise<void> {
         };
         reqest.onerror = reject;
     });
-};
+}
 export function getSelectedObjectId() {
     let result: string[] = [];
 
@@ -1207,7 +1210,7 @@ export function getSelectedObjectId() {
     });
 
     return result.join(',');
-};
+}
 export function getTimestamp() {
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -1218,7 +1221,7 @@ export function getTimestamp() {
     const ss = String(now.getSeconds()).padStart(2, '0');
 
     return `${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}`;
-};
+}
 export function getChoiceTitle(req: Requireds) {
     if (req.customTextIsOn) {
         return typeof req.customText !== 'undefined' ? req.customText : '';
@@ -1326,7 +1329,7 @@ export function generateRowId(repeated: number, strLength: number) {
     } else {
         return id;
     }
-};
+}
 export function generateWordId(repeated: number, strLength: number) {
     let id = app.addPrefix ? 'word-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1342,7 +1345,7 @@ export function generateWordId(repeated: number, strLength: number) {
     } else {
         return id;
     }
-};
+}
 export function generateObjectId(repeated: number, strLength: number, isAddon: boolean = false) {
     let id = app.addPrefix && !isAddon ? 'choice-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1358,7 +1361,7 @@ export function generateObjectId(repeated: number, strLength: number, isAddon: b
     } else {
         return id;
     }
-};
+}
 export function generateDesignId(repeated: number, strLength: number, isRow: boolean) {
     let id = app.addPrefix ? 'design-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1374,7 +1377,7 @@ export function generateDesignId(repeated: number, strLength: number, isRow: boo
     } else {
         return id;
     }
-};
+}
 export function generateGroupId(repeated: number, strLength: number) {
     let id = app.addPrefix ? 'group-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1390,7 +1393,7 @@ export function generateGroupId(repeated: number, strLength: number) {
     } else {
         return id;
     }
-};
+}
 export function generatePointTypeId(repeated: number, strLength: number) {
     let id = app.addPrefix ? 'point-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1406,7 +1409,7 @@ export function generatePointTypeId(repeated: number, strLength: number) {
     } else {
         return id;
     }
-};
+}
 export function generateVariableId(repeated: number, strLength: number) {
     let id = app.addPrefix ? 'variable-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1422,7 +1425,7 @@ export function generateVariableId(repeated: number, strLength: number) {
     } else {
         return id;
     }
-};
+}
 export function generateScoreId(repeated: number, strLength: number) {
     let id = 's-';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1438,7 +1441,7 @@ export function generateScoreId(repeated: number, strLength: number) {
     } else {
         return id;
     }
-};
+}
 export function objectWidthToNum(str: string) {
     switch(str) {
         case 'col-sm-6':
@@ -1455,7 +1458,7 @@ export function objectWidthToNum(str: string) {
         case 'col-xl-1': return 12
         default: return 1
     }
-};
+}
 let preWords: Word[] = [];
 let cachedRegex: RegExp;
 function checkWordChange() {
@@ -1499,7 +1502,7 @@ export function replaceText(str: string) {
         });
     }
     return text;
-};
+}
 export function getStyling(prop: string, row?: Row, choice?: Choice) {
     if (typeof choice !== 'undefined') {
         if (typeof choice.styling !== 'undefined' && choice.isPrivateStyling && choice[prop]) return choice.styling;
@@ -1540,14 +1543,14 @@ export function getStyling(prop: string, row?: Row, choice?: Choice) {
         }
     }
     return app.styling;
-};
+}
 export function checkDupId(id: string, dataMap: Map<string, PointType | Row | ChoiceMap | Group | Variable | Word | RowDesignGroup | ObjectDesignGroup | GlobalRequirement> | Set<string>) {
     if (dataMap.has(id)) {
         let tempId = `${id}_dup`;
         return checkDupId(tempId, dataMap);
     }
     return id;
-};
+}
 export function checkPointEnable(point: PointType) {
     if (point.isNotShownPointBar) {
         if (typeof point.activatedId !== 'undefined' && point.activatedId !== '') {
@@ -1564,7 +1567,7 @@ export function checkPointEnable(point: PointType) {
         return false;
     }
     return true;
-};
+}
 export function checkActivated(str: string, actMap: SvelteMap<string, ActivatedMap> = activatedMap) {
     const [key, val = '0'] = str.split('/ON#');
     const num = parseInt(val);
@@ -1573,7 +1576,7 @@ export function checkActivated(str: string, actMap: SvelteMap<string, ActivatedM
         return actNum >= num;
     }
     return actMap.has(key);
-};
+}
 function getPriority(operator: string, priority: number = 1) {
     switch (operator) {
         case '5':
@@ -1806,7 +1809,7 @@ export function checkRequirements(requireds: Requireds[], actMap: SvelteMap<stri
         }
     }
     return result;
-};
+}
 export function wrapYoutubePlayer(player: YT.Player): MusicPlayer {
     return {
         type: 'youtube',
@@ -2255,7 +2258,7 @@ export function calcStackDiscount(scoreVal: number, operator: string, value: num
         case '5': return value;
         default: return scoreVal;
     }
-};
+}
 export function deleteDiscount(score: Score) {
     delete score.tmpDiscount;
     delete score.discountTextA;
@@ -2276,7 +2279,7 @@ export function deleteDiscount(score: Score) {
     delete score.replaceText;
     delete score.hideDisValue;
     delete score.hideDisIcon;
-};
+}
 export function deselectDiscount(localChoice: Choice, targetChoice: Choice) {
     for (let m = 0; m < targetChoice.scores.length; m++) {
         const score = targetChoice.scores[m];
@@ -2530,7 +2533,7 @@ export function deselectDiscount(localChoice: Choice, targetChoice: Choice) {
             }
         }
     }
-};
+}
 export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
     for (let m = 0; m < targetChoice.scores.length; m++) {
         const score = targetChoice.scores[m];
@@ -2774,7 +2777,7 @@ export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
             }
         }
     }
-};
+}
 function updateDiscountTexts(localChoice: Choice, score: Score) {
     if (typeof score.discountTextA === 'undefined') score.discountTextA = [];
     if (typeof score.discountTextB === 'undefined') score.discountTextB = [];
@@ -2810,7 +2813,7 @@ function updateDiscountTexts(localChoice: Choice, score: Score) {
     score.replaceText = localChoice.replaceScoreText || false;
     score.hideDisValue = localChoice.hideScoreValue || false;
     score.hideDisIcon = localChoice.hideScoreIcon || false;
-};
+}
 export function expDiscount(point: PointType, score: Score) {
     if (score.discountedFrom && score.discountedFrom.length > 0) {
         for (let i = 0; i < score.discountedFrom.length; i++) {
@@ -2832,7 +2835,7 @@ export function expDiscount(point: PointType, score: Score) {
             }
         }
     }
-};
+}
 export function checkPoints(localChoice: Choice, isSel: boolean) {
     let isPositve = true;
     const scoreMap = new Map<string, number>();
@@ -3103,7 +3106,7 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
     }
 
     return isPositve;
-};
+}
 export function setScoreValue(point: PointType, score: Score) {
     if (score.isRandom) {
         if (typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
@@ -3912,7 +3915,7 @@ export function cleanActivated() {
             activatedMap.delete(keys[i]);
         }
     }
-};
+}
 
 function activateObject(localChoice: Choice, localRow: Row, isManually: boolean = false, options: choiceOptions) {
     let origRow = localRow;
@@ -5353,6 +5356,50 @@ export function deselectObject(localChoice: Choice, localRow: Row, options: choi
         if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
             if (!localChoice.selectDelayTimer) {
                 localChoice.selectDelayTimer = window.setTimeout(() => {
+                    if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
+                        wordDialog.choice = localChoice;
+                        wordDialog.row = localRow;
+                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                        wordDialog.prevText = localChoice.wordChangeSelect || '';
+                        wordDialog.isWord = true;
+                        wordDialog.currentDialog = 'dlgCommon';
+                        wordDialog.isDeselect = true;
+                        wordDialog.cFunc = (e, wordText) => {
+                            if (e.detail.action === 'deselect') {
+                                options.isOverDlg = true;
+                                deselectObject(localChoice, localRow, options);
+                            } else if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.choice.idOfTheTextfieldWord) {
+                                if (wordDialog.isWord) {
+                                    wordDialog.choice.wordChangeSelect = wordText;
+                                    const word = wordMap.get(wordDialog.choice.idOfTheTextfieldWord);
+                                    if (typeof word !== 'undefined') {
+                                        word.replaceText = wordDialog.choice.wordChangeSelect || '';
+                                    }
+                                }
+                                options.isOverDlg = true;
+                            }
+                            delete wordDialog.isDeselect;
+                        }
+
+                        return;
+                    }
+                
+                    if (localChoice.isImageUpload && !options.isOverImg) {
+                        dlgVariables.currentDialog = 'appImageUpload';
+                        dlgVariables.data = localChoice;
+                        dlgVariables.imgProp = 'image';
+                        dlgVariables.isDeselect = true;
+                        dlgVariables.cFunc = (e) => {
+                            if (e.detail.action === 'deselect') {
+                                options.isOverImg = true;
+                                deselectObject(localChoice, localRow, options);
+                            }
+                            delete dlgVariables.isDeselect;
+                        }
+
+                        return;
+                    }
+
                     if (options.linkedObjects.indexOf(localChoice.id) === -1) {
                         if (localChoice.isFadeTransition) {
                             if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
@@ -5386,6 +5433,50 @@ export function deselectObject(localChoice: Choice, localRow: Row, options: choi
                 }, localChoice.selectDelayTime);
             }
         } else {
+            if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
+                wordDialog.choice = localChoice;
+                wordDialog.row = localRow;
+                wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                wordDialog.prevText = localChoice.wordChangeSelect || '';
+                wordDialog.isWord = true;
+                wordDialog.currentDialog = 'dlgCommon';
+                wordDialog.isDeselect = true;
+                wordDialog.cFunc = (e, wordText) => {
+                    if (e.detail.action === 'deselect') {
+                        options.isOverDlg = true;
+                        deselectObject(localChoice, localRow, options);
+                    } else if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.choice.idOfTheTextfieldWord) {
+                        if (wordDialog.isWord) {
+                            wordDialog.choice.wordChangeSelect = wordText;
+                            const word = wordMap.get(wordDialog.choice.idOfTheTextfieldWord);
+                            if (typeof word !== 'undefined') {
+                                word.replaceText = wordDialog.choice.wordChangeSelect || '';
+                            }
+                        }
+                        options.isOverDlg = true;
+                    }
+                    delete wordDialog.isDeselect;
+                }
+
+                return;
+            }
+            
+            if (localChoice.isImageUpload && !options.isOverImg) {
+                dlgVariables.currentDialog = 'appImageUpload';
+                dlgVariables.data = localChoice;
+                dlgVariables.imgProp = 'image';
+                dlgVariables.isDeselect = true;
+                dlgVariables.cFunc = (e) => {
+                    if (e.detail.action === 'deselect') {
+                        options.isOverImg = true;
+                        deselectObject(localChoice, localRow, options);
+                    }
+                    delete dlgVariables.isDeselect;
+                }
+
+                return;
+            }
+
             if (options.linkedObjects.indexOf(localChoice.id) === -1) {
                 if (localChoice.isFadeTransition) {
                     if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
@@ -5581,7 +5672,10 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                 
                 if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
                     if (localChoice.isActivateRandom) {
-                        selectForceRandomActivate(localChoice, options);
+                        const newOptions = {...options};
+                        newOptions.isOverDlg = false;
+                        newOptions.isOverImg = false;
+                        selectForceRandomActivate(localChoice, newOptions);
                     } else {
                         const list = localChoice.activateThisChoice.split(',');
                         for (let i = 0; i < list.length; i++) {
@@ -5591,7 +5685,10 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                             if (typeof cMap !== 'undefined') {
                                 const fRow = cMap.row;
                                 const fChoice = cMap.choice;
-                                selectForceActivate(localChoice, fChoice, fRow, forceNum, options);
+                                const newOptions = {...options};
+                                newOptions.isOverDlg = false;
+                                newOptions.isOverImg = false;
+                                selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
                             } else {
                                 const groupData = groupMap.get(item[0]);
                                 if (typeof groupData !== 'undefined') {
@@ -5601,7 +5698,10 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                         if (typeof cMap !== 'undefined') {
                                             const fRow = cMap.row;
                                             const fChoice = cMap.choice;
-                                            selectForceActivate(localChoice, fChoice, fRow, forceNum, options);
+                                            const newOptions = {...options};
+                                            newOptions.isOverDlg = false;
+                                            newOptions.isOverImg = false;
+                                            selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
                                         }
                                     }
                                 }
@@ -5622,10 +5722,16 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                             if (dChoice.isActive) {
                                 if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
                                     for (let j = 0; j < deactiveNum; j++) {
-                                        selectedOneLess(dChoice, dRow, options);
+                                        const newOptions = {...options};
+                                        newOptions.isOverDlg = false;
+                                        newOptions.isOverImg = false;
+                                        selectedOneLess(dChoice, dRow, newOptions);
                                     }
                                 } else {
-                                    deselectObject(dChoice, dRow, options);
+                                    const newOptions = {...options};
+                                    newOptions.isOverDlg = false;
+                                    newOptions.isOverImg = false;
+                                    deselectObject(dChoice, dRow, newOptions);
                                 }
                             }
                         } else {
@@ -5640,10 +5746,16 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                         if (dChoice.isActive) {
                                             if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
                                                 for (let k = 0; k < deactiveNum; k++) {
-                                                    selectedOneLess(dChoice, dRow, options);
+                                                    const newOptions = {...options};
+                                                    newOptions.isOverDlg = false;
+                                                    newOptions.isOverImg = false;
+                                                    selectedOneLess(dChoice, dRow, newOptions);
                                                 }
                                             } else {
-                                                deselectObject(dChoice, dRow, options);
+                                                const newOptions = {...options};
+                                                newOptions.isOverDlg = false;
+                                                newOptions.isOverImg = false;
+                                                deselectObject(dChoice, dRow, newOptions);
                                             }
                                         }
                                     }
@@ -5665,10 +5777,20 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                     if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
                                 }
                                 if (val.multiple === 0) {
-                                    if (aChoice.isActive) deselectObject(aChoice, aRow, options);
+                                    if (aChoice.isActive) {
+                                        const newOptions = {...options};
+                                        newOptions.isOverDlg = false;
+                                        newOptions.isOverImg = false;
+                                        deselectObject(aChoice, aRow, newOptions);
+                                    }
                                 } else if (val.multiple > 0) {
                                     for (let i = 0; i < val.multiple; i++) {
-                                        if (aChoice.isActive) selectedOneLess(aChoice, aRow, options);
+                                        if (aChoice.isActive) {
+                                            const newOptions = {...options};
+                                            newOptions.isOverDlg = false;
+                                            newOptions.isOverImg = false;
+                                            selectedOneLess(aChoice, aRow, newOptions);
+                                        }
                                     }
                                 }
                             }
@@ -5790,10 +5912,16 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                             if (thisChoice.isSelectableMultiple) {
                                                 let counter = thisChoice.multipleUseVariable;
                                                 for (let k = 0; k < counter; k++) {
-                                                    selectedOneLess(thisChoice, aRow, options);
+                                                    const newOptions = {...options};
+                                                    newOptions.isOverDlg = false;
+                                                    newOptions.isOverImg = false;
+                                                    selectedOneLess(thisChoice, aRow, newOptions);
                                                 }
                                             } else {
-                                                deselectObject(thisChoice, aRow, options);
+                                                const newOptions = {...options};
+                                                newOptions.isOverDlg = false;
+                                                newOptions.isOverImg = false;
+                                                deselectObject(thisChoice, aRow, newOptions);
                                             }
                                         }
                                     }
@@ -6107,7 +6235,7 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                     options.isOverDlg = true;
                                     selectObject(dlgVariables.choice, dlgVariables.row, options);
                                 }
-                            };
+                            }
                             
                             return;
                         }
@@ -6118,13 +6246,12 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                             dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
                             dlgVariables.isWord = false;
                             dlgVariables.currentDialog = 'dlgCommon';
-                            dlgVariables.cFunc = (e, wordText) => {
+                            dlgVariables.cFunc = (e) => {
                                 if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                                    if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
                                     options.isOverDlg = true;
                                     selectObject(dlgVariables.choice, dlgVariables.row, options);
                                 }
-                            };
+                            }
                             
                             return;
                         }
@@ -6163,36 +6290,35 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                 }
             } else {
                 if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
-                    dlgVariables.choice = localChoice;
-                    dlgVariables.row = localRow;
-                    dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                    dlgVariables.prevText = localChoice.wordChangeSelect || '';
-                    dlgVariables.isWord = true;
-                    dlgVariables.currentDialog = 'dlgCommon';
-                    dlgVariables.cFunc = (e, wordText) => {
-                        if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                            if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
+                    wordDialog.choice = localChoice;
+                    wordDialog.row = localRow;
+                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                    wordDialog.prevText = localChoice.wordChangeSelect || '';
+                    wordDialog.isWord = true;
+                    wordDialog.currentDialog = 'dlgCommon';
+                    wordDialog.cFunc = (e, wordText) => {
+                        if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
+                            if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
                             options.isOverDlg = true;
-                            selectObject(dlgVariables.choice, dlgVariables.row, options);
+                            selectObject(wordDialog.choice, wordDialog.row, options);
                         }
-                    };
+                    }
                     
                     return;
                 }
 
                 if (localChoice.confirmIsOn && !options.isOverDlg) {
-                    dlgVariables.choice = localChoice;
-                    dlgVariables.row = localRow;
-                    dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                    dlgVariables.isWord = false;
-                    dlgVariables.currentDialog = 'dlgCommon';
-                    dlgVariables.cFunc = (e, wordText) => {
-                        if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                            if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
+                    wordDialog.choice = localChoice;
+                    wordDialog.row = localRow;
+                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                    wordDialog.isWord = false;
+                    wordDialog.currentDialog = 'dlgCommon';
+                    wordDialog.cFunc = (e) => {
+                        if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                             options.isOverDlg = true;
-                            selectObject(dlgVariables.choice, dlgVariables.row, options);
+                            selectObject(wordDialog.choice, wordDialog.row, options);
                         }
-                    };
+                    }
                     
                     return;
                 }
@@ -6494,10 +6620,20 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                                     if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
                                 }
                                 if (val.multiple === 0) {
-                                    if (aChoice.isActive) deselectObject(aChoice, aRow, options);
+                                    if (aChoice.isActive) {
+                                        const newOptions = {...options};
+                                        newOptions.isOverDlg = false;
+                                        newOptions.isOverImg = false;
+                                        deselectObject(aChoice, aRow, newOptions);
+                                    }
                                 } else if (val.multiple > 0) {
                                     for (let i = 0; i < val.multiple; i++) {
-                                        if (aChoice.isActive) selectedOneLess(aChoice, aRow, options);
+                                        if (aChoice.isActive) {
+                                            const newOptions = {...options};
+                                            newOptions.isOverDlg = false;
+                                            newOptions.isOverImg = false;
+                                            selectedOneLess(aChoice, aRow, newOptions);
+                                        }
                                     }
                                 }
                             }
@@ -6518,10 +6654,18 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                                             if (thisChoice.isSelectableMultiple) {
                                                 let counter = thisChoice.multipleUseVariable;
                                                 for (let k = 0; k < counter; k++) {
-                                                    selectedOneLess(thisChoice, aRow, options);
+                                                    const newOptions = {...options};
+                                                    newOptions.isOverDlg = false;
+                                                    newOptions.isOverImg = false;
+                                                    selectedOneLess(thisChoice, aRow, newOptions);
                                                 }
                                             } else {
-                                                if (thisChoice.isActive) deselectObject(thisChoice, aRow, options);
+                                                if (thisChoice.isActive) {
+                                                    const newOptions = {...options};
+                                                    newOptions.isOverDlg = false;
+                                                    newOptions.isOverImg = false;
+                                                    deselectObject(thisChoice, aRow, newOptions);
+                                                }
                                             }
                                         }
                                     }
@@ -6842,36 +6986,35 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                             if (!localChoice.selectDelayTimer) {
                                 localChoice.selectDelayTimer = window.setTimeout(() => {
                                     if (localChoice.customTextfieldIsOn && !options.isOverDlg && !localChoice.isActive) {
-                                        dlgVariables.choice = localChoice;
-                                        dlgVariables.row = localRow;
-                                        dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                                        dlgVariables.prevText = localChoice.wordChangeSelect || '';
-                                        dlgVariables.isWord = true;
-                                        dlgVariables.currentDialog = 'dlgCommon';
-                                        dlgVariables.cFunc = (e, wordText) => {
-                                            if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                                                if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
+                                        wordDialog.choice = localChoice;
+                                        wordDialog.row = localRow;
+                                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                        wordDialog.prevText = localChoice.wordChangeSelect || '';
+                                        wordDialog.isWord = true;
+                                        wordDialog.currentDialog = 'dlgCommon';
+                                        wordDialog.cFunc = (e, wordText) => {
+                                            if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
+                                                if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
                                                 options.isOverDlg = true;
-                                                selectedOneMore(dlgVariables.choice, dlgVariables.row, options);
+                                                selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                             }
-                                        };
+                                        }
                                         
                                         return;
                                     }
 
                                     if (localChoice.confirmIsOn && !options.isOverDlg) {
-                                        dlgVariables.choice = localChoice;
-                                        dlgVariables.row = localRow;
-                                        dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                                        dlgVariables.isWord = false;
-                                        dlgVariables.currentDialog = 'dlgCommon';
-                                        dlgVariables.cFunc = (e, wordText) => {
-                                            if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                                                if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
+                                        wordDialog.choice = localChoice;
+                                        wordDialog.row = localRow;
+                                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                        wordDialog.isWord = false;
+                                        wordDialog.currentDialog = 'dlgCommon';
+                                        wordDialog.cFunc = (e) => {
+                                            if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                                                 options.isOverDlg = true;
-                                                selectedOneMore(dlgVariables.choice, dlgVariables.row, options);
+                                                selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                             }
-                                        };
+                                        }
                                         
                                         return;
                                     }
@@ -6910,36 +7053,35 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                             }
                         } else {
                             if (localChoice.customTextfieldIsOn && !options.isOverDlg && !localChoice.isActive) {
-                                dlgVariables.choice = localChoice;
-                                dlgVariables.row = localRow;
-                                dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                                dlgVariables.prevText = localChoice.wordChangeSelect || '';
-                                dlgVariables.isWord = true;
-                                dlgVariables.currentDialog = 'dlgCommon';
-                                dlgVariables.cFunc = (e, wordText) => {
-                                    if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                                        if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
+                                wordDialog.choice = localChoice;
+                                wordDialog.row = localRow;
+                                wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                wordDialog.prevText = localChoice.wordChangeSelect || '';
+                                wordDialog.isWord = true;
+                                wordDialog.currentDialog = 'dlgCommon';
+                                wordDialog.cFunc = (e, wordText) => {
+                                    if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
+                                        if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
                                         options.isOverDlg = true;
-                                        selectedOneMore(dlgVariables.choice, dlgVariables.row, options);
+                                        selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                     }
-                                };
+                                }
                                 
                                 return;
                             }
 
                             if (localChoice.confirmIsOn && !options.isOverDlg) {
-                                dlgVariables.choice = localChoice;
-                                dlgVariables.row = localRow;
-                                dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                                dlgVariables.isWord = false;
-                                dlgVariables.currentDialog = 'dlgCommon';
-                                dlgVariables.cFunc = (e, wordText) => {
-                                    if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                                        if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
+                                wordDialog.choice = localChoice;
+                                wordDialog.row = localRow;
+                                wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                wordDialog.isWord = false;
+                                wordDialog.currentDialog = 'dlgCommon';
+                                wordDialog.cFunc = (e) => {
+                                    if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                                         options.isOverDlg = true;
-                                        selectedOneMore(dlgVariables.choice, dlgVariables.row, options);
+                                        selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                     }
-                                };
+                                }
                                 
                                 return;
                             }
@@ -7047,7 +7189,10 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                                 const fRow = cMap.row;
                                 const fChoice = cMap.choice;
                                 const forceNum = cID.length > 1 ? Number(cID[1]) : 0;
-                                deselectForceActivate(localChoice, fChoice, fRow, forceNum, options);
+                                const newOptions = {...options};
+                                newOptions.isOverDlg = false;
+                                newOptions.isOverImg = false;
+                                deselectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
                             }
                         }
                         localChoice.activatedRandomMul.splice(selNum, 1);
@@ -7060,7 +7205,12 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                             if (typeof cMap !== 'undefined') {
                                 const fRow = cMap.row;
                                 const fChoice = cMap.choice;
-                                if (selNum === 0 || fChoice.isSelectableMultiple) deselectForceActivate(localChoice, fChoice, fRow, forceNum, options);
+                                if (selNum === 0 || fChoice.isSelectableMultiple) {
+                                    const newOptions = {...options};
+                                    newOptions.isOverDlg = false;
+                                    newOptions.isOverImg = false;
+                                    deselectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                                }
                             } else {
                                 const groupData = groupMap.get(item[0]);
                                 if (typeof groupData !== 'undefined') {
@@ -7070,7 +7220,12 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                                         if (typeof cMap !== 'undefined') {
                                             const fRow = cMap.row;
                                             const fChoice = cMap.choice;
-                                            if (selNum === 0 || fChoice.isSelectableMultiple) deselectForceActivate(localChoice, fChoice, fRow, forceNum, options);
+                                            if (selNum === 0 || fChoice.isSelectableMultiple) {
+                                                const newOptions = {...options};
+                                                newOptions.isOverDlg = false;
+                                                newOptions.isOverImg = false;
+                                                deselectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                                            }
                                         }
                                     }
                                 }
@@ -7175,10 +7330,20 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                             }
                             if (val.multiple === 0) {
                                 if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                if (aChoice.isActive) deselectObject(aChoice, aRow, options);
+                                if (aChoice.isActive) {
+                                    const newOptions = {...options};
+                                    newOptions.isOverDlg = false;
+                                    newOptions.isOverImg = false;
+                                    deselectObject(aChoice, aRow, newOptions);
+                                }
                             } else if (val.multiple > 0) {
                                 for (let i = 0; i < val.multiple; i++) {
-                                    if (aChoice.isActive) selectedOneLess(aChoice, aRow, options);
+                                    if (aChoice.isActive) {
+                                        const newOptions = {...options};
+                                        newOptions.isOverDlg = false;
+                                        newOptions.isOverImg = false;
+                                        selectedOneLess(aChoice, aRow, newOptions);
+                                    }
                                 }
                             }
                         }
@@ -7199,10 +7364,18 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                                         if (thisChoice.isSelectableMultiple) {
                                             let counter = thisChoice.multipleUseVariable;
                                             for (let k = 0; k < counter; k++) {
-                                                selectedOneLess(thisChoice, aRow, options);
+                                                const newOptions = {...options};
+                                                newOptions.isOverDlg = false;
+                                                newOptions.isOverImg = false;
+                                                selectedOneLess(thisChoice, aRow, newOptions);
                                             }
                                         } else {
-                                            if (thisChoice.isActive) deselectObject(thisChoice, aRow, options);
+                                            if (thisChoice.isActive) {
+                                                const newOptions = {...options};
+                                                newOptions.isOverDlg = false;
+                                                newOptions.isOverImg = false;
+                                                deselectObject(thisChoice, aRow, newOptions);
+                                            }
                                         }
                                     }
                                 }    
@@ -7497,6 +7670,34 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                     if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
                         if (!localChoice.selectDelayTimer) {
                             localChoice.selectDelayTimer = window.setTimeout(() => {
+                                if (localChoice.customTextfieldIsOn && !options.isOverDlg && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
+                                    wordDialog.choice = localChoice;
+                                    wordDialog.row = localRow;
+                                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                                    wordDialog.prevText = localChoice.wordChangeSelect || '';
+                                    wordDialog.isWord = true;
+                                    wordDialog.currentDialog = 'dlgCommon';
+                                    wordDialog.isDeselect = true;
+                                    wordDialog.cFunc = (e, wordText) => {
+                                        if (e.detail.action === 'deselect') {
+                                            options.isOverDlg = true;
+                                            selectedOneLess(localChoice, localRow, options);
+                                        } else if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.choice.idOfTheTextfieldWord) {
+                                            if (wordDialog.isWord) {
+                                                wordDialog.choice.wordChangeSelect = wordText;
+                                                const word = wordMap.get(wordDialog.choice.idOfTheTextfieldWord);
+                                                if (typeof word !== 'undefined') {
+                                                    word.replaceText = wordDialog.choice.wordChangeSelect || '';
+                                                }
+                                            }
+                                            options.isOverDlg = true;
+                                        }
+                                        delete wordDialog.isDeselect;
+                                    }
+
+                                    return;
+                                }
+                                
                                 if (options.linkedObjects.indexOf(localChoice.id) === -1) {
                                     if (localChoice.isFadeTransition) {
                                         if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
@@ -7530,6 +7731,34 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                             }, localChoice.selectDelayTime);
                         }
                     } else {
+                        if (localChoice.customTextfieldIsOn && !options.isOverDlg && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
+                            wordDialog.choice = localChoice;
+                            wordDialog.row = localRow;
+                            wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                            wordDialog.prevText = localChoice.wordChangeSelect || '';
+                            wordDialog.isWord = true;
+                            wordDialog.currentDialog = 'dlgCommon';
+                            wordDialog.isDeselect = true;
+                            wordDialog.cFunc = (e, wordText) => {
+                                if (e.detail.action === 'deselect') {
+                                    options.isOverDlg = true;
+                                    selectedOneLess(localChoice, localRow, options);
+                                } else if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.choice.idOfTheTextfieldWord) {
+                                    if (wordDialog.isWord) {
+                                        wordDialog.choice.wordChangeSelect = wordText;
+                                        const word = wordMap.get(wordDialog.choice.idOfTheTextfieldWord);
+                                        if (typeof word !== 'undefined') {
+                                            word.replaceText = wordDialog.choice.wordChangeSelect || '';
+                                        }
+                                    }
+                                    options.isOverDlg = true;
+                                }
+                                delete wordDialog.isDeselect;
+                            }
+
+                            return;
+                        }
+                        
                         if (options.linkedObjects.indexOf(localChoice.id) === -1) {
                             if (localChoice.isFadeTransition) {
                                 if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
@@ -7698,7 +7927,7 @@ function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, 
             if (isChanged) updateScores(aChoice, thisTmpScores, ++count, changedScores);
         }
     }
-};
+}
 function selectObjectL(str: string, newActivatedList: string[]) {
     let cStr = str.split('/IMG#');
     const strImg = cStr.length > 1 ? cStr[1].replace(/\/CHAR#/g, ',') : '';
@@ -9089,7 +9318,7 @@ export function loadActivated(str: string) {
             }
         }
     }
-};
+}
 export function duplicateRow(localChoice: Choice, localRow: Row) {
     if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
         const dRowId = localChoice.duplicateRowId;
@@ -9369,15 +9598,15 @@ export function duplicateRow(localChoice: Choice, localRow: Row) {
             }
         }
     }
-};
+}
 export function getDataURL(str: string) {
     const match = str.match(/^data:.+;base64,(.+)$/);
     return match ? match[1] : str;
-};
+}
 export function isDataURL(str: string) {
     const regex = /^data:[a-zA-Z]+\/[a-zA-Z]+;base64,/;
     return regex.test(str);
-};
+}
 function isAvif(str: string) {
     const match = str.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/);
     if (!match) return false;
@@ -9626,7 +9855,7 @@ export function removeNulls(obj: any): any {
         return Object.keys(newObj).length > 0 ? newObj : null;
     }
     return obj;
-};
+}
 function initFilterStyling(data: any) {
     if (data.isPrivateStyling && data.privateFilterIsOn && typeof data.styling !== 'undefined') {
         if (typeof data.styling.unselFilterBlurIsOn === 'undefined') data.styling.unselFilterBlurIsOn = false;
@@ -9647,7 +9876,7 @@ function initFilterStyling(data: any) {
         if (typeof data.styling.unselFilterSepiaIsOn === 'undefined') data.styling.unselFilterSepiaIsOn = false;
         if (typeof data.styling.unselFilterSepia === 'undefined') data.styling.unselFilterSepia = 0;
     }
-};
+}
 function initPrivateStyling(data: any, isRow: boolean) {
     if (data.isPrivateStyling && typeof data.privateFilterIsOn === 'undefined') {
         if (typeof data.styling !== 'undefined') {
@@ -9791,7 +10020,7 @@ function initPrivateStyling(data: any, isRow: boolean) {
         if (typeof data.styling.objectImgObjectFillHeight !== 'undefined') data.objectImgObjectFillHeight = data.styling.objectImgObjectFillHeight;
         delete data.styling;
     }
-};
+}
 export function initializeApp(tempApp: any) {
     const keys = Object.keys(tempApp);
     for (let i = 0; i < keys.length; i++) {
