@@ -218,6 +218,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.7.1 / ${getDate('2026-01-04T10:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where line breaks removed in Text Editor.
+        `
+    }, {
+        open: false,
         title: `v2.7.0 / ${getDate('2026-01-04T08:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where nested div structure could not be used in raw HTML mode.

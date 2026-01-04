@@ -9,7 +9,7 @@ import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.7.0';
+export const appVersion = '2.7.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,

@@ -481,7 +481,7 @@
         if (!str) return '';
         let result = str;
 
-        result = result.replace(/>(\s+)</g, (_m, gap) => {return `>__KEEP_TAG__${btoa(gap)}__<`;});
+        //result = result.replace(/>(\s+)</g, (_m, gap) => {return `>__KEEP_TAG__${btoa(gap)}__<`;});
         result = removeNewlinesInsideList(result);
         result = result.replace(/\n/g, '<br>');
         result = result.replace(/<p([^>]*)><br><\/p>/gi, '<p></p>');
@@ -493,7 +493,7 @@
         result = result.replace(/ {2,}/g, spaces => spaces.split('').map(() => '&nbsp;').join(''));
         result = result.replace(/__KEEP_NEWLINE__/g, '<br>');
 
-        result = result.replace(/>__KEEP_TAG__(.*?)__</g,(_m, encoded) => `>${atob(encoded)}<`);
+        //result = result.replace(/>__KEEP_TAG__(.*?)__</g,(_m, encoded) => `>${atob(encoded)}<`);
         return result;
     }
 
