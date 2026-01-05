@@ -218,6 +218,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.7.3 / ${getDate('2026-01-05T13:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where score was not applied correctly when using Expression and Random together.
+        `
+    }, {
+        open: false,
         title: `v2.7.2 / ${getDate('2026-01-04T17:00:00Z')}`,
         text: `<span style="color: green">UI</span>
         - Fixed issue where line breaks removed in Text Editor.

@@ -9,7 +9,7 @@ import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.7.2';
+export const appVersion = '2.7.3';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3216,6 +3216,8 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
                         console.error(e);
                     }
                 }
+            } else if (score.isRandom && !score.setValue) {
+                setScoreValue(point, score);
             }
 
             let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value;
@@ -5828,13 +5830,6 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
     }
 
     if (selectable) {
-        for (let i = 0; i < localChoice.scores.length; i++) {
-            const score = localChoice.scores[i];
-            const point = pointTypeMap.get(score.id);
-            if (typeof point !== 'undefined' && !score.setValue){
-                setScoreValue(point, score);
-            }
-        }
         const pointCheck = checkPoints(localChoice, true);
         if (pointCheck) {
             const selectProcess = () => {
@@ -6691,13 +6686,6 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
     }
 
     if (selectable) {
-        for (let i = 0; i < localChoice.scores.length; i++) {
-            const score = localChoice.scores[i];
-            const point = pointTypeMap.get(score.id);
-            if (typeof point !== 'undefined' && !score.setValue){
-                setScoreValue(point, score);
-            }
-        }
         const pointCheck = checkPoints(localChoice, true);
         if (pointCheck) {
             const selectProcess = () => {
