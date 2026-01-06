@@ -218,6 +218,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.7.4 / ${getDate('2026-01-05T10:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where word input dialog popped up multiple times.
+        `
+    }, {
+        open: false,
         title: `v2.7.3 / ${getDate('2026-01-05T13:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where score was not applied correctly when using Expression and Random together.

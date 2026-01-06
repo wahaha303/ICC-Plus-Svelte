@@ -199,6 +199,9 @@
 {:else if currentDialog === 'appGlobalSettings'}
     <AppGlobalSettings open={currentDialog === 'appGlobalSettings'} onclose={() => (currentDialog = 'none')} />
 {/if}
+{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
+    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
+{/if}
 {#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
     <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={dlgVariables.cFunc} />
 {:else if dlgVariables.currentDialog === 'appPointSettings' && typeof dlgVariables.point !== 'undefined'}
@@ -254,7 +257,7 @@
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog } from '$lib/store/store.svelte';
     import type { Row } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';

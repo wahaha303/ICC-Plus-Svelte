@@ -240,12 +240,8 @@
         </div>
     </div>
 {/if}
-{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
-    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
-{/if}
 
 <script lang="ts">
-    import DlgCommon from './DlgCommon.svelte';
     import DOMPurify from 'dompurify';
     import ObjectAddon from './Object/ObjectAddon.svelte';
     import ObjectMultiChoice from './Object/ObjectMultiChoice.svelte';

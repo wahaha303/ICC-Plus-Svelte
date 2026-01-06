@@ -138,6 +138,9 @@
 {:else if dlgVariables.currentDialog === 'selectDialog' && typeof dlgVariables.choice !== 'undefined' && typeof dlgVariables.func !== 'undefined'}
     <ObjectSelectDialog open={dlgVariables.currentDialog === 'selectDialog'} onclose={() => (dlgVariables.currentDialog = 'none')} submit={dlgVariables.func} changeNum={dlgVariables.choice.multipleUseVariable} minVal={dlgVariables.choice.numMultipleTimesMinus} maxVal={dlgVariables.choice.numMultipleTimesPluss} />
 {/if}
+{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
+    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
+{/if}
 <Tooltip />
 
 <script lang="ts">
@@ -147,7 +150,7 @@
     import Slider from '@smui/slider';
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentTheme, dlgVariables, bgmVariables, cleanActivated, checkPointEnable, hexToRgba, musicPlayer } from '$lib/store/store.svelte';
+    import { app, currentTheme, dlgVariables, bgmVariables, cleanActivated, checkPointEnable, hexToRgba, musicPlayer, wordDialog } from '$lib/store/store.svelte';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppGlobalSettings from './AppGlobalSettings.svelte';
     import AppPointBar from './AppPointBar.svelte';

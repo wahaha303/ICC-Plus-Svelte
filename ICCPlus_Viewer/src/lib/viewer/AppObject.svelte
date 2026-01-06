@@ -240,19 +240,15 @@
         </div>
     </div>
 {/if}
-{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
-    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
-{/if}
 
 <script lang="ts">
-    import DlgCommon from './DlgCommon.svelte';
     import DOMPurify from 'dompurify';
     import ObjectAddon from './Object/ObjectAddon.svelte';
     import ObjectMultiChoice from './Object/ObjectMultiChoice.svelte';
     import ObjectRequired from './Object/ObjectRequired.svelte';
     import ObjectScore from './Object/ObjectScore.svelte';
 	import type { Choice, choiceOptions, Row } from '$lib/store/types';
-	import { app, choiceMap, getStyling, checkRequirements, sanitizeArg, replaceText, objectWidthToNum, snackbarVariables, winWidth, hexToRgba, selectObject, deselectObject, selectedOneMore, selectedOneLess, wordDialog } from '$lib/store/store.svelte';
+	import { app, choiceMap, getStyling, checkRequirements, sanitizeArg, replaceText, objectWidthToNum, snackbarVariables, winWidth, hexToRgba, selectObject, deselectObject, selectedOneMore, selectedOneLess } from '$lib/store/store.svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     export { activateObject, options };

@@ -1702,9 +1702,6 @@
         </div>
     </div>
 {/if}
-{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
-    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
-{/if}
 
 <script lang="ts">
     import Accordion, { Panel, Header, Content as AcdContent} from '$lib/custom/accordion';
@@ -1714,7 +1711,6 @@
     import Checkbox from '@smui/checkbox';
     import ColorPicker, { ChromeVariant } from '$lib/custom/svelte-awesome-color-picker';
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
-    import DlgCommon from './DlgCommon.svelte';
     import DOMPurify from 'dompurify';
     import FormField from '@smui/form-field';
     import IconButton, { Icon } from '@smui/icon-button';

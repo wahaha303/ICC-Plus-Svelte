@@ -155,6 +155,9 @@
         }
     }}/>
 {/if}
+{#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
+    <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} />
+{/if}
 {#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
     <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={dlgVariables.cFunc} />
 {:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
@@ -172,7 +175,7 @@
     import Slider from '@smui/slider';
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba, musicPlayer } from '$lib/store/store.svelte';
+    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba, musicPlayer, wordDialog } from '$lib/store/store.svelte';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppGlobalSettings from './AppGlobalSettings.svelte';
     import AppPointBar from './AppPointBar.svelte';
