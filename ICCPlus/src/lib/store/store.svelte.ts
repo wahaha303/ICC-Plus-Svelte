@@ -9,7 +9,7 @@ import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.7.4';
+export const appVersion = '2.7.5';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4239,6 +4239,7 @@ function selectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, nu
                 let count = fChoice.multipleUseVariable;
 
                 if (num > 0) {
+                    if (!localChoice.isAllowDeselect && (fChoice.customTextfieldIsOn || fChoice.confirmIsOn)) wordDialog.isForced = true;
                     for (let i = 0; i < num; i++) {
                         selectedOneMore(fChoice, fRow, options);
                         count++;
@@ -4279,7 +4280,10 @@ function selectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, nu
                 }
             }
         } else {
-            if (!fChoice.isActive) activateObject(fChoice, fRow, false, options);
+            if (!fChoice.isActive) {
+                if (fChoice.customTextfieldIsOn || fChoice.confirmIsOn) wordDialog.isForced = true;
+                activateObject(fChoice, fRow, false, options);
+            }
             if (!localChoice.isAllowDeselect) fChoice.forcedActivated = true;
             if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
             if (!isLinked) fChoice.activatedFrom++;
@@ -4292,6 +4296,8 @@ function selectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, nu
 }
 
 function deselectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, num: number, options: choiceOptions) {
+    options.isOverDlg = true;
+    options.isOverImg = true;
     if (fChoice.activateOtherChoice && typeof fChoice.activateThisChoice !== 'undefined' && options.linkedObjects.indexOf(localChoice.id) === -1 && fChoice.activateThisChoice.split(',').some(item => item.split('/ON#')[0] === localChoice.id)) {
         options.linkedObjects.push(localChoice.id);
     }
@@ -6007,14 +6013,14 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                 if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
                                     for (let j = 0; j < deactiveNum; j++) {
                                         const newOptions = {...options};
-                                        newOptions.isOverDlg = false;
-                                        newOptions.isOverImg = false;
+                                        newOptions.isOverDlg = true;
+                                        newOptions.isOverImg = true;
                                         selectedOneLess(dChoice, dRow, newOptions);
                                     }
                                 } else {
                                     const newOptions = {...options};
-                                    newOptions.isOverDlg = false;
-                                    newOptions.isOverImg = false;
+                                    newOptions.isOverDlg = true;
+                                    newOptions.isOverImg = true;
                                     deselectObject(dChoice, dRow, newOptions);
                                 }
                             }
@@ -6031,14 +6037,14 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                             if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
                                                 for (let k = 0; k < deactiveNum; k++) {
                                                     const newOptions = {...options};
-                                                    newOptions.isOverDlg = false;
-                                                    newOptions.isOverImg = false;
+                                                    newOptions.isOverDlg = true;
+                                                    newOptions.isOverImg = true;
                                                     selectedOneLess(dChoice, dRow, newOptions);
                                                 }
                                             } else {
                                                 const newOptions = {...options};
-                                                newOptions.isOverDlg = false;
-                                                newOptions.isOverImg = false;
+                                                newOptions.isOverDlg = true;
+                                                newOptions.isOverImg = true;
                                                 deselectObject(dChoice, dRow, newOptions);
                                             }
                                         }
@@ -6063,16 +6069,16 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                                 if (val.multiple === 0) {
                                     if (aChoice.isActive) {
                                         const newOptions = {...options};
-                                        newOptions.isOverDlg = false;
-                                        newOptions.isOverImg = false;
+                                        newOptions.isOverDlg = true;
+                                        newOptions.isOverImg = true;
                                         deselectObject(aChoice, aRow, newOptions);
                                     }
                                 } else if (val.multiple > 0) {
                                     for (let i = 0; i < val.multiple; i++) {
                                         if (aChoice.isActive) {
                                             const newOptions = {...options};
-                                            newOptions.isOverDlg = false;
-                                            newOptions.isOverImg = false;
+                                            newOptions.isOverDlg = true;
+                                            newOptions.isOverImg = true;
                                             selectedOneLess(aChoice, aRow, newOptions);
                                         }
                                     }
@@ -6507,17 +6513,19 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                 if (!localChoice.selectDelayTimer) {
                     localChoice.selectDelayTimer = window.setTimeout(() => {
                         if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
-                            dlgVariables.choice = localChoice;
-                            dlgVariables.row = localRow;
-                            dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                            dlgVariables.prevText = localChoice.wordChangeSelect || '';
-                            dlgVariables.isWord = true;
-                            dlgVariables.currentDialog = 'dlgCommon';
-                            dlgVariables.cFunc = (e, wordText) => {
-                                if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
-                                    if (dlgVariables.isWord) dlgVariables.choice.wordChangeSelect = wordText;
+                            wordDialog.choice = localChoice;
+                            wordDialog.row = localRow;
+                            wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                            wordDialog.prevText = localChoice.wordChangeSelect || '';
+                            wordDialog.isWord = true;
+                            wordDialog.currentDialog = 'dlgCommon';
+                            wordDialog.cFunc = (e, wordText) => {
+                                if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
+                                    if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
                                     options.isOverDlg = true;
-                                    selectObject(dlgVariables.choice, dlgVariables.row, options);
+                                    wordDialog.isForced = false;
+                                    tmpActivatedMap.delete(wordDialog.choice.id);
+                                    selectObject(wordDialog.choice, wordDialog.row, options);
                                 }
                             }
                             
@@ -6525,15 +6533,17 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                         }
 
                         if (localChoice.confirmIsOn && !options.isOverDlg) {
-                            dlgVariables.choice = localChoice;
-                            dlgVariables.row = localRow;
-                            dlgVariables.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                            dlgVariables.isWord = false;
-                            dlgVariables.currentDialog = 'dlgCommon';
-                            dlgVariables.cFunc = (e) => {
-                                if (e.detail.action === 'accept' && dlgVariables.choice && dlgVariables.row) {
+                            wordDialog.choice = localChoice;
+                            wordDialog.row = localRow;
+                            wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                            wordDialog.isWord = false;
+                            wordDialog.currentDialog = 'dlgCommon';
+                            wordDialog.cFunc = (e) => {
+                                if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                                     options.isOverDlg = true;
-                                    selectObject(dlgVariables.choice, dlgVariables.row, options);
+                                    wordDialog.isForced = false;
+                                    tmpActivatedMap.delete(wordDialog.choice.id);
+                                    selectObject(wordDialog.choice, wordDialog.row, options);
                                 }
                             }
                             
@@ -6584,6 +6594,8 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                         if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                             if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
                             options.isOverDlg = true;
+                            wordDialog.isForced = false;
+                            tmpActivatedMap.delete(wordDialog.choice.id);
                             selectObject(wordDialog.choice, wordDialog.row, options);
                         }
                     }
@@ -6600,6 +6612,8 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                     wordDialog.cFunc = (e) => {
                         if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                             options.isOverDlg = true;
+                            wordDialog.isForced = false;
+                            tmpActivatedMap.delete(wordDialog.choice.id);
                             selectObject(wordDialog.choice, wordDialog.row, options);
                         }
                     }
@@ -7273,6 +7287,8 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                                             if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                                                 if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
                                                 options.isOverDlg = true;
+                                                wordDialog.isForced = false;
+                                                tmpActivatedMap.delete(wordDialog.choice.id);
                                                 selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                             }
                                         }
@@ -7289,6 +7305,8 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                                         wordDialog.cFunc = (e) => {
                                             if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                                                 options.isOverDlg = true;
+                                                wordDialog.isForced = false;
+                                                tmpActivatedMap.delete(wordDialog.choice.id);
                                                 selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                             }
                                         }
@@ -7340,6 +7358,8 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                                     if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                                         if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
                                         options.isOverDlg = true;
+                                        wordDialog.isForced = false;
+                                        tmpActivatedMap.delete(wordDialog.choice.id);
                                         selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                     }
                                 }
@@ -7356,6 +7376,8 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                                 wordDialog.cFunc = (e) => {
                                     if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
                                         options.isOverDlg = true;
+                                        wordDialog.isForced = false;
+                                        tmpActivatedMap.delete(wordDialog.choice.id);
                                         selectedOneMore(wordDialog.choice, wordDialog.row, options);
                                     }
                                 }

@@ -76,17 +76,17 @@
         }
     }}/>
 {:else if currentDialog === 'appPoints'}
-    <AppPoints open={currentDialog === 'appPoints'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} />
+    <AppPoints open={currentDialog === 'appPoints'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} slots={catSlots} />
 {:else if currentDialog === 'appVariables'}
-    <AppVariables open={currentDialog === 'appVariables'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} />
+    <AppVariables open={currentDialog === 'appVariables'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} slots={catSlots} />
 {:else if currentDialog === 'appGroups'}
-    <AppGroups open={currentDialog === 'appGroups'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} />
+    <AppGroups open={currentDialog === 'appGroups'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} slots={catSlots} />
 {:else if currentDialog === 'appWords'}
-    <AppWords open={currentDialog === 'appWords'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} />
+    <AppWords open={currentDialog === 'appWords'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} slots={catSlots} />
 {:else if currentDialog === 'appDesignGroups'}
-    <AppDesignGroups open={currentDialog === 'appDesignGroups'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} isRow={isRowGroup} />
+    <AppDesignGroups open={currentDialog === 'appDesignGroups'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} isRow={isRowGroup} slots={catSlots} />
 {:else if currentDialog === 'appGlobalRequirements'}
-    <AppGlobalRequirements open={currentDialog === 'appGlobalRequirements'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} />
+    <AppGlobalRequirements open={currentDialog === 'appGlobalRequirements'} onclose={() => (currentDialog = 'none')} category={currentCategory} showAll={showAll} slots={catSlots} />
 {/if}
 
 <script lang="ts">

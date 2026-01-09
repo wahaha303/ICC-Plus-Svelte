@@ -2,6 +2,8 @@
     bind:open
     surface$style="width: 400px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={beforeClose}
+    scrimClickAction={isForced ? '' : 'close'}
+    escapeKeyAction={isForced ? '' : 'close'}
 >
     <Title class="px-3 pb-0 toolbar toolbar__dialog">
         {@html title}
@@ -33,7 +35,7 @@
                     </div>
                 {/if}
                 <div class="col-6">
-                    <Button action="close">
+                    <Button action="close" disabled={isForced}>
                         <Label>Cancel</Label>
                     </Button>
                 </div>
@@ -51,7 +53,7 @@
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import Textfield from '$lib/custom/textfield';
 
-    let { open, onclose, title = '', context, closeHandler, isWord, prevText, defaultRow = 5, textLabel = '', isDeselect }: { open: boolean; onclose: () => void, title?: string, context: string, closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void, isWord?: boolean, prevText?: string, defaultRow?: number, textLabel?: string, isDeselect?: boolean } = $props();
+    let { open, onclose, title = '', context, closeHandler, isWord, prevText, defaultRow = 5, textLabel = '', isDeselect, isForced }: { open: boolean; onclose: () => void, title?: string, context: string, closeHandler(e: CustomEvent<{ action: string }>, wordText?: string): void, isWord?: boolean, prevText?: string, defaultRow?: number, textLabel?: string, isDeselect?: boolean, isForced?: boolean } = $props();
     let wordText = $state(isWord && prevText ? prevText : '');
 
     function beforeClose(e: CustomEvent<{ action: string }>) {

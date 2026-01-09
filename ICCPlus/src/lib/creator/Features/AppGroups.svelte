@@ -3,9 +3,25 @@
     surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
-    <Title class="dialog-title" tabindex={0} autofocus>
-        Groups
-    </Title>
+    {#if showAll}
+        <Title class="dialog-title" tabindex={0} autofocus>
+            Groups
+        </Title>
+    {:else}
+        <div class="d-row align-items-center justify-end">
+            <Title class="dialog-title pe-4" tabindex={0} autofocus>
+                Groups
+            </Title>
+            <Wrapper text="Swap Slots">
+                <IconButton class="mdi mdi-swap-horizontal-bold" onclickcapture={swapCategory} disabled={curCat === category.idx}/>
+            </Wrapper>
+            <Select bind:value={curCat} label="Category" alwaysFloat={true}>
+                {#each slots as slot, i (i)}
+                    <Option value={i}>{i + 1}. {slot.name}</Option>
+                {/each}
+            </Select>
+        </div>
+    {/if}
     <Content id="dialog--group" class="pb-2">
         <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
             {#each $virtualizer.getVirtualItems() as gRow (gRow.index)}
@@ -90,7 +106,8 @@
 <script lang="ts">
     import Button, { Label } from '@smui/button';
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
-    import IconButton from '@smui/icon-button'; 
+    import IconButton from '@smui/icon-button';
+    import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
@@ -100,10 +117,12 @@
     import { onMount } from 'svelte';
     import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     
-    let { open, onclose, category = {idx: -1, name: '', type: 'word'}, showAll }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'group'}, showAll, slots }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean; slots: any } = $props();
 
     let groupId = '';
-    let catGroup = $derived(showAll ? app.groups : app.groups.filter(item => item.category === category.idx));
+    let cIdx = $state(category.idx);
+    let curCat = $state(category.idx);
+    let catGroup = $derived(showAll ? app.groups : app.groups.filter(item => item.category === cIdx));
     let groupRows = $derived.by(() => {
         const result: any[][] = [];
         for (let i = 0; i < catGroup.length; i += 3) {
@@ -185,7 +204,7 @@
         app.groups.push({
             id: id,
             name: `Group ${index + 1}`,
-            category: showAll ? -1 : category.idx,
+            category: cIdx,
             elements: [],
             rowElements: []
         });
@@ -342,4 +361,36 @@
         return '';
     }
     
+    function swapCategory() {
+        const cat = categoryMap.get(`${category.type}_${curCat}`);
+        if (typeof cat !== 'undefined') {
+            const oldGroup = app.groups.filter(item => item.category === curCat);
+
+            for (let i = 0; i < catGroup.length;) {
+                catGroup[i].category = curCat;
+            }
+            for (let i = 0; i < oldGroup.length; i++) {
+                oldGroup[i].category = cIdx;
+            }
+            category.idx = curCat;
+            cat.idx = cIdx;
+
+            categoryMap.set(`${category.type}_${cIdx}`, cat);
+            categoryMap.set(`${category.type}_${curCat}`, category);
+        } else {
+            const oldIdx = category.idx;
+
+            for (let i = 0; i < catGroup.length;) {
+                catGroup[i].category = curCat;
+            }
+            category.idx = curCat;
+            slots[curCat].name = category.name;
+            slots[curCat].stored = true;
+            slots[oldIdx].name = '';
+            slots[oldIdx].stored = false;
+            categoryMap.set(`${category.type}_${curCat}`, category);
+            categoryMap.delete(`${category.type}_${cIdx}`);
+        }
+        cIdx = curCat;
+    }
 </script>

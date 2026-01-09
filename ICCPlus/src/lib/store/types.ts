@@ -1044,7 +1044,8 @@ export type WordDialog = {
     isWord?: boolean
     cFunc?: (e: any, word?: string) => void,
     title?: string,
-    isDeselect?: boolean
+    isDeselect?: boolean,
+    isForced?: boolean
 };
 export type Category = {
     idx: number,

@@ -4,9 +4,25 @@
     surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
-    <Title class="dialog-title" tabindex={0} autofocus>
-        {isRow ? 'Row' : 'Choice'} Design Groups
-    </Title>
+    {#if showAll}
+        <Title class="dialog-title" tabindex={0} autofocus>
+            {isRow ? 'Row' : 'Choice'} Design Groups
+        </Title>
+    {:else}
+        <div class="d-row align-items-center justify-end">
+            <Title class="dialog-title pe-4" tabindex={0} autofocus>
+                {isRow ? 'Row' : 'Choice'} Design Groups
+            </Title>
+            <Wrapper text="Swap Slots">
+                <IconButton class="mdi mdi-swap-horizontal-bold" onclickcapture={swapCategory} disabled={curCat === category.idx}/>
+            </Wrapper>
+            <Select bind:value={curCat} label="Category" alwaysFloat={true}>
+                {#each slots as slot, i (i)}
+                    <Option value={i}>{i + 1}. {slot.name}</Option>
+                {/each}
+            </Select>
+        </div>
+    {/if}
     <Content id="dialog--design-group" class="pb-2">
         <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
             {#each $virtualizer.getVirtualItems() as gRow (gRow.index)}
@@ -102,6 +118,7 @@
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import IconButton from '@smui/icon-button'; 
+    import Select, { Option } from '$lib/custom/select';
     import AppPrivateDesign from './AppPrivateDesign.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
@@ -111,12 +128,14 @@
     import { onMount } from 'svelte';
     import CustomAutocomplete from '$lib/store/CustomAutocomplete.svelte';
     
-    let { open, onclose, category = {idx: -1, name: '', type: 'rDesign'}, showAll, isRow }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean; isRow: boolean } = $props();
+    let { open, onclose, showAll, isRow, category = {idx: -1, name: '', type: isRow ? 'rDesign' : 'cDesign'}, slots }: { open: boolean; onclose: () => void; showAll: boolean; isRow: boolean; category?: Category; slots: any; } = $props();
     let currentDialog = $state<'none' | 'privateDesign'>('none');
     let data = $state<RowDesignGroup | ObjectDesignGroup>();
     let designId = '';
+    let cIdx = $state(category.idx);
+    let curCat = $state(category.idx);
     let designGroup = (isRow ? app.rowDesignGroups : app.objectDesignGroups) || [];
-    let catGroup = $derived(showAll ? designGroup : designGroup.filter(item => item.category === category.idx));
+    let catGroup = $derived(showAll ? designGroup : designGroup.filter(item => item.category === cIdx));
     let groupRows = $derived.by(() => {
         const result: any[][] = [];
         for (let i = 0; i < catGroup.length; i += 3) {
@@ -237,7 +256,7 @@
             id: id,
             name: `Design Group ${designGroup.length + 1}`,
             activatedId: '',
-            category: showAll ? -1 : category.idx,
+            category: cIdx,
             elements: [],
             backpackElements: [],
             styling: {}
@@ -356,5 +375,38 @@
             return `${cat.idx + 1}. ${cat.name}`;
         }
         return '';
+    }
+
+    function swapCategory() {
+        const cat = categoryMap.get(`${category.type}_${curCat}`);
+        if (typeof cat !== 'undefined') {
+            const oldGroup = designGroup.filter(item => item.category === curCat);
+
+            for (let i = 0; i < catGroup.length;) {
+                catGroup[i].category = curCat;
+            }
+            for (let i = 0; i < oldGroup.length; i++) {
+                oldGroup[i].category = cIdx;
+            }
+            category.idx = curCat;
+            cat.idx = cIdx;
+
+            categoryMap.set(`${category.type}_${cIdx}`, cat);
+            categoryMap.set(`${category.type}_${curCat}`, category);
+        } else {
+            const oldIdx = category.idx;
+
+            for (let i = 0; i < catGroup.length;) {
+                catGroup[i].category = curCat;
+            }
+            category.idx = curCat;
+            slots[curCat].name = category.name;
+            slots[curCat].stored = true;
+            slots[oldIdx].name = '';
+            slots[oldIdx].stored = false;
+            categoryMap.set(`${category.type}_${curCat}`, category);
+            categoryMap.delete(`${category.type}_${cIdx}`);
+        }
+        cIdx = curCat;
     }
 </script>

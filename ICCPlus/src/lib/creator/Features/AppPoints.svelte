@@ -4,9 +4,25 @@
     surface$style="width: 1920px; max-width: calc(100vw - 32px);"
     onSMUIDialogClosed={onclose}
 >
-    <Title class="dialog-title" tabindex={0} autofocus>
-        Point Types
-    </Title>
+    {#if showAll}
+        <Title class="dialog-title" tabindex={0} autofocus>
+            Point Types
+        </Title>
+    {:else}
+        <div class="d-row align-items-center justify-end">
+            <Title class="dialog-title pe-4" tabindex={0} autofocus>
+                Point Types
+            </Title>
+            <Wrapper text="Swap Slots">
+                <IconButton class="mdi mdi-swap-horizontal-bold" onclickcapture={swapCategory} disabled={curCat === category.idx}/>
+            </Wrapper>
+            <Select bind:value={curCat} label="Category" alwaysFloat={true}>
+                {#each slots as slot, i (i)}
+                    <Option value={i}>{i + 1}. {slot.name}</Option>
+                {/each}
+            </Select>
+        </div>
+    {/if}
     <Content id="dialog--point" class="pb-2">
         <div style="position: relative; height: {$virtualizer.getTotalSize()}px; width: 100%;">
             {#each $virtualizer.getVirtualItems() as pRow (pRow.index)}
@@ -171,6 +187,7 @@
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import FormField from '@smui/form-field';
     import IconButton from '@smui/icon-button';
+    import Select, { Option } from '$lib/custom/select';
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
@@ -179,9 +196,11 @@
     import { onMount } from 'svelte';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     
-    let { open, onclose, category = {idx: -1, name: '', type: 'point'}, showAll }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean } = $props();
+    let { open, onclose, category = {idx: -1, name: '', type: 'point'}, showAll, slots }: { open: boolean; onclose: () => void; category?: Category; showAll: boolean; slots: any } = $props();
     let pointId = '';
-    let catPoint = $derived(showAll ? app.pointTypes : app.pointTypes.filter(item => item.category === category.idx));
+    let cIdx = $state(category.idx);
+    let curCat = $state(category.idx);
+    let catPoint = $derived(showAll ? app.pointTypes : app.pointTypes.filter(item => item.category === cIdx));
     let pointRows = $derived.by(() => {
         const result: any[][] = [];
         for (let i = 0; i < catPoint.length; i += 3) {
@@ -199,8 +218,7 @@
         overscan: 1,
         measureElement: (el) => Math.max(el.getBoundingClientRect().height, 576)
     }));
-    let pCats = $derived(app.categories.filter(item => item.type === category.type).map(item => item.idx));
-
+    let pCats = $derived(app.categories.filter(item => item.type === 'point').map(item => item.idx));
 
     onMount(() => {
         virtualListEl = document.getElementById('dialog--point') as HTMLDivElement;
@@ -293,7 +311,7 @@
             activatedId: '',
             beforeText: `Point ${app.pointTypes.length + 1}:`,
             afterText: '',
-            category: showAll ? -1 : category.idx
+            category: showAll ? -1 : cIdx
         });
         pointTypeMap.set(id, app.pointTypes[app.pointTypes.length - 1]);
         
@@ -335,5 +353,38 @@
             return `${cat.idx + 1}. ${cat.name}`;
         }
         return '';
-    };
+    }
+
+    function swapCategory() {
+        const cat = categoryMap.get(`${category.type}_${curCat}`);
+        if (typeof cat !== 'undefined') {
+            const oldPoint = app.pointTypes.filter(item => item.category === curCat);
+
+            for (let i = 0; i < catPoint.length;) {
+                catPoint[i].category = curCat;
+            }
+            for (let i = 0; i < oldPoint.length; i++) {
+                oldPoint[i].category = cIdx;
+            }
+            category.idx = curCat;
+            cat.idx = cIdx;
+
+            categoryMap.set(`${category.type}_${cIdx}`, cat);
+            categoryMap.set(`${category.type}_${curCat}`, category);
+        } else {
+            const oldIdx = category.idx;
+
+            for (let i = 0; i < catPoint.length;) {
+                catPoint[i].category = curCat;
+            }
+            category.idx = curCat;
+            slots[curCat].name = category.name;
+            slots[curCat].stored = true;
+            slots[oldIdx].name = '';
+            slots[oldIdx].stored = false;
+            categoryMap.set(`${category.type}_${curCat}`, category);
+            categoryMap.delete(`${category.type}_${cIdx}`);
+        }
+        cIdx = curCat;
+    }
 </script>
