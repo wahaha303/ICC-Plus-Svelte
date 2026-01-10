@@ -32,16 +32,16 @@
                                 <div class="point-slot">
                                     <div class="toolbar grey lighten-3 justify-space-around">
                                         <Wrapper text="Move Up">
-                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveGroupUp(group, i)} />
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveGroupUp(group, gRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Delete Group">
-                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteGroup(group, i)} />
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteGroup(group)} />
                                         </Wrapper>
                                         <Wrapper text="Clone Group">
                                             <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneGroup(group)} />
                                         </Wrapper>
                                         <Wrapper text="Move Down">
-                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveGroupDown(group, i)} />
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveGroupDown(group, gRow.index * 3 + i)} />
                                         </Wrapper>
                                     </div>
                                     <div class="row gy-4 p-3">
@@ -210,13 +210,11 @@
         });
         groupMap.set(id, app.groups[index]);
         
-        if (app.groups.length > 3) {
-            $virtualizer.setOptions({
-                count: rowCount()
-            });
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
 
-            scrollToLastRow($virtualizer, virtualListEl, app.groups.length - 1);
-        }
+        scrollToLastRow($virtualizer, virtualListEl, app.groups.length - 1);
     }
 
     function cloneGroup(num: number) {
@@ -244,17 +242,15 @@
             }
         }
 
-        if (app.groups.length > 3) {
-            $virtualizer.setOptions({
-                count: rowCount()
-            });
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
 
-            scrollToLastRow($virtualizer, virtualListEl, app.groups.length - 1);
-        }
+        scrollToLastRow($virtualizer, virtualListEl, app.groups.length - 1);
     }
 
-    function deleteGroup(id: string, num: number) {
-        const group = app.groups[num];
+    function deleteGroup(group: Group) {
+        console.log(group);
         for (let i = 0; i < group.rowElements.length; i++) {
             const row = rowMap.get(group.rowElements[i]);
             if (typeof row !== 'undefined' && typeof row.groups !== 'undefined') {
@@ -265,25 +261,25 @@
             const cMap = choiceMap.get(group.elements[i]);
             if (typeof cMap !== 'undefined') {
                 const choice = cMap.choice;
-                if (typeof choice.group !== 'undefined') {
+                if (typeof choice.groups !== 'undefined') {
                     choice.groups.splice(choice.groups.indexOf(group.id), 1);
+                    console.log(choice.groups);
                 }
             }
         }
-        app.groups.splice(num, 1);
-        groupMap.delete(id);
+        app.groups.splice(app.groups.indexOf(group), 1);
+        groupMap.delete(group.id);
 
-        if (app.groups.length > 3) {
-            $virtualizer.setOptions({
-                count: rowCount()
-            });
-        }
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
     }
+    
 
     function moveGroupUp(group: Group, num: number) {
         if (num > 0) {
-            const prevIdx = app.group.indexOf(catGroup[num - 1]);
-            const curIdx = app.group.indexOf(group);
+            const prevIdx = app.groups.indexOf(catGroup[num - 1]);
+            const curIdx = app.groups.indexOf(group);
             [app.groups[prevIdx], app.groups[curIdx]] = [app.groups[curIdx], app.groups[prevIdx]];
         }
     }

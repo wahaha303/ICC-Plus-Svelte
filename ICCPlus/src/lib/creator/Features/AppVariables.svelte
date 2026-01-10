@@ -32,13 +32,13 @@
                                 <div class="point-slot">
                                     <div class="toolbar grey lighten-3 justify-space-around">
                                         <Wrapper text="Move Up">
-                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveVariableUp(variable, i)} />
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveVariableUp(variable, vRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Delete Word">
-                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteVariable(variable, i)} />
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteVariable(variable)} />
                                         </Wrapper>
                                         <Wrapper text="Move Down">
-                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveVariableDown(variable, i)} />
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveVariableDown(variable, vRow.index * 3 + i)} />
                                         </Wrapper>
                                     </div>
                                     <div class="row gy-4 p-3">
@@ -173,29 +173,25 @@
         app.variables.push({id: id, isTrue: false, category: cIdx});
         variableMap.set(id, app.variables[app.variables.length - 1]);
 
-        if (app.variables.length > 4) {
-            $virtualizer.setOptions({
-                count: rowCount()
-            });
-            scrollToLastRow($virtualizer, virtualListEl, app.variables.length - 1);
-        }
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
+        scrollToLastRow($virtualizer, virtualListEl, app.variables.length - 1);
     }
 
-    function deleteVariable(id: string, num: number) {
-        app.variables.splice(num, 1);
-        variableMap.delete(id);
+    function deleteVariable(variable: Variable) {
+        app.variables.splice(app.variables.indexOf(variable), 1);
+        variableMap.delete(variable.id);
 
-        if (app.variables.length > 4) {
-            $virtualizer.setOptions({
-                count: rowCount()
-            });
-        }
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
     }
 
     function moveVariableUp(variable: Variable, num: number) {
         if (num > 0) {
-            const prevIdx = app.variable.indexOf(catVariable[num - 1]);
-            const curIdx = app.variable.indexOf(variable);
+            const prevIdx = app.variables.indexOf(catVariable[num - 1]);
+            const curIdx = app.variables.indexOf(variable);
             [app.variables[prevIdx], app.variables[curIdx]] = [app.variables[curIdx], app.variables[prevIdx]];
         }
     }

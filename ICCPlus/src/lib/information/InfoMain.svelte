@@ -218,6 +218,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.7.6 / ${getDate('2026-01-10T05:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where choice activated by Force Other Choice to Be Active could not be reselected after being deselected.
+        
+        <span style="color: green">Features</span>
+        - Fixed issue where deleting and moving items other than point did not work correctly.
+        `
+    }, {
+        open: false,
         title: `v2.7.5 / ${getDate('2026-01-09T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where player custom word choices did not work correctly with Force Other Choices to Be Active.
@@ -228,7 +237,7 @@
         `
     }, {
         open: false,
-        title: `v2.7.4 / ${getDate('2026-01-05T10:00:00Z')}`,
+        title: `v2.7.4 / ${getDate('2026-01-06T10:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where word input dialog popped up multiple times.
         `

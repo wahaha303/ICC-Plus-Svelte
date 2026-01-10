@@ -2672,7 +2672,7 @@
                 selectedOneMore(localChoice, origRow, options);
             }
         } else {
-            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated && !localChoice.activatedFrom) {
+            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated) {
                 if (localChoice.isActive) {
                     if (!localChoice.selectOnce) deselectObject(localChoice, origRow, options);
                 } else {

@@ -33,10 +33,10 @@
                                 <div class="point-slot">
                                     <div class="toolbar grey lighten-3 justify-space-around">
                                         <Wrapper text="Move Up">
-                                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveDesignUp(group, i)} />
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveDesignUp(group, gRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Delete Design">
-                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(group.id, i)} />
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteDesign(group)} />
                                         </Wrapper>
                                         <Wrapper text="Open Design Settings">
                                             <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = group}} />
@@ -45,7 +45,7 @@
                                             <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(group, i)} />
                                         </Wrapper>
                                         <Wrapper text="Move Down">
-                                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveDesignDown(group, i)} />
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveDesignDown(group, gRow.index * 3 + i)} />
                                         </Wrapper>
                                     </div>
                                     <div class="row gy-4 p-3">
@@ -270,45 +270,41 @@
         scrollToLastRow($virtualizer, virtualListEl, groupRows.length - 1);
     }
 
-    function deleteDesign(id: string, num: number) {
-        let designMap = isRow ? rowDesignMap : objectDesignMap;
-        let design = designMap.get(id);
-        if (typeof design !== 'undefined') {
-            for (let i = 0; i < design.elements.length; i++) {
-                if (isRow) {
-                    let rMap = rowMap.get(design.elements[i]);
-                    if (typeof rMap !== 'undefined') {
-                        let rowDesign = rMap.rowDesignGroups;
-                        rowDesign?.splice(rowDesign.indexOf(id), 1);
-                    }
-                } else {
-                    let cMap = choiceMap.get(design.elements[i]);
-                    if (typeof cMap !== 'undefined') {
-                        let objectDesign = cMap.choice.objectDesignGroups;
-                        objectDesign?.splice(objectDesign.indexOf(id), 1);
-                    }
+    function deleteDesign(design: RowDesignGroup | ObjectDesignGroup) {
+        for (let i = 0; i < design.elements.length; i++) {
+            if (isRow) {
+                let rMap = rowMap.get(design.elements[i]);
+                if (typeof rMap !== 'undefined') {
+                    let rowDesign = rMap.rowDesignGroups;
+                    rowDesign?.splice(rowDesign.indexOf(design.id), 1);
                 }
-            }
-            for (let i = 0; i < design.backpackElements.length; i++) {
-                if (isRow) {
-                    let rMap = rowMap.get(design.backpackElements[i]);
-                    if (typeof rMap !== 'undefined') {
-                        let rowDesign = rMap.rowDesignGroups;
-                        rowDesign?.splice(rowDesign.indexOf(id), 1);
-                    }
-                } else {
-                    let cMap = choiceMap.get(design.backpackElements[i]);
-                    if (typeof cMap !== 'undefined') {
-                        let objectDesign = cMap.choice.objectDesignGroups;
-                        objectDesign?.splice(objectDesign.indexOf(id), 1);
-                    }
+            } else {
+                let cMap = choiceMap.get(design.elements[i]);
+                if (typeof cMap !== 'undefined') {
+                    let objectDesign = cMap.choice.objectDesignGroups;
+                    objectDesign?.splice(objectDesign.indexOf(design.id), 1);
                 }
             }
         }
-        if (typeof designGroup !== 'undefined') {
-            designGroup.splice(num, 1);
-            designMap.delete(id);
+        for (let i = 0; i < design.backpackElements.length; i++) {
+            if (isRow) {
+                let rMap = rowMap.get(design.backpackElements[i]);
+                if (typeof rMap !== 'undefined') {
+                    let rowDesign = rMap.rowDesignGroups;
+                    rowDesign?.splice(rowDesign.indexOf(design.id), 1);
+                }
+            } else {
+                let cMap = choiceMap.get(design.backpackElements[i]);
+                if (typeof cMap !== 'undefined') {
+                    let objectDesign = cMap.choice.objectDesignGroups;
+                    objectDesign?.splice(objectDesign.indexOf(design.id), 1);
+                }
+            }
         }
+
+        const designMap = isRow ? rowDesignMap : objectDesignMap;
+        designGroup.splice(designGroup.indexOf(design), 1);
+        designMap.delete(design.id);
         
         $virtualizer.setOptions({
             count: rowCount()

@@ -32,13 +32,13 @@
                                 <div class="point-slot">
                                     <div class="toolbar grey lighten-3 justify-space-around">
                                         <Wrapper text="Move Up">
-                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveWordUp(word, i)} />
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveWordUp(word, wRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Delete Word">
-                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteWord(word, i)} />
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteWord(word)} />
                                         </Wrapper>
                                         <Wrapper text="Move Down">
-                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveWordDown(word, i)} />
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveWordDown(word, wRow.index * 3 + i)} />
                                         </Wrapper>
                                     </div>
                                     <div class="row gy-4 p-3">
@@ -173,23 +173,19 @@
         app.words.push({id: id, replaceText: '', category: cIdx});
         wordMap.set(id, app.words[app.words.length - 1]);
 
-        if (catWord.length > 4) {
-            $virtualizer.setOptions({
-                count: rowCount()
-            });
-            scrollToLastRow($virtualizer, virtualListEl, catWord.length - 1);
-        }
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
+        scrollToLastRow($virtualizer, virtualListEl, catWord.length - 1);
     }
 
-    function deleteWord(id: string, num: number) {
-        app.words.splice(num, 1);
-        wordMap.delete(id);
+    function deleteWord(word: Word) {
+        app.words.splice(app.words.indexOf(word), 1);
+        wordMap.delete(word.id);
 
-        if (catWord.length > 4) {
-            $virtualizer.setOptions({
-                count: rowCount()
-            });
-        }
+        $virtualizer.setOptions({
+            count: rowCount()
+        });
     }
 
     function moveWordUp(word: Word, num: number) {

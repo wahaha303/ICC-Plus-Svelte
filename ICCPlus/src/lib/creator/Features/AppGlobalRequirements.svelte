@@ -33,10 +33,10 @@
                                 <div class="point-slot">
                                     <div class="toolbar grey lighten-3 justify-space-around">
                                         <Wrapper text="Move Up">
-                                            <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveReqUp(req, i)} />
+                                            <IconButton class="mdi mdi-chevron-left" onclickcapture={() => moveReqUp(req, rRow.index * 3 + i)} />
                                         </Wrapper>
                                         <Wrapper text="Delete Global Requirement">
-                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(req.id, i)} />
+                                            <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(req)} />
                                         </Wrapper>
                                         <Wrapper text="Add Requirement">
                                             <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = req}} />
@@ -45,7 +45,7 @@
                                             <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(req, i)} />
                                         </Wrapper>
                                         <Wrapper text="Move Down">
-                                            <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveReqDown(req, i)} />
+                                            <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveReqDown(req, rRow.index * 3 + i)} />
                                         </Wrapper>
                                     </div>
                                     <div class="row gy-3 p-3">
@@ -248,16 +248,14 @@
         }
     }
 
-    function deleteReq(id: string, num: number) {
+    function deleteReq(req: GlobalRequirement) {
         if (typeof app.globalRequirements !== 'undefined') {
-            app.globalRequirements.splice(num, 1);
-            globalReqMap.delete(id);
+            app.globalRequirements.splice(app.globalRequirements.indexOf(req), 1);
+            globalReqMap.delete(req.id);
 
-            if (app.globalRequirements.length > 3) {
-                $virtualizer.setOptions({
-                    count: rowCount()
-                });
-            }
+            $virtualizer.setOptions({
+                count: rowCount()
+            });
         }
     }
 
