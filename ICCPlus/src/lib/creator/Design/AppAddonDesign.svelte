@@ -18,6 +18,7 @@
                             }
                         });
                         data.styling = {...(data.styling || {}), ...temp};
+                        data.styling!.useAddonDesign = true;
                         styling = data.styling!;
                     } else {
                         Object.keys(addonStyling).forEach(key => {

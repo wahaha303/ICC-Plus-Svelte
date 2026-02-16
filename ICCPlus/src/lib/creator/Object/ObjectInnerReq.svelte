@@ -100,7 +100,7 @@
                 <IconButton onclickcapture={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'; dlgVariables.isWord = true;}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
             </Wrapper>
         </div>
-        <Textfield bind:value={() => required.orNum ?? 1, (e) => required.orNum = e} onchange={() => required.orNum = Math.max(required.orNum || 0, 0)} label="Number" type="number" input$min={0} variant="filled" />
+        <Textfield bind:value={() => required.orNum ?? 1, (e) => required.orNum = e} onchange={() => required.orNum = Math.max(required.orNum || 0, 0)} label="{required.required ? 'Matching' : 'Non-Matching'} Count" type="number" input$min={0} variant="filled" />
         {#if required.orRequireds}
             <div class="row gy-3 p-2" bind:clientWidth={width}>
                 {#each required.orRequireds as req, i}

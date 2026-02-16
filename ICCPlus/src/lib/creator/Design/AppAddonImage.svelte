@@ -17,6 +17,7 @@
                             }
                         });
                         data.styling = {...(data.styling || {}), ...temp};
+                        data.styling!.useAddonImage = true;
                         styling = data.styling!;
                     } else {
                         Object.keys(addonImageStyling).forEach(key => {

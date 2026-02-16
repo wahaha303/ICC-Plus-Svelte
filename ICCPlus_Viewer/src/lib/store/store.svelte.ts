@@ -7,7 +7,7 @@ import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.8.0';
+export const appVersion = '2.8.1';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -10312,6 +10312,12 @@ function initPrivateStyling(data: any, isRow: boolean) {
         if (typeof data.styling.objectImgObjectFillHeight !== 'undefined') data.objectImgObjectFillHeight = data.styling.objectImgObjectFillHeight;
         delete data.styling;
     }
+    if (data.isPrivateStyling && data.privateAddonIsOn && !data.styling.useAddonDesign) {
+        data.styling.useAddonDesign = true;
+    }
+    if (data.isPrivateStyling && data.privateAddonImageIsOn && !data.styling.useAddonImage) {
+        data.styling.useAddonImage = true;
+    }
 }
 export function initializeApp(tempApp: any) {
     const keys = Object.keys(tempApp);
@@ -10363,7 +10369,7 @@ export function initializeApp(tempApp: any) {
                                 req.orRequireds = [];
                                 for (let k = 0; k < req.orRequired.length; k++) {
                                     req.orRequireds.push({
-                                        required: req.required,
+                                        required: true,
                                         requireds: [],
                                         orRequired: [],
                                         orRequireds: [],
@@ -10392,7 +10398,7 @@ export function initializeApp(tempApp: any) {
                                         rReq.orRequireds = [];
                                         for (let m = 0; m < rReq.orRequired.length; m++) {
                                             rReq.orRequireds.push({
-                                                required: rReq.required,
+                                                required: true,
                                                 requireds: [],
                                                 orRequired: [],
                                                 orRequireds: [],
@@ -10491,7 +10497,7 @@ export function initializeApp(tempApp: any) {
                                                 req.orRequireds = [];
                                                 for (let m = 0; m < req.orRequired.length; m++) {
                                                     req.orRequireds.push({
-                                                        required: req.required,
+                                                        required: true,
                                                         requireds: [],
                                                         orRequired: [],
                                                         orRequireds: [],
@@ -10520,7 +10526,7 @@ export function initializeApp(tempApp: any) {
                                                         rReq.orRequireds = [];
                                                         for (let n = 0; n < rReq.orRequired.length; n++) {
                                                             rReq.orRequireds.push({
-                                                                required: rReq.required,
+                                                                required: true,
                                                                 requireds: [],
                                                                 orRequired: [],
                                                                 orRequireds: [],
@@ -10556,7 +10562,7 @@ export function initializeApp(tempApp: any) {
                                         req.orRequireds = [];
                                         for (let l = 0; l < req.orRequired.length; l++) {
                                             req.orRequireds.push({
-                                                required: req.required,
+                                                required: true,
                                                 requireds: [],
                                                 orRequired: [],
                                                 orRequireds: [],
@@ -10585,7 +10591,7 @@ export function initializeApp(tempApp: any) {
                                                 rReq.orRequireds = [];
                                                 for (let m = 0; m < rReq.orRequired.length; m++) {
                                                     rReq.orRequireds.push({
-                                                        required: rReq.required,
+                                                        required: true,
                                                         requireds: [],
                                                         orRequired: [],
                                                         orRequireds: [],
@@ -10633,7 +10639,7 @@ export function initializeApp(tempApp: any) {
                                             req.orRequireds = [];
                                             for (let m = 0; m < req.orRequired.length; m++) {
                                                 req.orRequireds.push({
-                                                    required: req.required,
+                                                    required: true,
                                                     requireds: [],
                                                     orRequired: [],
                                                     orRequireds: [],
@@ -10662,7 +10668,7 @@ export function initializeApp(tempApp: any) {
                                                     rReq.orRequireds = [];
                                                     for (let n = 0; n < rReq.orRequired.length; n++) {
                                                         rReq.orRequireds.push({
-                                                            required: rReq.required,
+                                                            required: true,
                                                             requireds: [],
                                                             orRequired: [],
                                                             orRequireds: [],
@@ -10752,7 +10758,7 @@ export function initializeApp(tempApp: any) {
                                 req.orRequireds = [];
                                 for (let k = 0; k < req.orRequired.length; k++) {
                                     req.orRequireds.push({
-                                        required: req.required,
+                                        required: true,
                                         requireds: [],
                                         orRequired: [],
                                         orRequireds: [],
@@ -10781,7 +10787,7 @@ export function initializeApp(tempApp: any) {
                                         rReq.orRequireds = [];
                                         for (let m = 0; m < rReq.orRequired.length; m++) {
                                             rReq.orRequireds.push({
-                                                required: rReq.required,
+                                                required: true,
                                                 requireds: [],
                                                 orRequired: [],
                                                 orRequireds: [],
