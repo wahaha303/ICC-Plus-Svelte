@@ -74,18 +74,15 @@
                 </div>
             </div>
             <div class="row pb-2">
-                <div class="col-12 px-3 pb-2">'X of these' Requirement</div>
-                <div class="col-12 pb-3">
-                    <Textfield bind:value={numberOfOrRequireds} label="Number of Requirements" variant="filled" type="number" />
-                </div>
+                <div class="col-12 px-3 pb-2">Or Requirements</div>
                 <div class="col-sm-6 col-12 pb-3">
                     <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('or', true, '')}>
-                        <Label>'X of these is selected' Requirement</Label>
+                        <Label>'X of these is met' Requirement</Label>
                     </Button>
                 </div>
                 <div class="col-sm-6 col-12 pb-3">
                     <Button variant="raised" class="w-100" onclickcapture={() => addNewRequired('or', false, '')}>
-                        <Label>'X of these is not selected' Requirement</Label>
+                        <Label>'X of these is not met' Requirement</Label>
                     </Button>
                 </div>
             </div>
@@ -126,7 +123,7 @@
     import { app, snackbarVariables } from '$lib/store/store.svelte';
 	import type { Addon, Choice, Requireds, Row, Score, GlobalRequirement } from '$lib/store/types';
     
-    let { open, onclose, data }: { open: boolean; onclose: () => void; data: Row | Choice | Addon | Score | Requireds | GlobalRequirement; } = $props();
+    let { open, onclose, data, orReq = false }: { open: boolean; onclose: () => void; data: Row | Choice | Addon | Score | Requireds | GlobalRequirement; orReq?: boolean } = $props();
     const pointRequireList = [{
         text: '> More than',
         value: '1'
@@ -149,31 +146,55 @@
     let numberOfSelection = $state(1);
 
     function addNewRequired(type: string, bType: boolean, operator: string) {
-        let orReq = [];
-        let number = type === 'word' ? 1 : numberOfOrRequireds;
-        for (let i = 0; i < number; i++) {
-            orReq.push({req: ''});
+        if (orReq) {
+            const req = data as Requireds;
+            if (req.orRequireds) {
+                req.orRequireds.push({
+                    required: bType,
+                    requireds: [],
+                    orRequired: [],
+                    orRequireds: [],
+                    id: '',
+                    type: type,
+                    reqId: '',
+                    reqId1: '',
+                    reqId2: '',
+                    reqId3: '',
+                    reqPoints: 0,
+                    showRequired: app.defaultUseShowReq,
+                    operator: operator,
+                    afterText: app.defaultAfterReq,
+                    beforeText: app.defaultBeforeReq,
+                    orNum: 1,
+                    selNum: numberOfSelection,
+                    selFromOperators: '1',
+                    more: []
+                });
+            }
+        } else {
+            data.requireds.push({
+                required: bType,
+                requireds: [],
+                orRequired: type === 'word' ? [{req: ''}] : [],
+                orRequireds: [],
+                id: '',
+                type: type,
+                reqId: '',
+                reqId1: '',
+                reqId2: '',
+                reqId3: '',
+                reqPoints: 0,
+                showRequired: app.defaultUseShowReq,
+                operator: operator,
+                afterText: app.defaultAfterReq,
+                beforeText: app.defaultBeforeReq,
+                orNum: 1,
+                selNum: numberOfSelection,
+                selFromOperators: '1',
+                more: []
+            });
         }
-        data.requireds.push({
-            required: bType,
-            requireds: [],
-            orRequired: orReq,
-            id: '',
-            type: type,
-            reqId: '',
-            reqId1: '',
-            reqId2: '',
-            reqId3: '',
-            reqPoints: 0,
-            showRequired: !1,
-            operator: operator,
-            afterText: app.defaultAfterReq,
-            beforeText: app.defaultBeforeReq,
-            orNum: 1,
-            selNum: numberOfSelection,
-            selFromOperators: '1',
-            more: []
-        });
+        
     }
 
     function pasteRequired() {

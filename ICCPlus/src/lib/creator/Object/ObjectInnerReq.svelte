@@ -94,18 +94,26 @@
         {/each}
     {/if}
 {:else if required.type === 'or'}
-    <div class="toolbar d-row justify-space-between">
-        <IconButton onclickcapture={() => {
-            if (required.orRequired.length > 1) required.orRequired.pop();
-        }} ><i class="mdi mdi-minus"></i></IconButton>
-        <IconButton onclickcapture={() => {
-            required.orRequired.push({req: ''});
-        }} ><i class="mdi mdi-plus"></i></IconButton>
+    <div class="point-slot">
+        <div class="d-row justify-center">
+            <Wrapper text="Create New Requirement">
+                <IconButton onclickcapture={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'; dlgVariables.isWord = true;}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
+            </Wrapper>
+        </div>
+        <Textfield bind:value={() => required.orNum ?? 1, (e) => required.orNum = e} onchange={() => required.orNum = Math.max(required.orNum || 0, 0)} label="Number" type="number" input$min={0} variant="filled" />
+        {#if required.orRequireds}
+            <div class="row gy-3 p-2" bind:clientWidth={width}>
+                {#each required.orRequireds as req, i}
+                    <div class={col6}>
+                        <ObjectInnerReq required={req} />
+                        <Button onclickcapture={() => deleteInnerReq(i)} class="w-100 mt-1" variant="raised">
+                            <Label>Delete</Label>
+                        </Button>
+                    </div>
+                {/each}
+            </div>
+        {/if}
     </div>
-    <Textfield bind:value={() => required.orNum ?? 1, (e) => required.orNum = e} onchange={() => required.orNum = Math.min(Math.max(required.orNum || 0, 0), required.orRequired.length)} label="X" type="number" input$min={0} input$max={required.orRequired.length} variant="filled" />
-    {#each required.orRequired as orReq}
-        <Textfield bind:value={orReq.req} label={required.required ? 'Selected Id' : 'Not Selected Id'} variant="filled" />
-    {/each}
 {:else if required.type === 'selFromGroups' || required.type === 'selFromRows' || required.type === 'selFromWhole'}
     {#if required.type === 'selFromGroups'}
         <CustomChipInput acValue={required.selGroups || []} acOptions={getGroups()} inputLabel="Groups" getLabel={getGroupLabel} onSelected={setGroupElement} selectProp={required} />
@@ -154,12 +162,14 @@
 
 <script lang="ts">
     import Autocomplete from '$lib/custom/autocomplete/Autocomplete.svelte';
+    import Button, { Label } from '@smui/button';
     import CustomChipInput from '$lib/store/CustomChipInput.svelte';
     import IconButton from '@smui/icon-button';
+    import ObjectInnerReq from './ObjectInnerReq.svelte';
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { groupMap, rowMap, getGroupLabel, getPointTypeLabel, getRowLabel, getRows, getPointTypes, getGroups, getGlobalRequirement, getWords, getGlobalReqLabel } from '$lib/store/store.svelte';
+    import { groupMap, rowMap, getGroupLabel, getPointTypeLabel, getRowLabel, getRows, getPointTypes, getGroups, getGlobalRequirement, getWords, getGlobalReqLabel, dlgVariables } from '$lib/store/store.svelte';
     import type { Requireds } from '$lib/store/types';
 
     const { required }: { required: Requireds; } = $props();
@@ -205,6 +215,11 @@
         text: '≤ Less or equal',
         value: '3'
     }];
+    let width = $state(0);
+    let col6 = $derived.by(() => {
+        if (width > 300) return 'col-6';
+        else return 'col-12';
+    });
 
     function setGroupElement(e: CustomEvent, req: Requireds) {
         let group = groupMap.get(e.detail);
@@ -223,6 +238,12 @@
                 req.selRows = [];
                 req.selRows.push(row.id);
             }
+        }
+    }
+
+    function deleteInnerReq(index: number) {
+        if (required.orRequireds) {
+            required.orRequireds.splice(index, 1);
         }
     }
 </script>

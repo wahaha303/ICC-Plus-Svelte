@@ -198,20 +198,23 @@
     <AppRowList open={currentDialog === 'appRowList'} onclose={() => (currentDialog = 'none')} mainDiv={mainDiv} />
 {:else if currentDialog === 'appGlobalSettings'}
     <AppGlobalSettings open={currentDialog === 'appGlobalSettings'} onclose={() => (currentDialog = 'none')} />
+{:else if currentDialog === 'appSearchForm'}
+    <AppSearchForm open={currentDialog === 'appSearchForm'} onclose={() => (currentDialog = 'none')} />
 {/if}
 {#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
     <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} isForced={wordDialog.isForced} />
 {/if}
-{#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
-    <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={dlgVariables.cFunc} />
-{:else if dlgVariables.currentDialog === 'appPointSettings' && typeof dlgVariables.point !== 'undefined'}
+{#if imgDialog.currentDialog === 'appImageUpload' && typeof imgDialog.data !== 'undefined' && typeof imgDialog.imgProp !== 'undefined'}
+    <ImageUpload open={imgDialog.currentDialog === 'appImageUpload'} onclose={() => (imgDialog.currentDialog = 'none')} imgObject={imgDialog.data} imgProp={imgDialog.imgProp} isDeselect={imgDialog.isDeselect} closeHandler={imgDialog.cFunc} />
+{/if}
+{#if dlgVariables.currentDialog === 'appPointSettings' && typeof dlgVariables.point !== 'undefined'}
     <AppPointSettings open={dlgVariables.currentDialog === 'appPointSettings'} onclose={() => (dlgVariables.currentDialog = 'none')} currentPoint={dlgVariables.point} />
 {:else if dlgVariables.currentDialog === 'appButtonSettings' && typeof dlgVariables.row !== 'undefined'}
     <AppButtonSettings open={dlgVariables.currentDialog === 'appButtonSettings'} onclose={() => (dlgVariables.currentDialog = 'none')} row={dlgVariables.row} />
 {:else if dlgVariables.currentDialog === 'appCreateMultipleChoices' && typeof dlgVariables.func !== 'undefined'}
     <AppCreateMultipleChoice open={dlgVariables.currentDialog === 'appCreateMultipleChoices'} onclose={() => (dlgVariables.currentDialog = 'none')} submit={dlgVariables.func} />
 {:else if dlgVariables.currentDialog === 'appRequirement' && typeof dlgVariables.data !== 'undefined'}
-    <AppRequirement open={dlgVariables.currentDialog === 'appRequirement'} onclose={() => (dlgVariables.currentDialog = 'none')} data={dlgVariables.data} />
+    <AppRequirement open={dlgVariables.currentDialog === 'appRequirement'} onclose={() => (dlgVariables.currentDialog = 'none')} data={dlgVariables.data} orReq={dlgVariables.isWord} />
 {:else if dlgVariables.currentDialog === 'appRowSettings' && typeof dlgVariables.row !== 'undefined'}
     <AppRowSettings open={dlgVariables.currentDialog === 'appRowSettings'} onclose={() => (dlgVariables.currentDialog = 'none')} row={dlgVariables.row} />
 {:else if dlgVariables.currentDialog === 'appObjectSettings' && typeof dlgVariables.row !== 'undefined' && typeof dlgVariables.choice !== 'undefined'}
@@ -257,8 +260,8 @@
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog } from '$lib/store/store.svelte';
-    import type { Row } from '$lib/store/types';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateRowId, dlgVariables, tmpActivatedMap, bgmVariables, bgmPlayer, toggleTheme, generateScoreId, generateObjectId, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog, imgDialog } from '$lib/store/store.svelte';
+    import type { Row, SelectableAddon } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
 	import AppFeature from './AppFeature.svelte';
@@ -270,6 +273,7 @@
 	import AppButtonSettings from './AppButtonSettings.svelte';
 	import AppCreateMultipleChoice from './AppCreateMultipleChoice.svelte';
     import AppPointSettings from './Features/AppPointSettings.svelte';
+    import AppSearchForm from './AppSearchForm.svelte';
     import AppRowList from './AppRowList.svelte';
 	import AppRequirement from './AppRequirement.svelte';
 	import AppRowSettings from './AppRowSettings.svelte';
@@ -315,6 +319,12 @@
     }];
     const lowerMenuCompoenet = $state([{
         action: () => {
+            currentDialog = 'appSearchForm';
+        },
+        text: 'Search Choice',
+        icon: 'mdi mdi-magnify'
+    }, {
+        action: () => {
             toggleTheme();
         },
         text: 'Toggle Dark/Light Theme',
@@ -339,7 +349,7 @@
         icon: 'mdi mdi-clipboard-list'
     }]);
     
-    let currentDialog = $state<'none' | 'appFeature' | 'appDesign' | 'appSaveLoad' | 'appBuildForm' | 'appIdSearch' | 'dlgBackpack' | 'appRowList' | 'appGlobalSettings'>('none');
+    let currentDialog = $state<'none' | 'appFeature' | 'appDesign' | 'appSaveLoad' | 'appBuildForm' | 'appIdSearch' | 'dlgBackpack' | 'appRowList' | 'appGlobalSettings' | 'appSearchForm'>('none');
     let { bCreatorMode }: { bCreatorMode: boolean } = $props();
     let pointBarPosition = $state('bottom:0');
     let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${hexToRgba(app.fadeTransitionColor)}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);
@@ -533,6 +543,29 @@
                 const addon = cChoice.addons[j];
 
                 addon.parentId = cChoice.id;
+                if (addon.isSelectable) {
+                    addon.isActive = false;
+                    delete addon.forcedActivated;
+                    delete addon.appliedDisChoices;
+                    addon.id = generateObjectId(0, 4, true);
+
+                    if (addon.scores) {
+                        for (let k = 0; k < addon.scores.length; k++) {
+                            const score = addon.scores[k];
+
+                            score.idx = generateScoreId(0, 5);
+                            scoreSet.add(score.idx);
+                            if (addon.isSelectableMultiple) {
+                                delete score.isActiveMul;
+                                delete score.isActiveMulMinus;
+                            } else {
+                                delete score.isActive;
+                            }
+                            delete score.setValue;
+                            deleteDiscount(score);
+                        }
+                    }
+                }
             }
 
             if (cChoice.backpackBtnRequirement) {
@@ -564,6 +597,15 @@
             }
 
             choiceMap.set(cChoice.id, {choice: app.rows[num + 1].objects[i], row: app.rows[num + 1]});
+            if (cChoice.addons) {
+                for (let j = 0; j < cChoice.addons.length; j++) {
+                    const addon = cChoice.addons[j];
+
+                    if (addon.isSelectable) {
+                        choiceMap.set(addon.id, {choice: app.rows[num + 1].objects[i].addons[j] as SelectableAddon, row: app.rows[num + 1]});
+                    }
+                }
+            }
         }
 
         if (clone.groups) {
@@ -601,17 +643,18 @@
                 title: app.defaultRowTitle,
                 titleText: app.defaultRowText,
                 debugTitle: '',
-                objectWidth: 'col-md-3',
+                objectWidth: app.defaultRowWidth,
                 image: '',
-                template: 1,
+                template: app.defaultRowTemplate,
                 isButtonRow: false,
                 isResultRow: false,
                 resultGroupId: '',
                 isInfoRow: false,
                 defaultAspectWidth: 1,
                 defaultAspectHeight: 1,
-                allowedChoices: 0,
+                allowedChoices: app.defaultRowAllowedChoices,
                 currentChoices: 0,
+                rowJustify: app.defaultRowJustify,
                 requireds: [],
                 isEditModeOn: false,
                 isRequirementOpen: false,
@@ -626,9 +669,9 @@
                 title: app.defaultRowTitle,
                 titleText: app.defaultRowText,
                 debugTitle: '',
-                objectWidth: 'col-md-3',
+                objectWidth: app.defaultRowWidth,
                 image: '',
-                template: 1,
+                template: app.defaultRowTemplate,
                 isButtonRow: false,
                 buttonType: true,
                 buttonId: '',
@@ -640,8 +683,9 @@
                 isInfoRow: false,
                 defaultAspectWidth: 1,
                 defaultAspectHeight: 1,
-                allowedChoices: 0,
+                allowedChoices: app.defaultRowAllowedChoices,
                 currentChoices: 0,
+                rowJustify: app.defaultRowJustify,
                 requireds: [],
                 isEditModeOn: false,
                 isRequirementOpen: false,
@@ -710,6 +754,29 @@
                     const addon = cChoice.addons[j];
 
                     addon.parentId = cChoice.id;
+                    if (addon.isSelectable) {
+                        addon.id = generateObjectId(0, 4, true);
+                        addon.isActive = false;
+                        delete addon.forcedActivated;
+                        delete addon.appliedDisChoices;
+
+                        if (addon.scores) {
+                            for (let k = 0; k < addon.scores.length; k++) {
+                                const score = addon.scores[k];
+
+                                score.idx = generateScoreId(0, 5);
+                                scoreSet.add(score.idx);
+                                if (addon.isSelectableMultiple) {
+                                    delete score.isActiveMul;
+                                    delete score.isActiveMulMinus;
+                                } else {
+                                    delete score.isActive;
+                                }
+                                delete score.setValue;
+                                deleteDiscount(score);
+                            }
+                        }
+                    }
                 }
 
                 if (cChoice.backpackBtnRequirement) {
@@ -741,6 +808,15 @@
                 }
 
                 choiceMap.set(cChoice.id, {choice: app.rows[index].objects[i], row: app.rows[index]});
+                if (cChoice.addons) {
+                    for (let j = 0; j < cChoice.addons.length; j++) {
+                        const addon = cChoice.addons[j];
+
+                        if (addon.isSelectable) {
+                            choiceMap.set(addon.id, {choice: app.rows[index].objects[i].addons[j] as SelectableAddon, row: app.rows[index]});
+                        }
+                    }
+                }
             }
 
             if (clone.groups) {

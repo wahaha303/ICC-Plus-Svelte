@@ -193,11 +193,10 @@
             cropper = new Cropper(imageElement, {
                 viewMode: 3,
                 dragMode: 'move',
+                ready() {
+                    setCropPosition(cropper, app.cropperPosition);
+                }
             });
-        } else {
-            if (cropper) {
-                cropper.destroy();
-            }
         }
 
         return () => {
@@ -230,6 +229,55 @@
         }
     });
 
+    function setCropPosition(cropper: Cropper, position: number) {
+        const imageData = cropper.getImageData();
+        const cropData = cropper.getData();
+
+        let x = 0;
+        let y = 0;
+
+        switch (position) {
+            case 0:
+                x = 0;
+                y = 0;
+                break;
+            case 1:
+                x = (imageData.naturalWidth - cropData.width) / 2;
+                y = 0;
+                break;
+            case 2:
+                x = imageData.naturalWidth - cropData.width;
+                y = 0;
+                break;
+            case 3:
+                x = 0;
+                y = (imageData.naturalHeight - cropData.height) / 2;
+                break;
+            case 4:
+                x = (imageData.naturalWidth - cropData.width) / 2;
+                y = (imageData.naturalHeight - cropData.height) / 2;
+                break;
+            case 5:
+                x = imageData.naturalWidth - cropData.width;
+                y = (imageData.naturalHeight - cropData.height) / 2;
+                break;
+            case 6:
+                x = 0;
+                y = imageData.naturalHeight - cropData.height;
+                break;
+            case 7:
+                x = (imageData.naturalWidth - cropData.width) / 2;
+                y = imageData.naturalHeight - cropData.height;
+                break;
+            case 8:
+                x = imageData.naturalWidth - cropData.width;
+                y = imageData.naturalHeight - cropData.height;
+                break;
+        }
+
+        cropper.setData({ x, y });
+    }
+
     function beforeClose(e: CustomEvent<{ action: string }>) {
         closeHandler(e);
         onclose();
@@ -251,6 +299,7 @@
     function changeAspect() {
         if (cropper) {
             cropper.setAspectRatio(aspectWidth / aspectHeight);
+            setCropPosition(cropper, app.cropperPosition);
         }
     }
 

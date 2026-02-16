@@ -1,26 +1,41 @@
-<div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''} {addonWidthClass()}" style={addonBackground}>
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="text-center row-{row.id} choice-{choice.id} addon{addon.isSelectable ? ` addon-${addon.id}` : ''} {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(addon as SelectableAddon, row, e, true) : undefined}>
     {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
         <div>
-            {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row?.addonImageRemoved}
+            {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
                     <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
             {/if}
-            {#if addon.title !== '' && !row?.addonTitleRemoved}
+            {#if addon.title !== '' && !row.addonTitleRemoved}
                 {#key addonTitleKey}
                     <h3 class="m-0" style={addonTitle}>
                         {@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}
                     </h3>
                 {/key}
             {/if}
-            {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
-                {#each choice.scores as score}
-                    <ObjectScore score={score} row={row} choice={choice} />
-                {/each}
+            {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
             {/if}
-            {#if !row?.objectRequirementRemoved}
+            {#if !row.objectScoreRemoved}
+                {#if choice.showScoreInAddon && isFirst}
+                    {#each choice.scores as score}
+                        <ObjectScore score={score} row={row} choice={choice} />
+                    {/each}
+                {/if}
+                {#if addon.scores}
+                    {#each addon.scores as score}
+                        <ObjectScore score={score} row={row} choice={choice} addon={addon} />
+                    {/each}
+                {/if}
+            {/if}
+            {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+            {/if}
+            {#if !row.objectRequirementRemoved}
                 {#if choice.showReqInAddon && isFirst}
                     {#each choice.requireds as required}
                         <ObjectRequired required={required} scoreText={scoreText} />
@@ -30,33 +45,42 @@
                     <ObjectRequired required={required} scoreText={scoreText} />
                 {/each}
             {/if}
-            {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
+            {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+            {/if}
+            {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
                     <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
             {/if}
-            {#if addon.text !== '' && !row?.addonTextRemoved}
+            {#if addon.text !== '' && !row.addonTextRemoved}
                 {#key addonTextKey}
                     <p class="mb-0" style={addonText}>
                         {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
                     </p>
                 {/key}
             {/if}
-            {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row?.addonImageRemoved}
+            {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+            {/if}
+            {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
                 {#if addon.imageSourceTooltip}
                     <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {:else}
                     <img src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                 {/if}
             {/if}
+            {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+            {/if}
         </div>
     {:else}
         <div class="row m-0 p-0 w-100">
             {#if addon.template === 2}
                 <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
-                    {#if addon.image && !row?.addonImageRemoved}
+                    {#if addon.image && !row.addonImageRemoved}
                         {#if addon.imageSourceTooltip}
                             <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {:else}
@@ -65,15 +89,28 @@
                     {/if}
                 </div>
                 <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
-                    {#if addon.title !== '' && !row?.addonTitleRemoved}
+                    {#if addon.title !== '' && !row.addonTitleRemoved}
                         {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
-                    {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
-                        {#each choice.scores as score}
-                            <ObjectScore score={score} row={row} choice={choice} />
-                        {/each}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
                     {/if}
-                    {#if !row?.objectRequirementRemoved}
+                    {#if !row.objectScoreRemoved}
+                        {#if choice.showScoreInAddon && isFirst}
+                            {#each choice.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} />
+                            {/each}
+                        {/if}
+                        {#if addon.scores}
+                            {#each addon.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} addon={addon} />
+                            {/each}
+                        {/if}
+                    {/if}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+                    {/if}
+                    {#if !row.objectRequirementRemoved}
                         {#if choice.showReqInAddon && isFirst}
                             {#each choice.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
@@ -83,25 +120,44 @@
                             <ObjectRequired required={required} scoreText={scoreText} />
                         {/each}
                     {/if}
-                    {#if addon.text !== '' && !row?.addonTextRemoved}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+                    {/if}
+                    {#if addon.text !== '' && !row.addonTextRemoved}
                         {#key addonTextKey}
                             <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
                             </p>
                         {/key}
+                    {/if}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && (multiChoiceStyle.multiChoiceCounterPosition === 3 || multiChoiceStyle.multiChoiceCounterPosition === 4)}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
                     {/if}
                 </div>
             {:else if addon.template === 3}
                 <div class="col p-0 text-center" style="max-width: {100 - addonImageBoxWidth}%">
-                    {#if addon.title !== '' && !row?.addonTitleRemoved}
+                    {#if addon.title !== '' && !row.addonTitleRemoved}
                         {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
-                    {#if !row?.objectScoreRemoved && choice.showScoreInAddon && isFirst}
-                        {#each choice.scores as score}
-                            <ObjectScore score={score} row={row} choice={choice} />
-                        {/each}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
                     {/if}
-                    {#if !row?.objectRequirementRemoved}
+                    {#if !row.objectScoreRemoved}
+                        {#if choice.showScoreInAddon && isFirst}
+                            {#each choice.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} />
+                            {/each}
+                        {/if}
+                        {#if addon.scores}
+                            {#each addon.scores as score}
+                                <ObjectScore score={score} row={row} choice={choice} addon={addon} />
+                            {/each}
+                        {/if}
+                    {/if}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+                    {/if}
+                    {#if !row.objectRequirementRemoved}
                         {#if choice.showReqInAddon && isFirst}
                             {#each choice.requireds as required}
                                 <ObjectRequired required={required} scoreText={scoreText} />
@@ -111,16 +167,22 @@
                             <ObjectRequired required={required} scoreText={scoreText} />
                         {/each}
                     {/if}
-                    {#if addon.text !== '' && !row?.addonTextRemoved}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+                    {/if}
+                    {#if addon.text !== '' && !row.addonTextRemoved}
                         {#key addonTextKey}
                             <p class="mb-0" style={addonText}>
                                 {@html DOMPurify.sanitize(addonTextKey, sanitizeArg)}
                             </p>
                         {/key}
                     {/if}
+                    {#if addon.isSelectableMultiple && multiChoiceCounter && (multiChoiceStyle.multiChoiceCounterPosition === 3 || multiChoiceStyle.multiChoiceCounterPosition === 4)}
+                        <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
+                    {/if}
                 </div>
                 <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
-                    {#if addon.image && !row?.addonImageRemoved}
+                    {#if addon.image && !row.addonImageRemoved}
                         {#if addon.imageSourceTooltip}
                             <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                         {:else}
@@ -136,12 +198,16 @@
 <script lang="ts">
     import DOMPurify from 'dompurify';
     import ObjectRequired from './ObjectRequired.svelte';
-    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables, winWidth, objectWidthToNum } from '$lib/store/store.svelte';
-    import type { Choice, Row, Addon } from '$lib/store/types';
+    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables, winWidth, objectWidthToNum, selectedOneMore, selectedOneLess, choiceMap, closestByClassPrefix, deselectObject, selectObject } from '$lib/store/store.svelte';
+    import type { Choice, Row, Addon, BgStyles, Filters, SelectableAddon, ChoiceOptions } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import ObjectScore from './ObjectScore.svelte';
+    import ObjectMultiChoice from './ObjectMultiChoice.svelte';
 
-    let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, isFirst }: { addon: Addon; row: Row; choice: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean, isFirst?: boolean } = $props();
+    let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, isFirst, isBackpack = false, mainDiv }: { addon: Addon | SelectableAddon; row: Row; choice: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean, isFirst?: boolean, isBackpack?: boolean; mainDiv?: HTMLDivElement } = $props();
+
+    const linkedObjects: string[] = [];
+    const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
 
     let isActive = $derived(typeof choice !== 'undefined' ? choice.isActive : false);
     let addonImageStyle = $derived(getStyling('privateAddonImageIsOn', row, choice));
@@ -150,193 +216,184 @@
     let objectImageStyle = $derived(getStyling('privateObjectImageIsOn', row, choice));
     let objectStyle = $derived(getStyling('privateObjectIsOn', row, choice));
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
+    let multiChoiceStyle = $derived(getStyling('privateMultiChoiceIsOn', row, choice));
     let addonEnabled = $derived(checkRequirements(addon.requireds));
     let addonTitleKey = $derived(replaceText(addon.title));
     let addonTextKey = $derived(replaceText(addon.text));
-    
     let addonImageBoxWidth = $derived(typeof addonImageStyle.addonImageBoxWidth !== 'undefined' ? addonImageStyle.addonImageBoxWidth : 50);
+    let multiChoiceCounter = $derived.by(() => {
+        if (addon.hideMultipleCounter) {
+            return isEnabled;
+        }
+
+        return true;
+    });
 
     let addonBackground = $derived.by(() => {
         let useDesign = addonStyle.useAddonDesign; 
         let suffix = (useDesign ? addonStyle.addonBorderRadiusIsPixels : objectStyle.objectBorderRadiusIsPixels) ? 'px' : '%';
-        let bgImageIndex = 0;
-        let bgColorIndex = 0;
-        let filterIndex = 0;
-        let styles: string[] = [];
+        const bgStyles: BgStyles = {};
+        const filters: Filters = {};
 
         if (useDesign) {
             if (addonStyle.addonBorderImage) {
-                styles.push(`border-image: url('${addonStyle.addonBorderImage}') ${addonStyle.addonBorderImageSliceTop} ${addonStyle.addonBorderImageSliceRight} ${addonStyle.addonBorderImageSliceBottom} ${addonStyle.addonBorderImageSliceLeft} / ${addonStyle.addonBorderImageWidth}px ${addonStyle.addonBorderImageRepeat}; border-style: solid; padding: ${addonStyle.addonBorderImageWidth}px;`);
+                bgStyles.borderImage = `border-image: url('${addonStyle.addonBorderImage}') ${addonStyle.addonBorderImageSliceTop} ${addonStyle.addonBorderImageSliceRight} ${addonStyle.addonBorderImageSliceBottom} ${addonStyle.addonBorderImageSliceLeft} / ${addonStyle.addonBorderImageWidth}px ${addonStyle.addonBorderImageRepeat}; border-style: solid; padding: ${addonStyle.addonBorderImageWidth}px;`;
             }
             if (addonStyle.useAddonBackgroundImage && addonStyle.addonBackgroundImage) {
-                styles.push(`background-image: url('${addonStyle.addonBackgroundImage}'); ${addonStyle.isObjectBackgroundRepeat? 'background-repeat: repeat;' : (addonStyle.isObjectBackgroundFitIn ? 'background-size: 100% 100%;' : 'background-size: cover;')}`);
-                bgImageIndex = styles.length;
+                bgStyles.bgImage = `background-image: url('${addonStyle.addonBackgroundImage}'); ${addonStyle.isObjectBackgroundRepeat? 'background-repeat: repeat;' : (addonStyle.isObjectBackgroundFitIn ? 'background-size: 100% 100%;' : 'background-size: cover;')}`;
             }
             if (addonStyle.addonBgColorIsOn) {
-                styles.push(`background-color: ${hexToRgba(addonStyle.addonBgColor)};`);
-                bgColorIndex = styles.length;
+                bgStyles.bgColor = `background-color: ${hexToRgba(addonStyle.addonBgColor)};`;
             }
-            styles.push(`margin: ${addonStyle.addonMargin}px;`);
-            styles.push(`border-radius: ${addonStyle.addonBorderRadiusTopLeft}${suffix} ${addonStyle.addonBorderRadiusTopRight}${suffix} ${addonStyle.addonBorderRadiusBottomRight}${suffix} ${addonStyle.addonBorderRadiusBottomLeft}${suffix};`);
+            bgStyles.margin = `margin: ${addonStyle.addonMargin}px;`;
+            bgStyles.borderRadius = `border-radius: ${addonStyle.addonBorderRadiusTopLeft}${suffix} ${addonStyle.addonBorderRadiusTopRight}${suffix} ${addonStyle.addonBorderRadiusBottomRight}${suffix} ${addonStyle.addonBorderRadiusBottomLeft}${suffix};`;
             if (addonStyle.addonOverflowIsOn) {
-                styles.push(`overflow: hidden;`);
+                bgStyles.overflow = `overflow: hidden;`;
             }
-            if (addonStyle.addonBorderIsOn || (isActive && filterStyle.selBorderColorIsOn) || (!isEnabled && filterStyle.reqBorderColorIsOn)) {
-                let borderColor = addonStyle.addonBorderColor;
-                
-                if (!isEnabled && filterStyle.reqBorderColorIsOn) {
-                    borderColor = filterStyle.reqFilterBorderColor;
-                } else if (isActive && filterStyle.selBorderColorIsOn) {
-                    borderColor = filterStyle.selFilterBorderColor;
-                }
-                styles.push(`border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(borderColor)};`);
+            if (addonStyle.addonBorderIsOn) {
+                bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(addonStyle.addonBorderColor)};`;
             }
             if (addonStyle.addonGradientIsOn) {
-                if (isEnabled && addonEnabled) {
-                    if (isActive) {
-                        styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`);
-                    } else {
-                        styles.push(`background-image: linear-gradient(${addonStyle.addonGradient});`);
-                    }
-                } else {
-                    styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnReq});`);
-                }
+                bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradient});`;
             }
             if (addonStyle.addonDropShadowIsOn) {
                 if (addonStyle.addonUseBoxShadowIsOn) {
-                    styles.push(`box-shadow: ${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${addonStyle.addonDropShadowSpread}px ${hexToRgba(addonStyle.addonDropShadowColor)};`);
+                    bgStyles.boxShadow = `box-shadow: ${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${addonStyle.addonDropShadowSpread}px ${hexToRgba(addonStyle.addonDropShadowColor)};`;
                 } else {
-                    filterIndex = styles.length;
-                    styles.push(`filter: drop-shadow(${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${hexToRgba(addonStyle.addonDropShadowColor)})`);
+                    filters.dropShadow = ` drop-shadow(${addonStyle.addonDropShadowH}px ${addonStyle.addonDropShadowV}px ${addonStyle.addonDropShadowBlur}px ${hexToRgba(addonStyle.addonDropShadowColor)})`;
                 }
-            }            
-            if (filterIndex === 0) {
-                styles.push(`filter:`);
-                filterIndex = styles.length;
             }
-            if (isEnabled && addonEnabled) {
-                if (isActive) {
+        }
+        if (isEnabled) {
+            if (addonEnabled) {
+                if (addon.isActive || (isActive && !addon.isSelectable)) {
+                    if (useDesign) {
+                        if (filterStyle.selBorderColorIsOn) {
+                            bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
+                        }
+                        if (addonStyle.addonGradientIsOn) {
+                            bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`;
+                        }
+                    } else if (addon.isSelectable) {
+                        if (filterStyle.selBorderColorIsOn) {
+                            bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
+                        }
+                        if (objectStyle.objectGradientIsOn) {
+                            bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                        }
+                    }
+                    if (filterStyle.selBgColorIsOn) {
+                        bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
+                    }
                     if (filterStyle.selFilterBlurIsOn) {
-                        styles.push(` blur(${filterStyle.selFilterBlur}px)`);
+                        filters.blur = ` blur(${filterStyle.selFilterBlur}px)`;
                     }
                     if (filterStyle.selFilterBrightIsOn) {
-                        styles.push(` brightness(${filterStyle.selFilterBright}%)`);
+                        filters.brightness = ` brightness(${filterStyle.selFilterBright}%)`;
                     }
                     if (filterStyle.selFilterContIsOn) {
-                        styles.push(` contrast(${filterStyle.selFilterCont}%)`);
+                        filters.contrast = ` contrast(${filterStyle.selFilterCont}%)`;
                     }
                     if (filterStyle.selFilterGrayIsOn) {
-                        styles.push(` grayscale(${filterStyle.selFilterGray}%)`);
+                        filters.grayscale = ` grayscale(${filterStyle.selFilterGray}%)`;
                     }
                     if (filterStyle.selFilterHueIsOn) {
-                        styles.push(` hue-rotate(${filterStyle.selFilterHue}deg)`);
+                        filters.hueRotate = ` hue-rotate(${filterStyle.selFilterHue}deg)`;
                     }
                     if (filterStyle.selFilterInvertIsOn) {
-                        styles.push(` invert(${filterStyle.selFilterInvert}%)`);
+                        filters.invert = ` invert(${filterStyle.selFilterInvert}%)`;
                     }
                     if (filterStyle.selFilterOpacIsOn) {
-                        styles.push(` opacity(${filterStyle.selFilterOpac}%)`);
+                        filters.opacity = ` opacity(${filterStyle.selFilterOpac}%)`;
                     }
                     if (filterStyle.selFilterSaturIsOn) {
-                        styles.push(` saturate(${filterStyle.selFilterSatur})`);
+                        filters.saturate = ` saturate(${filterStyle.selFilterSatur})`;
                     }
                     if (filterStyle.selFilterSepiaIsOn) {
-                        styles.push(` sepia(${filterStyle.selFilterGray}%)`);
-                    }
-                    if (styles.length === filterIndex) {
-                        styles.splice(filterIndex - 1, 1);
-                    } else {
-                        styles.push(`;`);
+                        filters.sepia = ` sepia(${filterStyle.selFilterGray}%)`;
                     }
                 } else {
+                    if (objectStyle.objectGradientIsOn && addon.isSelectable) {
+                        bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
+                    }
                     if (filterStyle.unselFilterBlurIsOn) {
-                        styles.push(` blur(${filterStyle.unselFilterBlur}px)`);
+                        filters.blur = ` blur(${filterStyle.unselFilterBlur}px)`;
                     }
                     if (filterStyle.unselFilterBrightIsOn) {
-                        styles.push(` brightness(${filterStyle.unselFilterBright}%)`);
+                        filters.brightness = ` brightness(${filterStyle.unselFilterBright}%)`;
                     }
                     if (filterStyle.unselFilterContIsOn) {
-                        styles.push(` contrast(${filterStyle.unselFilterCont}%)`);
+                        filters.contrast = ` contrast(${filterStyle.unselFilterCont}%)`;
                     }
                     if (filterStyle.unselFilterGrayIsOn) {
-                        styles.push(` grayscale(${filterStyle.unselFilterGray}%)`);
+                        filters.grayscale = ` grayscale(${filterStyle.unselFilterGray}%)`;
                     }
                     if (filterStyle.unselFilterHueIsOn) {
-                        styles.push(` hue-rotate(${filterStyle.unselFilterHue}deg)`);
+                        filters.hueRotate = ` hue-rotate(${filterStyle.unselFilterHue}deg)`;
                     }
                     if (filterStyle.unselFilterInvertIsOn) {
-                        styles.push(` invert(${filterStyle.unselFilterInvert}%)`);
+                        filters.invert = ` invert(${filterStyle.unselFilterInvert}%)`;
                     }
                     if (filterStyle.unselFilterOpacIsOn) {
-                        styles.push(` opacity(${filterStyle.unselFilterOpac}%)`);
+                        filters.opacity = ` opacity(${filterStyle.unselFilterOpac}%)`;
                     }
                     if (filterStyle.unselFilterSaturIsOn) {
-                        styles.push(` saturate(${filterStyle.unselFilterSatur})`);
+                        filters.saturate = ` saturate(${filterStyle.unselFilterSatur})`;
                     }
                     if (filterStyle.unselFilterSepiaIsOn) {
-                        styles.push(` sepia(${filterStyle.unselFilterGray}%)`);
+                        filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
                     }
                 }
-                if (styles.length === filterIndex) {
-                    styles.splice(filterIndex - 1, 1);
-                } else {
-                    styles.push(`;`);
-                }
-            }
-        }
-        if ((app.showAllAddons > 0 || addon.showAddon) && isEnabled && !addonEnabled) {
-            if (filterIndex === 0) {
-                styles.push(`filter:`);
-                filterIndex = styles.length;
-            }
-            if (filterStyle.reqFilterBlurIsOn) {
-                styles.push(` blur(${filterStyle.reqFilterBlur}px)`);
-            }
-            if (filterStyle.reqFilterBrightIsOn) {
-                styles.push(` brightness(${filterStyle.reqFilterBright}%)`);
-            }
-            if (filterStyle.reqFilterContIsOn) {
-                styles.push(` contrast(${filterStyle.reqFilterCont}%)`);
-            }
-            if (filterStyle.reqFilterGrayIsOn) {
-                styles.push(` grayscale(${filterStyle.reqFilterGray}%)`);
-            }
-            if (filterStyle.reqFilterHueIsOn) {
-                styles.push(` hue-rotate(${filterStyle.reqFilterHue}deg)`);
-            }
-            if (filterStyle.reqFilterInvertIsOn) {
-                styles.push(` invert(${filterStyle.reqFilterInvert}%)`);
-            }
-            if (filterStyle.reqFilterOpacIsOn) {
-                styles.push(` opacity(${filterStyle.reqFilterOpac}%)`);
-            }
-            if (filterStyle.reqFilterSaturIsOn) {
-                styles.push(` saturate(${filterStyle.reqFilterSatur})`);
-            }
-            if (filterStyle.reqFilterSepiaIsOn) {
-                styles.push(` sepia(${filterStyle.reqFilterGray}%)`);
-            }
-            if (styles.length === filterIndex) {
-                styles.splice(filterIndex - 1, 1);
             } else {
-                styles.push(`;`);
-            }
-            if (filterStyle.reqBgColorIsOn) {
-                if (!filterStyle.reqOverlayOnImage) {
-                    if (bgColorIndex !== 0) {
-                        styles.splice(bgColorIndex - 1, 1);
+                if (useDesign) {
+                    if (filterStyle.reqBorderColorIsOn) {
+                        bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
                     }
-                    if (bgImageIndex !== 0) {
-                        styles.splice(bgImageIndex - 1, 1);
+                    if (addonStyle.addonGradientIsOn) {
+                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnReq});`;
+                    }
+                } else if (addon.isSelectable) {
+                    if (filterStyle.reqBorderColorIsOn) {
+                        bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
+                    }
+                    if (objectStyle.objectGradientIsOn) {
+                        bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
                     }
                 }
-                styles.push(`background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`);
-            }
-            if (useDesign && addonStyle.addonGradientIsOn) {
-                styles.push(`background-image: linear-gradient(${addonStyle.addonGradientOnReq});`);
+                if (filterStyle.reqFilterBlurIsOn) {
+                    filters.blur = ` blur(${filterStyle.reqFilterBlur}px)`;
+                }
+                if (filterStyle.reqFilterBrightIsOn) {
+                    filters.brightness = ` brightness(${filterStyle.reqFilterBright}%)`;
+                }
+                if (filterStyle.reqFilterContIsOn) {
+                    filters.contrast = ` contrast(${filterStyle.reqFilterCont}%)`;
+                }
+                if (filterStyle.reqFilterGrayIsOn) {
+                    filters.grayscale = ` grayscale(${filterStyle.reqFilterGray}%)`;
+                }
+                if (filterStyle.reqFilterHueIsOn) {
+                    filters.hueRotate = ` hue-rotate(${filterStyle.reqFilterHue}deg)`;
+                }
+                if (filterStyle.reqFilterInvertIsOn) {
+                    filters.invert = ` invert(${filterStyle.reqFilterInvert}%)`;
+                }
+                if (filterStyle.reqFilterOpacIsOn) {
+                    filters.opacity = ` opacity(${filterStyle.reqFilterOpac}%)`;
+                }
+                if (filterStyle.reqFilterSaturIsOn) {
+                    filters.saturate = ` saturate(${filterStyle.reqFilterSatur})`;
+                }
+                if (filterStyle.reqFilterSepiaIsOn) {
+                    filters.sepia = ` sepia(${filterStyle.reqFilterGray}%)`;
+                }
             }
         }
-        return styles.join(' ');
+        if (Object.keys(filters).length > 0) {
+            bgStyles.filter = `filter:${Object.values(filters).join('')};`;
+        }
+
+        return Object.values(bgStyles).join(' ');
     });
 
     let addonTitle = $derived.by(() => {
@@ -461,4 +518,37 @@
         });
     }
 
+    function activateObject(localChoice: SelectableAddon, localRow: Row, e?: MouseEvent, isManually: boolean = false) {
+        const target = e && e.target ? e.target as HTMLElement : null
+        let origRow = localRow;
+
+        options.isOverDlg = false;
+        options.isOverImg = false;
+
+        if (localRow.isResultRow || localRow.isGroupRow) {
+            const cMap = choiceMap.get(localChoice.id);
+
+            if (typeof cMap !== 'undefined') {
+                origRow = cMap.row;
+            }
+        }
+
+        if (localChoice.isSelectableMultiple) {
+            if (localChoice.id === addon.id && localChoice.allowSelectByClick && localChoice.multipleUseVariable === 0) {
+                if (target) {
+                    if (closestByClassPrefix(target, 'multi-', 'addon-')) return;
+                }
+
+                selectedOneMore(localChoice, origRow, options);
+            }
+        } else {
+            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated) {
+                if (localChoice.isActive) {
+                    if (!localChoice.selectOnce) deselectObject(localChoice, origRow, options);
+                } else {
+                    selectObject(localChoice, origRow, options);
+                }
+            }
+        }
+    }
 </script>

@@ -69,13 +69,18 @@
                                             <Textfield bind:value={group.name} label="Name" variant="filled" />
                                         </div>
                                         <div class="col-12">
-                                            <Textfield bind:value={group.activatedId} label="Id Needed to Show" variant="filled" />
+                                            <Wrapper text="Enter a Choice ID or Global Requirement ID.">
+                                                <Textfield bind:value={group.activatedId} label="Id Needed to Show" variant="filled" />
+                                            </Wrapper>
                                         </div>
                                         <div class="col-12">
-                                            <CustomChipInput acValue={group.elements} acOptions={isRow ? getRows() : getChoices()} inputLabel="Row Id" getLabel={isRow ? getRowLabel : getChoiceLabel} onSelected={isRow ? setRowElement : setChoiceElement} onDeselected={isRow ? releaseRowElement : releaseChoiceElement} selectProp={group}/>
+                                            <CustomChipInput acValue={group.groupElements} acOptions={getGroups()} inputLabel="Group Id" getLabel={getGroupLabel} onSelected={setGroupElement} onDeselected={releaseGroupElement} selectProp={group}/>
                                         </div>
                                         <div class="col-12">
-                                            <CustomChipInput acValue={group.backpackElements} acOptions={isRow ? getBackpackRows() : getBackpackChoices()} inputLabel="Backpack Row Id" getLabel={isRow ? getRowLabel : getChoiceLabel} onSelected={isRow ? setRowElement : setChoiceElement} onDeselected={isRow ? releaseRowElement : releaseChoiceElement} selectProp={group}/>
+                                            <CustomChipInput acValue={group.elements} acOptions={isRow ? getRows() : getChoices()} inputLabel={isRow ? 'Row Id' : 'Choice Id'} getLabel={isRow ? getRowLabel : getChoiceLabel} onSelected={isRow ? setRowElement : setChoiceElement} onDeselected={isRow ? releaseRowElement : releaseChoiceElement} selectProp={group}/>
+                                        </div>
+                                        <div class="col-12">
+                                            <CustomChipInput acValue={group.backpackElements} acOptions={isRow ? getBackpackRows() : getBackpackChoices()} inputLabel={isRow ? 'Backpack Row Id' : 'Backpack Choice Id'} getLabel={isRow ? getRowLabel : getChoiceLabel} onSelected={isRow ? setRowElement : setChoiceElement} onDeselected={isRow ? releaseRowElement : releaseChoiceElement} selectProp={group}/>
                                         </div>
                                     </div>
                                 </div>
@@ -122,7 +127,7 @@
     import AppPrivateDesign from './AppPrivateDesign.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
-    import { app, checkDupId, choiceMap, rowDesignMap, rowMap, objectDesignMap, generateDesignId, getRows, getChoices, getBackpackRows, getBackpackChoices, getRowLabel, getChoiceLabel, scrollToLastRow, categoryMap } from '$lib/store/store.svelte';
+    import { app, checkDupId, choiceMap, rowDesignMap, rowMap, objectDesignMap, generateDesignId, getRows, getChoices, getBackpackRows, getBackpackChoices, getGroups, getRowLabel, getChoiceLabel, getGroupLabel, scrollToLastRow, categoryMap, groupMap } from '$lib/store/store.svelte';
 	import type { RowDesignGroup, ObjectDesignGroup, Category } from '$lib/store/types';
     import { createVirtualizer } from '@tanstack/svelte-virtual';
     import { onMount } from 'svelte';
@@ -259,6 +264,7 @@
             category: cIdx,
             elements: [],
             backpackElements: [],
+            groupElements: [],
             styling: {}
         });
         designMap.set(id, designGroup[designGroup.length - 1]);
@@ -327,9 +333,27 @@
         }
     }
 
+    function  releaseGroupElement(e: CustomEvent, design: RowDesignGroup | ObjectDesignGroup) {
+        const key = typeof e.detail === 'object' ? e.detail.chipId : e.detail;
+        const group = groupMap.get(key);
+        if (typeof group !== 'undefined') {
+            if (typeof group.designGroups !== 'undefined') {
+                group.designGroups.splice(group.designGroups.indexOf(design.id), 1);
+            }
+        }
+    }
+
+    function setGroupElement(e: CustomEvent, design: RowDesignGroup) {
+        const group = groupMap.get(e.detail);
+        if (typeof group !== 'undefined') {
+            if (typeof group.designGroups === 'undefined') group.designGroups = [];
+            if (group.designGroups.indexOf(design.id) === -1) group.designGroups.push(design.id);
+        }
+    }
+
     function  releaseRowElement(e: CustomEvent, design: RowDesignGroup) {
-        let key = typeof e.detail === 'object' ? e.detail.chipId : e.detail;
-        let row = rowMap.get(key);
+        const key = typeof e.detail === 'object' ? e.detail.chipId : e.detail;
+        const row = rowMap.get(key);
         if (typeof row !== 'undefined') {
             if (typeof row.rowDesignGroups !== 'undefined') {
                 row.rowDesignGroups.splice(row.rowDesignGroups.indexOf(design.id), 1);
@@ -338,7 +362,7 @@
     }
 
     function setRowElement(e: CustomEvent, design: RowDesignGroup) {
-        let row = rowMap.get(e.detail);
+        const row = rowMap.get(e.detail);
         if (typeof row !== 'undefined') {
             if (typeof row.rowDesignGroups === 'undefined') row.rowDesignGroups = [];
             if (row.rowDesignGroups.indexOf(design.id) === -1) row.rowDesignGroups.push(design.id);
@@ -346,8 +370,8 @@
     }
 
     function  releaseChoiceElement(e: CustomEvent, design: ObjectDesignGroup) {
-        let key = typeof e.detail === 'object' ? e.detail.chipId : e.detail;
-        let cMap = choiceMap.get(key);
+        const key = typeof e.detail === 'object' ? e.detail.chipId : e.detail;
+        const cMap = choiceMap.get(key);
         if (typeof cMap !== 'undefined') {
             let choice = cMap.choice;
             if (typeof choice.objectDesignGroups !== 'undefined') {
@@ -357,9 +381,9 @@
     }
 
     function setChoiceElement(e: CustomEvent, design: ObjectDesignGroup) {
-        let cMap = choiceMap.get(e.detail);
+        const cMap = choiceMap.get(e.detail);
         if (typeof cMap !== 'undefined') {
-            let choice = cMap.choice;
+            const choice = cMap.choice;
             if (typeof choice.objectDesignGroups === 'undefined') choice.objectDesignGroups = [];
             if (choice.objectDesignGroups.indexOf(design.id) === -1) choice.objectDesignGroups.push(design.id);
         }

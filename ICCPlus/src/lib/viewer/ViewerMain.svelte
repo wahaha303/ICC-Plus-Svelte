@@ -44,6 +44,12 @@
                     <Graphic class="mdi mdi-select-off" />
                     <Text class="w-100 list-text text-center">Clear Selected Choices</Text>
                 </Item>
+                {#if app.enableSearch}
+                    <Item onSMUIAction={() => {currentDialog = 'appSearchForm'; menuOpen = false;}} class="my-0">
+                        <Graphic class="mdi mdi-magnify" />
+                        <Text class="w-100 list-text text-center">Search Choice</Text>
+                    </Item>
+                {/if}
                 {#if app.importedChoicesIsOpen}
                     <Item onSMUIAction={() => {currentDialog = 'appBuildForm'; menuOpen = false;}} class="my-0">
                         <Graphic class="mdi mdi-format-list-checks" />
@@ -154,13 +160,16 @@
             confirmDialog.action();
         }
     }}/>
+{:else if currentDialog === 'appSearchForm'}
+    <AppSearchForm open={currentDialog === 'appSearchForm'} onclose={() => (currentDialog = 'none')} />
 {/if}
 {#if wordDialog.currentDialog === 'dlgCommon' && typeof wordDialog.cFunc !== 'undefined' && typeof wordDialog.context !== 'undefined'}
     <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} isForced={wordDialog.isForced} />
 {/if}
-{#if dlgVariables.currentDialog === 'appImageUpload' && typeof dlgVariables.data !== 'undefined' && typeof dlgVariables.imgProp !== 'undefined'}
-    <ImageUpload open={dlgVariables.currentDialog === 'appImageUpload'} onclose={() => (dlgVariables.currentDialog = 'none')} imgObject={dlgVariables.data} imgProp={dlgVariables.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={dlgVariables.cFunc} />
-{:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
+{#if imgDialog.currentDialog === 'appImageUpload' && typeof imgDialog.data !== 'undefined' && typeof imgDialog.imgProp !== 'undefined'}
+    <ImageUpload open={imgDialog.currentDialog === 'appImageUpload'} onclose={() => (imgDialog.currentDialog = 'none')} imgObject={imgDialog.data} imgProp={imgDialog.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={imgDialog.cFunc} />
+{/if}
+{#if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />
 {:else if dlgVariables.currentDialog === 'selectDialog' && typeof dlgVariables.choice !== 'undefined' && typeof dlgVariables.func !== 'undefined'}
     <ObjectSelectDialog open={dlgVariables.currentDialog === 'selectDialog'} onclose={() => (dlgVariables.currentDialog = 'none')} submit={dlgVariables.func} changeNum={dlgVariables.choice.multipleUseVariable} minVal={dlgVariables.choice.numMultipleTimesMinus} maxVal={dlgVariables.choice.numMultipleTimesPluss} />
@@ -175,11 +184,12 @@
     import Slider from '@smui/slider';
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba, musicPlayer, wordDialog } from '$lib/store/store.svelte';
+    import { app, currentComponent, currentTheme, dlgVariables, bgmVariables, downloadAsImage, loadFromDisk, cleanActivated, checkPointEnable, hexToRgba, musicPlayer, wordDialog, imgDialog } from '$lib/store/store.svelte';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppGlobalSettings from './AppGlobalSettings.svelte';
     import AppPointBar from './AppPointBar.svelte';
     import AppSaveLoad from './AppSaveLoad.svelte';
+    import AppSearchForm from './AppSearchForm.svelte';
 	import AppRow from './AppRow.svelte';
     import DlgBackpack from './DlgBackpack.svelte';
 	import ImageUpload from '$lib/store/ImageUpload.svelte';
@@ -196,7 +206,7 @@
     
     let menuOpen = $state(false);
     let topPointBar = $state(false);
-    let currentDialog = $state<'none' | 'appSaveLoad' | 'dlgBackpack' | 'appGlobalSettings' | 'appBuildForm' | 'dlgCommon'>('none');
+    let currentDialog = $state<'none' | 'appSaveLoad' | 'dlgBackpack' | 'appGlobalSettings' | 'appBuildForm' | 'appSearchForm' | 'dlgCommon'>('none');
     let pointBarPosition = $derived(topPointBar ? app.showMusicPlayer ? 'top: 32px;' : 'top: 0;' : 'bottom: 0;');
     let viewerMenuStyle = $derived(topPointBar ? app.showMusicPlayer ? 'margin-top: 88px;' : 'margin-top: 56px;' : app.showMusicPlayer ? 'margin-top: 32px;' : '');
     let fadeStyle = $derived(`opacity: ${app.fadeTransitionIsOn ? 1 : 0}; transition: opacity ${app.fadeTransitionTime}s ease-out; background-color: ${hexToRgba(app.fadeTransitionColor)}; pointer-events: ${app.fadeTransitionIsOn ? 'auto' : 'none'}; cursor: ${app.fadeTransitionIsOn ? 'none' : 'auto'};`);

@@ -132,11 +132,11 @@
         <b>Add Point Comparison Requirement</b>
         - Insert a requirement to compare the values of two Point-types.
         - Arithmetic operations can be added to the Point-type located on the right-hand side.
-        <b>'X of These is Selected' Requirement</b>
-        - Insert a requirement to check whether the user has selected at least X choices with the specified id.
-        <b>'X of These is Not Selected' Requirement</b>
-        - Insert a requirement to check whether the user has selected fewer than X choices with the specified id.
-        <b>'Selected X or more From' Requirements</b>
+        <b>'X of These is Met' Requirement</b>
+        - Insert a requirement to check whether the user has met at least X requirements.
+        <b>'X of These is Not Met' Requirement</b>
+        - Insert a requirement to check whether the user has met fewer than X requirements.
+        <b>'Selected X or more from' Requirements</b>
         - Insert a requirement to check whether the user has selected at least X choices among those included in the Group / Row / All Rows.
 
 
@@ -180,7 +180,13 @@
         The third button named 'Selected Choices?' can be used to make the row show all choices that have been selected, good to use at the end of the project to let the player see the choices they have made. A private row design should be used to make filters invisible.`
     }, {
         title: 'What is an Addon?',
-        text: `An Addon is going to be a smaller choice in the choices but is currently only an under title and undertext of the choice it is attached to.`
+        text: `An addon is a smaller choice in the choices.
+        You can completely remove the choice’s title and text and instead add individual requirements to each addon, allowing different images or text to be displayed depending on the situation.
+
+        There is also an option to make an addon selectable.
+        A selectable addon is always placed below other addons and cannot use group or certain choice functions.
+        When using border-image together with a selectable addon, depending on the image, the filter designs may not fully cover the choice.
+        `
     }, {
         title: 'What is the image cropper and compressor?',
         text: `The image cropper and compressor can be found when someone presses the 'Change Image'-button on either a row or a choice and will open up in its own dialog.
@@ -218,6 +224,34 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.0 / ${getDate('2026-02-16T03:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where choice was not properly deselected when requirement was no longer met due to row button.
+
+        <span style="color: green">Choice</span>
+        - Added option to set choice as non-searchable.
+        - Added option to automatically activate choice.
+        - Fixed issue where choice with selection delay option reselected after certain time when deselected.
+        - Fixed issue where This Choice functions could not be disabled while choice was selected.
+        - Fixed issue where choice from Force Other Choice Active did not activate after requirements were met if Clear Selected Choices had been used.
+
+        <span style="color: green">Addon</span>
+        - Added option to set addon as selectable.
+
+        <span style="color: green">Requirement</span>
+        - Renewed "X of these" Requirement to check requirements instead of choice selection status.
+
+        <span style="color: green">Features</span>
+        - Added option to set group in design group.
+        - Renewed manage defaults feature.
+        - Fixed issue where HTML tags were inserted into IDs when using Change IDs to Titles.
+
+        <span style="color: green">Global Settings</span>
+        - Added option to enable choice search feature.
+        - Added option to set default position for image cropper.
+        `
+    }, {
+        open: false,
         title: `v2.7.6 / ${getDate('2026-01-10T05:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where choice activated by Force Other Choice to Be Active could not be reselected after being deselected.

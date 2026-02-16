@@ -92,12 +92,22 @@
                                     {/snippet}
                                 </FormField>
                             </div>
+                            <div class="col-12">
+                                <Select bind:value={app.cropperPosition} label="Image Cropper Position" variant="standard" alwaysFloat={true}>
+                                    {#each positions as position (position.text)}
+                                        <Option value={position.value}>{position.text}</Option>
+                                    {/each}
+                                    {#snippet helperText()}
+                                        Default position of the image cropper
+                                    {/snippet}
+                                </Select>
+                            </div>
                         </div>
                     </div>
                 </PaperContent>
             </Paper>
         {:else if active === 'Advanced'}
-            <Paper role="tabpanel" variant="unelevated">
+            <Paper role="tabpanel" class="pb-0" variant="unelevated">
                 <PaperContent>
                     <div class="container-fluid p-0">
                         <div class="row gy-3">
@@ -114,6 +124,14 @@
                                     <Switch bind:checked={() => app.useTextEditor ?? false, (e) => app.useTextEditor = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
                                         Enable Text Editor
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
+                                    <Switch bind:checked={() => app.enableSearch ?? false, (e) => app.enableSearch = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Enable Search Choice
                                     {/snippet}
                                 </FormField>
                             </div>
@@ -410,14 +428,42 @@
 
     let { open, onclose }: { open: boolean; onclose: () => void; } = $props();
     const objectWidths = [{
-        text: "2 per row",
-        value: "col-6"
+        text: '2 per row',
+        value: 'col-6'
     }, {
-        text: "3 per row",
-        value: "col-4"
+        text: '3 per row',
+        value: 'col-4'
     }, {
-        text: "4 per row",
-        value: "col-3"
+        text: '4 per row',
+        value: 'col-3'
+    }];
+    const positions = [{
+        text: 'top-left',
+        value: 0
+    }, {
+        text: 'top-center',
+        value: 1
+    }, {
+        text: 'top-right',
+        value: 2
+    }, {
+        text: 'middle-left',
+        value: 3
+    }, {
+        text: 'center',
+        value: 4
+    }, {
+        text: 'middle-right',
+        value: 5
+    }, {
+        text: 'bottom-left',
+        value: 6
+    }, {
+        text: 'bottom-center',
+        value: 7
+    }, {
+        text: 'bottom-right',
+        value: 8
     }];
     let active = $state('General');
     let importFromUrl = $state(false);

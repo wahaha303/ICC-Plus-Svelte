@@ -22,11 +22,11 @@
                     {/if}
                     <div class="py-3 px-5 col-12">
                         {#if choice.image && !app.hideImages}
-                            <button type="button" onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} class="btn--image-background">
+                            <button type="button" onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload', imgDialog.data = choice, imgDialog.imgProp = 'image'}} class="btn--image-background">
                                 <img src={choice.image} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
                             </button>
                         {/if}
-                        <Button onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload', dlgVariables.data = choice, dlgVariables.imgProp = 'image'}} variant="raised">
+                        <Button onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload', imgDialog.data = choice, imgDialog.imgProp = 'image'}} variant="raised">
                             <Label>Change Image</Label>
                         </Button>
                     </div>                    
@@ -132,8 +132,8 @@
                                     </div>
                                     {#each choice.addons as addon, i}
                                         <div class="col-12 p-0">
-                                            <ObjectAddon choice={choice} addon={addon} isEditModeOn={true} index={i} />
-                                            <Button onclickcapture={() => choice.addons.splice(i, 1)} class="w-100 mt-1" variant="raised">
+                                            <ObjectAddon row={row} choice={choice} addon={addon} isEditModeOn={true} index={i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv}/>
+                                            <Button disabled={addon.isActive} onclickcapture={() => {choiceMap.delete(addon.id); choice.addons.splice(i, 1);}} class="w-100 mt-1" variant="raised">
                                                 <Label>Delete</Label>
                                             </Button>
                                         </div>
@@ -152,7 +152,7 @@
                                 {#if panelReq}
                                 <div class="row">
                                     {#each choice.requireds as req, i}
-                                        <div class="{req.requireds.length > 0 ? 'col-12' : reqCol} p-2">
+                                        <div class="{req.requireds.length > 0 || req.type === 'or' ? 'col-12' : reqCol} p-2">
                                             <ObjectRequired required={req} isEditModeOn={true} data={choice} index={i} />
                                             <Button onclickcapture={() => choice.requireds.splice(i, 1)} class="w-100 mt-1" variant="raised" disabled={choice.isActive}>
                                                 <Label>Delete</Label>
@@ -203,14 +203,16 @@
                                     </Header>
                                     <AcdContent style="overflow:visible">
                                         {#if panel01}
-                                        <div class:disabled={choice.isActive} class="row gy-3">
-                                            <FormField class="col-12 m-1 p-0">
+                                        <div class="row gy-3">
+                                            <FormField class="{choice.isActive ? 'disabled ' : ''}col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.isSelectableMultiple ?? false, (e) => choice.isSelectableMultiple = e} onchange={() => {
                                                     if (choice.isSelectableMultiple) {
                                                         choice.numMultipleTimesMinus = 0;
-                                                        choice.numMultipleTimesPluss = 0;
+                                                        choice.numMultipleTimesPluss = app.defaultChoiceMaxNum;
                                                         choice.initMultipleTimesMinus = 0;
                                                         choice.isMultipleUseVariable = true;
+                                                        delete choice.isAutoActive;
+                                                        tmpActivatedMap.delete(choice.id);
                                                     } else {
                                                         delete choice.isSelectableMultiple;
                                                         delete choice.isMultipleUseVariable;
@@ -237,7 +239,7 @@
                                             </FormField>
                                             {#if choice.isSelectableMultiple}
                                                 <Wrapper innerClass="m-0 p-0" text="Disabling this checkbox will make most features unavailable.">
-                                                    <FormField class="col-12 m-1 p-0">
+                                                    <FormField class="{choice.isActive ? 'disabled ' : ''}col-12 m-1 p-0">
                                                         <Checkbox bind:checked={() => choice.isMultipleUseVariable ?? false, (e) => choice.isMultipleUseVariable = e} onchange={() => {
                                                             if (choice.isMultipleUseVariable) {
                                                                 delete choice.multipleScoreId;
@@ -308,7 +310,7 @@
                                                 {/if}
                                                 {#if !choice.isMultipleUseVariable}
                                                     <div class="col-12 m-1">The point type used here should only be used for this choice.</div>
-                                                    <div class="col-12 m-1 px-2">
+                                                    <div class:disabled={choice.isActive} class="col-12 m-1 px-2">
                                                         <Autocomplete
                                                             options={getPointTypes()}
                                                             getOptionLabel={getPointTypeLabel}
@@ -321,7 +323,7 @@
                                                         />
                                                     </div>
                                                 {/if}
-                                                <div class="col-12 m-1 px-2">
+                                                <div class:disabled={choice.isActive} class="col-12 m-1 px-2">
                                                     <Wrapper text="Some features may not work properly if this value is set below 0.">
                                                         <Textfield bind:value={() => choice.numMultipleTimesMinus ?? 0, (e) => choice.numMultipleTimesMinus = e} onchange={() => choice.initMultipleTimesMinus = choice.numMultipleTimesMinus} label="Number at which the minus stops working" type="number" variant="filled" />
                                                     </Wrapper>
@@ -329,7 +331,7 @@
                                                 </div>
                                                 <div class="b-line"></div>
                                             {/if}
-                                            <FormField class="col-12 m-1 p-0">
+                                            <FormField class="{choice.isAutoActive ? 'disabled ' : ''}col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.isNotSelectable ?? false, (e) => choice.isNotSelectable = e} onchange={() => {
                                                     if (!choice.isNotSelectable) delete choice.isNotSelectable;
                                                 }} />
@@ -337,7 +339,7 @@
                                                     Cannot Be Selected Manually
                                                 {/snippet}
                                             </FormField>
-                                            <FormField class="col-12 m-1 p-0">
+                                            <FormField class="{choice.isAutoActive ? 'disabled ' : ''}col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.selectOnce ?? false, (e) => choice.selectOnce = e} onchange={() => {
                                                     if (!choice.selectOnce) delete choice.selectOnce;
                                                 }} />
@@ -345,7 +347,7 @@
                                                     Cannot Be Deselected Manually
                                                 {/snippet}
                                             </FormField>
-                                            <FormField class="col-12 m-1 p-0">
+                                            <FormField class="{choice.isAutoActive ? 'disabled ' : ''}col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.notDeselectedByClean ?? false, (e) => choice.notDeselectedByClean = e} onchange={() => {
                                                     if (!choice.notDeselectedByClean) {
                                                         delete choice.notDeselectedByClean;
@@ -365,6 +367,14 @@
                                                 {/snippet}
                                             </FormField>
                                             <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isNotSearchable ?? false, (e) => choice.isNotSearchable = e} onchange={() => {
+                                                    if (!choice.isNotSearchable) delete choice.isNotSearchable;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Searched
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="{choice.isActive ? 'disabled ' : ''}col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.isImageUpload ?? false, (e) => choice.isImageUpload = e} onchange={() => {
                                                     if (!choice.isImageUpload) delete choice.isImageUpload;
                                                 }} />
@@ -372,7 +382,7 @@
                                                     Allows the Player to Upload Image
                                                 {/snippet}
                                             </FormField>
-                                            <FormField class="col-12 m-1 p-0">
+                                            <FormField class="{choice.isAutoActive ? 'disabled ' : ''}col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.isSelectDelayed ?? false, (e) => choice.isSelectDelayed = e} onchange={() => {
                                                     if (choice.isSelectDelayed) {
                                                         choice.selectDelayTime = 1000;
@@ -391,6 +401,12 @@
                                                     <Textfield bind:value={() => choice.selectDelayTime ?? 0, (e) => choice.selectDelayTime = e} label="Delay" type="number" suffix="ms" variant="filled" />
                                                 </div>
                                             {/if}
+                                            <FormField class="{choice.isSelectableMultiple ? 'disabled ' : ''}col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isAutoActive ?? false, (e) => choice.isAutoActive = e} onchange={toggleAutoActive} />
+                                                {#snippet label()}
+                                                    Will Be Automatically Selected
+                                                {/snippet}
+                                            </FormField>
                                             <FormField class="col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.showScoreInAddon ?? false, (e) => choice.showScoreInAddon = e} onchange={() => {
                                                     if (!choice.showScoreInAddon) {
@@ -707,7 +723,7 @@
                                                 <div class="col-12 m-1 px-2">
                                                     {#if choice.isDisChoices}
                                                         <CustomChipInput acValue={choice.discountRows ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Rows to apply discount" getLabel={getRowLabel} selectProp={choice} />
-                                                        <CustomChipInput acValue={choice.discountChoices ?? []} acOptions={isBackpack ? getBackpackChoices() : getChoices()} inputLabel="Choices to apply discount" getLabel={getChoiceLabel} selectProp={choice} />
+                                                        <CustomChipInput acValue={choice.discountChoices ?? []} acOptions={isBackpack ? getBackpackSelectables() : getSelectables()} inputLabel="Choices to apply discount" getLabel={getChoiceLabel} selectProp={choice} />
                                                     {:else}
                                                         <CustomChipInput acValue={choice.discountGroups ?? []} acOptions={getGroups()} inputLabel="Groups to apply discount" getLabel={getGroupLabel} selectProp={choice} />
                                                     {/if}
@@ -1086,11 +1102,11 @@
                                                 {#if choice.changeBgImage}
                                                     <div class="col-12 px-5 py-3">
                                                         {#if choice.bgImage && !app.hideImages}
-                                                            <button type="button" onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = choice; dlgVariables.imgProp = 'bgImage'}} class="btn--image-background">
+                                                            <button type="button" onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = choice; imgDialog.imgProp = 'bgImage'}} class="btn--image-background">
                                                                 <img src={choice.bgImage} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
                                                             </button>
                                                         {/if}
-                                                        <Button onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = choice; dlgVariables.imgProp = 'bgImage'}} variant="raised">
+                                                        <Button onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = choice; imgDialog.imgProp = 'bgImage'}} variant="raised">
                                                             <Label>Change Image</Label>
                                                         </Button>
                                                     </div>
@@ -1465,9 +1481,9 @@
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
+            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)} oncontextmenu={() => console.log(choice)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
-                    <div class="d-column w-100 p-0 align-items-center">
+                    <div class="d-column w-100 p-0 align-items-center" style={objectFilter}>
                         {#if row.resultShowRowTitle}
                             {#key oriTitleKey}
                                 <div class="col-12" style={scoreText}>
@@ -1491,7 +1507,7 @@
                                 {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
                             {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                 {#each choice.scores as score}
@@ -1499,7 +1515,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
                             {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                 {#each choice.requireds as required}
@@ -1507,7 +1523,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
                             {#if choice.template === 5 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
@@ -1524,7 +1540,7 @@
                                 {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice}  selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice}  selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
                             {#if choice.template === 4 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
@@ -1534,166 +1550,197 @@
                                 {/if}
                             {/if}
                         </div>
-                        {#if choice.addons && choice.addons.length > 0}
+                        {#if nAddons}
                             <div class="row g-0 p-0 w-100{addonJustify}">
-                                {#each choice.addons as addon, i}
+                                {#each nAddons as addon, i}
                                     {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
                                     {/if}
                                 {/each}
                             </div>
                         {/if}
                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                            <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                            <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                         {/if}
                     </div>
+                    {#if sAddons}
+                        <div class="row g-0 p-0 w-100{addonJustify}">
+                            {#each sAddons as addon, i}
+                                {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                {/if}
+                            {/each}
+                        </div>
+                    {/if}
                 {:else}
                     {#if choice.template === 2}
-                        <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
-                            {#if choice.image && !row.objectImageRemoved}
-                                {#if choice.imageSourceTooltip}
-                                    <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                {:else}
-                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                        <div class="row g-0" style={objectFilter}>
+                            <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
+                                {#if choice.image && !row.objectImageRemoved}
+                                    {#if choice.imageSourceTooltip}
+                                        <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    {:else}
+                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    {/if}
                                 {/if}
+                            </div>
+                            <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
+                                {#if choice.title !== '' && !row.objectTitleRemoved}
+                                    {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
+                                {/if}
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {/if}
+                                {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
+                                    {#each choice.scores as score}
+                                        <ObjectScore score={score} row={row} choice={choice} />
+                                    {/each}
+                                {/if}
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {/if}
+                                {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
+                                    {#each choice.requireds as required}
+                                        <ObjectRequired required={required} scoreText={scoreText} />
+                                    {/each}
+                                {/if}
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {/if}
+                                {#if choice.text !== '' && !row.objectTextRemoved}
+                                    {#key choiceTextKey}
+                                        <p class="mb-0" style={objectText}>
+                                            {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
+                                        </p>
+                                    {/key}
+                                {/if}
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {/if}
+                                {#if !choice.useSeperateAddon}
+                                    {#if nAddons}
+                                        <div class="row g-0 p-0 col w-100{addonJustify}">
+                                            {#each nAddons as addon, i}
+                                                {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                                {/if}
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                {/if}
+                            </div>
+                            {#if choice.useSeperateAddon}
+                                <div class="col-12 text-center">
+                                    {#if nAddons}
+                                        <div class="row g-0 p-0 col w-100{addonJustify}">
+                                            {#each nAddons as addon, i}
+                                                {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                                {/if}
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                </div>
                             {/if}
                         </div>
-                        <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
-                            {#if choice.title !== '' && !row.objectTitleRemoved}
-                                {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
-                                {#each choice.scores as score}
-                                    <ObjectScore score={score} row={row} choice={choice} />
+                        {#if sAddons}
+                            <div class="row g-0 p-0 col w-100{addonJustify}">
+                                {#each sAddons as addon, i}
+                                    {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                    {/if}
                                 {/each}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
-                                {#each choice.requireds as required}
-                                    <ObjectRequired required={required} scoreText={scoreText} />
-                                {/each}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if choice.text !== '' && !row.objectTextRemoved}
-                                {#key choiceTextKey}
-                                    <p class="mb-0" style={objectText}>
-                                        {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
-                                    </p>
-                                {/key}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if !choice.useSeperateAddon}
-                                {#if choice.addons && choice.addons.length > 0}
-                                    <div class="row g-0 p-0 col w-100{addonJustify}">
-                                        {#each choice.addons as addon, i}
-                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
-                                            {/if}
-                                        {/each}
-                                    </div>
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                            {/if}
-                        </div>
-                        {#if choice.useSeperateAddon}
-                            <div class="col-12 text-center">
-                                {#if choice.addons && choice.addons.length > 0}
-                                    <div class="row g-0 p-0 col w-100{addonJustify}">
-                                        {#each choice.addons as addon, i}
-                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
-                                            {/if}
-                                        {/each}
-                                    </div>
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
                             </div>
                         {/if}
                     {:else if choice.template === 3}
-                        <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
-                            {#if choice.title !== '' && !row.objectTitleRemoved}
-                                {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
-                                {#each choice.scores as score}
-                                    <ObjectScore score={score} row={row} choice={choice} />
-                                {/each}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
-                                {#each choice.requireds as required}
-                                    <ObjectRequired required={required} scoreText={scoreText} />
-                                {/each}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if choice.text !== '' && !row.objectTextRemoved}
-                                {#key choiceTextKey}
-                                    <p class="mb-0" style={objectText}>
-                                        {@html DOMPurify.sanitize(choiceTextKey, sanitizeArg)}
-                                    </p>
-                                {/key}
-                            {/if}
-                            {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                            {/if}
-                            {#if !choice.useSeperateAddon}
-                                {#if choice.addons && choice.addons.length > 0}
-                                    <div class="row g-0 p-0 col w-100{addonJustify}">
-                                        {#each choice.addons as addon, i}
-                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
-                                            {/if}
-                                        {/each}
-                                    </div>
+                        <div class="row g-0" style={objectFilter}>
+                            <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
+                                {#if choice.title !== '' && !row.objectTitleRemoved}
+                                    {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
                                 {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                                 {/if}
+                                {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
+                                    {#each choice.scores as score}
+                                        <ObjectScore score={score} row={row} choice={choice} />
+                                    {/each}
+                                {/if}
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {/if}
+                                {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
+                                    {#each choice.requireds as required}
+                                        <ObjectRequired required={required} scoreText={scoreText} />
+                                    {/each}
+                                {/if}
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {/if}
+                                {#if choice.text !== '' && !row.objectTextRemoved}
+                                    {#key choiceTextKey}
+                                        <p class="mb-0" style={objectText}>
+                                            {@html DOMPurify.sanitize(choiceTextKey, sanitizeArg)}
+                                        </p>
+                                    {/key}
+                                {/if}
+                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                {/if}
+                                {#if !choice.useSeperateAddon}
+                                    {#if nAddons}
+                                        <div class="row g-0 p-0 col w-100{addonJustify}">
+                                            {#each nAddons as addon, i}
+                                                {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                                {/if}
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                {/if}
+                            </div>
+                            <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
+                                {#if choice.image && !row.objectImageRemoved}
+                                    {#if choice.imageSourceTooltip}
+                                        <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    {:else}
+                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    {/if}
+                                {/if}
+                            </div>
+                            {#if choice.useSeperateAddon}
+                                <div class="col-12 text-center">
+                                    {#if nAddons}
+                                        <div class="row g-0 p-0 col w-100{addonJustify}">
+                                            {#each nAddons as addon, i}
+                                                {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                                {/if}
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                </div>
                             {/if}
                         </div>
-                        <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
-                            {#if choice.image && !row.objectImageRemoved}
-                                {#if choice.imageSourceTooltip}
-                                    <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                {:else}
-                                    <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                {/if}
-                            {/if}
-                        </div>
-                        {#if choice.useSeperateAddon}
-                            <div class="col-12 text-center">
-                                {#if choice.addons && choice.addons.length > 0}
-                                    <div class="row g-0 p-0 col w-100{addonJustify}">
-                                        {#each choice.addons as addon, i}
-                                            {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} />
-                                            {/if}
-                                        {/each}
-                                    </div>
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} multiChoiceButton={multiChoiceButton} multiChoiceText={multiChoiceText} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
+                        {#if sAddons}
+                            <div class="row g-0 p-0 col w-100{addonJustify}">
+                                {#each sAddons as addon, i}
+                                    {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                    {/if}
+                                {/each}
                             </div>
                         {/if}
                     {/if}
@@ -1723,14 +1770,14 @@
     import Textfield from '$lib/custom/textfield';
     import Tiptap from '$lib/store/Tiptap.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-	import type { Choice, choiceOptions, Row } from '$lib/store/types';
-	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, activatedMap, tmpActivatedMap, objectWidthToNum, generateObjectId, dlgVariables, snackbarVariables, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount, exportData, selectObject, deselectObject, selectedOneMore, selectedOneLess, wordDialog } from '$lib/store/store.svelte';
+	import type { BgStyles, Choice, ChoiceOptions, Filters, Row, SelectableAddon } from '$lib/store/types';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, activatedMap, tmpActivatedMap, objectWidthToNum, generateObjectId, dlgVariables, snackbarVariables, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, generateScoreId, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount, exportData, selectObject, deselectObject, selectedOneMore, selectedOneLess, imgDialog, closestByClassPrefix, getSelectables, getBackpackSelectables } from '$lib/store/store.svelte';
     import { tick } from 'svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     export { activateObject, options };
     
-    const { row, choice, index, windowWidth, bCreatorMode, preloadImages = false, isBackpack, mainDiv }: { row: Row, choice: Choice, index: number, windowWidth: number, bCreatorMode: boolean, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
+    const { row, choice, index, windowWidth, bCreatorMode, preloadImages = false, isBackpack, mainDiv, isSearch = false }: { row: Row, choice: Choice, index: number, windowWidth: number, bCreatorMode: boolean, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement, isSearch?: boolean } = $props();
     const choiceToolbarButtons = [{
         action: () => { moveChoiceLeft() },
         text: 'Move Left',
@@ -1764,30 +1811,30 @@
         text: 'L: Create Addon<br>R: Context Menu',
         icon: 'mdi mdi-comment-plus'
     }, {
-        action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = choice; },
+        action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = choice; dlgVariables.isWord = false; },
         contextAction: (e: MouseEvent) => { requiredContext(e) },
         text: 'L: Create Requirement<br>R: Context Menu',
         icon: 'mdi mdi-key-plus'
     }, {
         action: () => { choice.groups.push('') },
         contextAction: (e: MouseEvent) => { groupContext(e) },
-        text: 'L: Add To Group<br>R: Context Menu',
+        text: 'L: Add to Group<br>R: Context Menu',
         icon: 'mdi mdi-group'
     }];
     const templates = [{
-        text: 'Image top',
+        text: 'Image Top',
         value: 1
     }, {
-        text: 'Image left',
+        text: 'Image Left',
         value: 2
     }, {
-        text: 'Image right',
+        text: 'Image Right',
         value: 3
     }, {
-        text: 'Image bottom',
+        text: 'Image Bottom',
         value: 4
     }, {
-        text: 'Image center',
+        text: 'Image Center',
         value: 5
     }];
     const discountOperators = [{
@@ -1820,7 +1867,25 @@
     }];
     const justifies = ['start', 'center', 'end', 'space-around', 'space-between'];
     const linkedObjects: string[] = [];
-    const options: choiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
+    const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
+    const nAddons = $derived.by(() => {
+        if (choice.addons && choice.addons.length > 0) {
+            const addons = choice.addons.filter(item => item.isSelectable !== true);
+            if (addons.length > 0) {
+                return addons;
+            }
+        }
+        return null;
+    });
+    const sAddons = $derived.by(() => {
+        if (choice.addons && choice.addons.length > 0) {
+            const addons = choice.addons.filter(item => item.isSelectable === true);
+            if (addons.length > 0) {
+                return addons;
+            }
+        }
+        return null;
+    });
     
     let panelScore = $state(false);
     let panelReq = $state(false);
@@ -1832,9 +1897,17 @@
     let panel04 = $state(false);
 
     let firstAddonIndex = $derived.by(() => {
-        if (choice.addons) {
-            for (let i = 0; i < choice.addons.length; i++) {
-                const addon = choice.addons[i];
+        if (nAddons) {
+            for (let i = 0; i < nAddons.length; i++) {
+                const addon = nAddons[i];
+                if (app.showAllAddons > 0 || !addon.skipIndex && (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))) {
+                    return i;
+                }
+            }
+        }
+        if (sAddons) {
+            for (let i = 0; i < sAddons.length; i++) {
+                const addon = sAddons[i];
                 if (app.showAllAddons > 0 || !addon.skipIndex && (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))) {
                     return i;
                 }
@@ -1865,6 +1938,7 @@
         return checkRequirements(choice.requireds);
     });
     let isShown = $derived.by(() => {
+        if (isSearch) return true;
         if (choice.isActive) {
             return !filterStyle.selFilterVisibleIsOn;
         } else if (!isEnabled) {
@@ -1874,7 +1948,7 @@
     });
     let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}` : '');
     let isActive = $derived(choice.isActive);
-    let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight);
+    let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight && !isSearch);
     let oriRow = $derived.by(() => {
         if (row.isResultRow) {
             const cMap = choiceMap.get(choice.id);
@@ -1905,15 +1979,6 @@
     let oriTitleKey = $derived(replaceText(oriRow.title !== '' ? oriRow.title : oriRow.debugTitle || ''));
     let choiceTitleKey = $derived(replaceText(choice.title));
     let choiceTextKey = $derived(replaceText(choice.text));
-
-    let multiChoiceText = $derived.by(() => {
-        return `font-family: '${multiChoiceStyle.multiChoiceTextFont}'; color: ${hexToRgba(textStyle.scoreTextColor)}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`;
-    });
-
-    let multiChoiceButton = $derived.by(() => {
-        return `font-size: ${multiChoiceStyle.multiChoiceCounterSize}%; color: ${hexToRgba(textStyle.scoreTextColor)};`;
-    });
-
     let multiChoiceCounter = $derived.by(() => {
         if (choice.hideMultipleCounter) {
             return isEnabled;
@@ -1940,26 +2005,22 @@
 
     let objectBackground = $derived.by(() => {
         const suffix = objectStyle.objectBorderRadiusIsPixels ? 'px' : '%';
-        let bgImageIndex = 0;
-        let bgColorIndex = 0;
-        let filterIndex = 0;
-        let styles: string[] = [];
+        const bgStyles: BgStyles = {};
+        const filters: Filters = {};
 
         if (objectStyle.objectBorderImage) {
-            styles.push(`border-image: url('${objectStyle.objectBorderImage}') ${objectStyle.objectBorderImageSliceTop} ${objectStyle.objectBorderImageSliceRight} ${objectStyle.objectBorderImageSliceBottom} ${objectStyle.objectBorderImageSliceLeft} / ${objectStyle.objectBorderImageWidth}px ${objectStyle.objectBorderImageRepeat}; border-style: solid; padding: ${objectStyle.objectBorderImageWidth}px;`);
+            bgStyles.borderImage = `border-image: url('${objectStyle.objectBorderImage}') ${objectStyle.objectBorderImageSliceTop} ${objectStyle.objectBorderImageSliceRight} ${objectStyle.objectBorderImageSliceBottom} ${objectStyle.objectBorderImageSliceLeft} / ${objectStyle.objectBorderImageWidth}px ${objectStyle.objectBorderImageRepeat}; border-style: solid; padding: ${objectStyle.objectBorderImageWidth}px;`;
         }
         if (backgroundStyle.objectBackgroundImage) {
-            styles.push(`background-image: url('${backgroundStyle.objectBackgroundImage}'); ${backgroundStyle.isObjectBackgroundRepeat? 'background-repeat: repeat;' : (backgroundStyle.isObjectBackgroundFitIn ? 'background-size: 100% 100%;' : 'background-size: cover;')}`);
-            bgImageIndex = styles.length;
+            bgStyles.bgImage = `background-image: url('${backgroundStyle.objectBackgroundImage}'); ${backgroundStyle.isObjectBackgroundRepeat? 'background-repeat: repeat;' : (backgroundStyle.isObjectBackgroundFitIn ? 'background-size: 100% 100%;' : 'background-size: cover;')}`;
         }
         if (backgroundStyle.objectBgColorIsOn) {
-            styles.push(`background-color: ${hexToRgba(backgroundStyle.objectBgColor)};`);
-            bgColorIndex = styles.length;
+            bgStyles.bgColor = `background-color: ${hexToRgba(backgroundStyle.objectBgColor)};`;
         }
-        styles.push(`margin: ${objectStyle.objectMargin}px;`);
-        styles.push(`border-radius: ${objectStyle.objectBorderRadiusTopLeft}${suffix} ${objectStyle.objectBorderRadiusTopRight}${suffix} ${objectStyle.objectBorderRadiusBottomRight}${suffix} ${objectStyle.objectBorderRadiusBottomLeft}${suffix};`);
+        bgStyles.margin = `margin: ${objectStyle.objectMargin}px;`;
+        bgStyles.borderRadius = `border-radius: ${objectStyle.objectBorderRadiusTopLeft}${suffix} ${objectStyle.objectBorderRadiusTopRight}${suffix} ${objectStyle.objectBorderRadiusBottomRight}${suffix} ${objectStyle.objectBorderRadiusBottomLeft}${suffix};`;
         if (objectStyle.objectOverflowIsOn) {
-            styles.push(`overflow: hidden;`);
+            bgStyles.overflow = `overflow: hidden;`;
         }
         if (objectStyle.objectBorderIsOn || (isActive && filterStyle.selBorderColorIsOn) || (!isEnabled && filterStyle.reqBorderColorIsOn)) {
             let borderColor = objectStyle.objectBorderColor;
@@ -1969,157 +2030,40 @@
             } else if (isActive && filterStyle.selBorderColorIsOn) {
                 borderColor = filterStyle.selFilterBorderColor;
             }
-            styles.push(`border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(borderColor)};`);
+            bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(borderColor)};`;
         }
         if (objectStyle.objectDropShadowIsOn) {
             if (objectStyle.objectUseBoxShadowIsOn) {
-                styles.push(`box-shadow: ${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${objectStyle.objectDropShadowSpread}px ${hexToRgba(objectStyle.objectDropShadowColor)};`);
+                bgStyles.boxShadow = `box-shadow: ${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${objectStyle.objectDropShadowSpread}px ${hexToRgba(objectStyle.objectDropShadowColor)};`;
             } else {
-                filterIndex = styles.length;
-                styles.push(`filter: drop-shadow(${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${hexToRgba(objectStyle.objectDropShadowColor)})`);
-            }
-        }
-        if (filterIndex === 0) {
-            styles.push(`filter:`);
-            filterIndex = styles.length;
-        }
-        if (isEnabled) {
-            if (isActive) {
-                if (filterStyle.selFilterBlurIsOn) {
-                    styles.push(` blur(${filterStyle.selFilterBlur}px)`);
-                }
-                if (filterStyle.selFilterBrightIsOn) {
-                    styles.push(` brightness(${filterStyle.selFilterBright}%)`);
-                }
-                if (filterStyle.selFilterContIsOn) {
-                    styles.push(` contrast(${filterStyle.selFilterCont}%)`);
-                }
-                if (filterStyle.selFilterGrayIsOn) {
-                    styles.push(` grayscale(${filterStyle.selFilterGray}%)`);
-                }
-                if (filterStyle.selFilterHueIsOn) {
-                    styles.push(` hue-rotate(${filterStyle.selFilterHue}deg)`);
-                }
-                if (filterStyle.selFilterInvertIsOn) {
-                    styles.push(` invert(${filterStyle.selFilterInvert}%)`);
-                }
-                if (filterStyle.selFilterOpacIsOn) {
-                    styles.push(` opacity(${filterStyle.selFilterOpac}%)`);
-                }
-                if (filterStyle.selFilterSaturIsOn) {
-                    styles.push(` saturate(${filterStyle.selFilterSatur})`);
-                }
-                if (filterStyle.selFilterSepiaIsOn) {
-                    styles.push(` sepia(${filterStyle.selFilterGray}%)`);
-                }
-                if (styles.length === filterIndex) {
-                    styles.splice(filterIndex - 1, 1);
+                if (sAddons) {
+                    bgStyles.filter = `filter: drop-shadow(${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${hexToRgba(objectStyle.objectDropShadowColor)})`;
                 } else {
-                    styles.push(`;`);
+                    filters.dropShadow = ` drop-shadow(${objectStyle.objectDropShadowH}px ${objectStyle.objectDropShadowV}px ${objectStyle.objectDropShadowBlur}px ${hexToRgba(objectStyle.objectDropShadowColor)})`;
                 }
-                if (filterStyle.selBgColorIsOn) {
-                    if (bgColorIndex !== 0) {
-                        styles.splice(bgColorIndex - 1, 1);
-                    }
-                    if (!filterStyle.selOverlayOnImage) {
-                        if (bgImageIndex !== 0) {
-                            styles.splice(bgImageIndex - 1, 1);
-                        }
-                    }
-                    styles.push(`background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`);
-                }
-                if (objectStyle.objectGradientIsOn) {
-                    styles.push(`background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`);
-                }
-            } else {
-                if (filterStyle.unselFilterBlurIsOn) {
-                    styles.push(` blur(${filterStyle.unselFilterBlur}px)`);
-                }
-                if (filterStyle.unselFilterBrightIsOn) {
-                    styles.push(` brightness(${filterStyle.unselFilterBright}%)`);
-                }
-                if (filterStyle.unselFilterContIsOn) {
-                    styles.push(` contrast(${filterStyle.unselFilterCont}%)`);
-                }
-                if (filterStyle.unselFilterGrayIsOn) {
-                    styles.push(` grayscale(${filterStyle.unselFilterGray}%)`);
-                }
-                if (filterStyle.unselFilterHueIsOn) {
-                    styles.push(` hue-rotate(${filterStyle.unselFilterHue}deg)`);
-                }
-                if (filterStyle.unselFilterInvertIsOn) {
-                    styles.push(` invert(${filterStyle.unselFilterInvert}%)`);
-                }
-                if (filterStyle.unselFilterOpacIsOn) {
-                    styles.push(` opacity(${filterStyle.unselFilterOpac}%)`);
-                }
-                if (filterStyle.unselFilterSaturIsOn) {
-                    styles.push(` saturate(${filterStyle.unselFilterSatur})`);
-                }
-                if (filterStyle.unselFilterSepiaIsOn) {
-                    styles.push(` sepia(${filterStyle.unselFilterGray}%)`);
-                }
-                if (styles.length === filterIndex) {
-                    styles.splice(filterIndex - 1, 1);
-                } else {
-                    styles.push(`;`);
-                }
-                if (objectStyle.objectGradientIsOn) {
-                    styles.push(`background-image: linear-gradient(${objectStyle.objectGradient});`);
-                }
-            }
-            if (app.isPointerCursor && !choice.isNotSelectable && (!choice.isSelectableMultiple || (choice.allowSelectByClick && choice.multipleUseVariable === 0))) {
-                styles.push(`cursor: pointer;`);
-            }
-        } else {
-            if (filterStyle.reqFilterBlurIsOn) {
-                styles.push(` blur(${filterStyle.reqFilterBlur}px)`);
-            }
-            if (filterStyle.reqFilterBrightIsOn) {
-                styles.push(` brightness(${filterStyle.reqFilterBright}%)`);
-            }
-            if (filterStyle.reqFilterContIsOn) {
-                styles.push(` contrast(${filterStyle.reqFilterCont}%)`);
-            }
-            if (filterStyle.reqFilterGrayIsOn) {
-                styles.push(` grayscale(${filterStyle.reqFilterGray}%)`);
-            }
-            if (filterStyle.reqFilterHueIsOn) {
-                styles.push(` hue-rotate(${filterStyle.reqFilterHue}deg)`);
-            }
-            if (filterStyle.reqFilterInvertIsOn) {
-                styles.push(` invert(${filterStyle.reqFilterInvert}%)`);
-            }
-            if (filterStyle.reqFilterOpacIsOn) {
-                styles.push(` opacity(${filterStyle.reqFilterOpac}%)`);
-            }
-            if (filterStyle.reqFilterSaturIsOn) {
-                styles.push(` saturate(${filterStyle.reqFilterSatur})`);
-            }
-            if (filterStyle.reqFilterSepiaIsOn) {
-                styles.push(` sepia(${filterStyle.reqFilterGray}%)`);
-            }
-            if (styles.length === filterIndex) {
-                styles.splice(filterIndex - 1, 1);
-            } else {
-                styles.push(`;`);
-            }
-            if (filterStyle.reqBgColorIsOn) {
-                if (bgColorIndex !== 0) {
-                    styles.splice(bgColorIndex - 1, 1);
-                }
-                if (!filterStyle.reqOverlayOnImage) {
-                    if (bgImageIndex !== 0) {
-                        styles.splice(bgImageIndex - 1, 1);
-                    }
-                }
-                styles.push(`background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`);
-            }
-            if (objectStyle.objectGradientIsOn) {
-                styles.push(`background-image: linear-gradient(${objectStyle.objectGradientOnReq});`);
             }
         }
-        return styles.join(' ');
+
+        if (!sAddons) {
+            setFilters(bgStyles, filters);
+        }
+        if (Object.keys(filters).length > 0) {
+            bgStyles.filter = `filter:${Object.values(filters).join('')};`;
+        }
+        
+        return Object.values(bgStyles).join(' ');
+    });
+
+    let objectFilter = $derived.by(() => {
+        const bgStyles: BgStyles = {};
+        const filters: Filters = {};
+
+        setFilters(bgStyles, filters);
+        if (Object.keys(filters).length > 0) {
+            bgStyles.filter = `filter:${Object.values(filters).join('')};`;
+        }
+        
+        return Object.values(bgStyles).join(' ');
     });
 
     let objectImage = $derived.by(() => {
@@ -2177,20 +2121,26 @@
                 choice.id = checkDupId(choice.id, choiceMap);
                 if (choice.groups) {
                     for (let i = 0; i < choice.groups.length; i++) {
-                        let group = groupMap.get(choice.groups[i]);
+                        const group = groupMap.get(choice.groups[i]);
                         if (typeof group !== 'undefined') {
-                            let elementIndex = group.elements.indexOf(choiceId);
+                            const elementIndex = group.elements.indexOf(choiceId);
                             if (elementIndex !== -1) group.elements[elementIndex] = choice.id;
                         }
                     }
                 }
                 if (choice.objectDesignGroups) {
                     for (let i = 0; i < choice.objectDesignGroups.length; i++) {
-                        let dGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
+                        const dGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
                         if (typeof dGroup !== 'undefined') {
-                            let elementIndex = dGroup.elements.indexOf(choiceId);
+                            const elementIndex = dGroup.elements.indexOf(choiceId);
                             if (elementIndex !== -1) dGroup.elements[elementIndex] = choice.id;
                         }
+                    }
+                }
+                if (choice.addons) {
+                    for (let i = 0; i < choice.addons.length; i++) {
+                        const addon = choice.addons[i];
+                        addon.parentId = choice.id;
                     }
                 }
                 choiceMap.set(choice.id, {choice: choice, row: row});
@@ -2201,14 +2151,19 @@
     }
 
     function createNewAddon() {
+        if (!choice.addonJsutify) choice.addonJustify = app.defaultAddonJustify;
+        if (!choice.useSeperateAddon) choice.useSeperateAddon = app.defaultUseSeperateAddon;
         choice.addons.push({
             id: '',
             title: app.defaultAddonTitle,
             text: app.defaultAddonText,
-            template: 1,
+            template: app.defaultAddonTemplate,
+            addonWidth: app.defaultAddonWidth,
             image: '',
             requireds: [],
-            parentId: choice.id
+            parentId: choice.id,
+            ...(app.defaultUseShowAddon && { showAddon: true }),
+            ...(app.defaultUseHideAddon && { hideAddon: true })
         });
     }
 
@@ -2221,7 +2176,7 @@
             requireds: [],
             beforeText: app.defaultBeforePoint,
             afterText: app.defaultAfterPoint,
-            showScore: true
+            showScore: app.defaultUseShowScore
         });
     }
 
@@ -2280,7 +2235,36 @@
             for (var i = 0; i < app.tmpAddon.length; i++) {
                 const tmpAddon = JSON.parse(JSON.stringify(app.tmpAddon[i]));
                 tmpAddon.parentId = choice.id;
+                if (tmpAddon.isSelectable) {
+                    tmpAddon.isActive = false;
+                    delete tmpAddon.forcedActivated;
+                    delete tmpAddon.appliedDisChoices;
+                    tmpAddon.id = generateObjectId(0, 4, true);
+
+                    if (tmpAddon.scores) {
+                        for (let j = 0; j < tmpAddon.scores.length; j++) {
+                            const score = tmpAddon.scores[j];
+
+                            score.idx = generateScoreId(0, 5);
+                            scoreSet.add(score.idx);
+                            if (tmpAddon.isSelectableMultiple) {
+                                delete score.isActiveMul;
+                                delete score.isActiveMulMinus;
+                            } else {
+                                delete score.isActive;
+                            }
+                            delete score.setValue;
+                            deleteDiscount(score);
+                        }
+                    }
+                }
                 choice.addons.push(tmpAddon);
+                if (tmpAddon.isSelectable) {
+                    const idx = choice.addons.length - 1;
+                    const addon = choice.addons[idx];
+
+                    choiceMap.set(addon.id, {choice: choice.addons[idx] as SelectableAddon, row: row});
+                }
             }
         }
     }
@@ -2471,6 +2455,29 @@
             const addon = clone.addons[j];
 
             addon.parentId = clone.id;
+            if (addon.isSelectable) {
+                addon.id = generateObjectId(0, 4, true);
+                addon.isActive = false;
+                delete addon.forcedActivated;
+                delete addon.appliedDisChoices;
+
+                if (addon.scores) {
+                    for (let j = 0; j < addon.scores.length; j++) {
+                        const score = addon.scores[j];
+
+                        score.idx = generateScoreId(0, 5);
+                        scoreSet.add(score.idx);
+                        if (addon.isSelectableMultiple) {
+                            delete score.isActiveMul;
+                            delete score.isActiveMulMinus;
+                        } else {
+                            delete score.isActive;
+                        }
+                        delete score.setValue;
+                        deleteDiscount(score);
+                    }
+                }
+            }
         }
 
         if (clone.backpackBtnRequirement) {
@@ -2483,6 +2490,15 @@
 
         row.objects.splice(index + 1, 0, clone);
         choiceMap.set(id, {choice: row.objects[index + 1], row: row});
+        if (clone.addons) {
+            for (let i = 0; i < clone.addons.length; i++) {
+                const addon = clone.addons[i];
+
+                if (addon.isSelectable) {
+                    choiceMap.set(addon.id, {choice: row.objects[index + 1].addons[i] as SelectableAddon, row: row});
+                }
+            }
+        }
 
         for (let i = index + 2; i < row.objects.length; i++) {
             row.objects[i].index += 1;
@@ -2517,7 +2533,8 @@
         delete tmpChoice.appliedDisChoices;
         if (typeof tmpChoice.scores !== 'undefined' && tmpChoice.scores.length > 0) {
             for (let i = 0; i < tmpChoice.scores.length; i++) {
-                deleteDiscount(tmpChoice.scores[i]);
+                const tmpScore = tmpChoice.scores[i];
+                deleteDiscount(tmpScore);
             }
         }
         app.tmpChoice.length = 0;
@@ -2551,19 +2568,39 @@
             }
             if (choice.groups) {
                 for (let i = 0; i < choice.groups.length; i++) {
-                    let group = groupMap.get(choice.groups[i]);
+                    const group = groupMap.get(choice.groups[i]);
                     if (typeof group !== 'undefined') {
-                        let elementIndex = group.elements.indexOf(choice.id);
+                        const elementIndex = group.elements.indexOf(choice.id);
                         if (elementIndex !== -1) group.elements.splice(elementIndex, 1);
                     }
                 }
             }
             if (choice.objectDesignGroups) {
                 for (let i = 0; i < choice.objectDesignGroups.length; i++) {
-                    let dGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
+                    const dGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
                     if (typeof dGroup !== 'undefined') {
-                        let elementIndex = dGroup.elements.indexOf(choice.id);
+                        const elementIndex = dGroup.elements.indexOf(choice.id);
                         if (elementIndex !== -1) dGroup.elements.splice(elementIndex, 1);
+                    }
+                }
+            }
+            if (choice.scores) {
+                for (let i = 0; i < choice.scores.length; i++) {
+                    const score = choice.scores[i];
+                    scoreSet.delete(score.idx);
+                }
+            }
+            if (choice.addons) {
+                for (let i = 0; i < choice.addons.length; i++) {
+                    const addon = choice.addons[i];
+                    if (addon.isSelectable) {
+                        if (addon.scores) {
+                            for (let j = 0; j < addon.scores.length; j++) {
+                                const score = addon.scores[j];
+                                scoreSet.delete(score.idx);
+                            }
+                        }
+                        choiceMap.delete(addon.id);
                     }
                 }
             }
@@ -2607,7 +2644,116 @@
         }
     }
 
+    function setFilters(bgStyles: BgStyles, filters: Filters) {
+        if (isEnabled) {
+            if (isActive) {
+                if (filterStyle.selFilterBlurIsOn) {
+                    filters.blur = ` blur(${filterStyle.selFilterBlur}px)`;
+                }
+                if (filterStyle.selFilterBrightIsOn) {
+                    filters.brightness = ` brightness(${filterStyle.selFilterBright}%)`;
+                }
+                if (filterStyle.selFilterContIsOn) {
+                    filters.contrast = ` contrast(${filterStyle.selFilterCont}%)`;
+                }
+                if (filterStyle.selFilterGrayIsOn) {
+                    filters.grayscale = ` grayscale(${filterStyle.selFilterGray}%)`;
+                }
+                if (filterStyle.selFilterHueIsOn) {
+                    filters.hueRotate = ` hue-rotate(${filterStyle.selFilterHue}deg)`;
+                }
+                if (filterStyle.selFilterInvertIsOn) {
+                    filters.invert = ` invert(${filterStyle.selFilterInvert}%)`;
+                }
+                if (filterStyle.selFilterOpacIsOn) {
+                    filters.opacity = ` opacity(${filterStyle.selFilterOpac}%)`;
+                }
+                if (filterStyle.selFilterSaturIsOn) {
+                    filters.saturate = ` saturate(${filterStyle.selFilterSatur})`;
+                }
+                if (filterStyle.selFilterSepiaIsOn) {
+                    filters.sepia = ` sepia(${filterStyle.selFilterGray}%)`;
+                }
+                if (filterStyle.selBgColorIsOn) {
+                    bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
+                }
+                if (objectStyle.objectGradientIsOn) {
+                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                }
+            } else {
+                if (filterStyle.unselFilterBlurIsOn) {
+                    filters.blur = ` blur(${filterStyle.unselFilterBlur}px)`;
+                }
+                if (filterStyle.unselFilterBrightIsOn) {
+                    filters.brightness = ` brightness(${filterStyle.unselFilterBright}%)`;
+                }
+                if (filterStyle.unselFilterContIsOn) {
+                    filters.contrast = ` contrast(${filterStyle.unselFilterCont}%)`;
+                }
+                if (filterStyle.unselFilterGrayIsOn) {
+                    filters.grayscale = ` grayscale(${filterStyle.unselFilterGray}%)`;
+                }
+                if (filterStyle.unselFilterHueIsOn) {
+                    filters.hueRotate = ` hue-rotate(${filterStyle.unselFilterHue}deg)`;
+                }
+                if (filterStyle.unselFilterInvertIsOn) {
+                    filters.invert = ` invert(${filterStyle.unselFilterInvert}%)`;
+                }
+                if (filterStyle.unselFilterOpacIsOn) {
+                    filters.opacity = ` opacity(${filterStyle.unselFilterOpac}%)`;
+                }
+                if (filterStyle.unselFilterSaturIsOn) {
+                    filters.saturate = ` saturate(${filterStyle.unselFilterSatur})`;
+                }
+                if (filterStyle.unselFilterSepiaIsOn) {
+                    filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
+                }
+                if (objectStyle.objectGradientIsOn) {
+                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
+                }
+            }
+            if (app.isPointerCursor && !choice.isNotSelectable && (!choice.isSelectableMultiple || (choice.allowSelectByClick && choice.multipleUseVariable === 0))) {
+                bgStyles.cursor = `cursor: pointer;`;
+            }
+        } else {
+            if (filterStyle.reqFilterBlurIsOn) {
+                filters.blur = ` blur(${filterStyle.reqFilterBlur}px)`;
+            }
+            if (filterStyle.reqFilterBrightIsOn) {
+                filters.brightness = ` brightness(${filterStyle.reqFilterBright}%)`;
+            }
+            if (filterStyle.reqFilterContIsOn) {
+                filters.contrast = ` contrast(${filterStyle.reqFilterCont}%)`;
+            }
+            if (filterStyle.reqFilterGrayIsOn) {
+                filters.grayscale = ` grayscale(${filterStyle.reqFilterGray}%)`;
+            }
+            if (filterStyle.reqFilterHueIsOn) {
+                filters.hueRotate = ` hue-rotate(${filterStyle.reqFilterHue}deg)`;
+            }
+            if (filterStyle.reqFilterInvertIsOn) {
+                filters.invert = ` invert(${filterStyle.reqFilterInvert}%)`;
+            }
+            if (filterStyle.reqFilterOpacIsOn) {
+                filters.opacity = ` opacity(${filterStyle.reqFilterOpac}%)`;
+            }
+            if (filterStyle.reqFilterSaturIsOn) {
+                filters.saturate = ` saturate(${filterStyle.reqFilterSatur})`;
+            }
+            if (filterStyle.reqFilterSepiaIsOn) {
+                filters.sepia = ` sepia(${filterStyle.reqFilterGray}%)`;
+            }
+            if (filterStyle.reqBgColorIsOn) {
+                bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
+            }
+            if (objectStyle.objectGradientIsOn) {
+                bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
+            }
+        }
+    }
+
     function objectWidthClass() {
+        if (isSearch) return 'col-sm-6 col-12';
         let objectWidth = (choice.objectWidth || row.objectWidth);
         let objectWidthNum = objectWidthToNum(objectWidth);
         let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
@@ -2628,20 +2774,26 @@
         }
     }
 
-    function closestByClassPrefix(el: HTMLElement, prefix: string, endpoint: string) {
-        let current: HTMLElement | null = el;
-        let isEnd = false;
-
-        while (current) {
-            for (const cls of current.classList) {
-                if (cls.startsWith(prefix)) return true;
-                if (cls.startsWith(endpoint)) isEnd = true;
+    function toggleAutoActive() {
+        if (choice.isAutoActive) {
+            delete choice.isNotSelectable;
+            delete choice.selectOnce;
+            delete choice.isImageUpload;
+            delete choice.notDeselectedByClean;
+            delete choice.activateAfterReset;
+            delete choice.isSelectDelayed;
+            delete choice.selectDelayTime;
+            if (!choice.isActive) {
+                selectObject(choice, row, options);
+                if (choice.isActive) choice.forcedActivated = true;
             }
-            if (isEnd) return false;
-            current = current.parentElement;
+            if (!choice.isActive) tmpActivatedMap.set(choice.id, {multiple: 0});
+        } else {
+            delete choice.isAutoActive;
+            delete choice.forcedActivated;
+            tmpActivatedMap.delete(choice.id);
+            if (choice.isActive) deselectObject(choice, row, options);
         }
-
-        return false;
     }
 
     function activateObject(localChoice: Choice, localRow: Row, e?: MouseEvent, isManually: boolean = false) {

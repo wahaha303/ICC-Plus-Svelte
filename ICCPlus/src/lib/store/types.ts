@@ -359,6 +359,7 @@ export type Requireds = {
     required: boolean,
     requireds: Requireds[],
     orRequired: { req?: string }[],
+    orRequireds?: Requireds[],
     id: string,
     type: string,
     reqId: string,
@@ -380,26 +381,6 @@ export type Requireds = {
     more?: MoreReq[],
     customTextIsOn?: boolean,
     customText?: string
-};
-export type Addon = {
-    [key: string]: any;
-    id: string,
-    title: string,
-    text: string,
-    template: number,
-    image: string,
-    requireds: Requireds[],
-    parentId: string,
-    showAddon?: boolean,
-    hideAddon?: boolean,
-    skipIndex?: boolean,
-    defaultTemplate?: number,
-    templateStack?: {
-        id: string,
-        data: number
-    }[],
-    isSelectable?: boolean,
-    addonWidth?: string
 };
 export type Discount = {
     isStackable: boolean,
@@ -463,41 +444,11 @@ export type Score = {
     expMinValue?: string,
     expMaxValue?: string,
     mulValue?: number[],
-}
-export type Choice = {
-    [key: string]: any,
-    id: string,
-    index: number,
-    title: string,
-    text: string,
-    debugTitle: string,
-    image: string,
-    template: number,
-    objectWidth: string,
-    isActive: boolean,
-    isVisible: boolean,
-    multipleUseVariable: number,
-    initMultipleTimesMinus?: number,
-    selectedThisManyTimesProp: number,
-    requireds: Requireds[],
-    addons: Addon[],
-    scores: Score[],
-    groups: string[],
-    objectDesignGroups?: string[],
-    isPrivateStyling?: boolean,
-    privateFilterIsOn?: boolean,
-    privateTextIsOn?: boolean,
-    privateObjectImageIsOn?: boolean,
-    privateObjectIsOn?: boolean,
-    privateAddonImageIsOn?: boolean,
-    privateAddonIsOn?: boolean,
-    privateBackgroundIsOn?: boolean,
-    privateMultiChoiceIsOn?: boolean,
-    styling?: Styling,
+};
+export type ChoiceFunc = {
     hideMultipleCounter?: boolean,
     allowSelectByClick?: boolean,
     hideCounterUntilSelect?: boolean,
-    addonJustify?: string,
     isSelectableMultiple?: boolean,
     isMultipleUseVariable?: boolean,
     multipleScoreId?: string,
@@ -650,8 +601,71 @@ export type Choice = {
     setPointtypeIsOn?: boolean,
     pointTypeToSet?: string[],
     setWithThis?: string,
-    linkedObjects?: string[]
+    isNotSearchable?: boolean,
+    isAutoActive?: boolean,
 };
+export type Addon = {
+    [key: string]: any;
+    id: string,
+    title: string,
+    text: string,
+    template: number,
+    image: string,
+    requireds: Requireds[],
+    parentId?: string,
+    showAddon?: boolean,
+    hideAddon?: boolean,
+    skipIndex?: boolean,
+    defaultTemplate?: number,
+    templateStack?: {
+        id: string,
+        data: number
+    }[],
+    addonWidth?: string,
+    isSelectable?: boolean
+};
+export type SelectableAddon = {
+    scores: Score[],
+    multipleUseVariable: number,
+    isActive: boolean,
+    deselectParent?: boolean,
+} & Addon & ChoiceFunc;
+export type MDObject = {
+    [key: string]: any,
+    id: string,
+} & ChoiceFunc;
+export type Choice = {
+    [key: string]: any,
+    id: string,
+    index: number,
+    title: string,
+    text: string,
+    debugTitle: string,
+    image: string,
+    template: number,
+    objectWidth: string,
+    isActive: boolean,
+    multipleUseVariable: number,
+    initMultipleTimesMinus?: number,
+    selectedThisManyTimesProp: number,
+    requireds: Requireds[],
+    addons: Addon[],
+    scores: Score[],
+    groups: string[],
+    objectDesignGroups?: string[],
+    isPrivateStyling?: boolean,
+    privateFilterIsOn?: boolean,
+    privateTextIsOn?: boolean,
+    privateObjectImageIsOn?: boolean,
+    privateObjectIsOn?: boolean,
+    privateAddonImageIsOn?: boolean,
+    privateAddonIsOn?: boolean,
+    privateBackgroundIsOn?: boolean,
+    privateMultiChoiceIsOn?: boolean,
+    styling?: Styling,
+    addonJustify?: string,
+    linkedObjects?: string[]
+} & ChoiceFunc;
 export type Row = {
     [key: string]: any,
     id: string,
@@ -785,6 +799,7 @@ export type Group = {
     category?: number
     elements: string[],
     rowElements: string[],
+    designGroups?: string[],
 };
 export type CommonImage = {
     [key: string]: any,
@@ -810,6 +825,7 @@ export type RowDesignGroup = {
     activatedId: string,
     elements: string[],
     backpackElements: string[],
+    groupElements: string[],
     privateFilterIsOn?: boolean,
     privateTextIsOn?: boolean,
     privateObjectImageIsOn?: boolean,
@@ -829,6 +845,7 @@ export type ObjectDesignGroup = {
     activatedId: string,
     elements: string[],
     backpackElements: string[],
+    groupElements: string[],
     privateFilterIsOn?: boolean,
     privateTextIsOn?: boolean,
     privateObjectImageIsOn?: boolean,
@@ -838,6 +855,38 @@ export type ObjectDesignGroup = {
     privateBackgroundIsOn?: boolean,
     category?: number
     styling: Styling
+}
+export type DefaultSettings = {
+    defaultRowTitle: string,
+    defaultRowText: string,
+    defaultChoiceTitle: string,
+    defaultChoiceText: string,
+    defaultBeforePoint: string,
+    defaultAfterPoint: string,
+    defaultBeforeReq: string,
+    defaultAfterReq: string,
+    defaultAddonTitle: string,
+    defaultAddonText: string,
+    orderOrReqText: string,
+    defaultOrReq: string,
+    orderSelReqText: string,
+    defaultSelReq: string,
+    defaultRowTemplate: number,
+    defaultRowWidth: string,
+    defaultRowJustify: string,
+    defaultRowAllowedChoices: number,
+    defaultChoiceTemplate: number,
+    defaultChoiceWidth: string,
+    defaultChoiceMaxNum: number,
+    defaultAddonJustify: string,
+    defaultAddonTemplate: number,
+    defaultAddonWidth: string,
+    defaultUseSeperateAddon: boolean,
+    defaultUseShowAddon: boolean,
+    defaultUseHideAddon: boolean,
+    defaultUseShowScore: boolean,
+    defaultUseHideValue: boolean,
+    defaultUseShowReq: boolean
 }
 export type App = {
     [key: string]: any,
@@ -891,21 +940,7 @@ export type App = {
     checkDeleteRow: boolean,
     checkDeleteObject: boolean,
     checkSelectAll: boolean,
-    defaultRowTitle: string,
-    defaultRowText: string,
-    defaultChoiceTitle: string,
-    defaultChoiceText: string,
-    defaultBeforePoint: string,
-    defaultAfterPoint: string,
-    defaultBeforeReq: string,
-    defaultAfterReq: string,
-    defaultAddonTitle: string,
-    defaultAddonText: string,
     enableShortcut: boolean,
-    orderOrReqText: string,
-    defaultOrReq: string,
-    orderSelReqText: string,
-    defaultSelReq: string,
     defaultBgColor?: string,
     defaultBgImage?: string,
     defaultBarBgColor?: string,
@@ -938,8 +973,10 @@ export type App = {
     rows: Row[],
     backpack: Row[],
     styling: Styling,
-    categories: Category[]
-};
+    categories: Category[],
+    cropperPosition: number,
+    enableSearch: boolean
+} & DefaultSettings;
 export type RowMap = {
     rows: number,
     type: string
@@ -968,7 +1005,7 @@ export type ActivatedMap = {
     pointNum?: number
 };
 export type ChoiceMap = {
-    choice: Choice,
+    choice: Choice | SelectableAddon,
     row: Row
 };
 export type BgmPlayer = {
@@ -1037,13 +1074,23 @@ export type ExprNode = {
 };
 export type WordDialog = {
     currentDialog: string,
-    choice?: Choice | null,
+    choice?: Choice | SelectableAddon | null,
     row?: Row | null,
     context?: string,
     prevText?: string,
     isWord?: boolean
     cFunc?: (e: any, word?: string) => void,
     title?: string,
+    isDeselect?: boolean,
+    isForced?: boolean
+};
+export type ImgDialog = {
+    currentDialog: string,
+    data?: Row | Choice | Addon,
+    cFunc?: (e: any) => void,
+    choice?: Choice,
+    row?: Row,
+    imgProp?: string,
     isDeselect?: boolean,
     isForced?: boolean
 };
@@ -1078,11 +1125,35 @@ export type MusicPlayer = {
     getTitle(): string;
     getId(): string;
 };
-export type choiceOptions = {
+export type ChoiceOptions = {
     linkedObjects: string[];
     mainDiv?: HTMLDivElement;
     bCreatorMode?: boolean;
     isBackpack?: boolean;
     isOverDlg?: boolean;
     isOverImg?: boolean;
+};
+export type Filters = {
+    dropShadow?: string,
+    blur?: string,
+    brightness?: string,
+    contrast?: string,
+    grayscale?: string,
+    hueRotate?: string,
+    invert?: string,
+    opacity?: string,
+    saturate?: string,
+    sepia?: string
+}
+export type BgStyles = {
+    border?: string,
+    borderImage?: string,
+    bgImage?: string,
+    bgColor?: string,
+    margin?: string,
+    borderRadius?: string,
+    overflow?: string,
+    boxShadow?: string,
+    filter?: string,
+    cursor?: string,
 };

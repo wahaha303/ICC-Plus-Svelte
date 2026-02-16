@@ -151,6 +151,16 @@
                                 </FormField>
                             </div>
                             <div class="col-12">
+                                <Select bind:value={app.cropperPosition} label="Image Cropper Position" variant="standard" alwaysFloat={true}>
+                                    {#each positions as position (position.text)}
+                                        <Option value={position.value}>{position.text}</Option>
+                                    {/each}
+                                    {#snippet helperText()}
+                                        Default position of the image cropper
+                                    {/snippet}
+                                </Select>
+                            </div>
+                            <div class="col-12">
                                 <Textfield bind:value={() => app.styling.backPackWidth || 1200, (e) => app.styling.backPackWidth = e} label="Backpack Width" type="number" suffix="px" variant="standard" input$min="0" onchange={() => {
                                     if (typeof app.styling.backPackWidth !== 'undefined' && app.styling.backPackWidth < 0) {
                                         app.styling.backPackWidth = 0;
@@ -208,6 +218,34 @@
     }, {
         text: "4 per row",
         value: "col-3"
+    }];
+    const positions = [{
+        text: 'top-left',
+        value: 0
+    }, {
+        text: 'top-center',
+        value: 1
+    }, {
+        text: 'top-right',
+        value: 2
+    }, {
+        text: 'middle-left',
+        value: 3
+    }, {
+        text: 'center',
+        value: 4
+    }, {
+        text: 'middle-right',
+        value: 5
+    }, {
+        text: 'bottom-left',
+        value: 6
+    }, {
+        text: 'bottom-center',
+        value: 7
+    }, {
+        text: 'bottom-right',
+        value: 8
     }];
     let active = $state('General');
 

@@ -114,11 +114,11 @@
         <div class="row gx-0 m-0 p-0 {rowJustify}">
             {#if row.isResultRow}
                 {#each resultRow as val, i}
-                    <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} />
+                    <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} />
                 {/each}
             {:else if row.isGroupRow}
                 {#each groupRow as val, i}
-                    <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
+                    <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
                 {/each}
             {:else}
                 {#each row.objects as choice, i}
@@ -132,13 +132,13 @@
     import AppObject from './AppObject.svelte';
     import Button, { Label } from '@smui/button';
     import DOMPurify from 'dompurify';
-    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap, snackbarVariables, selectUpdateScore, selectedOneMore, selectedOneLess } from '$lib/store/store.svelte';
-    import type { choiceOptions, Row } from '$lib/store/types';
+    import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap, snackbarVariables, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices } from '$lib/store/store.svelte';
+    import type { Choice, ChoiceOptions, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 
     const { row, windowWidth, preloadImages = false, isBackpack = false, mainDiv }: { row: Row, windowWidth: number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement } = $props();
-    const blankOptions: choiceOptions = {linkedObjects: []}
+    const blankOptions: ChoiceOptions = {linkedObjects: []}
     
     let choiceRef = $state<any>();
     let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row));
@@ -397,10 +397,43 @@
                 if (typeof actRow !== 'undefined' && actRow.pointNum) {
                     pNum = actRow.pointNum;
                 }
+
+                Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                    const cMap = choiceMap.get(id);
+                    if (typeof cMap !== 'undefined') {
+                        const aRow = cMap.row;
+                        const aChoice = cMap.choice;
+                        if (!checkRequirements(aChoice.requireds)) {
+                            if (aChoice.forcedActivated) {
+                                delete aChoice.forcedActivated;
+                                if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                            }
+                            if (val.multiple === 0) {
+                                if (aChoice.isActive) {
+                                    const newOptions = {...blankOptions};
+                                    newOptions.isOverDlg = true;
+                                    newOptions.isOverImg = true;
+                                    deselectObject(aChoice, aRow, newOptions);
+                                }
+                            } else if (val.multiple > 0) {
+                                for (let i = 0; i < val.multiple; i++) {
+                                    if (aChoice.isActive) {
+                                        const newOptions = {...blankOptions};
+                                        newOptions.isOverDlg = true;
+                                        newOptions.isOverImg = true;
+                                        selectedOneLess(aChoice, aRow, newOptions);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
                 activatedMap.set(row.id, {multiple: 0, isRowButton: true, rndPoint: row.pointTypeRandom, pointNum: pNum + rnd});
                 tmpScores.set(point.id, rnd);
 
                 selectUpdateScore(null, tmpScores, 0, undefined, undefined, blankOptions);
+                activateTempChoices(blankOptions);
             }
             return;
         }

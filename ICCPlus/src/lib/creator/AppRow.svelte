@@ -23,11 +23,11 @@
                             </Button>
                         {:else}
                             {#if row.image && !app.hideImages}
-                                <button type="button" onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = row; dlgVariables.imgProp = 'image';}} class="btn--image-background">
+                                <button type="button" onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = row; imgDialog.imgProp = 'image';}} class="btn--image-background">
                                     <img src={row.image} alt="" loading="lazy" class="btn--image" style="max-height:140px;"/>
                                 </button>
                             {/if}
-                            <Button onclickcapture={() => {dlgVariables.currentDialog = 'appImageUpload'; dlgVariables.data = row; dlgVariables.imgProp = 'image';}} variant="raised">
+                            <Button onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = row; imgDialog.imgProp = 'image';}} variant="raised">
                                 <Label>Change Image</Label>
                             </Button>
                         {/if}
@@ -47,7 +47,7 @@
                                     } else {
                                         delete row.buttonType;
                                         delete row.buttonId;
-                                        delete row.buttonText;                                        
+                                        delete row.buttonText;
                                         delete row.buttonTypeRadio;
                                         delete row.pointTypeRandom
                                         delete row.btnPointAddon
@@ -392,11 +392,11 @@
         <div class="row gx-0 m-0 p-0 {rowJustify}">
             {#if row.isResultRow}
                 {#each resultRow as val, i}
-                    <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} />
+                    <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} />
                 {/each}
             {:else if row.isGroupRow}
                 {#each groupRow as val, i}
-                    <AppObject bind:this={choiceRef} row={row} choice={val.choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
+                    <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
                 {/each}
             {:else}
                 {#each row.objects as choice, i}
@@ -432,8 +432,8 @@
 	import IconButton from '@smui/icon-button';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData, selectUpdateScore, selectedOneMore, selectedOneLess } from '$lib/store/store.svelte';
-    import type { choiceOptions, Requireds, Row } from '$lib/store/types';
+    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateObjectId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices, imgDialog } from '$lib/store/store.svelte';
+    import type { Choice, ChoiceOptions, Requireds, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { tick } from 'svelte';
     import Tiptap from '$lib/store/Tiptap.svelte';
@@ -490,7 +490,7 @@
     }, {
         value: 'space-between'
     }];
-    const blankOptions: choiceOptions = {linkedObjects: []}
+    const blankOptions: ChoiceOptions = {linkedObjects: []}
     let choiceRef = $state<any>();
     let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row));
     let rowImageStyle = $derived(getStyling('privateRowImageIsOn', row));
@@ -533,7 +533,7 @@
                     const aChoice = cMap.choice;
                     const aRow = cMap.row;
 
-                    if (!aChoice.isNotResult) {
+                    if (!aChoice.isNotResult && typeof aChoice.parentId === 'undefined') {
                         result.push({choice: aChoice, row: aRow});
                     }
                 }
@@ -546,7 +546,7 @@
                     const aChoice = cMap.choice;
                     const aRow = cMap.row;
 
-                    if (!aChoice.isNotResult) {
+                    if (!aChoice.isNotResult && typeof aChoice.parentId === 'undefined') {
                         if (row.resultGroupId === aRow.resultGroupId) {
                             result.push({choice: aChoice, row: aRow});
                         } else {
@@ -791,10 +791,9 @@
             text: app.defaultChoiceText,
             debugTitle: '',
             image: '',
-            template: 1,
-            objectWidth: '',
-            isActive: !1,
-            isVisible: !0,
+            template: app.defaultChoiceTemplate,
+            objectWidth: app.defaultChoiceWidth,
+            isActive: false,
             multipleUseVariable: 0,
             initMultipleTimesMinus: 0,
             selectedThisManyTimesProp: 0,
@@ -913,10 +912,43 @@
                 if (typeof actRow !== 'undefined' && actRow.pointNum) {
                     pNum = actRow.pointNum;
                 }
+
+                Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                    const cMap = choiceMap.get(id);
+                    if (typeof cMap !== 'undefined') {
+                        const aRow = cMap.row;
+                        const aChoice = cMap.choice;
+                        if (!checkRequirements(aChoice.requireds)) {
+                            if (aChoice.forcedActivated) {
+                                delete aChoice.forcedActivated;
+                                if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                            }
+                            if (val.multiple === 0) {
+                                if (aChoice.isActive) {
+                                    const newOptions = {...blankOptions};
+                                    newOptions.isOverDlg = true;
+                                    newOptions.isOverImg = true;
+                                    deselectObject(aChoice, aRow, newOptions);
+                                }
+                            } else if (val.multiple > 0) {
+                                for (let i = 0; i < val.multiple; i++) {
+                                    if (aChoice.isActive) {
+                                        const newOptions = {...blankOptions};
+                                        newOptions.isOverDlg = true;
+                                        newOptions.isOverImg = true;
+                                        selectedOneLess(aChoice, aRow, newOptions);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
                 activatedMap.set(row.id, {multiple: 0, isRowButton: true, rndPoint: row.pointTypeRandom, pointNum: pNum + rnd});
                 tmpScores.set(point.id, rnd);
 
                 selectUpdateScore(null, tmpScores, 0, undefined, undefined, blankOptions);
+                activateTempChoices(blankOptions);
             }
             return;
         }

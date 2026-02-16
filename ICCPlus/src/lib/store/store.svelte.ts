@@ -1,5 +1,5 @@
 import { get, readable, writable } from 'svelte/store';
-import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting, MenuVariables, ExprNode, Category, MusicPlayer, choiceOptions, WordDialog } from './types';
+import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting, MenuVariables, ExprNode, Category, MusicPlayer, ChoiceOptions, WordDialog, ImgDialog, SelectableAddon, MDObject } from './types';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { z } from 'zod';
 import JSZip from 'jszip';
@@ -9,7 +9,7 @@ import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.7.6';
+export const appVersion = '2.8.0';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -358,6 +358,7 @@ export const backpackStyling = {
     backpackBgImage: '',
     backPackWidth: 1400
 }
+export const selectableAddonItems = ['isSelectable', 'scores', 'multipleUseVariable', 'hideMultipleCounter', 'allowSelectByClick', 'hideCounterUntilSelect', 'isSelectableMultiple', 'isMultipleUseVariable', 'multipleScoreId', 'numMultipleTimesMinus', 'numMultipleTimesPluss', 'isNotSelectable', 'selectOnce', 'notDeselectedByClean', 'isNotResult', 'isImageUpload', 'cleanACtivatedOnSelect', 'activateOtherChoice', 'isNotDeactivate', 'isAllowDeselect', 'activateAfterReset', 'isActivateRandom', 'numActivateRandom', 'activateThisChoice', 'isNotActiveUnselectable', 'deactivateOtherChoice', 'deactivateThisChoice', 'discountOther', 'discountLowLimitIsOn', 'discountLowLimit', 'discountShow', 'replaceScoreText', 'hideScoreValue', 'hideScoreIcon', 'discountBeforeText', 'discountAfterText', 'isDisChoices', 'discountRows', 'discountChoices', 'discountGroups', 'discountPointTypes', 'discountOperator', 'discountValue', 'stackableDiscount', 'useDiscountCount', 'discountCount', 'numDiscountChoices', 'appliedDisChoices', 'duplicateRow', 'dRowAddSufReq', 'dRowAddSufFunc', 'duplicateRowId', 'duplicateRowPlace', 'isContentHidden', 'hiddenContentsRow', 'hiddenContentsType', 'addToAllowChoice', 'idOfAllowChoice', 'numbAddToAllowChoice', 'showAllAddons', 'changeTemplates', 'changeAddonTemplate', 'changeWidth', 'changeTemplatesList', 'changeToThisTemplate', 'changeWidthList', 'changeToThisWidth', 'defaultTemplate', 'defaultWidth', 'scrollToRow', 'scrollToObject', 'scrollObjectId', 'scrollRowId', 'changePointBar', 'changeBarBgColorIsOn', 'changeBarTextColorIsOn', 'changeBarIconColorIsOn', 'changedBarBgColor', 'changedBarTextColor', 'changedBarIconColor', 'changeBackground', 'changeBgImage', 'changedBgColorCode', 'bgImage', 'setBgmIsOn', 'bgmId', 'bgmFadeIn', 'bgmFadeOut', 'bgmFadeInSec', 'bgmFadeOutSec', 'bgmNoLoop', 'muteBgm', 'useAudioURL', 'isFadeTransition', 'fadeTransitionColor', 'fadeTransitionTime', 'fadeInTransitionTime', 'fadeOutTransitionTime', 'multiplyPointtypeIsOn', 'pointTypeToMultiply', 'multiplyWithThis', 'multiplyPointtypeIsId', 'dividePointtypeIsOn', 'pointTypeToDivide', 'divideWithThis', 'startingSumAtMultiply', 'startingSumAtDivide', 'startingSumAtSet', 'multiplyPointtypeIsOnCheck', 'dividePointtypeIsOnCheck', 'setPointtypeIsOnCheck', 'isChangeVariables', 'changedVariables', 'changeType', 'textfieldIsOn', 'customTextfieldIsOn', 'idOfTheTextfieldWord', 'wordPromptText', 'wordChangeSelect', 'wordChangeDeselect', 'confirmIsOn', 'backpackBtnRequirement', 'forcedActivated', 'activatedFrom', 'activatedRandom', 'activatedRandomMul', 'defaultImage', 'tempMultipleValue', 'randomWeight', 'useSeperateAddon', 'useSlider', 'hideCounter', 'templateStack', 'widthStack', 'isEditModeOn', 'isSelectDelayed', 'selectDelayTime', 'selectDelayTimer', 'showScoreInAddon', 'showReqInAddon', 'setPointtypeIsOn', 'pointTypeToSet', 'setWithThis'];
 export const app = $state<App>({
     version: appVersion,
     isEditModeOnAll: true,
@@ -429,6 +430,24 @@ export const app = $state<App>({
     defaultOrReq: 'of',
     orderSelReqText: '0',
     defaultSelReq: 'choice from',
+    defaultRowTemplate: 1,
+    defaultRowWidth: 'col-md-3',
+    defaultRowJustify: 'start',
+    defaultRowAllowedChoices: 0,
+    defaultChoiceTemplate: 1,
+    defaultChoiceWidth: '',
+    defaultChoiceMaxNum: 99,
+    defaultAddonJustify: 'start',
+    defaultAddonTemplate: 1,
+    defaultAddonWidth: 'col-12',
+    defaultUseSeperateAddon: false,
+    defaultUseShowAddon: false,
+    defaultUseHideAddon: false,
+    defaultUseShowScore: true,
+    defaultUseHideValue: false,
+    defaultUseShowReq: false,
+    cropperPosition: 4,
+    enableSearch: true,
     backpack: [{
         index: 0,
         id: 'default_backpack_row',
@@ -439,6 +458,7 @@ export const app = $state<App>({
         objectWidth: 'col-md-3',
         image: '',
         template: 1,
+        rowJustify: 'start',
         isButtonRow: false,
         buttonType: true,
         buttonId: '',
@@ -531,6 +551,24 @@ export const defaultApp: App = {
     defaultOrReq: 'of',
     orderSelReqText: '0',
     defaultSelReq: 'choice from',
+    defaultRowTemplate: 1,
+    defaultRowWidth: 'col-md-3',
+    defaultRowJustify: 'start',
+    defaultRowAllowedChoices: 0,
+    defaultChoiceTemplate: 1,
+    defaultChoiceWidth: '',
+    defaultChoiceMaxNum: 99,
+    defaultAddonJustify: 'start',
+    defaultAddonTemplate: 1,
+    defaultAddonWidth: 'col-12',
+    defaultUseSeperateAddon: false,
+    defaultUseShowAddon: false,
+    defaultUseHideAddon: false,
+    defaultUseShowScore: true,
+    defaultUseHideValue: false,
+    defaultUseShowReq: false,
+    cropperPosition: 4,
+    enableSearch: true,
     backpack: [{
         index: 0,
         id: 'default_backpack_row',
@@ -541,6 +579,7 @@ export const defaultApp: App = {
         objectWidth: 'col-md-3',
         image: '',
         template: 1,
+        rowJustify: 'start',
         isButtonRow: false,
         buttonType: true,
         buttonId: '',
@@ -602,19 +641,19 @@ export const objectWidths = [{
     text: '6 per row',
     value: 'col-lg-2'
 }, {
-    text: '7 per row ',
+    text: '7 per row',
     value: 'w-14'
 }, {
-    text: '8 per row ',
+    text: '8 per row',
     value: 'w-12'
 }, {
-    text: '9 per row ',
+    text: '9 per row',
     value: 'w-11'
 }, {
     text: '10 per row',
     value: 'w-10'
 }, {
-    text: '11 per row ',
+    text: '11 per row',
     value: 'w-9'
 }, {
     text: '12 per row',
@@ -635,7 +674,7 @@ export const rowDesignMap = $state<SvelteMap<string, RowDesignGroup>>(new Svelte
 export const objectDesignMap = $state<SvelteMap<string, ObjectDesignGroup>>(new SvelteMap());
 export const categoryMap = $state<SvelteMap<string, Category>>(new SvelteMap);
 export const scoreSet = $state<SvelteSet<string>>(new SvelteSet());
-export const mdObjects = $state<Choice[]>([]);
+export const mdObjects = $state<MDObject[]>([]);
 export const currentComponent = $state({ value: 'appMain'});
 export const currentTheme = $state({ value: 'light' });
 export const useAltMenu = $state({ value: false });
@@ -665,6 +704,9 @@ export const dlgVariables = $state<DlgVariables>({
     currentDialog: 'none',
 });
 export const wordDialog = $state<WordDialog>({
+    currentDialog: 'none',
+});
+export const imgDialog = $state<ImgDialog>({
     currentDialog: 'none',
 });
 export const snackbarVariables = $state<SnackBarVariables>({
@@ -743,6 +785,12 @@ let optimizedPointTypes = $derived(app.pointTypes.map(({id}) => id));
 let optimizedVariables = $derived(app.variables.map(({id}) => id));
 let optimizedWords = $derived(app.words.map(({id}) => id));
 let optimizedGlobalRequirement = $derived(app.globalRequirements?.map(({id}) => id));
+let optimizedAddons = $derived(app.rows.flatMap(row => row.objects).flatMap(obj => obj.addons ?? []).filter(addon => addon.isSelectable).map(({ id }) => id));
+let optimizedBackpackAddons = $derived(app.backpack.flatMap(row => row.objects).flatMap(obj => obj.addons ?? []).filter(addon => addon.isSelectable).map(({ id }) => id));
+let optimizedSelectables = $derived([...optimizedChoices, ...optimizedAddons]);
+let optimizedBackpackSelectables = $derived([...optimizedBackpackChoices, ...optimizedBackpackAddons]);
+let optimizedSearchables = $derived([...app.rows.flatMap(row => row.objects).filter(choice => !choice.isNotSelectable && !choice.isNotSearchable).map(({ id }) => id), ...app.rows.flatMap(row => row.objects).flatMap(obj => obj.addons ?? []).filter(addon => addon.isSelectable && !addon.isNotSelectable && !addon.isNotSearchable).map(({ id }) => id)]);
+
 export function getRows() {
     return optimizedRows;
 }
@@ -769,6 +817,15 @@ export function getWords() {
 }
 export function getGlobalRequirement() {
     return optimizedGlobalRequirement;
+}
+export function getSelectables() {
+    return optimizedSelectables;
+}
+export function getBackpackSelectables() {
+    return optimizedBackpackSelectables;
+}
+export function getSearchables() {
+    return optimizedSearchables;
 }
 let dbInstance: IDBDatabase | null = null;
 let dbInstanceOld: IDBDatabase | null = null;
@@ -1510,94 +1567,88 @@ export function getGlobalReqLabel(str: string) {
     }
     return '';
 }
-export function getChoiceTitle(req: Requireds) {
-    if (req.customTextIsOn) {
-        return typeof req.customText !== 'undefined' ? req.customText : '';
-    }
-
+function getReqText(req: Requireds): string {
     switch (req.type) {
         case 'id': {
-            let id = req.reqId.split('/ON#');
-            let cMap = choiceMap.get(id[0]);
+            const id = req.reqId.split('/ON#');
+            const cMap = choiceMap.get(id[0]);
             if (typeof cMap !== 'undefined') {
-                let thisChoice = cMap.choice;
+                const thisChoice = cMap.choice;
 
-                return `${req.beforeText}${id.length > 1 ? ` ${id[1]}` : ''} ${thisChoice.title} ${req.afterText}`;
+                return `${id.length > 1 ? `${id[1]} ` : ''}${thisChoice.title}`;
             }
             break;
         }
         case 'points': {
-            let thisPoint = pointTypeMap.get(req.reqId);
+            const thisPoint = pointTypeMap.get(req.reqId);
             if (typeof thisPoint !== 'undefined') {
-
-                return `${req.beforeText} ${req.reqPoints} ${thisPoint.name} ${req.afterText}`;
+                return `${req.reqPoints} ${thisPoint.name}`;
             }
             break;
         }
         case 'or': {
-            let val = [];
-            for (let i = 0; i < req.orRequired.length; i++) {
-                let orReq = req.orRequired[i].req;
-                if (typeof orReq !== 'undefined') {
-                    let id = orReq.split('/ON#');
-                    let cMap = choiceMap.get(id[0]);
-                    let num = '';
-                    if (typeof cMap !== 'undefined') {
-                        let thisChoice = cMap.choice;
-                        num = id.length > 1 ? `${id[1]} ` : '';
-                        val.push(`${num}${thisChoice.title}`);
-                    }
+            const val = [];
+            if (typeof req.orRequireds !== 'undefined') {
+                for (let i = 0 ; i < req.orRequireds.length; i++) {
+                    val.push(getReqText(req.orRequireds[i]));
                 }
             }
             if (app.orderOrReqText === '1') {
-                return `${req.beforeText} ${val.join(', ')} ${typeof req.orNum !== 'undefined' ? `${app.defaultOrReq} ${req.orNum}` : `${app.defaultOrReq} 1`} ${req.afterText}`;
+                return `${val.join(', ')} ${typeof req.orNum !== 'undefined' ? `${app.defaultOrReq} ${req.orNum}` : `${app.defaultOrReq} 1`}`;
             } else {
-                return `${req.beforeText} ${typeof req.orNum !== 'undefined' ? `${req.orNum} ${app.defaultOrReq}` : `1 ${app.defaultOrReq}`} ${val.join(', ')} ${req.afterText}`;
+                return `${typeof req.orNum !== 'undefined' ? `${req.orNum} ${app.defaultOrReq}` : `1 ${app.defaultOrReq}`} ${val.join(', ')}`;
             }
         }
         case 'selFromGroups': {
             if (typeof req.selGroups !== 'undefined') {
-                let val = [];
+                const val = [];
                 for (let i = 0; i < req.selGroups.length; i++) {
-                    let id = req.selGroups[i];
-                    let thisGroup = groupMap.get(id);
+                    const id = req.selGroups[i];
+                    const thisGroup = groupMap.get(id);
                     if (typeof thisGroup !== 'undefined') {
                         val.push(thisGroup.name);
                     }
                 }
                 if (app.orderSelReqText === '1') {
-                    return `${req.beforeText} ${val.join(', ')} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
+                    return `${val.join(', ')} ${app.defaultOrReq} ${req.selNum}`;
                 } else {
-                    return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${val.join(', ')} ${req.afterText}`;
+                    return `${req.selNum} ${app.defaultOrReq} ${val.join(', ')}`;
                 }
             }
         }
         case 'selFromRows': {
             if (typeof req.selRows !== 'undefined') {
-                let val = [];
+                const val = [];
                 for (let i = 0; i < req.selRows.length; i++) {
-                    let id = req.selRows[i];
-                    let thisRow = rowMap.get(id);
+                    const id = req.selRows[i];
+                    const thisRow = rowMap.get(id);
                     if (typeof thisRow !== 'undefined') {
                         val.push(thisRow.title);
                     }
                 }
                 if (app.orderSelReqText === '1') {
-                    return `${req.beforeText} ${val.join(', ')} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
+                    return `${val.join(', ')} ${app.defaultOrReq} ${req.selNum}`;
                 } else {
-                    return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${val.join(', ')} ${req.afterText}`;
+                    return `${req.selNum} ${app.defaultOrReq} ${val.join(', ')}`;
                 }
             }
         }
         case 'selFromWhole': {
             if (app.orderSelReqText === '1') {
-                return `${req.beforeText} ${app.defaultOrReq} ${req.selNum} ${req.afterText}`;
+                return `${app.defaultOrReq} ${req.selNum}`;
             } else {
-                return `${req.beforeText} ${req.selNum} ${app.defaultOrReq} ${req.afterText}`;
+                return `${req.selNum} ${app.defaultOrReq}`;
             }
         }
     }
-    return `${req.beforeText} ${req.afterText}`;
+    return '';
+}
+export function getChoiceTitle(req: Requireds) {
+    if (req.customTextIsOn) {
+        return typeof req.customText !== 'undefined' ? req.customText : '';
+    }
+
+    return `${req.beforeText} ${getReqText(req)} ${req.afterText}`;
 }
 function checkInitId(id: string) {
     return rowMap.has(id) || choiceMap.has(id) || wordMap.has(id) || pointTypeMap.has(id) || rowDesignMap.has(id) || objectDesignMap.has(id) || groupMap.has(id) || variableMap.has(id)
@@ -1635,7 +1686,7 @@ export function generateWordId(repeated: number, strLength: number) {
     }
 }
 export function generateObjectId(repeated: number, strLength: number, isAddon: boolean = false) {
-    let id = app.addPrefix && !isAddon ? 'choice-' : '';
+    let id = app.addPrefix ? isAddon ? 'addon-' : 'choice-' : '';
     let str = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (var o = 0; o < strLength; o++) {
         id += str.charAt(Math.floor(Math.random() * str.length));
@@ -1794,17 +1845,42 @@ export function replaceText(str: string) {
 export function getStyling(prop: string, row?: Row, choice?: Choice) {
     if (typeof choice !== 'undefined') {
         if (typeof choice.styling !== 'undefined' && choice.isPrivateStyling && choice[prop]) return choice.styling;
-        if (typeof app.objectDesignGroups !== 'undefined' && choice.objectDesignGroups) {
-            for (let i = 0; i < choice.objectDesignGroups.length; i++) {
-                let objectDesignGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
-                if (typeof objectDesignGroup !== 'undefined') {
-                    if (objectDesignGroup[prop]) {
-                        let id = objectDesignGroup.activatedId;
-                        let globalReq = globalReqMap.get(id);
-                        if (id === '' || checkActivated(objectDesignGroup.activatedId)) {
-                            return objectDesignGroup.styling;
-                        } else if (typeof app.globalRequirements !== 'undefined' && typeof globalReq !== 'undefined') {
-                            if (checkRequirements(globalReq.requireds)) return objectDesignGroup.styling;
+        if (typeof app.objectDesignGroups !== 'undefined') {
+            if (choice.objectDesignGroups) {
+                for (let i = 0; i < choice.objectDesignGroups.length; i++) {
+                    const objectDesignGroup = objectDesignMap.get(choice.objectDesignGroups[i]);
+                    if (typeof objectDesignGroup !== 'undefined') {
+                        if (objectDesignGroup[prop]) {
+                            const id = objectDesignGroup.activatedId;
+                            const globalReq = globalReqMap.get(id);
+                            if (id === '' || checkActivated(objectDesignGroup.activatedId)) {
+                                return objectDesignGroup.styling;
+                            } else if (typeof app.globalRequirements !== 'undefined' && typeof globalReq !== 'undefined') {
+                                if (checkRequirements(globalReq.requireds)) return objectDesignGroup.styling;
+                            }
+                        }
+                    }
+                }
+            }
+            if (choice.groups) {
+                for (let i = 0; i < choice.groups.length; i++) {
+                    const group = groupMap.get(choice.groups[i]);
+                    if (typeof group !== 'undefined') {
+                        if (typeof group.designGroups !== 'undefined') {
+                            for (let j = 0; j < group.designGroups.length; j++) {
+                                const objectDesignGroup = objectDesignMap.get(group.designGroups[i]);
+                                if (typeof objectDesignGroup !== 'undefined') {
+                                    if (objectDesignGroup[prop]) {
+                                        const id = objectDesignGroup.activatedId;
+                                        const globalReq = globalReqMap.get(id);
+                                        if (id === '' || checkActivated(objectDesignGroup.activatedId)) {
+                                            return objectDesignGroup.styling;
+                                        } else if (typeof app.globalRequirements !== 'undefined' && typeof globalReq !== 'undefined') {
+                                            if (checkRequirements(globalReq.requireds)) return objectDesignGroup.styling;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1813,17 +1889,42 @@ export function getStyling(prop: string, row?: Row, choice?: Choice) {
     }
     if (typeof row !== 'undefined') {
         if (typeof row.styling !== 'undefined' && row.isPrivateStyling && row[prop]) return row.styling;
-        if (typeof app.rowDesignGroups !== 'undefined' && row.rowDesignGroups) {
-            for (let i = 0; i < row.rowDesignGroups.length; i++) {
-                let rowDesignGroup = rowDesignMap.get(row.rowDesignGroups[i]);
-                if (typeof rowDesignGroup !== 'undefined') {
-                    if (rowDesignGroup[prop]) {
-                        let id = rowDesignGroup.activatedId;
-                        let globalReq = globalReqMap.get(id);
-                        if (id === '' || checkActivated(rowDesignGroup.activatedId)) {
-                            return rowDesignGroup.styling;
-                        } else if (typeof app.globalRequirements !== 'undefined' && typeof globalReq !== 'undefined') {
-                            if (checkRequirements(globalReq.requireds)) return rowDesignGroup.styling;
+        if (typeof app.rowDesignGroups !== 'undefined') {
+            if (row.rowDesignGroups) {
+                for (let i = 0; i < row.rowDesignGroups.length; i++) {
+                    const rowDesignGroup = rowDesignMap.get(row.rowDesignGroups[i]);
+                    if (typeof rowDesignGroup !== 'undefined') {
+                        if (rowDesignGroup[prop]) {
+                            const id = rowDesignGroup.activatedId;
+                            const globalReq = globalReqMap.get(id);
+                            if (id === '' || checkActivated(rowDesignGroup.activatedId)) {
+                                return rowDesignGroup.styling;
+                            } else if (typeof app.globalRequirements !== 'undefined' && typeof globalReq !== 'undefined') {
+                                if (checkRequirements(globalReq.requireds)) return rowDesignGroup.styling;
+                            }
+                        }
+                    }
+                }
+            }
+            if (row.groups) {
+                for (let i = 0; i < row.groups.length; i++) {
+                    const group = groupMap.get(row.groups[i]);
+                    if (typeof group !== 'undefined') {
+                        if (typeof group.designGroups !== 'undefined') {
+                            for (let j = 0; j < group.designGroups.length; j++) {
+                                const rowDesignGroup = rowDesignMap.get(group.designGroups[i]);
+                                if (typeof rowDesignGroup !== 'undefined') {
+                                    if (rowDesignGroup[prop]) {
+                                        const id = rowDesignGroup.activatedId;
+                                        const globalReq = globalReqMap.get(id);
+                                        if (id === '' || checkActivated(rowDesignGroup.activatedId)) {
+                                            return rowDesignGroup.styling;
+                                        } else if (typeof app.globalRequirements !== 'undefined' && typeof globalReq !== 'undefined') {
+                                            if (checkRequirements(globalReq.requireds)) return rowDesignGroup.styling;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1834,7 +1935,7 @@ export function getStyling(prop: string, row?: Row, choice?: Choice) {
 }
 export function checkDupId(id: string, dataMap: Map<string, PointType | Row | ChoiceMap | Group | Variable | Word | RowDesignGroup | ObjectDesignGroup | GlobalRequirement> | Set<string>) {
     if (dataMap.has(id)) {
-        let tempId = `${id}_dup`;
+        const tempId = `${id}_dup`;
         return checkDupId(tempId, dataMap);
     }
     return id;
@@ -1842,8 +1943,8 @@ export function checkDupId(id: string, dataMap: Map<string, PointType | Row | Ch
 export function checkPointEnable(point: PointType) {
     if (point.isNotShownPointBar) {
         if (typeof point.activatedId !== 'undefined' && point.activatedId !== '') {
-            let globalReq = globalReqMap.get(point.activatedId);
-            let variable = variableMap.get(point.activatedId);
+            const globalReq = globalReqMap.get(point.activatedId);
+            const variable = variableMap.get(point.activatedId);
             if (typeof globalReq !== 'undefined') {
                 return checkRequirements(globalReq.requireds);
             }
@@ -1922,9 +2023,11 @@ export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> =
             case 'or':
                 let orNum = typeof req.orNum === 'undefined' ? 1 : req.orNum;
                 let orCount = 0;
-                for (let i = 0; i < req.orRequired.length; i++) {
-                    let orReq = req.orRequired[i].req;
-                    if (typeof orReq !== 'undefined' && checkActivated(orReq, aMap)) orCount++;
+                if (req.orRequireds) {
+                    for (let i = 0; i < req.orRequireds.length; i++) {
+                        const orReq = req.orRequireds[i];
+                        if (checkReq(orReq, aMap)) orCount++;
+                    }
                 }
                 return orCount >= orNum;
             case 'pointCompare':
@@ -2065,11 +2168,13 @@ export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> =
             case 'or':
                 let orNum = typeof req.orNum === 'undefined' ? 1 : req.orNum;
                 let orCount = 0;
-                for (let i = 0; i < req.orRequired.length; i++) {
-                    let orReq = req.orRequired[i].req;
-                    if (orReq === '' || typeof orReq !== 'undefined' && checkActivated(orReq, aMap)) orCount++;
+                if (req.orRequireds) {
+                    for (let i = 0; i < req.orRequireds.length; i++) {
+                        let orReq = req.orRequireds[i];
+                        if (checkReq(orReq, aMap)) orCount++;
+                    }
+                    return orCount < req.orRequireds.length - orNum + 1;
                 }
-                return orCount < req.orRequired.length - orNum + 1;
             case 'gid':
                 const globalReq = globalReqMap.get(req.reqId);
                 if (typeof globalReq !== 'undefined' && typeof app.globalRequirements !== 'undefined') {
@@ -2235,7 +2340,7 @@ function retryAudioPlayer(bgmId: string, loop: boolean) {
 
     return newPlayer;
 }
-function bgmFadeIn(localChoice: Choice, bgmId: string, isFirst: boolean, player: MusicPlayer) {
+function bgmFadeIn(localChoice: Choice | SelectableAddon, bgmId: string, isFirst: boolean, player: MusicPlayer) {
     function bgmPlay() {
         const result = player.play();
 
@@ -2355,7 +2460,7 @@ function bgmFadeIn(localChoice: Choice, bgmId: string, isFirst: boolean, player:
         playProc();
     }
 }
-function bgmFadeOut(localChoice: Choice, player: MusicPlayer) {
+function bgmFadeOut(localChoice: Choice | SelectableAddon, player: MusicPlayer) {
     const steps = app.curVolume / 5;
 
     if (localChoice.bgmFadeOut && typeof localChoice.bgmFadeOutSec !== 'undefined' && localChoice.bgmFadeOutSec > 0 && steps > 0) {
@@ -2420,7 +2525,7 @@ function bgmFadeOut(localChoice: Choice, player: MusicPlayer) {
         bgmVariables.curBgmLength = 0;
     }
 }
-export function playBgm(localChoice: Choice, bgmId: string, count: number) {
+export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, count: number) {
     const youPlayer = get(bgmPlayer);
     let player = get(musicPlayer);
 
@@ -2476,7 +2581,6 @@ export function playBgm(localChoice: Choice, bgmId: string, count: number) {
         }
     }
 }
-
 export function loadYouTubeAPI(): Promise<typeof YT> {
     return new Promise((resolve) => {
         if (window.YT && window.YT.Player) {
@@ -2489,7 +2593,7 @@ export function loadYouTubeAPI(): Promise<typeof YT> {
         }
     });
 }
-export async function initYoutubePlayer(localChoice: Choice) {
+export async function initYoutubePlayer(localChoice: Choice | SelectableAddon) {
     const YT = await loadYouTubeAPI();
     const player = new YT.Player('bgm-player', {
         width: 0,
@@ -2569,7 +2673,7 @@ export function deleteDiscount(score: Score) {
     delete score.hideDisValue;
     delete score.hideDisIcon;
 }
-export function deselectDiscount(localChoice: Choice, targetChoice: Choice) {
+export function deselectDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
     for (let m = 0; m < targetChoice.scores.length; m++) {
         const score = targetChoice.scores[m];
         const appliedDiscount = score.appliedDiscount;
@@ -2823,7 +2927,7 @@ export function deselectDiscount(localChoice: Choice, targetChoice: Choice) {
         }
     }
 }
-export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
+export function selectDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
     for (let m = 0; m < targetChoice.scores.length; m++) {
         const score = targetChoice.scores[m];
 
@@ -3067,7 +3171,7 @@ export function selectDiscount(localChoice: Choice, targetChoice: Choice) {
         }
     }
 }
-function updateDiscountTexts(localChoice: Choice, score: Score) {
+function updateDiscountTexts(localChoice: Choice | SelectableAddon, score: Score) {
     if (typeof score.discountTextA === 'undefined') score.discountTextA = [];
     if (typeof score.discountTextB === 'undefined') score.discountTextB = [];
     if (typeof score.dupTextA === 'undefined') score.dupTextA = {};
@@ -3125,7 +3229,7 @@ export function expDiscount(point: PointType, score: Score) {
         }
     }
 }
-export function checkPoints(localChoice: Choice, isSel: boolean) {
+export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolean) {
     let isPositve = true;
     const scoreMap = new Map<string, number>();
     const acMap: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
@@ -3398,6 +3502,35 @@ export function checkPoints(localChoice: Choice, isSel: boolean) {
 
     return isPositve;
 }
+function checkAddons(localChoice: Choice, localRow: Row, options: ChoiceOptions) {
+    if (localChoice.addons && localChoice.addons.length > 0) {
+        const sAddons = localChoice.addons.filter(item => item.isSelectable === true);
+
+        for (let i = 0; i < sAddons.length; i++) {
+            const addon = sAddons[i] as SelectableAddon;
+
+            if (addon.isActive) {
+                if (addon.selectOnce) return false;
+                
+                if (addon.isSelectableMultiple && addon.isMultipleUseVariable) {
+                    const pNum = addon.multipleUseVariable;
+                    for (let i = 0; i < Math.abs(pNum); i++) {
+                        if (pNum > 0) {
+                            selectedOneLess(addon, localRow, options);
+                        } else {
+                            selectedOneMore(addon, localRow, options);
+                        }
+                    }
+                } else {
+                    deselectObject(addon, localRow, options);
+                }
+
+                if (addon.isActive) return false;
+            }
+        }
+    }
+    return true;
+}
 export function setScoreValue(point: PointType, score: Score) {
     if (score.isRandom) {
         if (typeof score.maxValue !== 'undefined' && typeof score.minValue !== 'undefined') {
@@ -3411,7 +3544,7 @@ export function cleanActivated() {
     const preserveList = new Set<string>();
     const reactivateList = new Set<string>();
 
-    function checkActivateOther(localChoice: Choice) {
+    function checkActivateOther(localChoice: Choice | SelectableAddon) {
         if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
             if (localChoice.activatedRandom) {
                 if (localChoice.isSelectableMultiple) {
@@ -3514,13 +3647,115 @@ export function cleanActivated() {
                             if (typeof tChoice !== 'undefined') {
                                 if (val.length > 1) tChoice.multiple += parseInt(val[1]);
                             } else {
-                                tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: fChoice.isAllowDeselect || false});
+                                tmpActivatedMap.set(fChoice.id, {multiple: val.length > 1 ? parseInt(val[1]) : 0, isAllowDeselect: localChoice.isAllowDeselect || false});
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    function deselectProc(cChoice: Choice | SelectableAddon) {
+        delete cChoice.activatedRandom;
+        delete cChoice.activatedRandomMul;
+
+        if (cChoice.isContentHidden && typeof cChoice.hiddenContentsRow !== 'undefined' && typeof cChoice.hiddenContentsType !== 'undefined') {
+            for (let i = 0; i < cChoice.hiddenContentsRow.length; i++) {
+                const hRow = rowMap.get(cChoice.hiddenContentsRow[i]);
+                if (typeof hRow !== 'undefined') {
+                    for (let j = 0; j < cChoice.hiddenContentsType.length; j++) {
+                        switch (cChoice.hiddenContentsType[j]) {
+                            case '1':
+                                delete hRow.objectTitleRemoved;
+                                break;
+                            case '2':
+                                delete hRow.objectImageRemoved;
+                                break;
+                            case '3':
+                                delete hRow.objectTextRemoved;
+                                break;
+                            case '4':
+                                delete hRow.objectScoreRemoved;
+                                break;
+                            case '5':
+                                delete hRow.objectRequirementRemoved;
+                                break;
+                            case '6':
+                                delete hRow.addonTitleRemoved;
+                                break;
+                            case '7':
+                                delete hRow.addonImageRemoved;
+                                break;
+                            case '8':
+                                delete hRow.addonTextRemoved;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (cChoice.isChangeVariables && typeof cChoice.changedVariables !== 'undefined') {
+            for (let i = 0; i < cChoice.changedVariables.length; i++) {
+                const variable = variableMap.get(cChoice.changedVariables[i]);
+                if (typeof variable !== 'undefined') {
+                    if (cChoice.changeType === '1') {
+                        variable.isTrue = true;
+                    } else if (cChoice.changeType === '2') {
+                        variable.isTrue = false;
+                    } else if (cChoice.changeType === '3') {
+                        variable.isTrue = !variable.isTrue;
+                    }
+                }
+            }
+        }
+
+        if (cChoice.textfieldIsOn && typeof cChoice.idOfTheTextfieldWord !== 'undefined' && typeof cChoice.wordChangeSelect !== 'undefined') {
+            const word = wordMap.get(cChoice.idOfTheTextfieldWord);
+            if (typeof word !== 'undefined') {
+                word.replaceText = typeof cChoice.wordChangeDeselect === 'undefined' ? '' : cChoice.wordChangeDeselect;
+            }
+        }
+
+        if (cChoice.isImageUpload) {
+            if (typeof cChoice.defaultImage !== 'undefined') cChoice.image = cChoice.defaultImage;
+        }
+
+        if (cChoice.setBgmIsOn && musicPlayer) {
+            if (cChoice.bgmId) {
+                const player = get(musicPlayer);
+
+                if (player && player.getId() === cChoice.bgmId) {
+                    player.stop();
+                    bgmVariables.bgmIsPlaying = false;
+                    if (bgmVariables.bgmFadeInterval !== 0) {
+                        window.clearInterval(bgmVariables.bgmFadeInterval);
+                        bgmVariables.bgmFadeInterval = 0;
+                    }
+                    if (bgmVariables.bgmTitleInterval !== 0) {
+                        window.clearInterval(bgmVariables.bgmTitleInterval);
+                        bgmVariables.bgmTitleInterval = 0;
+                    }
+                    if (bgmVariables.bgmPlayInterval !== 0) {
+                        window.clearInterval(bgmVariables.bgmPlayInterval);
+                        bgmVariables.bgmPlayInterval = 0;
+                    }
+                    bgmVariables.lastFadeTime = 0;
+                    bgmVariables.isFadingOut = false;
+                    bgmVariables.bgmTitle = 'No Audio Title';
+                    bgmVariables.curBgmTime = 0;
+                    bgmVariables.curBgmLength = 0;
+                }
+            }
+        }
+        
+        if (typeof cChoice.initMultipleTimesMinus !== 'undefined') cChoice.numMultipleTimesMinus = cChoice.initMultipleTimesMinus;
+        cChoice.multipleUseVariable = 0;
+        cChoice.isActive = false;
+        activatedMap.delete(cChoice.id);
     }
 
     tmpActivatedMap.clear();
@@ -3531,7 +3766,7 @@ export function cleanActivated() {
         if (typeof cMap !== 'undefined') {
             const aChoice = cMap.choice;
 
-            if (aChoice.notDeselectedByClean) {
+            if (aChoice.notDeselectedByClean || aChoice.isAutoActive) {
                 preserveList.add(aChoice.id);
                 checkActivateOther(aChoice);
             }
@@ -3552,6 +3787,8 @@ export function cleanActivated() {
     for (let [key, value] of choiceMap) {
         if (value.choice.isActive) {
             keysSet.add(key);
+        } else if (value.choice.isAutoActive) {
+            tmpActivatedMap.set(key, {multiple: 0});
         }
     }
 
@@ -3589,105 +3826,7 @@ export function cleanActivated() {
             }
 
             if (!preserveList.has(cChoice.id)) {
-                delete cChoice.activatedRandom;
-                delete cChoice.activatedRandomMul;
-
-                if (cChoice.isContentHidden && typeof cChoice.hiddenContentsRow !== 'undefined' && typeof cChoice.hiddenContentsType !== 'undefined') {
-                    for (let i = 0; i < cChoice.hiddenContentsRow.length; i++) {
-                        const hRow = rowMap.get(cChoice.hiddenContentsRow[i]);
-                        if (typeof hRow !== 'undefined') {
-                            for (let j = 0; j < cChoice.hiddenContentsType.length; j++) {
-                                switch (cChoice.hiddenContentsType[j]) {
-                                    case '1':
-                                        delete hRow.objectTitleRemoved;
-                                        break;
-                                    case '2':
-                                        delete hRow.objectImageRemoved;
-                                        break;
-                                    case '3':
-                                        delete hRow.objectTextRemoved;
-                                        break;
-                                    case '4':
-                                        delete hRow.objectScoreRemoved;
-                                        break;
-                                    case '5':
-                                        delete hRow.objectRequirementRemoved;
-                                        break;
-                                    case '6':
-                                        delete hRow.addonTitleRemoved;
-                                        break;
-                                    case '7':
-                                        delete hRow.addonImageRemoved;
-                                        break;
-                                    case '8':
-                                        delete hRow.addonTextRemoved;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (cChoice.isChangeVariables && typeof cChoice.changedVariables !== 'undefined') {
-                    for (let i = 0; i < cChoice.changedVariables.length; i++) {
-                        const variable = variableMap.get(cChoice.changedVariables[i]);
-                        if (typeof variable !== 'undefined') {
-                            if (cChoice.changeType === '1') {
-                                variable.isTrue = true;
-                            } else if (cChoice.changeType === '2') {
-                                variable.isTrue = false;
-                            } else if (cChoice.changeType === '3') {
-                                variable.isTrue = !variable.isTrue;
-                            }
-                        }
-                    }
-                }
-
-                if (cChoice.textfieldIsOn && typeof cChoice.idOfTheTextfieldWord !== 'undefined' && typeof cChoice.wordChangeSelect !== 'undefined') {
-                    const word = wordMap.get(cChoice.idOfTheTextfieldWord);
-                    if (typeof word !== 'undefined') {
-                        word.replaceText = typeof cChoice.wordChangeDeselect === 'undefined' ? '' : cChoice.wordChangeDeselect;
-                    }
-                }
-
-                if (cChoice.isImageUpload) {
-                    if (typeof cChoice.defaultImage !== 'undefined') cChoice.image = cChoice.defaultImage;
-                }
-
-                if (cChoice.setBgmIsOn && musicPlayer) {
-                    if (cChoice.bgmId) {
-                        const player = get(musicPlayer);
-
-                        if (player && player.getId() === cChoice.bgmId) {
-                            player.stop();
-                            bgmVariables.bgmIsPlaying = false;
-                            if (bgmVariables.bgmFadeInterval !== 0) {
-                                window.clearInterval(bgmVariables.bgmFadeInterval);
-                                bgmVariables.bgmFadeInterval = 0;
-                            }
-                            if (bgmVariables.bgmTitleInterval !== 0) {
-                                window.clearInterval(bgmVariables.bgmTitleInterval);
-                                bgmVariables.bgmTitleInterval = 0;
-                            }
-                            if (bgmVariables.bgmPlayInterval !== 0) {
-                                window.clearInterval(bgmVariables.bgmPlayInterval);
-                                bgmVariables.bgmPlayInterval = 0;
-                            }
-                            bgmVariables.lastFadeTime = 0;
-                            bgmVariables.isFadingOut = false;
-                            bgmVariables.bgmTitle = 'No Audio Title';
-                            bgmVariables.curBgmTime = 0;
-                            bgmVariables.curBgmLength = 0;
-                        }
-                    }
-                }
-                
-                if (typeof cChoice.initMultipleTimesMinus !== 'undefined') cChoice.numMultipleTimesMinus = cChoice.initMultipleTimesMinus;
-                cChoice.multipleUseVariable = 0;
-                cChoice.isActive = false;
-                activatedMap.delete(cChoice.id);
+                deselectProc(cChoice);
             } else {
                 if (cChoice.isSelectableMultiple && cChoice.isMultipleUseVariable && typeof cChoice.tempMultipleValue !== 'undefined') {
                     cChoice.multipleUseVariable = cChoice.tempMultipleValue;
@@ -3853,7 +3992,7 @@ export function cleanActivated() {
         if (typeof cMap !== 'undefined') {
             const aChoice = cMap.choice;
 
-            if (checkRequirements(aChoice.requireds)  && checkPoints(aChoice, true)) {
+            if (checkRequirements(aChoice.requireds) && checkPoints(aChoice, true)) {
                 if (aChoice.discountOther) {
                     if (typeof aChoice.discountOperator !== 'undefined' && typeof aChoice.discountValue !== 'undefined') {
                         if (aChoice.isDisChoices) {
@@ -3891,6 +4030,15 @@ export function cleanActivated() {
                         }
                     }
                 }
+            } else {
+                const mul = aChoice.multipleUseVariable || 0;
+                delete aChoice.forcedActivated;
+                delete aChoice.activatedFrom;
+                delete aChoice.numDiscountChoices;
+                delete aChoice.appliedDisChoices;
+                deselectProc(aChoice);
+
+                tmpActivatedMap.set(aChoice.id, {multiple: mul});
             }
         }
     }
@@ -4199,6 +4347,7 @@ export function cleanActivated() {
                 activatedMap.delete(aChoice.id);
 
                 if (aChoice.forcedActivated) {
+                    delete aChoice.forcedActivated;
                     tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
                 }
             }
@@ -4206,9 +4355,11 @@ export function cleanActivated() {
             activatedMap.delete(keys[i]);
         }
     }
+
+    activateTempChoices({linkedObjects: []});
 }
 
-function activateObject(localChoice: Choice, localRow: Row, isManually: boolean = false, options: choiceOptions) {
+function activateObject(localChoice: Choice | SelectableAddon, localRow: Row, isManually: boolean = false, options: ChoiceOptions = {linkedObjects: []}) {
     let origRow = localRow;
     if (localRow.isResultRow || localRow.isGroupRow) {
         const cMap = choiceMap.get(localChoice.id);
@@ -4217,16 +4368,16 @@ function activateObject(localChoice: Choice, localRow: Row, isManually: boolean 
             origRow = cMap.row;
         }
     }
-    if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated) {
+    if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable)) {
         if (localChoice.isActive) {
-            if (!localChoice.selectOnce) deselectObject(localChoice, origRow, options);
+            if (!localChoice.selectOnce && !localChoice.forcedActivated) deselectObject(localChoice, origRow, options);
         } else {
             selectObject(localChoice, origRow, options);
         }
     }
 }
 
-function selectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, num: number, options: choiceOptions) {
+function selectForceActivate(localChoice: Choice | SelectableAddon, fChoice: Choice | SelectableAddon, fRow: Row, num: number, options: ChoiceOptions) {
     if (!fChoice.isNotSelectable || !localChoice.isNotActiveUnselectable) {
         let isLinked = false;
 
@@ -4288,14 +4439,32 @@ function selectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, nu
             if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
             if (!isLinked) fChoice.activatedFrom++;
         }
-        if (!fChoice.isActive) {
-            delete fChoice.forcedActivated;
-            tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect || false});
+        if (fChoice.isSelectDelayed && typeof fChoice.selectDelayTime !== 'undefined') {
+            const waitForRelease = () => {
+                if (!fChoice.selectDelayTimer) {
+                    if (localChoice.isActive) {
+                        if (!fChoice.isActive) {
+                            delete fChoice.forcedActivated;
+                            tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect || false});
+                        }
+                    } else {
+                        delete fChoice.forcedActivated;
+                    }
+                    return;
+                }
+                setTimeout(waitForRelease, 1000);
+            }
+            setTimeout(waitForRelease, fChoice.selectDelayTime + 1000);
+        } else {
+            if (!fChoice.isActive) {
+                delete fChoice.forcedActivated;
+                tmpActivatedMap.set(fChoice.id, {multiple: num, isAllowDeselect: localChoice.isAllowDeselect || false});
+            }
         }
     }
 }
 
-function deselectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, num: number, options: choiceOptions) {
+function deselectForceActivate(localChoice: Choice | SelectableAddon, fChoice: Choice | SelectableAddon, fRow: Row, num: number, options: ChoiceOptions) {
     options.isOverDlg = true;
     options.isOverImg = true;
     if (fChoice.activateOtherChoice && typeof fChoice.activateThisChoice !== 'undefined' && options.linkedObjects.indexOf(localChoice.id) === -1 && fChoice.activateThisChoice.split(',').some(item => item.split('/ON#')[0] === localChoice.id)) {
@@ -4352,9 +4521,15 @@ function deselectForceActivate(localChoice: Choice, fChoice: Choice, fRow: Row, 
             if (!localChoice.isNotDeactivate && fChoice.isActive) deselectObject(fChoice, fRow, options);
         }
     }
+    if (!fChoice.isActive && fChoice.selectDelayTimer) {
+        clearTimeout(fChoice.selectDelayTimer);
+        delete fChoice.selectDelayTimer;
+        delete fChoice.forcedActivated;
+        tmpActivatedMap.delete(fChoice.id);
+    }
 }
 
-function selectForceRandomActivate(localChoice: Choice, options: choiceOptions) {
+function selectForceRandomActivate(localChoice: Choice | SelectableAddon, options: ChoiceOptions) {
     if (typeof localChoice.activateThisChoice !== 'undefined') {
         let forceList = localChoice.activateThisChoice.split(',');
         let listMap = new Map<string, number>();
@@ -4431,7 +4606,7 @@ function selectForceRandomActivate(localChoice: Choice, options: choiceOptions) 
     }
 }
 
-function deselectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>(), scoreUpdate: string[] = [], options: choiceOptions) {
+function deselectUpdateScore(localChoice: Choice | SelectableAddon, tmpScores: TempScore, count: number, changedScores = new Set<string>(), scoreUpdate: string[] = [], options: ChoiceOptions) {
     const activated = Array.from(activatedMap.keys());
 
     for (let i = activated.length - 1; i >= 0; i--) {
@@ -4441,9 +4616,9 @@ function deselectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: n
             const aRow = cMap.row;
             const aChoice = cMap.choice;
             const thisTmpScores = new SvelteMap<string, number>();
-            const addCountSet = new Set<Choice>();
-            const removeCountSet = new Set<Choice>();
-            let disChoices = new Set<Choice>();
+            const addCountSet = new Set<Choice | SelectableAddon>();
+            const removeCountSet = new Set<Choice | SelectableAddon>();
+            let disChoices = new Set<Choice | SelectableAddon>();
             let isChanged = false;
             let isRevoked = false;
             let idx = localChoice.appliedDisChoices ? localChoice.appliedDisChoices.indexOf(aChoice.id) : -1;
@@ -4510,7 +4685,7 @@ function deselectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: n
                                     if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
                                         if (aChoice.forcedActivated) {
                                             delete aChoice.forcedActivated;
-                                            if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
+                                            tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
                                         }
                                         if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
                                             for (let k = 0; k < aChoice.multipleUseVariable; k++) {
@@ -4728,7 +4903,7 @@ function deselectUpdateScore(localChoice: Choice, tmpScores: TempScore, count: n
     }
 }
 
-export function selectUpdateScore(localChoice: Choice | null, tmpScores: TempScore, count: number, changedScores = new Set<string>(), scoreUpdate: string[] = [], options: choiceOptions) {
+export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, tmpScores: TempScore, count: number, changedScores = new Set<string>(), scoreUpdate: string[] = [], options: ChoiceOptions) {
     const activated = Array.from(activatedMap.keys());
 
     for (let i = 0; i < activated.length; i++) {
@@ -4738,8 +4913,8 @@ export function selectUpdateScore(localChoice: Choice | null, tmpScores: TempSco
             const aRow = cMap.row;
             const aChoice = cMap.choice;
             const thisTmpScores = new SvelteMap<string, number>();
-            const addCountSet = new Set<Choice>();
-            const removeCountSet = new Set<Choice>();
+            const addCountSet = new Set<Choice | SelectableAddon>();
+            const removeCountSet = new Set<Choice | SelectableAddon>();
             let isDiscounted = false;
             let isChanged = false;
             if (localChoice && localChoice.useDiscountCount && !localChoice.appliedDisChoices) localChoice.appliedDisChoices = [];
@@ -4991,7 +5166,7 @@ export function selectUpdateScore(localChoice: Choice | null, tmpScores: TempSco
     }
 }
 
-function activateTempChoices(options: choiceOptions) {
+export function activateTempChoices(options: ChoiceOptions) {
     let isActivated = false;
     Array.from(tmpActivatedMap.entries()).forEach(([id, val]) => {
         const cMap = choiceMap.get(id);
@@ -5011,12 +5186,14 @@ function activateTempChoices(options: choiceOptions) {
     if (isActivated) activateTempChoices(options);
 }
 
-export function deselectObject(localChoice: Choice, localRow: Row, options: choiceOptions) {
+export function deselectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+    const isChoice = typeof localChoice.parentId === 'undefined';
     const pointCheck = checkPoints(localChoice, false);
-    if (pointCheck) {
+    const addonCheck = isChoice ? checkAddons(localChoice as Choice, localRow, options) : true;
+    if (pointCheck && addonCheck) {
         const deselectProcess = () => {
             const tmpScores = new SvelteMap<string, number>();
-            let countSet = new Set<Choice>();
+            let countSet = new Set<Choice | SelectableAddon>();
             for (let i = 0; i < localChoice.scores.length; i++) {
                 const score = localChoice.scores[i];
                 if (checkRequirements(score.requireds) && score.isActive || score.isActive) {
@@ -5153,7 +5330,7 @@ export function deselectObject(localChoice: Choice, localRow: Row, options: choi
             }
             
             localChoice.isActive = false;
-            localRow.currentChoices -= 1;
+            if (isChoice) localRow.currentChoices -= 1;
             activatedMap.delete(localChoice.id);
 
             Array.from(activatedMap.entries()).forEach(([id, val]) => {
@@ -5165,13 +5342,17 @@ export function deselectObject(localChoice: Choice, localRow: Row, options: choi
                         if (!checkRequirements(aChoice.requireds)) {
                             if (aChoice.forcedActivated) {
                                 delete aChoice.forcedActivated;
-                                if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
                             }
                             if (val.multiple === 0) {
-                                if (aChoice.isActive) deselectObject(aChoice, aRow, options);
+                                if (aChoice.isActive) {
+                                    deselectObject(aChoice, aRow, options);
+                                }
                             } else if (val.multiple > 0) {
                                 for (let i = 0; i < val.multiple; i++) {
-                                    if (aChoice.isActive) selectedOneLess(aChoice, aRow, options);
+                                    if (aChoice.isActive) {
+                                        selectedOneLess(aChoice, aRow, options);
+                                    }
                                 }
                             }
                         }
@@ -5648,87 +5829,110 @@ export function deselectObject(localChoice: Choice, localRow: Row, options: choi
             deselectUpdateScore(localChoice, tmpScores, 0, undefined, undefined, options);
             activateTempChoices(options);
             delete localChoice.appliedDisChoices;
+            if (localChoice.isAutoActive) tmpActivatedMap.set(localChoice.id, {multiple: 0});
+
+            if (!localChoice.isActive && localChoice.deselectParent && localChoice.parentId) {
+                const pMap = choiceMap.get(localChoice.parentId);
+
+                if (typeof pMap !== 'undefined') {
+                    const pChoice = pMap.choice;
+
+                    if (pChoice.isActive) {
+                        if (pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable) {
+                            const pNum = pChoice.multipleUseVariable;
+                            for (let i = 0; i < Math.abs(pNum); i++) {
+                                if (pNum > 0) {
+                                    selectedOneLess(pChoice, localRow, options);
+                                } else {
+                                    selectedOneMore(pChoice, localRow, options);
+                                }
+                            }
+                        } else {
+                            deselectObject(pChoice, localRow, options);
+                        }
+                    }
+                }
+            }
         }
 
-        if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
-            if (!localChoice.selectDelayTimer) {
-                localChoice.selectDelayTimer = window.setTimeout(() => {
-                    if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
-                        wordDialog.choice = localChoice;
-                        wordDialog.row = localRow;
-                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                        wordDialog.prevText = localChoice.wordChangeSelect || '';
-                        wordDialog.isWord = true;
-                        wordDialog.currentDialog = 'dlgCommon';
-                        wordDialog.isDeselect = true;
-                        wordDialog.cFunc = (e, wordText) => {
-                            if (e.detail.action === 'deselect') {
-                                options.isOverDlg = true;
-                                deselectObject(localChoice, localRow, options);
-                            } else if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.choice.idOfTheTextfieldWord) {
-                                if (wordDialog.isWord) {
-                                    wordDialog.choice.wordChangeSelect = wordText;
-                                    const word = wordMap.get(wordDialog.choice.idOfTheTextfieldWord);
-                                    if (typeof word !== 'undefined') {
-                                        word.replaceText = wordDialog.choice.wordChangeSelect || '';
-                                    }
+        if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined' && !localChoice.selectDelayTimer) {
+            localChoice.selectDelayTimer = window.setTimeout(() => {
+                if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
+                    wordDialog.choice = localChoice;
+                    wordDialog.row = localRow;
+                    wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                    wordDialog.prevText = localChoice.wordChangeSelect || '';
+                    wordDialog.isWord = true;
+                    wordDialog.currentDialog = 'dlgCommon';
+                    wordDialog.isDeselect = true;
+                    wordDialog.cFunc = (e, wordText) => {
+                        if (e.detail.action === 'deselect') {
+                            options.isOverDlg = true;
+                            deselectObject(localChoice, localRow, options);
+                        } else if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.choice.idOfTheTextfieldWord) {
+                            if (wordDialog.isWord) {
+                                wordDialog.choice.wordChangeSelect = wordText;
+                                const word = wordMap.get(wordDialog.choice.idOfTheTextfieldWord);
+                                if (typeof word !== 'undefined') {
+                                    word.replaceText = wordDialog.choice.wordChangeSelect || '';
                                 }
-                                options.isOverDlg = true;
                             }
-                            delete wordDialog.isDeselect;
+                            options.isOverDlg = true;
                         }
-
-                        return;
-                    }
-                
-                    if (localChoice.isImageUpload && !options.isOverImg) {
-                        dlgVariables.currentDialog = 'appImageUpload';
-                        dlgVariables.data = localChoice;
-                        dlgVariables.imgProp = 'image';
-                        dlgVariables.isDeselect = true;
-                        dlgVariables.cFunc = (e) => {
-                            if (e.detail.action === 'deselect') {
-                                options.isOverImg = true;
-                                deselectObject(localChoice, localRow, options);
-                            }
-                            delete dlgVariables.isDeselect;
-                        }
-
-                        return;
+                        delete wordDialog.isDeselect;
                     }
 
-                    if (options.linkedObjects.indexOf(localChoice.id) === -1) {
-                        if (localChoice.isFadeTransition) {
-                            if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
-                                app.fadeTransitionColor = '000000FF';
-                            } else {
-                                app.fadeTransitionColor = localChoice.fadeTransitionColor;
-                            }
+                    return;
+                }
+            
+                if (localChoice.isImageUpload && !options.isOverImg) {
+                    imgDialog.currentDialog = 'appImageUpload';
+                    imgDialog.data = localChoice;
+                    imgDialog.imgProp = 'image';
+                    imgDialog.isDeselect = true;
+                    imgDialog.cFunc = (e) => {
+                        if (e.detail.action === 'deselect') {
+                            options.isOverImg = true;
+                            deselectObject(localChoice, localRow, options);
+                        }
+                        delete imgDialog.isDeselect;
+                    }
 
-                            if (typeof localChoice.fadeInTransitionTime === 'undefined') {
-                                app.fadeTransitionTime = 0.25;
-                            } else {
-                                app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
-                            }
+                    return;
+                }
 
-                            app.fadeTransitionIsOn = true;
-                            window.setTimeout(() => {
-                                if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                                    app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
-                                }
-                                app.fadeTransitionIsOn = false;
-                                deselectProcess();
-                            }, app.fadeTransitionTime * 1000);
+                if (options.linkedObjects.indexOf(localChoice.id) === -1) {
+                    if (localChoice.isFadeTransition) {
+                        if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                            app.fadeTransitionColor = '000000FF';
                         } else {
-                            deselectProcess();
+                            app.fadeTransitionColor = localChoice.fadeTransitionColor;
                         }
+
+                        if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                            app.fadeTransitionTime = 0.25;
+                        } else {
+                            app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                        }
+
+                        app.fadeTransitionIsOn = true;
+                        window.setTimeout(() => {
+                            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                            }
+                            app.fadeTransitionIsOn = false;
+                            deselectProcess();
+                        }, app.fadeTransitionTime * 1000);
+                    } else {
+                        deselectProcess();
                     }
-                    if (options.linkedObjects.indexOf(localChoice.id) === 0) {
-                        options.linkedObjects.splice(0);
-                    }
-                    delete localChoice.selectDelayTimer;
-                }, localChoice.selectDelayTime);
-            }
+                }
+                if (options.linkedObjects.indexOf(localChoice.id) === 0) {
+                    options.linkedObjects.splice(0);
+                }
+                localChoice.selectDelayTimer = 0;
+                delete localChoice.selectDelayTimer;
+            }, localChoice.selectDelayTime);
         } else {
             if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
                 wordDialog.choice = localChoice;
@@ -5759,16 +5963,16 @@ export function deselectObject(localChoice: Choice, localRow: Row, options: choi
             }
             
             if (localChoice.isImageUpload && !options.isOverImg) {
-                dlgVariables.currentDialog = 'appImageUpload';
-                dlgVariables.data = localChoice;
-                dlgVariables.imgProp = 'image';
-                dlgVariables.isDeselect = true;
-                dlgVariables.cFunc = (e) => {
+                imgDialog.currentDialog = 'appImageUpload';
+                imgDialog.data = localChoice;
+                imgDialog.imgProp = 'image';
+                imgDialog.isDeselect = true;
+                imgDialog.cFunc = (e) => {
                     if (e.detail.action === 'deselect') {
                         options.isOverImg = true;
                         deselectObject(localChoice, localRow, options);
                     }
-                    delete dlgVariables.isDeselect;
+                    delete imgDialog.isDeselect;
                 }
 
                 return;
@@ -5807,10 +6011,11 @@ export function deselectObject(localChoice: Choice, localRow: Row, options: choi
     }
 }
 
-export function selectObject(localChoice: Choice, localRow: Row, options: choiceOptions) {
+export function selectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+    const isChoice = typeof localChoice.parentId === 'undefined';
     let selectable = true;
 
-    if (localRow.allowedChoices > 0 && localRow.currentChoices >= localRow.allowedChoices) {
+    if (isChoice && localRow.allowedChoices > 0 && localRow.currentChoices >= localRow.allowedChoices) {
         let count = 0;
         for (let i = 0; i < localRow.objects.length; i++) {
             const thisChoice = localRow.objects[i];
@@ -5843,7 +6048,7 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
 
                 localChoice.isActive = true;
                 activatedMap.set(localChoice.id, {multiple: 0});
-                localRow.currentChoices += 1;
+                if (isChoice) localRow.currentChoices += 1;
 
                 if (localChoice.discountOther) {
                     if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
@@ -5889,7 +6094,7 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                     }
                 }
 
-                let countSet = new Set<Choice>();
+                let countSet = new Set<Choice | SelectableAddon>();
                 for (let i = 0; i < localChoice.scores.length; i++) {
                     const score = localChoice.scores[i];
                     if (checkRequirements(score.requireds) && !score.isActive) {
@@ -6064,7 +6269,7 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                             if (!checkRequirements(aChoice.requireds)) {
                                 if (aChoice.forcedActivated) {
                                     delete aChoice.forcedActivated;
-                                    if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                    tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
                                 }
                                 if (val.multiple === 0) {
                                     if (aChoice.isActive) {
@@ -6233,9 +6438,9 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
 
                 if (localChoice.isImageUpload) {
                     localChoice.defaultImage = localChoice.image;
-                    dlgVariables.currentDialog = 'appImageUpload';
-                    dlgVariables.data = localChoice;
-                    dlgVariables.imgProp = 'image';
+                    imgDialog.currentDialog = 'appImageUpload';
+                    imgDialog.data = localChoice;
+                    imgDialog.imgProp = 'image';
                 }
 
                 if (localChoice.backpackBtnRequirement) {
@@ -6509,79 +6714,78 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
                     deselectObject(localChoice, localRow, options);
                 }
             }
-            if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
-                if (!localChoice.selectDelayTimer) {
-                    localChoice.selectDelayTimer = window.setTimeout(() => {
-                        if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
-                            wordDialog.choice = localChoice;
-                            wordDialog.row = localRow;
-                            wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                            wordDialog.prevText = localChoice.wordChangeSelect || '';
-                            wordDialog.isWord = true;
-                            wordDialog.currentDialog = 'dlgCommon';
-                            wordDialog.cFunc = (e, wordText) => {
-                                if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
-                                    if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
-                                    options.isOverDlg = true;
-                                    wordDialog.isForced = false;
-                                    tmpActivatedMap.delete(wordDialog.choice.id);
-                                    selectObject(wordDialog.choice, wordDialog.row, options);
-                                }
+            if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined' && !localChoice.selectDelayTimer) {
+                localChoice.selectDelayTimer = window.setTimeout(() => {
+                    if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
+                        wordDialog.choice = localChoice;
+                        wordDialog.row = localRow;
+                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                        wordDialog.prevText = localChoice.wordChangeSelect || '';
+                        wordDialog.isWord = true;
+                        wordDialog.currentDialog = 'dlgCommon';
+                        wordDialog.cFunc = (e, wordText) => {
+                            if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
+                                if (wordDialog.isWord) wordDialog.choice.wordChangeSelect = wordText;
+                                options.isOverDlg = true;
+                                wordDialog.isForced = false;
+                                tmpActivatedMap.delete(wordDialog.choice.id);
+                                selectObject(wordDialog.choice, wordDialog.row, options);
                             }
-                            
-                            return;
                         }
+                        
+                        return;
+                    }
 
-                        if (localChoice.confirmIsOn && !options.isOverDlg) {
-                            wordDialog.choice = localChoice;
-                            wordDialog.row = localRow;
-                            wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
-                            wordDialog.isWord = false;
-                            wordDialog.currentDialog = 'dlgCommon';
-                            wordDialog.cFunc = (e) => {
-                                if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
-                                    options.isOverDlg = true;
-                                    wordDialog.isForced = false;
-                                    tmpActivatedMap.delete(wordDialog.choice.id);
-                                    selectObject(wordDialog.choice, wordDialog.row, options);
-                                }
+                    if (localChoice.confirmIsOn && !options.isOverDlg) {
+                        wordDialog.choice = localChoice;
+                        wordDialog.row = localRow;
+                        wordDialog.context = typeof localChoice.wordPromptText !== 'undefined' ? localChoice.wordPromptText : '';
+                        wordDialog.isWord = false;
+                        wordDialog.currentDialog = 'dlgCommon';
+                        wordDialog.cFunc = (e) => {
+                            if (e.detail.action === 'accept' && wordDialog.choice && wordDialog.row) {
+                                options.isOverDlg = true;
+                                wordDialog.isForced = false;
+                                tmpActivatedMap.delete(wordDialog.choice.id);
+                                selectObject(wordDialog.choice, wordDialog.row, options);
                             }
-                            
-                            return;
                         }
+                        
+                        return;
+                    }
 
-                        if (options.linkedObjects.indexOf(localChoice.id) === -1) {
-                            if (localChoice.isFadeTransition) {
-                                if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
-                                    app.fadeTransitionColor = '000000FF';
-                                } else {
-                                    app.fadeTransitionColor = localChoice.fadeTransitionColor;
-                                }
-
-                                if (typeof localChoice.fadeInTransitionTime === 'undefined') {
-                                    app.fadeTransitionTime = 0.25;
-                                } else {
-                                    app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
-                                }
-
-                                app.fadeTransitionIsOn = true;
-                                window.setTimeout(() => {
-                                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
-                                    }
-                                    app.fadeTransitionIsOn = false;
-                                    selectProcess();
-                                }, app.fadeTransitionTime * 1000);
+                    if (options.linkedObjects.indexOf(localChoice.id) === -1) {
+                        if (localChoice.isFadeTransition) {
+                            if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                                app.fadeTransitionColor = '000000FF';
                             } else {
-                                selectProcess();
+                                app.fadeTransitionColor = localChoice.fadeTransitionColor;
                             }
+
+                            if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                                app.fadeTransitionTime = 0.25;
+                            } else {
+                                app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                            }
+
+                            app.fadeTransitionIsOn = true;
+                            window.setTimeout(() => {
+                                if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                    app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                }
+                                app.fadeTransitionIsOn = false;
+                                selectProcess();
+                            }, app.fadeTransitionTime * 1000);
+                        } else {
+                            selectProcess();
                         }
-                        if (options.linkedObjects.indexOf(localChoice.id) === 0) {
-                            options.linkedObjects.splice(0);
-                        }
-                        delete localChoice.selectDelayTimer;
-                    }, localChoice.selectDelayTime);
-                }
+                    }
+                    if (options.linkedObjects.indexOf(localChoice.id) === 0) {
+                        options.linkedObjects.splice(0);
+                    }
+                    localChoice.selectDelayTimer = 0;
+                    delete localChoice.selectDelayTimer;
+                }, localChoice.selectDelayTime);
             } else {
                 if (localChoice.customTextfieldIsOn && !options.isOverDlg) {
                     wordDialog.choice = localChoice;
@@ -6660,7 +6864,8 @@ export function selectObject(localChoice: Choice, localRow: Row, options: choice
     }
 }
 
-export function selectedOneMore(localChoice: Choice, localRow: Row, options: choiceOptions) {
+export function selectedOneMore(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+    const isChoice = typeof localChoice.parentId === 'undefined';
     const reqCheck = checkRequirements(localChoice.requireds) && !localRow.isInfoRow && !localChoice.isNotSelectable;
     let selectable = true;
     let origRow = localRow;
@@ -6672,7 +6877,7 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
         }
     }
 
-    if (reqCheck && localChoice.isMultipleUseVariable && localChoice.multipleUseVariable === 0) {
+    if (reqCheck && isChoice && localChoice.isMultipleUseVariable && localChoice.multipleUseVariable === 0) {
         if (origRow.allowedChoices > 0 && origRow.currentChoices >= origRow.allowedChoices) {
             let count = 0;
             for (let i = 0; i < origRow.objects.length; i++) {
@@ -6713,11 +6918,11 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                 if (localChoice.multipleUseVariable === 0) {
                     activatedMap.delete(localChoice.id);
                     localChoice.isActive = false;
-                    origRow.currentChoices -= 1;
+                    if (isChoice) origRow.currentChoices -= 1;
                 } else {
                     if (localChoice.multipleUseVariable === 1) {
                         localChoice.isActive = true;
-                        origRow.currentChoices += 1;
+                        if (isChoice) origRow.currentChoices += 1;
                     }
                     activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
                 }
@@ -6767,7 +6972,7 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                         }
                     }
 
-                    let countSet = new Set<Choice>();
+                    let countSet = new Set<Choice | SelectableAddon>();
                     for (let i = 0; i < localChoice.scores.length; i++) {
                         const score = localChoice.scores[i];
                         if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
@@ -6908,7 +7113,7 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                             if (!checkRequirements(aChoice.requireds)) {
                                 if (aChoice.forcedActivated) {
                                     delete aChoice.forcedActivated;
-                                    if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                    tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
                                 }
                                 if (val.multiple === 0) {
                                     if (aChoice.isActive) {
@@ -6994,9 +7199,9 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
 
                     if (localChoice.isImageUpload) {
                         localChoice.defaultImage = localChoice.image;
-                        dlgVariables.currentDialog = 'appImageUpload';
-                        dlgVariables.data = localChoice;
-                        dlgVariables.imgProp = 'image';
+                        imgDialog.currentDialog = 'appImageUpload';
+                        imgDialog.data = localChoice;
+                        imgDialog.imgProp = 'image';
                     }
 
                     if (localChoice.backpackBtnRequirement) {
@@ -7266,6 +7471,29 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                 if (!checkRequirements(localChoice.requireds) && localChoice.isActive) {
                     selectedOneLess(localChoice, localRow, options);
                 }
+
+                if (!localChoice.isActive && localChoice.deselectParent && localChoice.parentId) {
+                    const pMap = choiceMap.get(localChoice.parentId);
+
+                    if (typeof pMap !== 'undefined') {
+                        const pChoice = pMap.choice;
+
+                        if (pChoice.isActive) {
+                            if (pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable) {
+                                const pNum = pChoice.multipleUseVariable;
+                                for (let i = 0; i < Math.abs(pNum); i++) {
+                                    if (pNum > 0) {
+                                        selectedOneLess(pChoice, localRow, options);
+                                    } else {
+                                        selectedOneMore(pChoice, localRow, options);
+                                    }
+                                }
+                            } else {
+                                deselectObject(pChoice, localRow, options);
+                            }
+                        }
+                    }
+                }
             }
 
             if (reqCheck) {
@@ -7343,6 +7571,7 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
                                     if (options.linkedObjects.indexOf(localChoice.id) === 0) {
                                         options.linkedObjects.splice(0);
                                     }
+                                    localChoice.selectDelayTimer = 0;
                                     delete localChoice.selectDelayTimer;
                                 }, localChoice.selectDelayTime);
                             }
@@ -7435,7 +7664,8 @@ export function selectedOneMore(localChoice: Choice, localRow: Row, options: cho
     }
 }
 
-export function selectedOneLess(localChoice: Choice, localRow: Row, options: choiceOptions) {
+export function selectedOneLess(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+    const isChoice = typeof localChoice.parentId === 'undefined';
     const pointCheck = checkPoints(localChoice, false);
     let origRow = localRow;
     if (localRow.isResultRow) {
@@ -7606,12 +7836,12 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
 
             if (localChoice.multipleUseVariable === 0) {
                 localChoice.isActive = false;
-                origRow.currentChoices -= 1;
+                if (isChoice) origRow.currentChoices -= 1;
                 activatedMap.delete(localChoice.id);
             } else {
                 if (localChoice.multipleUseVariable === -1) {
                     localChoice.isActive = true;
-                    origRow.currentChoices += 1;
+                    if (isChoice) origRow.currentChoices += 1;
                 }
                 activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
             }
@@ -7625,7 +7855,7 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                         if (!checkRequirements(aChoice.requireds)) {
                             if (aChoice.forcedActivated) {
                                 delete aChoice.forcedActivated;
-                                if (!aChoice.isAllowDeselect) tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
+                                tmpActivatedMap.set(aChoice.id, {multiple: val.multiple});
                             }
                             if (val.multiple === 0) {
                                 if (aChoice.forcedActivated) delete aChoice.forcedActivated;
@@ -7960,6 +8190,29 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
 
             deselectUpdateScore(localChoice, tmpScores, 0, undefined, undefined, options);
             activateTempChoices(options);
+
+            if (!localChoice.isActive && localChoice.deselectParent && localChoice.parentId) {
+                const pMap = choiceMap.get(localChoice.parentId);
+
+                if (typeof pMap !== 'undefined') {
+                    const pChoice = pMap.choice;
+
+                    if (pChoice.isActive) {
+                        if (pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable) {
+                            const pNum = pChoice.multipleUseVariable;
+                            for (let i = 0; i < Math.abs(pNum); i++) {
+                                if (pNum > 0) {
+                                    selectedOneLess(pChoice, localRow, options);
+                                } else {
+                                    selectedOneMore(pChoice, localRow, options);
+                                }
+                            }
+                        } else {
+                            deselectObject(pChoice, localRow, options);
+                        }
+                    }
+                }
+            }
         }
 
         if (!localRow.isInfoRow && !localChoice.isNotSelectable && !localChoice.selectOnce) {
@@ -8026,6 +8279,7 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
                                 if (options.linkedObjects.indexOf(localChoice.id) === 0) {
                                     options.linkedObjects.splice(0);
                                 }
+                                localChoice.selectDelayTimer = 0;
                                 delete localChoice.selectDelayTimer;
                             }, localChoice.selectDelayTime);
                         }
@@ -8102,7 +8356,7 @@ export function selectedOneLess(localChoice: Choice, localRow: Row, options: cho
     }
 }
 
-function updateScores(localChoice: Choice, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
+function updateScores(localChoice: Choice | SelectableAddon, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
     const activated = Array.from(activatedMap.keys());
 
     for (let i = 0; i < activated.length; i++) {
@@ -8243,6 +8497,7 @@ function selectObjectL(str: string, newActivatedList: string[]) {
         const localRow = cMap.row;
         const localChoice = cMap.choice;
         const strRSMap = new Map<number, number>();
+        const isChoice = typeof localChoice.parentId === 'undefined';
 
         if (strRS) {
             const rStr = strRS.split('/AND#');
@@ -8274,7 +8529,7 @@ function selectObjectL(str: string, newActivatedList: string[]) {
 
         localChoice.isActive = true;
         activatedMap.set(localChoice.id, {multiple: 0});
-        localRow.currentChoices += 1;
+        if (isChoice) localRow.currentChoices += 1;
 
         if (localChoice.discountOther) {
             if (typeof localChoice.discountOperator !== 'undefined' && typeof localChoice.discountValue !== 'undefined') {
@@ -8322,7 +8577,7 @@ function selectObjectL(str: string, newActivatedList: string[]) {
             }
         }
 
-        let countSet = new Set<Choice>();
+        let countSet = new Set<Choice | SelectableAddon>();
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             if (checkRequirements(score.requireds) && !score.isActive) {
@@ -8485,9 +8740,11 @@ function selectObjectL(str: string, newActivatedList: string[]) {
                     }
                 }
             } else {
-                const list = localChoice.activateThisChoice.split(',').filter(item => activatedIds.has(item.split('/ON#')[0]));
-                for (let i = 0; i < list.length; i++) {
-                    const item = list[i].split('/ON#');
+                const list = localChoice.activateThisChoice.split(',');
+                const aList = list.filter(item => activatedIds.has(item.split('/ON#')[0]));
+                const nList = list.filter(item => !activatedIds.has(item.split('/ON#')[0]));
+                for (let i = 0; i < aList.length; i++) {
+                    const item = aList[i].split('/ON#');
                     const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
                     const cMap = choiceMap.get(item[0]);
                     if (typeof cMap !== 'undefined') {
@@ -8563,6 +8820,16 @@ function selectObjectL(str: string, newActivatedList: string[]) {
                                 }
                             }
                         }
+                    }
+                }
+                for (let i = 0; i < nList.length; i++) {
+                    const item = nList[i].split('/ON#');
+                    const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                    const cMap = choiceMap.get(item[0]);
+                    if (typeof cMap !== 'undefined') {
+                        const fChoice = cMap.choice;
+
+                        tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false});
                     }
                 }
             }
@@ -8932,6 +9199,7 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
         const localChoice = cMap.choice;
         const localRow = cMap.row;
         const strRSMap = new Map<number, number>();
+        const isChoice = typeof localChoice.parentId === 'undefined';
 
         if (strRS) {
             const rStr = strRS.split('/AND#');
@@ -8966,7 +9234,7 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
 
         if (!localChoice.isActive) {
             localChoice.isActive = true;
-            localRow.currentChoices += 1;
+            if (isChoice) localRow.currentChoices += 1;
         }
         localChoice.multipleUseVariable++;
         activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
@@ -9019,7 +9287,7 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
             }
         }
 
-        let countSet = new Set<Choice>();
+        let countSet = new Set<Choice | SelectableAddon>();
         for (let i = 0; i < localChoice.scores.length; i++) {
             const score = localChoice.scores[i];
             if (typeof score.isActiveMul === 'undefined') score.isActiveMul = [];
@@ -9179,9 +9447,11 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
                         }
                     }
                 } else {
-                    const list = localChoice.activateThisChoice.split(',').filter(item => activatedIds.has(item.split('/ON#')[0]));
-                    for (let i = 0; i < list.length; i++) {
-                        const item = list[i].split('/ON#');
+                    const list = localChoice.activateThisChoice.split(',');
+                    const aList = list.filter(item => activatedIds.has(item.split('/ON#')[0]));
+                    const nList = list.filter(item => !activatedIds.has(item.split('/ON#')[0]));
+                    for (let i = 0; i < aList.length; i++) {
+                        const item = aList[i].split('/ON#');
                         const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
                         const cMap = choiceMap.get(item[0]);
                         if (typeof cMap !== 'undefined') {
@@ -9247,6 +9517,16 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
                                     }
                                 }
                             }
+                        }
+                    }
+                    for (let i = 0; i < nList.length; i++) {
+                        const item = nList[i].split('/ON#');
+                        const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                        const cMap = choiceMap.get(item[0]);
+                        if (typeof cMap !== 'undefined') {
+                            const fChoice = cMap.choice;
+
+                            tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false});
                         }
                     }
                 }
@@ -9517,7 +9797,7 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
 
     }
 }
-function selectedOneLessL(localChoice: Choice, localRow: Row) {
+function selectedOneLessL(localChoice: Choice | SelectableAddon, localRow: Row) {
     
     const tmpScores = new SvelteMap<string, number>();
     const selNum = Math.abs(localChoice.multipleUseVariable - 1);
@@ -9618,7 +9898,7 @@ export function loadActivated(str: string) {
         }
     }
 }
-export function duplicateRow(localChoice: Choice, localRow: Row) {
+export function duplicateRow(localChoice: Choice | SelectableAddon, localRow: Row) {
     if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
         const dRowId = localChoice.duplicateRowId;
         let num = 0;
@@ -10708,6 +10988,7 @@ function getMimeFromBlob(str: string) {
     return ext ? (mt[ext] || `image/${ext}`) : 'application/octet-stream';
 }
 export function initializeApp(tempApp: any) {
+    musicPlayer.set(null);
     cleanActivated();
     if (typeof tempApp.useTextEditor === 'undefined') tempApp.useTextEditor = false;
     const keys = Object.keys(tempApp);
@@ -10743,6 +11024,69 @@ export function initializeApp(tempApp: any) {
 
                     if (typeof kRow.defaultWidth === 'boolean') {
                         delete kRow.defaultWidth;
+                    }
+
+                    if (typeof kRow.requireds !== 'undefined') {
+                        for (let j = 0; j < kRow.requireds.length; j++) {
+                            const req: Requireds = kRow.requireds[j];
+                            if (req.type === 'or' && req.orRequired && typeof req.orRequireds === 'undefined') {
+                                req.orRequireds = [];
+                                for (let k = 0; k < req.orRequired.length; k++) {
+                                    req.orRequireds.push({
+                                        required: req.required,
+                                        requireds: [],
+                                        orRequired: [],
+                                        orRequireds: [],
+                                        id: '',
+                                        type: 'id',
+                                        reqId: req.orRequired[k].req || '',
+                                        reqId1: '',
+                                        reqId2: '',
+                                        reqId3: '',
+                                        reqPoints: 0,
+                                        showRequired: req.showRequired,
+                                        operator: req.operator,
+                                        afterText: req.afterText,
+                                        beforeText: req.beforeText,
+                                        orNum: req.orNum,
+                                        selNum: req.selNum,
+                                        selFromOperators: '1',
+                                        more: []
+                                    });
+                                }
+                            }
+                            if (typeof req.requireds !== 'undefined') {
+                                for (let l = 0; l < req.requireds.length; l++) {
+                                    const rReq: Requireds = req.requireds[l];
+                                    if (rReq.type === 'or' && rReq.orRequired && typeof rReq.orRequireds === 'undefined') {
+                                        rReq.orRequireds = [];
+                                        for (let m = 0; m < rReq.orRequired.length; m++) {
+                                            rReq.orRequireds.push({
+                                                required: rReq.required,
+                                                requireds: [],
+                                                orRequired: [],
+                                                orRequireds: [],
+                                                id: '',
+                                                type: 'id',
+                                                reqId: rReq.orRequired[m].req || '',
+                                                reqId1: '',
+                                                reqId2: '',
+                                                reqId3: '',
+                                                reqPoints: 0,
+                                                showRequired: rReq.showRequired,
+                                                operator: rReq.operator,
+                                                afterText: rReq.afterText,
+                                                beforeText: rReq.beforeText,
+                                                orNum: rReq.orNum,
+                                                selNum: rReq.selNum,
+                                                selFromOperators: '1',
+                                                more: []
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     
                     if (typeof kRow.objects !== 'undefined') {
@@ -10807,11 +11151,205 @@ export function initializeApp(tempApp: any) {
                                 delete kObj.defaultWidth;
                             }
 
+                            if (typeof kObj.scores !== 'undefined') {
+                                for (let k = 0; k < kObj.scores.length; k++) {
+                                    const kScore = kObj.scores[k];
+                                    if (typeof kScore.requireds !== 'undefined') {
+                                        for (let l = 0; l < kScore.requireds.length; l++) {
+                                            const req: Requireds = kScore.requireds[l];
+                                            if (req.type === 'or' && req.orRequired && typeof req.orRequireds === 'undefined') {
+                                                req.orRequireds = [];
+                                                for (let m = 0; m < req.orRequired.length; m++) {
+                                                    req.orRequireds.push({
+                                                        required: req.required,
+                                                        requireds: [],
+                                                        orRequired: [],
+                                                        orRequireds: [],
+                                                        id: '',
+                                                        type: 'id',
+                                                        reqId: req.orRequired[m].req || '',
+                                                        reqId1: '',
+                                                        reqId2: '',
+                                                        reqId3: '',
+                                                        reqPoints: 0,
+                                                        showRequired: req.showRequired,
+                                                        operator: req.operator,
+                                                        afterText: req.afterText,
+                                                        beforeText: req.beforeText,
+                                                        orNum: req.orNum,
+                                                        selNum: req.selNum,
+                                                        selFromOperators: '1',
+                                                        more: []
+                                                    });
+                                                }
+                                            }
+                                            if (typeof req.requireds !== 'undefined') {
+                                                for (let m = 0; m < req.requireds.length; m++) {
+                                                    const rReq: Requireds = req.requireds[m];
+                                                    if (rReq.type === 'or' && rReq.orRequired && typeof rReq.orRequireds === 'undefined') {
+                                                        rReq.orRequireds = [];
+                                                        for (let n = 0; n < rReq.orRequired.length; n++) {
+                                                            rReq.orRequireds.push({
+                                                                required: rReq.required,
+                                                                requireds: [],
+                                                                orRequired: [],
+                                                                orRequireds: [],
+                                                                id: '',
+                                                                type: 'id',
+                                                                reqId: rReq.orRequired[n].req || '',
+                                                                reqId1: '',
+                                                                reqId2: '',
+                                                                reqId3: '',
+                                                                reqPoints: 0,
+                                                                showRequired: rReq.showRequired,
+                                                                operator: rReq.operator,
+                                                                afterText: rReq.afterText,
+                                                                beforeText: rReq.beforeText,
+                                                                orNum: rReq.orNum,
+                                                                selNum: rReq.selNum,
+                                                                selFromOperators: '1',
+                                                                more: []
+                                                            });
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (typeof kObj.requireds !== 'undefined') {
+                                for (let k = 0; k < kObj.requireds.length; k++) {
+                                    const req: Requireds = kObj.requireds[k];
+                                    if (req.type === 'or' && req.orRequired && typeof req.orRequireds === 'undefined') {
+                                        req.orRequireds = [];
+                                        for (let l = 0; l < req.orRequired.length; l++) {
+                                            req.orRequireds.push({
+                                                required: req.required,
+                                                requireds: [],
+                                                orRequired: [],
+                                                orRequireds: [],
+                                                id: '',
+                                                type: 'id',
+                                                reqId: req.orRequired[l].req || '',
+                                                reqId1: '',
+                                                reqId2: '',
+                                                reqId3: '',
+                                                reqPoints: 0,
+                                                showRequired: req.showRequired,
+                                                operator: req.operator,
+                                                afterText: req.afterText,
+                                                beforeText: req.beforeText,
+                                                orNum: req.orNum,
+                                                selNum: req.selNum,
+                                                selFromOperators: '1',
+                                                more: []
+                                            });
+                                        }
+                                    }
+                                    if (typeof req.requireds !== 'undefined') {
+                                        for (let l = 0; l < req.requireds.length; l++) {
+                                            const rReq: Requireds = req.requireds[l];
+                                            if (rReq.type === 'or' && rReq.orRequired && typeof rReq.orRequireds === 'undefined') {
+                                                rReq.orRequireds = [];
+                                                for (let m = 0; m < rReq.orRequired.length; m++) {
+                                                    rReq.orRequireds.push({
+                                                        required: rReq.required,
+                                                        requireds: [],
+                                                        orRequired: [],
+                                                        orRequireds: [],
+                                                        id: '',
+                                                        type: 'id',
+                                                        reqId: rReq.orRequired[m].req || '',
+                                                        reqId1: '',
+                                                        reqId2: '',
+                                                        reqId3: '',
+                                                        reqPoints: 0,
+                                                        showRequired: rReq.showRequired,
+                                                        operator: rReq.operator,
+                                                        afterText: rReq.afterText,
+                                                        beforeText: rReq.beforeText,
+                                                        orNum: rReq.orNum,
+                                                        selNum: rReq.selNum,
+                                                        selFromOperators: '1',
+                                                        more: []
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             for (let k = 0; k < kObj.addons.length; k++) {
                                 const kAddon = kObj.addons[k];
 
                                 if (typeof kAddon.template === 'undefined' || kAddon.template === 0) kAddon.template = 1;
                                 kAddon.parentId = kObj.id;
+
+                                if (typeof kAddon.requireds !== 'undefined') {
+                                    for (let l = 0; l < kAddon.requireds.length; l++) {
+                                        const req: Requireds = kAddon.requireds[l];
+                                        if (req.type === 'or' && req.orRequired && typeof req.orRequireds === 'undefined') {
+                                            req.orRequireds = [];
+                                            for (let m = 0; m < req.orRequired.length; m++) {
+                                                req.orRequireds.push({
+                                                    required: req.required,
+                                                    requireds: [],
+                                                    orRequired: [],
+                                                    orRequireds: [],
+                                                    id: '',
+                                                    type: 'id',
+                                                    reqId: req.orRequired[m].req || '',
+                                                    reqId1: '',
+                                                    reqId2: '',
+                                                    reqId3: '',
+                                                    reqPoints: 0,
+                                                    showRequired: req.showRequired,
+                                                    operator: req.operator,
+                                                    afterText: req.afterText,
+                                                    beforeText: req.beforeText,
+                                                    orNum: req.orNum,
+                                                    selNum: req.selNum,
+                                                    selFromOperators: '1',
+                                                    more: []
+                                                });
+                                            }
+                                        }
+                                        if (typeof req.requireds !== 'undefined') {
+                                            for (let m = 0; m < req.requireds.length; m++) {
+                                                const rReq: Requireds = req.requireds[m];
+                                                if (rReq.type === 'or' && rReq.orRequired && typeof rReq.orRequireds === 'undefined') {
+                                                    rReq.orRequireds = [];
+                                                    for (let n = 0; n < rReq.orRequired.length; n++) {
+                                                        rReq.orRequireds.push({
+                                                            required: rReq.required,
+                                                            requireds: [],
+                                                            orRequired: [],
+                                                            orRequireds: [],
+                                                            id: '',
+                                                            type: 'id',
+                                                            reqId: rReq.orRequired[n].req || '',
+                                                            reqId1: '',
+                                                            reqId2: '',
+                                                            reqId3: '',
+                                                            reqPoints: 0,
+                                                            showRequired: rReq.showRequired,
+                                                            operator: rReq.operator,
+                                                            afterText: rReq.afterText,
+                                                            beforeText: rReq.beforeText,
+                                                            orNum: rReq.orNum,
+                                                            selNum: rReq.selNum,
+                                                            selFromOperators: '1',
+                                                            more: []
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -10823,6 +11361,7 @@ export function initializeApp(tempApp: any) {
                     if (typeof dGroup.activatedId === 'undefined') dGroup.activatedId = '';
                     if (typeof dGroup.elements === 'undefined') dGroup.elements = [];
                     if (typeof dGroup.backpackElements === 'undefined') dGroup.backpackElements = [];
+                    if (typeof dGroup.groupElements === 'undefined') dGroup.groupElements = [];
 
                     for (let j = 0; j < dGroup.elements.length; j++) {
                         if (typeof dGroup.elements[j] === 'object') dGroup.elements[j] = dGroup.elements[j].id;
@@ -10861,6 +11400,73 @@ export function initializeApp(tempApp: any) {
                     for (let j = 0; j < group.rowElements.length; j++) {
                         if (typeof group.rowElements[j] === 'object') {
                             group.rowElements[j] = group.rowElements[j].id;
+                        }
+                    }
+                }
+            } else if (key === 'globalRequirements') {
+                for (let i = 0; i < tempApp[key].length; i++) {
+                    const gReq = tempApp[key][i];
+
+                    if (typeof gReq.requireds !== 'undefined') {
+                        for (let j = 0; j < gReq.requireds.length; j++) {
+                            const req: Requireds = gReq.requireds[j];
+                            if (req.type === 'or' && req.orRequired && typeof req.orRequireds === 'undefined') {
+                                req.orRequireds = [];
+                                for (let k = 0; k < req.orRequired.length; k++) {
+                                    req.orRequireds.push({
+                                        required: req.required,
+                                        requireds: [],
+                                        orRequired: [],
+                                        orRequireds: [],
+                                        id: '',
+                                        type: 'id',
+                                        reqId: req.orRequired[k].req || '',
+                                        reqId1: '',
+                                        reqId2: '',
+                                        reqId3: '',
+                                        reqPoints: 0,
+                                        showRequired: req.showRequired,
+                                        operator: req.operator,
+                                        afterText: req.afterText,
+                                        beforeText: req.beforeText,
+                                        orNum: req.orNum,
+                                        selNum: req.selNum,
+                                        selFromOperators: '1',
+                                        more: []
+                                    });
+                                }
+                            }
+                            if (typeof req.requireds !== 'undefined') {
+                                for (let l = 0; l < req.requireds.length; l++) {
+                                    const rReq: Requireds = req.requireds[l];
+                                    if (rReq.type === 'or' && rReq.orRequired && typeof rReq.orRequireds === 'undefined') {
+                                        rReq.orRequireds = [];
+                                        for (let m = 0; m < rReq.orRequired.length; m++) {
+                                            rReq.orRequireds.push({
+                                                required: rReq.required,
+                                                requireds: [],
+                                                orRequired: [],
+                                                orRequireds: [],
+                                                id: '',
+                                                type: 'id',
+                                                reqId: rReq.orRequired[m].req || '',
+                                                reqId1: '',
+                                                reqId2: '',
+                                                reqId3: '',
+                                                reqPoints: 0,
+                                                showRequired: rReq.showRequired,
+                                                operator: rReq.operator,
+                                                afterText: rReq.afterText,
+                                                beforeText: rReq.beforeText,
+                                                orNum: rReq.orNum,
+                                                selNum: rReq.selNum,
+                                                selFromOperators: '1',
+                                                more: []
+                                            });
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -10992,6 +11598,27 @@ export function initializeApp(tempApp: any) {
                 iScore.idx = checkDupId(iScore.idx, scoreSet);
                 scoreSet.add(iScore.idx);
             }
+
+            if (iChoice.addons && iChoice.addons.length > 0) {
+                for (let k = 0; k < iChoice.addons.length; k++) {
+                    const iAddon = iChoice.addons[k];
+
+                    if (iAddon.isSelectable) {
+                        iAddon.id = checkDupId(iAddon.id, choiceMap);
+                        choiceMap.set(iAddon.id, {choice: iAddon as SelectableAddon, row: iRow});
+
+                        if (iAddon.scores && iAddon.scores.length > 0) {
+                            for(let l = 0; l < iAddon.scores.length; l++) {
+                                const iScore = iAddon.scores[l];
+
+                                if (typeof iScore.idx === 'undefined' || iScore.idx === '') iScore.idx = generateScoreId(0, 5);
+                                iScore.idx = checkDupId(iScore.idx, scoreSet);
+                                scoreSet.add(iScore.idx);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -11014,6 +11641,27 @@ export function initializeApp(tempApp: any) {
                 if (typeof iScore.idx === 'undefined' || iScore.idx === '') iScore.idx = generateScoreId(0, 5);
                 iScore.idx = checkDupId(iScore.idx, scoreSet);
                 scoreSet.add(iScore.idx);
+            }
+
+            if (iChoice.addons && iChoice.addons.length > 0) {
+                for (let k = 0; k < iChoice.addons.length; k++) {
+                    const iAddon = iChoice.addons[k];
+
+                    if (iAddon.isSelectable) {
+                        iAddon.id = checkDupId(iAddon.id, choiceMap);
+                        choiceMap.set(iAddon.id, {choice: iAddon as SelectableAddon, row: iRow});
+
+                        if (iAddon.scores && iAddon.scores.length > 0) {
+                            for(let l = 0; l < iAddon.scores.length; l++) {
+                                const iScore = iAddon.scores[l];
+
+                                if (typeof iScore.idx === 'undefined' || iScore.idx === '') iScore.idx = generateScoreId(0, 5);
+                                iScore.idx = checkDupId(iScore.idx, scoreSet);
+                                scoreSet.add(iScore.idx);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -11121,6 +11769,14 @@ export function initializeApp(tempApp: any) {
                 }
             }
 
+            if (typeof designGroup.groupElements !== 'undefined') {
+                for (let j = designGroup.groupElements.length - 1; j >= 0; j--) {
+                    if (!groupMap.has(designGroup.groupElements[j])) {
+                        designGroup.groupElements.splice(j, 1);
+                    }
+                }
+            }
+
             rowDesignMap.set(designGroup.id, designGroup);
         }
     }
@@ -11144,7 +11800,27 @@ export function initializeApp(tempApp: any) {
                 }
             }
 
+            if (typeof designGroup.groupElements !== 'undefined') {
+                for (let j = designGroup.groupElements.length - 1; j >= 0; j--) {
+                    if (!groupMap.has(designGroup.groupElements[j])) {
+                        designGroup.groupElements.splice(j, 1);
+                    }
+                }
+            }
+
             objectDesignMap.set(app.objectDesignGroups[i].id, app.objectDesignGroups[i]);
+        }
+    }
+
+    for (let i = 0; i < app.groups.length; i++) {
+        const iGroup = app.groups[i];
+
+        if (typeof iGroup.designGroups !== 'undefined') {
+            for (let j = iGroup.designGroups.length - 1; j >= 0; j--) {
+                if (!rowDesignMap.has(iGroup.designGroups[j]) && !objectDesignMap.has(iGroup.designGroups[j])) {
+                    iGroup.designGroups.splice(j, 1);
+                }
+            }
         }
     }
 
@@ -11601,7 +12277,7 @@ export function revertTemplate(target: Row | Choice | Addon, id: string) {
         }
     }
 }
-export function applyWidth(target: Row | Choice, id: string, width: string) {
+export function applyWidth(target: Row | Choice | SelectableAddon, id: string, width: string) {
     if (typeof target.widthStack === 'undefined') {
         target.widthStack = [];
         target.defaultWidth = typeof target.objectWidth !== 'undefined' ? target.objectWidth : 'col-md-3';
@@ -11609,7 +12285,7 @@ export function applyWidth(target: Row | Choice, id: string, width: string) {
     target.widthStack.push({ id: id, data: width });
     target.objectWidth = width;
 }
-export function revertWidth(target: Row | Choice, id: string) {
+export function revertWidth(target: Row | Choice | SelectableAddon, id: string) {
     if (typeof target.widthStack !== 'undefined') {
         const idx = target.widthStack.findIndex(item => item.id === id);
         if (idx !== -1) target.widthStack.splice(idx, 1);
@@ -11737,10 +12413,33 @@ export function pasteObject(row: Row, num: number) {
             deleteDiscount(score);
         }
 
-        for (let j = 0; j < clone.addons.length; j++) {
-            const addon = clone.addons[j];
+        for (let i = 0; i < clone.addons.length; i++) {
+            const addon = clone.addons[i];
 
             addon.parentId = clone.id;
+            if (addon.isSelectable) {
+                addon.isActive = false;
+                delete addon.forcedActivated;
+                delete addon.appliedDisChoices;
+                addon.id = generateObjectId(0, 4, true);
+
+                if (addon.scores) {
+                    for (let j = 0; j < addon.scores.length; j++) {
+                        const score = addon.scores[j];
+
+                        score.idx = generateScoreId(0, 5);
+                        scoreSet.add(score.idx);
+                        if (addon.isSelectableMultiple) {
+                            delete score.isActiveMul;
+                            delete score.isActiveMulMinus;
+                        } else {
+                            delete score.isActive;
+                        }
+                        delete score.setValue;
+                        deleteDiscount(score);
+                    }
+                }
+            }
         }
 
         if (clone.backpackBtnRequirement) {
@@ -11757,6 +12456,15 @@ export function pasteObject(row: Row, num: number) {
             row.objects.splice(num, 0, clone);
         }
         choiceMap.set(id, {choice: row.objects[index], row: row});
+        if (clone.addons) {
+            for (let i = 0; i < clone.addons.length; i++) {
+                const addon = clone.addons[i];
+
+                if (addon.isSelectable) {
+                    choiceMap.set(addon.id, {choice: row.objects[index].addons[i] as SelectableAddon, row: row});
+                }
+            }
+        }
 
         if (clone.groups) {
             for (let i = 0; i < clone.groups.length; i++) {
@@ -11812,4 +12520,19 @@ export function clearClipboard(type: number) {
             break;
     }
     snackbarVariables.isOpen = true;
+}
+export function closestByClassPrefix(el: HTMLElement, prefix: string, endpoint: string) {
+    let current: HTMLElement | null = el;
+    let isEnd = false;
+
+    while (current) {
+        for (const cls of current.classList) {
+            if (cls.startsWith(prefix)) return true;
+            if (cls.startsWith(endpoint)) isEnd = true;
+        }
+        if (isEnd) return false;
+        current = current.parentElement;
+    }
+
+    return false;
 }

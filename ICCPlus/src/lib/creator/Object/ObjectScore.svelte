@@ -110,7 +110,7 @@
                         }
                     }} />
                     {#snippet label()}
-                        Enter Expression
+                        Use Expression
                     {/snippet}
                 </FormField>
             </Wrapper>
@@ -219,10 +219,11 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import { app, checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, getPointTypes, snackbarVariables, dlgVariables, variableMap, hexToRgba, choiceMap, deleteDiscount, calcStackDiscount } from '$lib/store/store.svelte';
-    import type { Choice, Row, Score } from '$lib/store/types';
+    import type { Choice, Row, Score, Addon } from '$lib/store/types';
     import { evaluate } from '@antv/expr';
 
-    let { isEditModeOn = false, score, row, choice, num = 0 }: { isEditModeOn?: boolean; score: Score; row?: Row; choice: Choice; num?: number } = $props();
+    let { isEditModeOn = false, score, row, choice, addon, num = 0 }: { isEditModeOn?: boolean; score: Score; row?: Row; choice: Choice; addon?: Addon; num?: number } = $props();
+    let data = $derived(addon ? addon : choice);
     let width = $state(0);
     let col6 = $derived.by(() => {
         if (width > 300) return 'col-6';
@@ -235,7 +236,7 @@
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let pointType = $derived(pointTypeMap.get(score.id));
-    let isEnabled = $derived(checkRequirements(choice.requireds));
+    let isEnabled = $derived(checkRequirements(data.requireds));
     let discountFlags = $derived.by(() => {
         let result = { isWithinCount: false, isSimple: false };
         if (!score.discountIsOn || !score.discountedFrom || score.discountedFrom.length === 0) return result;
@@ -402,8 +403,8 @@
             } else {
                 value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
             }
-            if (choice.isSelectableMultiple && score.multiplyByTimes && score.displayMulScore) {
-                value = value * (choice.multipleUseVariable + 1);
+            if (data.isSelectableMultiple && data.isMultipleUseVariable && score.multiplyByTimes && score.displayMulScore) {
+                value = value * (data.multipleUseVariable + 1);
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
@@ -492,7 +493,7 @@
             if (filterStyle.reqScoreTextColorIsOn)  {
                 style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
             }
-        } else if (choice.isActive) {
+        } else if (data.isActive) {
             if (filterStyle.selScoreTextColorIsOn) {
                 style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
             }
@@ -552,14 +553,14 @@
     let scoreWholeText = $derived(`${scoreBeforeText} ${scoreValueText} ${scoreAfterText}`);
 
     function moveScoreDown() {
-        if (num < choice.scores.length - 1) {
-            choice.scores.splice(num, 2, choice.scores[num + 1], choice.scores[num]);
+        if (data.scores && num < data.scores!.length - 1) {
+            data.scores.splice(num, 2, data.scores[num + 1], data.scores[num]);
         }
     }
 
     function moveScoreUp() {
-        if (num > 0) {
-            choice.scores.splice(num - 1, 2, choice.scores[num], choice.scores[num - 1]);
+        if (data.scores && num > 0) {
+            data.scores.splice(num - 1, 2, data.scores[num], data.scores[num - 1]);
         }
     }
 

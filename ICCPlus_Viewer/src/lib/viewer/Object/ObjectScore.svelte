@@ -20,14 +20,15 @@
 <script lang="ts">
     import DOMPurify from 'dompurify';
     import { checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, variableMap, hexToRgba, choiceMap, calcStackDiscount } from '$lib/store/store.svelte';
-    import type { Choice, Row, Score } from '$lib/store/types';
+    import type { Addon, Choice, Row, Score } from '$lib/store/types';
     import { evaluate } from '@antv/expr';
 
-    let { score, row, choice }: { isEditModeOn?: boolean; score: Score; row: Row; choice: Choice } = $props();
+    let { score, row, choice, addon }: { score: Score; row?: Row; choice: Choice; addon?: Addon; } = $props();
+    let data = $derived(addon ? addon : choice);
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let pointType = $derived(pointTypeMap.get(score.id));
-    let isEnabled = $derived(checkRequirements(choice.requireds));
+    let isEnabled = $derived(checkRequirements(data.requireds));
     let discountFlags = $derived.by(() => {
         let result = { isWithinCount: false, isSimple: false };
         if (!score.discountIsOn || !score.discountedFrom || score.discountedFrom.length === 0) return result;
@@ -194,8 +195,8 @@
             } else {
                 value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
             }
-            if (choice.isSelectableMultiple && score.multiplyByTimes && score.displayMulScore) {
-                value = value * (choice.multipleUseVariable + 1);
+            if (data.isSelectableMultiple && data.isMultipleUseVariable && score.multiplyByTimes && score.displayMulScore) {
+                value = value * (data.multipleUseVariable + 1);
             }
             if (pointType?.plussOrMinusAdded) {
                 let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
@@ -284,7 +285,7 @@
             if (filterStyle.reqScoreTextColorIsOn)  {
                 style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
             }
-        } else if (choice.isActive) {
+        } else if (data.isActive) {
             if (filterStyle.selScoreTextColorIsOn) {
                 style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
             }
