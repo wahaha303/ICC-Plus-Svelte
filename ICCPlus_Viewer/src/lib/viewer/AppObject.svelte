@@ -493,14 +493,10 @@
         let style: string[] = [];
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
-        if (!isEnabled) {
-            if (filterStyle.reqScoreTextColorIsOn)  {
-                style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
-            }
-        } else if (choice.isActive) {
-            if (filterStyle.selScoreTextColorIsOn) {
-                style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
-            }
+        if (!isEnabled && filterStyle.reqScoreTextColorIsOn) {
+            style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
+        } else if (choice.isActive && filterStyle.selScoreTextColorIsOn) {
+            style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
         } else {
             style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         }
