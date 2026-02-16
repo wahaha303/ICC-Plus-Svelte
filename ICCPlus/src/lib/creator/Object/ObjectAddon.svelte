@@ -1755,7 +1755,7 @@
         }
         if (isEnabled) {
             if (addonEnabled) {
-                if (addon.isActive || (isActive && !addon.isSelectable)) {
+                if (addon.isActive || isActive && !addon.isSelectable) {
                     if (useDesign) {
                         if (filterStyle.selBorderColorIsOn) {
                             bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
@@ -1849,6 +1849,9 @@
                         bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
                     }
                 }
+                if (filterStyle.reqBgColorIsOn) {
+                    bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
+                }
                 if (filterStyle.reqFilterBlurIsOn) {
                     filters.blur = ` blur(${filterStyle.reqFilterBlur}px)`;
                 }
@@ -1891,7 +1894,7 @@
         styles.push(`white-space: pre-line; font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATitleColor)};`);
-        } else if (isActive && filterStyle.selATitleColorIsOn) {
+        } else if ((addon.isActive || isActive && !addon.isSelectable) && filterStyle.selATitleColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.selFilterATitleColor)};`);
         } else {
             styles.push(`color: ${hexToRgba(textStyle.addonTitleColor)};`);
@@ -1913,7 +1916,7 @@
         styles.push(`white-space: pre-wrap; font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.reqFilterATextColor)};`);
-        } else if (isActive && filterStyle.selATextColorIsOn) {
+        } else if ((addon.isActive || isActive && !addon.isSelectable) && filterStyle.selATextColorIsOn) {
             styles.push(`color: ${hexToRgba(filterStyle.selFilterATextColor)};`);
         } else {
             styles.push(`color: ${hexToRgba(textStyle.addonTextColor)};`);
@@ -1946,14 +1949,14 @@
                 styles.push(`overflow: hidden;`);
             }
             if (addonImageStyle.addonImgBorderIsOn) {
-                const borderColor = isEnabled ? (isActive && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || addonImageStyle.addonImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || addonImageStyle.addonImgBorderColor;
+                const borderColor = isEnabled ? ((addon.isActive || isActive && !addon.isSelectable) && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || addonImageStyle.addonImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || addonImageStyle.addonImgBorderColor;
                 styles.push(`border: ${addonImageStyle.addonImgBorderWidth}px ${addonImageStyle.addonImgBorderStyle} ${hexToRgba(borderColor)};`);
             }
         } else {
             styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
             if (objectImageStyle.objectImgObjectFillIsOn) {
                 styles.push(`object-fit: ${objectImageStyle.objectImgObjectFillStyle};`);
-                const imgHeight = row.objectImgObjectFillHeight || objectImageStyle.objectImgObjectFillHeight;
+                const imgHeight = row?.objectImgObjectFillHeight || objectImageStyle.objectImgObjectFillHeight;
                 if (imgHeight) {
                     styles.push(`height: ${imgHeight}px;`);
                 }
@@ -1963,7 +1966,7 @@
                 styles.push(`overflow: hidden;`);
             }
             if (objectImageStyle.objectImgBorderIsOn) {
-                const borderColor = isEnabled ? (isActive && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || objectImageStyle.objectImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || objectImageStyle.objectImgBorderColor;
+                const borderColor = isEnabled ? ((addon.isActive || isActive && !addon.isSelectable) && filterStyle.selImgBorderColorIsOn && filterStyle.selFilterImgBorderColor) || objectImageStyle.objectImgBorderColor : (filterStyle.reqImgBorderColorIsOn && filterStyle.reqFilterImgBorderColor) || objectImageStyle.objectImgBorderColor;
                 styles.push(`border: ${objectImageStyle.objectImgBorderWidth}px ${objectImageStyle.objectImgBorderStyle} ${hexToRgba(borderColor)};`);
             }
         }
@@ -1972,7 +1975,22 @@
     });
 
     let scoreText = $derived.by(() => {
-        return `font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign}; color: ${hexToRgba(textStyle.scoreTextColor)};`;
+        let style: string[] = [];
+
+        style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
+        if (!isEnabled) {
+            if (filterStyle.reqScoreTextColorIsOn)  {
+                style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
+            }
+        } else if (addon.isActive || isActive && !addon.isSelectable) {
+            if (filterStyle.selScoreTextColorIsOn) {
+                style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
+            }
+        } else {
+            style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
+        }
+
+        return style.join(' ');
     });
 
     function addonWidthClass() {

@@ -224,13 +224,19 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.2 / ${getDate('2026-02-16T17:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where some filter styles did not apply to Addon.
+        `
+    }, {
+        open: false,
         title: `v2.8.1 / ${getDate('2026-02-16T14:00:00Z')}`,
         text: `<span style="color: green">Requirement</span>
-        - Fix issue where projects using "X of These is not selected" Requirement had requirements converted from selected to non-selected (※ Plaese load projects saved in versions prior to v2.8.0).
-        - Fix issue where created "X of These is met" and "X of These is not met" requirements could not be distinguished.
+        - Fixed issue where projects using "X of These is not selected" Requirement had requirements converted from selected to non-selected (※ Plaese load projects saved in versions prior to v2.8.0).
+        - Fixed issue where created "X of These is met" and "X of These is not met" requirements could not be distinguished.
         
         <span style="color: green">Design</span>
-        - Fix issue where Addon Design and Addon Image Design created in Private Styling or Design Group did not apply.
+        - Fixed issue where Addon Design and Addon Image Design created in Private Styling or Design Group did not apply.
         `
     }, {
         open: false,

@@ -493,7 +493,6 @@
         let style: string[] = [];
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
-        style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         if (!isEnabled) {
             if (filterStyle.reqScoreTextColorIsOn)  {
                 style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
@@ -502,6 +501,8 @@
             if (filterStyle.selScoreTextColorIsOn) {
                 style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
             }
+        } else {
+            style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         }
 
         return style.join(' ');
