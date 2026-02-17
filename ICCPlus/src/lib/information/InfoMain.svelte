@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.3 / ${getDate('2026-02-17T03:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where choice-id class and row-id class were assigned to addon.
+        `
+    }, {
+        open: false,
         title: `v2.8.2 / ${getDate('2026-02-16T17:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where some filter styles did not apply to Addon.

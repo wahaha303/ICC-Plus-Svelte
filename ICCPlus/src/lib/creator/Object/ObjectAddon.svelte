@@ -1361,7 +1361,7 @@
 {:else}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="text-center row-{row.id} choice-{choice.id} addon{addon.isSelectable ? ` addon-${addon.id}` : ''} {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(addon as SelectableAddon, row, e, true) : undefined}>
+    <div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''} {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(addon as SelectableAddon, row, e, true) : undefined}>
         {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
             <div>
                 {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}
