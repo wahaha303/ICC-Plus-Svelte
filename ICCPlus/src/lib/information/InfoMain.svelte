@@ -224,6 +224,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.4 / ${getDate('2026-02-18T14:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where Or Requirement button in Row was not visible in Dark Mode.
+
+        <span style="color: green">Requirement</span>
+        - Fixed issue where creating a Requirement in Or Requirement prevented creating a Requirement elsewhere.
+        `
+    }, {
+        open: false,
         title: `v2.8.3 / ${getDate('2026-02-17T03:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where choice-id class and row-id class were assigned to addon.

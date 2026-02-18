@@ -39,7 +39,7 @@
                                             <IconButton class="mdi mdi-delete-forever" onclickcapture={() => deleteReq(req)} />
                                         </Wrapper>
                                         <Wrapper text="Add Requirement">
-                                            <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = req}} />
+                                            <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = req;}} />
                                         </Wrapper>
                                         <Wrapper text="Clone Global Requirement">
                                             <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(req, i)} />

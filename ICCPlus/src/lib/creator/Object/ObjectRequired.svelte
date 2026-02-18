@@ -6,7 +6,7 @@
             </Wrapper>
             <div class="d-flex">
                 <Wrapper text="Create New Requirement">
-                    <IconButton onclickcapture={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
+                    <IconButton onclickcapture={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'; dlgVariables.isWord = false;}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Requirement">
                     <IconButton onclickcapture={copyRequirement} size="mini"><i class="mdi mdi-clipboard-outline"></i></IconButton>

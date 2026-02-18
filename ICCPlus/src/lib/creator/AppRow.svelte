@@ -454,7 +454,7 @@
         text: 'List of Choices',
         icon: 'mdi mdi-format-list-bulleted'
     }, {
-        action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = row },
+        action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = row; dlgVariables.isWord = false; },
         contextAction: (e: MouseEvent) => { reqContext(e) },
         text: 'L: Create Requirement<br>R: Context Menu',
         icon: 'mdi mdi-key-plus'

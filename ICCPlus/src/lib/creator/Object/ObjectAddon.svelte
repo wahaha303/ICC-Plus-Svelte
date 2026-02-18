@@ -11,7 +11,7 @@
                     </Wrapper>
                 {/if}
                 <Wrapper text="Create Requirement">
-                    <IconButton onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'}}><i class="mdi mdi-key-plus"></i></IconButton>
+                    <IconButton onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'; dlgVariables.isWord = false;}}><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 <Wrapper text="Copy Addon">
                     <IconButton disabled={addon.isActive} onclickcapture={copyAddon}><i class="mdi mdi-clipboard-outline"></i></IconButton>

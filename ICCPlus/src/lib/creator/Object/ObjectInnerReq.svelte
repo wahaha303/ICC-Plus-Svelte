@@ -95,7 +95,7 @@
     {/if}
 {:else if required.type === 'or'}
     <div class="point-slot">
-        <div class="d-row justify-center">
+        <div class="d-row justify-center title--text">
             <Wrapper text="Create New Requirement">
                 <IconButton onclickcapture={() => {dlgVariables.data = required; dlgVariables.currentDialog = 'appRequirement'; dlgVariables.isWord = true;}} size="mini"><i class="mdi mdi-key-plus"></i></IconButton>
             </Wrapper>
