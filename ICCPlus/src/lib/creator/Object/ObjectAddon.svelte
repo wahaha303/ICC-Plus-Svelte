@@ -1753,132 +1753,130 @@
                 }
             }
         }
-        if (isEnabled) {
-            if (addonEnabled) {
-                if (addon.isActive || isActive && !addon.isSelectable) {
-                    if (useDesign) {
-                        if (filterStyle.selBorderColorIsOn) {
-                            bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
-                        }
-                        if (addonStyle.addonGradientIsOn) {
-                            bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`;
-                        }
-                    } else if (addon.isSelectable) {
-                        if (filterStyle.selBorderColorIsOn) {
-                            bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
-                        }
-                        if (objectStyle.objectGradientIsOn) {
-                            bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
-                        }
-                    }
-                    if (filterStyle.selBgColorIsOn) {
-                        bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
-                    }
-                    if (filterStyle.selFilterBlurIsOn) {
-                        filters.blur = ` blur(${filterStyle.selFilterBlur}px)`;
-                    }
-                    if (filterStyle.selFilterBrightIsOn) {
-                        filters.brightness = ` brightness(${filterStyle.selFilterBright}%)`;
-                    }
-                    if (filterStyle.selFilterContIsOn) {
-                        filters.contrast = ` contrast(${filterStyle.selFilterCont}%)`;
-                    }
-                    if (filterStyle.selFilterGrayIsOn) {
-                        filters.grayscale = ` grayscale(${filterStyle.selFilterGray}%)`;
-                    }
-                    if (filterStyle.selFilterHueIsOn) {
-                        filters.hueRotate = ` hue-rotate(${filterStyle.selFilterHue}deg)`;
-                    }
-                    if (filterStyle.selFilterInvertIsOn) {
-                        filters.invert = ` invert(${filterStyle.selFilterInvert}%)`;
-                    }
-                    if (filterStyle.selFilterOpacIsOn) {
-                        filters.opacity = ` opacity(${filterStyle.selFilterOpac}%)`;
-                    }
-                    if (filterStyle.selFilterSaturIsOn) {
-                        filters.saturate = ` saturate(${filterStyle.selFilterSatur})`;
-                    }
-                    if (filterStyle.selFilterSepiaIsOn) {
-                        filters.sepia = ` sepia(${filterStyle.selFilterGray}%)`;
-                    }
-                } else {
-                    if (objectStyle.objectGradientIsOn && addon.isSelectable) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
-                    }
-                    if (filterStyle.unselFilterBlurIsOn) {
-                        filters.blur = ` blur(${filterStyle.unselFilterBlur}px)`;
-                    }
-                    if (filterStyle.unselFilterBrightIsOn) {
-                        filters.brightness = ` brightness(${filterStyle.unselFilterBright}%)`;
-                    }
-                    if (filterStyle.unselFilterContIsOn) {
-                        filters.contrast = ` contrast(${filterStyle.unselFilterCont}%)`;
-                    }
-                    if (filterStyle.unselFilterGrayIsOn) {
-                        filters.grayscale = ` grayscale(${filterStyle.unselFilterGray}%)`;
-                    }
-                    if (filterStyle.unselFilterHueIsOn) {
-                        filters.hueRotate = ` hue-rotate(${filterStyle.unselFilterHue}deg)`;
-                    }
-                    if (filterStyle.unselFilterInvertIsOn) {
-                        filters.invert = ` invert(${filterStyle.unselFilterInvert}%)`;
-                    }
-                    if (filterStyle.unselFilterOpacIsOn) {
-                        filters.opacity = ` opacity(${filterStyle.unselFilterOpac}%)`;
-                    }
-                    if (filterStyle.unselFilterSaturIsOn) {
-                        filters.saturate = ` saturate(${filterStyle.unselFilterSatur})`;
-                    }
-                    if (filterStyle.unselFilterSepiaIsOn) {
-                        filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
-                    }
-                }
-            } else {
+        if (isEnabled && addonEnabled) {
+            if (addon.isActive || isActive && !addon.isSelectable) {
                 if (useDesign) {
-                    if (filterStyle.reqBorderColorIsOn) {
-                        bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
+                    if (filterStyle.selBorderColorIsOn) {
+                        bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
                     }
                     if (addonStyle.addonGradientIsOn) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnReq});`;
+                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`;
                     }
                 } else if (addon.isSelectable) {
-                    if (filterStyle.reqBorderColorIsOn) {
-                        bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
+                    if (filterStyle.selBorderColorIsOn) {
+                        bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
                     }
                     if (objectStyle.objectGradientIsOn) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
+                        bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
                     }
                 }
-                if (filterStyle.reqBgColorIsOn) {
-                    bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
+                if (filterStyle.selBgColorIsOn) {
+                    bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
                 }
-                if (filterStyle.reqFilterBlurIsOn) {
-                    filters.blur = ` blur(${filterStyle.reqFilterBlur}px)`;
+                if (filterStyle.selFilterBlurIsOn) {
+                    filters.blur = ` blur(${filterStyle.selFilterBlur}px)`;
                 }
-                if (filterStyle.reqFilterBrightIsOn) {
-                    filters.brightness = ` brightness(${filterStyle.reqFilterBright}%)`;
+                if (filterStyle.selFilterBrightIsOn) {
+                    filters.brightness = ` brightness(${filterStyle.selFilterBright}%)`;
                 }
-                if (filterStyle.reqFilterContIsOn) {
-                    filters.contrast = ` contrast(${filterStyle.reqFilterCont}%)`;
+                if (filterStyle.selFilterContIsOn) {
+                    filters.contrast = ` contrast(${filterStyle.selFilterCont}%)`;
                 }
-                if (filterStyle.reqFilterGrayIsOn) {
-                    filters.grayscale = ` grayscale(${filterStyle.reqFilterGray}%)`;
+                if (filterStyle.selFilterGrayIsOn) {
+                    filters.grayscale = ` grayscale(${filterStyle.selFilterGray}%)`;
                 }
-                if (filterStyle.reqFilterHueIsOn) {
-                    filters.hueRotate = ` hue-rotate(${filterStyle.reqFilterHue}deg)`;
+                if (filterStyle.selFilterHueIsOn) {
+                    filters.hueRotate = ` hue-rotate(${filterStyle.selFilterHue}deg)`;
                 }
-                if (filterStyle.reqFilterInvertIsOn) {
-                    filters.invert = ` invert(${filterStyle.reqFilterInvert}%)`;
+                if (filterStyle.selFilterInvertIsOn) {
+                    filters.invert = ` invert(${filterStyle.selFilterInvert}%)`;
                 }
-                if (filterStyle.reqFilterOpacIsOn) {
-                    filters.opacity = ` opacity(${filterStyle.reqFilterOpac}%)`;
+                if (filterStyle.selFilterOpacIsOn) {
+                    filters.opacity = ` opacity(${filterStyle.selFilterOpac}%)`;
                 }
-                if (filterStyle.reqFilterSaturIsOn) {
-                    filters.saturate = ` saturate(${filterStyle.reqFilterSatur})`;
+                if (filterStyle.selFilterSaturIsOn) {
+                    filters.saturate = ` saturate(${filterStyle.selFilterSatur})`;
                 }
-                if (filterStyle.reqFilterSepiaIsOn) {
-                    filters.sepia = ` sepia(${filterStyle.reqFilterGray}%)`;
+                if (filterStyle.selFilterSepiaIsOn) {
+                    filters.sepia = ` sepia(${filterStyle.selFilterGray}%)`;
                 }
+            } else {
+                if (objectStyle.objectGradientIsOn && addon.isSelectable) {
+                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
+                }
+                if (filterStyle.unselFilterBlurIsOn) {
+                    filters.blur = ` blur(${filterStyle.unselFilterBlur}px)`;
+                }
+                if (filterStyle.unselFilterBrightIsOn) {
+                    filters.brightness = ` brightness(${filterStyle.unselFilterBright}%)`;
+                }
+                if (filterStyle.unselFilterContIsOn) {
+                    filters.contrast = ` contrast(${filterStyle.unselFilterCont}%)`;
+                }
+                if (filterStyle.unselFilterGrayIsOn) {
+                    filters.grayscale = ` grayscale(${filterStyle.unselFilterGray}%)`;
+                }
+                if (filterStyle.unselFilterHueIsOn) {
+                    filters.hueRotate = ` hue-rotate(${filterStyle.unselFilterHue}deg)`;
+                }
+                if (filterStyle.unselFilterInvertIsOn) {
+                    filters.invert = ` invert(${filterStyle.unselFilterInvert}%)`;
+                }
+                if (filterStyle.unselFilterOpacIsOn) {
+                    filters.opacity = ` opacity(${filterStyle.unselFilterOpac}%)`;
+                }
+                if (filterStyle.unselFilterSaturIsOn) {
+                    filters.saturate = ` saturate(${filterStyle.unselFilterSatur})`;
+                }
+                if (filterStyle.unselFilterSepiaIsOn) {
+                    filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
+                }
+            }
+        } else if (addon.isSelectable) {
+            if (useDesign) {
+                if (filterStyle.reqBorderColorIsOn) {
+                    bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
+                }
+                if (addonStyle.addonGradientIsOn) {
+                    bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnReq});`;
+                }
+            } else if (addon.isSelectable) {
+                if (filterStyle.reqBorderColorIsOn) {
+                    bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
+                }
+                if (objectStyle.objectGradientIsOn) {
+                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
+                }
+            }
+            if (filterStyle.reqBgColorIsOn) {
+                bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
+            }
+            if (filterStyle.reqFilterBlurIsOn) {
+                filters.blur = ` blur(${filterStyle.reqFilterBlur}px)`;
+            }
+            if (filterStyle.reqFilterBrightIsOn) {
+                filters.brightness = ` brightness(${filterStyle.reqFilterBright}%)`;
+            }
+            if (filterStyle.reqFilterContIsOn) {
+                filters.contrast = ` contrast(${filterStyle.reqFilterCont}%)`;
+            }
+            if (filterStyle.reqFilterGrayIsOn) {
+                filters.grayscale = ` grayscale(${filterStyle.reqFilterGray}%)`;
+            }
+            if (filterStyle.reqFilterHueIsOn) {
+                filters.hueRotate = ` hue-rotate(${filterStyle.reqFilterHue}deg)`;
+            }
+            if (filterStyle.reqFilterInvertIsOn) {
+                filters.invert = ` invert(${filterStyle.reqFilterInvert}%)`;
+            }
+            if (filterStyle.reqFilterOpacIsOn) {
+                filters.opacity = ` opacity(${filterStyle.reqFilterOpac}%)`;
+            }
+            if (filterStyle.reqFilterSaturIsOn) {
+                filters.saturate = ` saturate(${filterStyle.reqFilterSatur})`;
+            }
+            if (filterStyle.reqFilterSepiaIsOn) {
+                filters.sepia = ` sepia(${filterStyle.reqFilterGray}%)`;
             }
         }
         if (Object.keys(filters).length > 0) {

@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.5 / ${getDate('2026-02-19T14:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where selectable addon's require filter wasn't applied when parent choice didn't meet requirement.
+        `
+    }, {
+        open: false,
         title: `v2.8.4 / ${getDate('2026-02-18T14:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where Or Requirement button in Row was not visible in Dark Mode.
