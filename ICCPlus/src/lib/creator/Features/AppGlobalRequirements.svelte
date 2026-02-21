@@ -80,7 +80,7 @@
                                                         <AcdContent>
                                                             <div class="row gy-4">
                                                                 {#each req.requireds as required, j}
-                                                                    <div class="{required.requireds.length > 0 ? 'col-12' : 'col-sm-6 col-12'} p-2">
+                                                                    <div class="{required.requireds.length > 0 || required.type === 'or' ? 'col-12' : 'col-sm-6 col-12'} p-2">
                                                                         <ObjectRequired required={required} isEditModeOn={true} />
                                                                         <Button onclickcapture={() => req.requireds.splice(j, 1)} class="mt-1" variant="raised">
                                                                             <Label>Delete</Label>

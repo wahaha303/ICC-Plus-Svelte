@@ -1832,7 +1832,7 @@
                     filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
                 }
             }
-        } else if (addon.isSelectable) {
+        } else if (addon.isSelectable || isEnabled) {
             if (useDesign) {
                 if (filterStyle.reqBorderColorIsOn) {
                     bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;

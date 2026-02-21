@@ -1,7 +1,7 @@
 <Dialog
     bind:open
     surface$style="width: 1000px; max-width: calc(100vw - 32px);"
-    onSMUIDialogClosed={onclose}
+    onSMUIDialogClosed={beforeClose}
 >
     <Title tabindex={0} autofocus>
         Create Requirement
@@ -120,7 +120,7 @@
     import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
-    import { app, snackbarVariables } from '$lib/store/store.svelte';
+    import { app, dlgVariables, snackbarVariables } from '$lib/store/store.svelte';
 	import type { Addon, Choice, Requireds, Row, Score, GlobalRequirement } from '$lib/store/types';
     
     let { open, onclose, data, orReq = false }: { open: boolean; onclose: () => void; data: Row | Choice | Addon | Score | Requireds | GlobalRequirement; orReq?: boolean } = $props();
@@ -142,8 +142,12 @@
     }];
     let pointRequire = $state('1');
     let pointComparisonRequire = $state('1');
-    let numberOfOrRequireds = $state(4);
     let numberOfSelection = $state(1);
+
+    function beforeClose() {
+        if (orReq && dlgVariables.isWord) dlgVariables.isWord = false;
+        onclose();
+    }
 
     function addNewRequired(type: string, bType: boolean, operator: string) {
         if (orReq) {

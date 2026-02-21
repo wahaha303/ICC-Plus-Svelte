@@ -224,6 +224,18 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.6 / ${getDate('2026-02-21T15:00:00Z')}`,
+        text: `<span style="color: green">Requirement</span>
+        - Fixed issue where text input field appeared in all other confirmation dialogs after using Or Requirement.
+        
+        <span style="color: green">Addon</span>
+        - Fixed issue where non-selectable addon's require filter wasn't applied when requirements were not met.
+
+        <span style="color: green">Desktop Version</span>
+        - Added context menu for right-click.
+        `
+    }, {
+        open: false,
         title: `v2.8.5 / ${getDate('2026-02-19T14:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where selectable addon's require filter wasn't applied when parent choice didn't meet requirement.
