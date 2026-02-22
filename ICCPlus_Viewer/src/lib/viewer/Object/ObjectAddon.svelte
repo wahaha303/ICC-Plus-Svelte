@@ -273,46 +273,45 @@
                     if (addonStyle.addonGradientIsOn) {
                         bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`;
                     }
-                } else if (addon.isSelectable) {
-                    if (filterStyle.selBorderColorIsOn) {
-                        bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
+                }
+                if (addon.isSelectable) {
+                    if (filterStyle.selBgColorIsOn) {
+                        bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
                     }
-                    if (objectStyle.objectGradientIsOn) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                    if (filterStyle.selFilterBlurIsOn) {
+                        filters.blur = ` blur(${filterStyle.selFilterBlur}px)`;
+                    }
+                    if (filterStyle.selFilterBrightIsOn) {
+                        filters.brightness = ` brightness(${filterStyle.selFilterBright}%)`;
+                    }
+                    if (filterStyle.selFilterContIsOn) {
+                        filters.contrast = ` contrast(${filterStyle.selFilterCont}%)`;
+                    }
+                    if (filterStyle.selFilterGrayIsOn) {
+                        filters.grayscale = ` grayscale(${filterStyle.selFilterGray}%)`;
+                    }
+                    if (filterStyle.selFilterHueIsOn) {
+                        filters.hueRotate = ` hue-rotate(${filterStyle.selFilterHue}deg)`;
+                    }
+                    if (filterStyle.selFilterInvertIsOn) {
+                        filters.invert = ` invert(${filterStyle.selFilterInvert}%)`;
+                    }
+                    if (filterStyle.selFilterOpacIsOn) {
+                        filters.opacity = ` opacity(${filterStyle.selFilterOpac}%)`;
+                    }
+                    if (filterStyle.selFilterSaturIsOn) {
+                        filters.saturate = ` saturate(${filterStyle.selFilterSatur})`;
+                    }
+                    if (filterStyle.selFilterSepiaIsOn) {
+                        filters.sepia = ` sepia(${filterStyle.selFilterGray}%)`;
                     }
                 }
-                if (filterStyle.selBgColorIsOn) {
-                    bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
-                }
-                if (filterStyle.selFilterBlurIsOn) {
-                    filters.blur = ` blur(${filterStyle.selFilterBlur}px)`;
-                }
-                if (filterStyle.selFilterBrightIsOn) {
-                    filters.brightness = ` brightness(${filterStyle.selFilterBright}%)`;
-                }
-                if (filterStyle.selFilterContIsOn) {
-                    filters.contrast = ` contrast(${filterStyle.selFilterCont}%)`;
-                }
-                if (filterStyle.selFilterGrayIsOn) {
-                    filters.grayscale = ` grayscale(${filterStyle.selFilterGray}%)`;
-                }
-                if (filterStyle.selFilterHueIsOn) {
-                    filters.hueRotate = ` hue-rotate(${filterStyle.selFilterHue}deg)`;
-                }
-                if (filterStyle.selFilterInvertIsOn) {
-                    filters.invert = ` invert(${filterStyle.selFilterInvert}%)`;
-                }
-                if (filterStyle.selFilterOpacIsOn) {
-                    filters.opacity = ` opacity(${filterStyle.selFilterOpac}%)`;
-                }
-                if (filterStyle.selFilterSaturIsOn) {
-                    filters.saturate = ` saturate(${filterStyle.selFilterSatur})`;
-                }
-                if (filterStyle.selFilterSepiaIsOn) {
-                    filters.sepia = ` sepia(${filterStyle.selFilterGray}%)`;
-                }
-            } else {
-                if (objectStyle.objectGradientIsOn && addon.isSelectable) {
+            } else if (addon.isSelectable) {
+                if (useDesign) {
+                    if (addonStyle.objectGradientIsOn) {
+                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradient});`;
+                    }
+                } else if (objectStyle.objectGradientIsOn) {
                     bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
                 }
                 if (filterStyle.unselFilterBlurIsOn) {

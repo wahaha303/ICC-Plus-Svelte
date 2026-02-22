@@ -224,6 +224,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.7 / ${getDate('2026-02-22T13:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where non-selectable addon's selected filter was applied multiple times.
+        - Fixed issue where Addon Gradient was not properly applied to Selectable Addon.
+        `
+    }, {
+        open: false,
         title: `v2.8.6 / ${getDate('2026-02-21T15:00:00Z')}`,
         text: `<span style="color: green">Requirement</span>
         - Fixed issue where text input field appeared in all other confirmation dialogs after using Or Requirement.

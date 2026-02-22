@@ -7,7 +7,7 @@ import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.8.6';
+export const appVersion = '2.8.7';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
