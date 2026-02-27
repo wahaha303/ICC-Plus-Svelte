@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2026-02-22T13:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2026-02-27T10:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -116,6 +116,14 @@
         }
 	}
 
+    function handleWheel(e: MouseEvent) {
+        const target = e.target;
+
+        if (target instanceof HTMLInputElement && target.type === 'number') {
+            target.blur();
+        }
+    }
+
     onMount(() => {
         window.debugApp = app;
         autoModeWatcher();
@@ -126,6 +134,8 @@
             window.addEventListener('keydown', setShortcut);
         }
 
+        document.addEventListener('wheel', handleWheel);
+
         onDestroy(() => {
             bgmPlayer.update(p => {
                 p?.destroy();
@@ -133,6 +143,7 @@
             });
 
             window.removeEventListener('keydown', setShortcut);
+            document.removeEventListener('wheel', handleWheel);
         });
     });
 

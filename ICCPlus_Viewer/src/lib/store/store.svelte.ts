@@ -7,7 +7,7 @@ import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.8.7';
+export const appVersion = '2.8.8';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1509,6 +1509,29 @@ export function objectWidthToNum(str: string) {
         case 'w-9': return 11
         case 'col-xl-1': return 12
         default: return 1
+    }
+}
+export function widthToNum(str: string) {
+    switch(str) {
+        case 'col-xl-1': return 1/12;
+        case 'w-9': return 1/11;
+        case 'w-10': return 1/10;
+        case 'w-11': return 1/9;
+        case 'w-12': return 1/8;
+        case 'w-14': return 1/7;
+        case 'col-lg-2': return 1/6;
+        case 'w-20': return 1/5;
+        case 'col-md-3': return 1/4;
+        case 'col-md-4': return 1/3;
+        case 'col-sm-5': return 5/12;
+        case 'col-sm-6': return 1/2;
+        case 'col-sm-7': return 7/12;
+        case 'col-sm-8': return 8/12;
+        case 'col-sm-9': return 9/12;
+        case 'col-sm-10': return 10/12;
+        case 'col-sm-11': return 11/12;
+        case 'col-12': return 1;
+        default: return 1;
     }
 }
 let preWords: Word[] = [];
@@ -5285,10 +5308,10 @@ export function deselectObject(localChoice: Choice | SelectableAddon, localRow: 
                 }
             }
 
-            if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+            if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
                 const word = wordMap.get(localChoice.idOfTheTextfieldWord);
                 if (typeof word !== 'undefined') {
-                    word.replaceText = typeof localChoice.wordChangeDeselect === 'undefined' ? '' : localChoice.wordChangeDeselect;
+                    word.replaceText = localChoice.wordChangeDeselect || '';
                 }
             }
 
@@ -6142,10 +6165,10 @@ export function selectObject(localChoice: Choice | SelectableAddon, localRow: Ro
                     }
                 }
 
-                if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+                if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
                     const word = wordMap.get(localChoice.idOfTheTextfieldWord);
                     if (typeof word !== 'undefined') {
-                        word.replaceText = localChoice.wordChangeSelect;
+                        word.replaceText = localChoice.wordChangeSelect || '';
                     }
                 }
 
@@ -6903,10 +6926,10 @@ export function selectedOneMore(localChoice: Choice | SelectableAddon, localRow:
                         }
                     }
 
-                    if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+                    if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
                         const word = wordMap.get(localChoice.idOfTheTextfieldWord);
                         if (typeof word !== 'undefined') {
-                            word.replaceText = localChoice.wordChangeSelect;
+                            word.replaceText = localChoice.wordChangeSelect || '';
                         }
                     }
 
@@ -7631,10 +7654,10 @@ export function selectedOneLess(localChoice: Choice | SelectableAddon, localRow:
             }
 
             if (selNum === 0) {
-                if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+                if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
                     const word = wordMap.get(localChoice.idOfTheTextfieldWord);
                     if (typeof word !== 'undefined') {
-                        word.replaceText = typeof localChoice.wordChangeDeselect === 'undefined' ? '' : localChoice.wordChangeDeselect;
+                        word.replaceText = localChoice.wordChangeDeselect || '';
                     }
                 }
 
@@ -8658,13 +8681,13 @@ function selectObjectL(str: string, newActivatedList: string[]) {
             }
         }
 
-        if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+        if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
             const word = wordMap.get(localChoice.idOfTheTextfieldWord);
             if (typeof word !== 'undefined') {
                 if (localChoice.customTextfieldIsOn) {
                     word.replaceText = strWord;
                 } else {
-                    word.replaceText = localChoice.wordChangeSelect;
+                    word.replaceText = localChoice.wordChangeSelect || '';
                 }
             }
         }
@@ -9271,13 +9294,13 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
                 }
             }
 
-            if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined' && typeof localChoice.wordChangeSelect !== 'undefined') {
+            if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
                 const word = wordMap.get(localChoice.idOfTheTextfieldWord);
                 if (typeof word !== 'undefined') {
                     if (localChoice.customTextfieldIsOn) {
                         word.replaceText = strWord;
                     } else {
-                        word.replaceText = localChoice.wordChangeSelect;
+                        word.replaceText = localChoice.wordChangeSelect || '';
                     }
                 }
             }
@@ -10813,6 +10836,12 @@ export function initializeApp(tempApp: any) {
                             }
                         }
                     }
+                }
+            } else if (key === 'words') {
+                for (let i = 0; i < tempApp[key].length; i++) {
+                    const word = tempApp[key][i];
+
+                    if (typeof word.replaceText === 'undefined') word.replaceText = '';
                 }
             }
         } else if (typeof tempApp[key] === 'object') {

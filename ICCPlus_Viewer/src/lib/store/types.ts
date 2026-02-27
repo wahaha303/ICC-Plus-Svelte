@@ -915,7 +915,7 @@ export type App = {
     groups: Group[],
     rowDesignGroups?: RowDesignGroup[],
     objectDesignGroups?: ObjectDesignGroup[],
-    objectsPerRow?: string,
+    objectsPerRow: string,
     globalRequirements?: GlobalRequirement[],
     googleFonts: string[],
     customFonts: string[],

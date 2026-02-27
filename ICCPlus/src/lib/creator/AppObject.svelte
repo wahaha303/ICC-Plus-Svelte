@@ -1483,7 +1483,7 @@
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)} oncontextmenu={() => console.log(choice)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
-                    <div class="d-column w-100 p-0 align-items-center" style={objectFilter}>
+                    <div class="d-column w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle}
                             {#key oriTitleKey}
                                 <div class="col-12" style={scoreText}>
@@ -1567,7 +1567,7 @@
                         <div class="row g-0 p-0 w-100{addonJustify}">
                             {#each sAddons as addon, i}
                                 {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                 {/if}
                             {/each}
                         </div>
@@ -1653,7 +1653,7 @@
                             <div class="row g-0 p-0 col w-100{addonJustify}">
                                 {#each sAddons as addon, i}
                                     {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                     {/if}
                                 {/each}
                             </div>
@@ -1738,7 +1738,7 @@
                             <div class="row g-0 p-0 col w-100{addonJustify}">
                                 {#each sAddons as addon, i}
                                     {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                     {/if}
                                 {/each}
                             </div>
@@ -1869,22 +1869,26 @@
     const linkedObjects: string[] = [];
     const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     const nAddons = $derived.by(() => {
-        if (choice.addons && choice.addons.length > 0) {
-            const addons = choice.addons.filter(item => item.isSelectable !== true);
-            if (addons.length > 0) {
-                return addons;
-            }
+        const list = choice.addons;
+        if (!list || list.length === 0) return null;
+
+        const result = [];
+        for (let i = 0; i < list.length; i++) {
+            const addon = list[i];
+            if (addon.isSelectable !== true) result.push(addon);
         }
-        return null;
+        return result.length === 0 ? null : result;
     });
     const sAddons = $derived.by(() => {
-        if (choice.addons && choice.addons.length > 0) {
-            const addons = choice.addons.filter(item => item.isSelectable === true);
-            if (addons.length > 0) {
-                return addons;
-            }
+        const list = choice.addons;
+        if (!list || list.length === 0) return null;
+        
+        const result = [];
+        for (let i = 0; i < list.length; i++) {
+            const addon = list[i];
+            if (addon.isSelectable === true && (app.showAllAddons > 0 || !addon.hideAddon || choice.isActive && (addon.showAddon || checkRequirements(addon.requireds)))) result.push(addon);
         }
-        return null;
+        return result.length === 0 ? null : result;
     });
     
     let panelScore = $state(false);
@@ -1908,7 +1912,7 @@
         if (sAddons) {
             for (let i = 0; i < sAddons.length; i++) {
                 const addon = sAddons[i];
-                if (app.showAllAddons > 0 || !addon.skipIndex && (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))) {
+                if (!addon.skipIndex) {
                     return i;
                 }
             }
@@ -1960,7 +1964,7 @@
     });
 
     let objectTitle = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push(`white-space: pre-line; font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
@@ -1988,7 +1992,7 @@
     });
 
     let objectText = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push(`white-space: pre-wrap; font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
@@ -2057,8 +2061,12 @@
     let objectFilter = $derived.by(() => {
         const bgStyles: BgStyles = {};
         const filters: Filters = {};
+        const suffix = objectStyle.objectBorderRadiusIsPixels ? 'px' : '%';
+        const rtl = objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusTopLeft ? objectStyle.objectBorderRadiusTopLeft - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusTopLeft;
+        const rtr = objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusTopRight ? objectStyle.objectBorderRadiusTopRight - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusTopRight;
 
         setFilters(bgStyles, filters);
+        if (rtl && rtr) bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} 0 0;`;
         if (Object.keys(filters).length > 0) {
             bgStyles.filter = `filter:${Object.values(filters).join('')};`;
         }
@@ -2067,7 +2075,7 @@
     });
 
     let objectImage = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
         const suffix = objectImageStyle.objectImgBorderRadiusIsPixels ? 'px' : '%';
 
         styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
@@ -2091,7 +2099,7 @@
     });
 
     let scoreText = $derived.by(() => {
-        let style: string[] = [];
+        const style: string[] = [];
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (!isEnabled && filterStyle.reqScoreTextColorIsOn) {

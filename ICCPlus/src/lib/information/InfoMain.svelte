@@ -224,6 +224,21 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.8 / ${getDate('2026-02-27T10:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where selected filter was applied multiple times.
+        
+        <span style="color: green">Word</span>
+        - Fixed issue where some words did not work properly in projects created with legacy version.
+
+        <span style="color: green">Design</span>
+        - Fixed issue where selected filter affected area outside bounds when Border Radius cut off option disabled.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where scrolling mouse wheel over number input field sometimes changed value instead of scrolling page.
+        `
+    }, {
+        open: false,
         title: `v2.8.7 / ${getDate('2026-02-22T13:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where non-selectable addon's selected filter was applied multiple times.

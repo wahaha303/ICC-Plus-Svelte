@@ -198,13 +198,13 @@
 <script lang="ts">
     import DOMPurify from 'dompurify';
     import ObjectRequired from './ObjectRequired.svelte';
-    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables, winWidth, objectWidthToNum, selectedOneMore, selectedOneLess, choiceMap, closestByClassPrefix, deselectObject, selectObject } from '$lib/store/store.svelte';
+    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables, winWidth, objectWidthToNum, selectedOneMore, selectedOneLess, choiceMap, closestByClassPrefix, deselectObject, selectObject, widthToNum } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon, BgStyles, Filters, SelectableAddon, ChoiceOptions } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import ObjectScore from './ObjectScore.svelte';
     import ObjectMultiChoice from './ObjectMultiChoice.svelte';
 
-    let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, isFirst, isBackpack = false, mainDiv }: { addon: Addon | SelectableAddon; row: Row; choice: Choice; isEnabled?: boolean, windowWidth?: number, preloadImages?: boolean, isFirst?: boolean, isBackpack?: boolean; mainDiv?: HTMLDivElement } = $props();
+    let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, index, isFirst, isBackpack = false, mainDiv, list }: { addon: Addon | SelectableAddon; row: Row; choice: Choice; isEnabled?: boolean; windowWidth?: number; preloadImages?: boolean; index?: number; isFirst?: boolean; isBackpack?: boolean; mainDiv?: HTMLDivElement; list?: SelectableAddon[]; } = $props();
 
     const linkedObjects: string[] = [];
     const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
@@ -230,10 +230,15 @@
     });
 
     let addonBackground = $derived.by(() => {
-        let useDesign = addonStyle.useAddonDesign; 
-        let suffix = (useDesign ? addonStyle.addonBorderRadiusIsPixels : objectStyle.objectBorderRadiusIsPixels) ? 'px' : '%';
+        const useDesign = addonStyle.useAddonDesign; 
+        const suffix = (useDesign ? addonStyle.addonBorderRadiusIsPixels : objectStyle.objectBorderRadiusIsPixels) ? 'px' : '%';
         const bgStyles: BgStyles = {};
         const filters: Filters = {};
+        const radius = getRadius();
+        const rtl = isFirst && choice.title === '' && choice.text === '' ? objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusTopLeft ? objectStyle.objectBorderRadiusTopLeft - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusTopLeft : 0;
+        const rtr = isFirst && choice.title === '' && choice.text === '' ? objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusTopRight ? objectStyle.objectBorderRadiusTopRight - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusTopRight : 0;
+        const rbl = radius.l ? objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusBottomLeft ? objectStyle.objectBorderRadiusBottomLeft - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusBottomLeft : 0;
+        const rbr = radius.r ? objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusBottomRight ? objectStyle.objectBorderRadiusBottomRight - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusBottomRight : 0;
 
         if (useDesign) {
             if (addonStyle.addonBorderImage) {
@@ -275,6 +280,7 @@
                     }
                 }
                 if (addon.isSelectable) {
+                    if (!useDesign) bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
                     if (filterStyle.selBgColorIsOn) {
                         bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
                     }
@@ -498,9 +504,9 @@
     });
 
     function addonWidthClass() {
-        let addonWidth = (addon.addonWidth || 'col-12');
-        let addonWidthNum = objectWidthToNum(addonWidth);
-        let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
+        const addonWidth = (addon.addonWidth || 'col-12');
+        const addonWidthNum = objectWidthToNum(addonWidth);
+        const objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
         if ($winWidth > 1280) {
             return addonWidth;
         } else if ($winWidth > 720) {
@@ -513,9 +519,8 @@
             }
         } else if ($winWidth > 480) {
             return addonWidthNum === 1 ? 'col-12' : 'col-6';
-        } else {
-            return 'col-12';
         }
+        return 'col-12';
     }
 
     function copyTooltip(e: Event) {
@@ -527,6 +532,46 @@
             snackbarVariables.labelText = 'Tooltip text logged to developer console.';
             snackbarVariables.isOpen = true;
         });
+    }
+
+    function getRadius() {
+        if (!objectStyle.objectBorderRadiusBottomLeft && !objectStyle.objectBorderRadiusBottomRight) return {l: false, r: false};
+        if (typeof list !== 'undefined' && typeof index !== 'undefined') {
+            const width = addonWidthClass();
+            const num = widthToNum(width);
+            if (list.length === index + 1) {
+                if (num === 1) return {l: true, r: true};
+                if (index > 0) {
+                    if (widthToNum(list[index - 1].addonWidth || 'col-12') + num <= 1) {
+                        return {l: false, r: true};
+                    } else {
+                        return {l: true, r: true};
+                    }
+                }
+            } else {
+                let val = 0;
+                for (let i = 0; i < index; i++) {
+                    const item = list[i];
+                    const inNum = widthToNum(item.addonWidth || 'col-12');
+
+                    val += inNum;
+                    if (val > 1) val = inNum;
+                }
+                val += num;
+                if (val > 1) {
+                    val = num;
+                    for (let i = index + 1; i < list.length; i++) {
+                        const item = list[i];
+                        const inNum = widthToNum(item.addonWidth || 'col-12');
+
+                        val += inNum;
+                        if (val > 1) return {l: false, r: false};
+                    }
+                    return {l: true, r: false};
+                }
+            }
+        }
+        return {l: false, r: false};
     }
 
     function activateObject(localChoice: SelectableAddon, localRow: Row, e?: MouseEvent, isManually: boolean = false) {

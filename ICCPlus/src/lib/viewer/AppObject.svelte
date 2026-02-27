@@ -89,7 +89,7 @@
                         <div class="row g-0 p-0 w-100{addonJustify}">
                             {#each sAddons as addon, i}
                                 {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                 {/if}
                             {/each}
                         </div>
@@ -175,7 +175,7 @@
                             <div class="row g-0 p-0 col w-100{addonJustify}">
                                 {#each sAddons as addon, i}
                                     {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                     {/if}
                                 {/each}
                             </div>
@@ -260,7 +260,7 @@
                             <div class="row g-0 p-0 col w-100{addonJustify}">
                                 {#each sAddons as addon, i}
                                     {#if app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                     {/if}
                                 {/each}
                             </div>
@@ -278,7 +278,7 @@
     import ObjectMultiChoice from './Object/ObjectMultiChoice.svelte';
     import ObjectRequired from './Object/ObjectRequired.svelte';
     import ObjectScore from './Object/ObjectScore.svelte';
-	import type { BgStyles, Choice, ChoiceOptions, Filters, Row } from '$lib/store/types';
+	import type { BgStyles, Choice, ChoiceOptions, Filters, Row, SelectableAddon } from '$lib/store/types';
 	import { app, choiceMap, getStyling, checkRequirements, sanitizeArg, replaceText, objectWidthToNum, snackbarVariables, winWidth, hexToRgba, selectObject, deselectObject, selectedOneMore, selectedOneLess, wordDialog, closestByClassPrefix } from '$lib/store/store.svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
@@ -288,22 +288,26 @@
     const linkedObjects: string[] = [];
     const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     const nAddons = $derived.by(() => {
-        if (choice.addons && choice.addons.length > 0) {
-            const addons = choice.addons.filter(item => item.isSelectable !== true);
-            if (addons.length > 0) {
-                return addons;
-            }
+        const list = choice.addons;
+        if (!list || list.length === 0) return null;
+
+        const result = [];
+        for (let i = 0; i < list.length; i++) {
+            const addon = list[i];
+            if (addon.isSelectable !== true) result.push(addon);
         }
-        return null;
+        return result.length === 0 ? null : result;
     });
     const sAddons = $derived.by(() => {
-        if (choice.addons && choice.addons.length > 0) {
-            const addons = choice.addons.filter(item => item.isSelectable === true);
-            if (addons.length > 0) {
-                return addons;
-            }
+        const list = choice.addons;
+        if (!list || list.length === 0) return null;
+        
+        const result = [];
+        for (let i = 0; i < list.length; i++) {
+            const addon = list[i];
+            if (addon.isSelectable === true && (app.showAllAddons > 0 || !addon.hideAddon || choice.isActive && (addon.showAddon || checkRequirements(addon.requireds)))) result.push(addon);
         }
-        return null;
+        return result.length === 0 ? null : result;
     });
 
     let firstAddonIndex = $derived.by(() => {
@@ -318,7 +322,7 @@
         if (sAddons) {
             for (let i = 0; i < sAddons.length; i++) {
                 const addon = sAddons[i];
-                if (app.showAllAddons > 0 || !addon.skipIndex && (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds))) {
+                if (!addon.skipIndex) {
                     return i;
                 }
             }
@@ -358,7 +362,7 @@
         return row;
     });
     let objectTitle = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push(`white-space: pre-line; font-family: '${textStyle.objectTitle}'; font-size: ${textStyle.objectTitleTextSize}%; text-align: ${textStyle.objectTitleAlign};`);
         if (!isEnabled && filterStyle.reqCTitleColorIsOn) {
@@ -387,7 +391,7 @@
     });
 
     let objectText = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push(`white-space: pre-wrap; font-family: '${textStyle.objectText}'; text-align: ${textStyle.objectTextAlign}; font-size: ${textStyle.objectTextTextSize}%;`);
         if (!isEnabled && filterStyle.reqCTextColorIsOn) {
@@ -456,8 +460,12 @@
     let objectFilter = $derived.by(() => {
         const bgStyles: BgStyles = {};
         const filters: Filters = {};
+        const suffix = objectStyle.objectBorderRadiusIsPixels ? 'px' : '%';
+        const rtl = objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusTopLeft ? objectStyle.objectBorderRadiusTopLeft - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusTopLeft;
+        const rtr = objectStyle.objectBorderRadiusIsPixels && objectStyle.objectBorderWidth && objectStyle.objectBorderRadiusTopRight ? objectStyle.objectBorderRadiusTopRight - objectStyle.objectBorderWidth : objectStyle.objectBorderRadiusTopRight;
 
         setFilters(bgStyles, filters);
+        if (rtl && rtr) bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} 0 0;`;
         if (Object.keys(filters).length > 0) {
             bgStyles.filter = `filter:${Object.values(filters).join('')};`;
         }
@@ -466,7 +474,7 @@
     });
 
     let objectImage = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
         const suffix = objectImageStyle.objectImgBorderRadiusIsPixels ? 'px' : '%';
 
         styles.push(`width: ${objectImageStyle.objectImageWidth}%; margin-top: ${objectImageStyle.objectImageMarginTop}%; margin-bottom: ${objectImageStyle.objectImageMarginBottom}%;`);
@@ -490,7 +498,7 @@
     });
 
     let scoreText = $derived.by(() => {
-        let style: string[] = [];
+        const style: string[] = [];
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (!isEnabled && filterStyle.reqScoreTextColorIsOn) {
