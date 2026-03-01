@@ -9,7 +9,7 @@ import type { SvelteVirtualizer } from '@tanstack/svelte-virtual';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 
-export const appVersion = '2.8.8';
+export const appVersion = '2.8.9';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -8973,6 +8973,7 @@ function selectObjectL(str: string, newActivatedList: string[]) {
             if (typeof word !== 'undefined') {
                 if (localChoice.customTextfieldIsOn) {
                     word.replaceText = strWord;
+                    localChoice.wordChangeSelect = strWord;
                 } else {
                     word.replaceText = localChoice.wordChangeSelect || '';
                 }
@@ -9586,6 +9587,7 @@ function selectedOneMoreL(str: string, newActivatedList: string[]) {
                 if (typeof word !== 'undefined') {
                     if (localChoice.customTextfieldIsOn) {
                         word.replaceText = strWord;
+                        localChoice.wordChangeSelect = strWord;
                     } else {
                         word.replaceText = localChoice.wordChangeSelect || '';
                     }

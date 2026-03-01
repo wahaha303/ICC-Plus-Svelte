@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.9 / ${getDate('2026-03-01T08:00:00Z')}`,
+        text: `<span style="color: green">Word</span>
+        - Fixed issue where custom word was not saved correctly after loading and re-saving build.
+        `
+    }, {
+        open: false,
         title: `v2.8.8 / ${getDate('2026-02-27T10:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where selected filter was applied multiple times.
