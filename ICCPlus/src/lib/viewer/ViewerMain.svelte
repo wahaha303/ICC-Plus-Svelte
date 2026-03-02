@@ -167,7 +167,7 @@
     <DlgCommon open={wordDialog.currentDialog === 'dlgCommon'} onclose={() => (wordDialog.currentDialog = 'none')} closeHandler={wordDialog.cFunc} title={wordDialog.title} context={wordDialog.context} isWord={wordDialog.isWord} prevText={wordDialog.prevText} isDeselect={wordDialog.isDeselect} isForced={wordDialog.isForced} />
 {/if}
 {#if imgDialog.currentDialog === 'appImageUpload' && typeof imgDialog.data !== 'undefined' && typeof imgDialog.imgProp !== 'undefined'}
-    <ImageUpload open={imgDialog.currentDialog === 'appImageUpload'} onclose={() => (imgDialog.currentDialog = 'none')} imgObject={imgDialog.data} imgProp={imgDialog.imgProp} isDeselect={dlgVariables.isDeselect} closeHandler={imgDialog.cFunc} />
+    <ImageUpload open={imgDialog.currentDialog === 'appImageUpload'} onclose={() => (imgDialog.currentDialog = 'none')} imgObject={imgDialog.data} imgProp={imgDialog.imgProp} isDeselect={imgDialog.isDeselect} closeHandler={imgDialog.cFunc} />
 {/if}
 {#if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
     <DlgCommon open={dlgVariables.currentDialog === 'dlgCommon'} onclose={() => (dlgVariables.currentDialog = 'none')} closeHandler={dlgVariables.cFunc} title={dlgVariables.title} context={dlgVariables.context} isWord={dlgVariables.isWord} />

@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.8.10 / ${getDate('2026-03-02T03:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where choice with player custom image could not be deselected.
+        `
+    }, {
+        open: false,
         title: `v2.8.9 / ${getDate('2026-03-01T08:00:00Z')}`,
         text: `<span style="color: green">Word</span>
         - Fixed issue where custom word was not saved correctly after loading and re-saving build.
