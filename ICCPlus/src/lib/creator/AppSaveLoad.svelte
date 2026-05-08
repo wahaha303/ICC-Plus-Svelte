@@ -606,7 +606,7 @@
                 if (!jsFile) throw new Error('Failed to load app.js.');
 
                 const oldJs = await jsFile.async('string');
-                const newJs = oldJs.replace(/(\n\/\*![\s\S]*?Delete and replace[\s\S]*?\*\/\n)(\{[\s\S]*?\})(\n\/\*! End \*\/)/, `$1${saveData}$3`);
+                const newJs = oldJs.replace(/(\n\/\*![\s\S]*?Delete and replace[\s\S]*?\*\/\n)(\{[\s\S]*?\})(\n\/\*! End \*\/)/, (_, p1, p2, p3) => `${p1}${saveData}${p3}`);
                 zip.file('js/app.js', newJs);
             } else {
                 zip.file('project.json', blob);

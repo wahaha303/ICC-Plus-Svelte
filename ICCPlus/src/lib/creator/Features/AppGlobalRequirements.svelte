@@ -42,7 +42,7 @@
                                             <IconButton class="mdi mdi-key-plus" onclickcapture={() => {currentDialog = 'appRequirement'; data = req;}} />
                                         </Wrapper>
                                         <Wrapper text="Clone Global Requirement">
-                                            <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(req, i)} />
+                                            <IconButton class="mdi mdi mdi-content-copy" onclickcapture={() => cloneReq(req)} />
                                         </Wrapper>
                                         <Wrapper text="Move Down">
                                             <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveReqDown(req, rRow.index * 3 + i)} />
@@ -209,14 +209,15 @@
         }
     }
 
-    function cloneReq(req: GlobalRequirement, num: number) {
-        let id = generateId(0, 4, 'req');
-        let clone = JSON.parse(JSON.stringify(req));
+    function cloneReq(req: GlobalRequirement) {
+        if (typeof app.globalRequirements === 'undefined') return;
+
+        const id = generateId(0, 4, 'req');
+        const num = app.globalRequirements.indexOf(req);
+        const clone = JSON.parse(JSON.stringify(req));
         clone.id = id;
-        if (typeof app.globalRequirements !== 'undefined') {
-            app.globalRequirements.splice(num + 1, 0, clone);
-            globalReqMap.set(id, app.globalRequirements[num + 1]);
-        }
+        app.globalRequirements.splice(num + 1, 0, clone);
+        globalReqMap.set(id, app.globalRequirements[num + 1]);
 
         if (app.globalRequirements!.length > 3) {
             $virtualizer.setOptions({
@@ -228,9 +229,9 @@
     }
 
     function createNewGlobalReq() {
-        let id = generateId(0, 4, 'req');
+        const id = generateId(0, 4, 'req');
         if (typeof app.globalRequirements === 'undefined') app.globalRequirements = [];
-        let index = app.globalRequirements.length;
+        const index = app.globalRequirements.length;
         app.globalRequirements.push({
             id: id,
             name: `Requirement ${index + 1}`,

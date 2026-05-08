@@ -1332,6 +1332,19 @@
                                             {/snippet}
                                         </FormField>
                                         {#if addon.textfieldIsOn}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => addon.customTextfieldIsOn ?? false, (e) => addon.customTextfieldIsOn = e} onchange={() => {
+                                                    if (addon.customTextfieldIsOn) {
+                                                        addon.wordPromptText = '';
+                                                    } else {
+                                                        delete addon.customTextfieldIsOn;
+                                                        delete addon.wordPromptText;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Allows the Player to Set Word
+                                                {/snippet}
+                                            </FormField>
                                             <div class="col-12 m-1 px-2">
                                                 <Autocomplete
                                                     options={getWords()}
@@ -1342,7 +1355,11 @@
                                                     textfield$variant="filled"
                                                     class="w-100 p-0"
                                                 />
-                                                <Textfield bind:value={() => addon.wordChangeSelect ?? '', (e) => addon.wordChangeSelect = e} label="Replacement Text when Selected" variant="filled" />
+                                                {#if addon.customTextfieldIsOn}
+                                                    <Textfield bind:value={() => addon.wordPromptText ?? '', (e) => addon.wordPromptText = e} label="Prompt Text" variant="filled" />
+                                                {:else}
+                                                    <Textfield bind:value={() => addon.wordChangeSelect ?? '', (e) => addon.wordChangeSelect = e} label="Replacement Text when Selected" variant="filled" />
+                                                {/if}
                                                 <Textfield bind:value={() => addon.wordChangeDeselect ?? '', (e) => addon.wordChangeDeselect = e} label="Replacement Text when Deselected" variant="filled" />
                                             </div>
                                             <div class="b-line"></div>
@@ -1875,7 +1892,12 @@
                     }
                 }
                 if (addon.isSelectable) {
-                    if (!useDesign) bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
+                    if (!useDesign) {
+                        bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
+                        if (objectStyle.objectGradientIsOn) {
+                            bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                        }
+                    }
                     if (filterStyle.selBgColorIsOn) {
                         bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
                     }

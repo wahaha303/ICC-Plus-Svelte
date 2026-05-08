@@ -384,16 +384,22 @@ export type Requireds = {
     customText?: string
 };
 export type Discount = {
-    isStackable: boolean,
-    calcValue: number,
-    discountedFrom: string[],
-    discountedValue: number,
+    id: string,
+    state: number,
+    stackable: boolean,
+    stack: number,
+    operator: string,
+    value: number,
+    count: number,
+    useLowLimit: boolean,
+    lowLimit: number,
     showDiscount: boolean,
-    beforeText?: string,
-    afterText?: string,
-    replaceText?: boolean,
-    hideValue?: boolean,
-    hideIcon?: boolean
+    afterText: string,
+    beforeText: string,
+    replaceText: boolean,
+    consolidate: boolean,
+    hideValue: boolean,
+    hideIcon: boolean,
 };
 export type Score = {
     [key: string]: any,
@@ -415,6 +421,7 @@ export type Score = {
     minValue?: number,
     maxValue?: number,
     setValue?: boolean,
+    discounts?: Discount[],
     discountIsOn?: boolean,
     discountShow?: boolean,
     discountBeforeText?: string,
@@ -596,7 +603,7 @@ export type ChoiceFunc = {
     isEditModeOn?: boolean,
     isSelectDelayed?: boolean,
     selectDelayTime?: number,
-    selectDelayTimer?: number,
+    selectDelayTimer?: boolean,
     showScoreInAddon?: boolean,
     showReqInAddon?: boolean,
     showMulInAddon?: boolean,
@@ -606,7 +613,8 @@ export type ChoiceFunc = {
     isNotSearchable?: boolean,
     isAutoActive?: boolean,
     useSfx?: boolean,
-    sfxId?: string,
+    sfxIdOnSelect?: string,
+    sfxIdOnDeselect?: string,
     sfxOnSelect?: boolean,
     sfxOnDeselect?: boolean,
     isCountDisabled?: boolean
@@ -1180,6 +1188,10 @@ export type ChoiceOptions = {
     isBackpack?: boolean;
     isOverDlg?: boolean;
     isOverImg?: boolean;
+    isForced?: boolean;
+    isAllowDeselect?: boolean;
+    isLinked?: boolean;
+    fromTemp?: boolean;
 };
 export type Filters = {
     dropShadow?: string,

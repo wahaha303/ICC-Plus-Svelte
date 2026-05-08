@@ -22,6 +22,7 @@
     import { checkActivated, checkRequirements, getStyling, globalReqMap, pointTypeMap, sanitizeArg, variableMap, hexToRgba, choiceMap, calcStackDiscount } from '$lib/store/store.svelte';
     import type { Addon, Choice, Row, Score } from '$lib/store/types';
     import { evaluate } from '@antv/expr';
+    import { DISABLED, ACTIVE } from '$lib/store/constants';
 
     let { score, row, choice, addon }: { score: Score; row?: Row; choice: Choice; addon?: Addon; } = $props();
     let data = $derived(addon ? addon : choice);
@@ -29,61 +30,42 @@
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let pointType = $derived(pointTypeMap.get(score.id));
     let isEnabled = $derived(checkRequirements(data.requireds));
-    let discountFlags = $derived.by(() => {
-        let result = { isWithinCount: false, isSimple: false };
-        if (!score.discountIsOn || !score.discountedFrom || score.discountedFrom.length === 0) return result;
-        for (let i = 0; i < score.discountedFrom.length; i++) {
-            const cMap = choiceMap.get(score.discountedFrom[i]);
+    let discountTexts = $derived.by(() => {
+        const result = { before: '', after: '', replace: false, show: false, hideVal: false, hideIcon: false };
+        const beforeTexts: string[] = [];
+        const afterTexts: string[] = [];
+        if (!score.discountIsOn || !score.appliedDiscount || typeof score.discounts === 'undefined') return result;
+        for (let i = 0; i < score.discounts.length; i++) {
+            const dc = score.discounts[i];
 
-            if (typeof cMap !== 'undefined') {
-                const dChoice = cMap.choice;
-
-                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && dChoice.appliedDisChoices) {
-                    const count = dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable ? dChoice.discountCount * dChoice.multipleUseVariable : dChoice.discountCount;
-                    if (count > dChoice.appliedDisChoices.length) {
-                        result.isWithinCount = true;
-                        break;
-                    }
-                } else {
-                    result.isSimple = true;
-                    break;
+            if (dc.state === ACTIVE && dc.showDiscount) {
+                result.show = true;
+                if (dc.beforeText !== '') {
+                    if (!dc.consolidate || dc.consolidate && beforeTexts.indexOf(dc.beforeText) !== DISABLED) beforeTexts.push(dc.beforeText);
                 }
+                if (dc.afterText !== '') {
+                    if (!dc.consolidate || dc.consolidate && afterTexts.indexOf(dc.afterText) !== DISABLED) afterTexts.push(dc.beforeText);
+                }
+                if (dc.replaceText) result.replace = true;
+                if (dc.hideValue) result.hideVal = true;
+                if (dc.hideIcon) result.hideIcon = true;
+                if (!dc.stackable) break;
             }
         }
+        if (beforeTexts.length > 0) {
+            result.before = beforeTexts.join(' ');
+        }
+        if (afterTexts.length > 0) {
+            result.after = afterTexts.join(' ');
+        }
+        
         return result;
     });
     let scoreAfterText = $derived.by(() => {
         let text = [];
-        if (score.discountIsOn && score.discountShow && score.discountAfterText) {
-            if (score.appliedDiscount) {
-                if (!score.replaceText) text.push(`${score.afterText}`);
-                text.push(`${score.discountAfterText}`);
-            } else {
-                if (discountFlags.isWithinCount) {
-                    if (!score.replaceText) text.push(`${score.afterText}`);
-                    text.push(`${score.discountAfterText}`);
-                } else if (discountFlags.isSimple) {
-                    if (!score.replaceText) text.push(`${score.afterText}`);
-                    text.push(`${score.discountAfterText}`);
-                } else {
-                    if (typeof score.tmpDiscount !== 'undefined') {
-                        let value = score.value;
-                        let tmpText = '';
-                        let replaceText = false;
-                        for (let j = 0; j < score.tmpDiscount.length; j++) {
-                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                value = score.tmpDiscount[j].discountedValue;
-                                tmpText = score.tmpDiscount[j].beforeText || '';
-                                replaceText = score.tmpDiscount[j].replaceText || false;
-                            }
-                        }
-                        if (!replaceText) text.push(`${score.afterText}`);
-                        text.push(`${tmpText}`);
-                    } else {
-                        text.push(`${score.afterText}`);
-                    }
-                }
-            }
+        if (score.discountIsOn && score.appliedDiscount && discountTexts.show) {
+            if (!discountTexts.replace) text.push(`${score.afterText}`);
+            if (discountTexts.after !== '') text.push(`${discountTexts.after}`);
         } else {
             text.push(`${score.afterText}`);
         }
@@ -91,36 +73,9 @@
     });
     let scoreBeforeText = $derived.by(() => {
         let text = [];
-        if (score.discountIsOn && score.discountShow && score.discountBeforeText) {
-            if (score.appliedDiscount) {
-                if (!score.replaceText) text.push(`${score.beforeText}`);
-                text.push(`${score.discountBeforeText}`);
-            } else {
-                if (discountFlags.isWithinCount) {
-                    if (!score.replaceText) text.push(`${score.beforeText}`);
-                    text.push(`${score.discountBeforeText}`);
-                } else if (discountFlags.isSimple) {
-                    if (!score.replaceText) text.push(`${score.beforeText}`);
-                    text.push(`${score.discountBeforeText}`);
-                } else {
-                    if (typeof score.tmpDiscount !== 'undefined') {
-                        let value = score.value;
-                        let tmpText = '';
-                        let replaceText = false;
-                        for (let j = 0; j < score.tmpDiscount.length; j++) {
-                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                value = score.tmpDiscount[j].discountedValue;
-                                tmpText = score.tmpDiscount[j].beforeText || '';
-                                replaceText = score.tmpDiscount[j].replaceText || false;
-                            }
-                        }
-                        if (!replaceText) text.push(`${score.beforeText}`);
-                        text.push(`${tmpText}`);
-                    } else {
-                        text.push(`${score.beforeText}`);
-                    }
-                }
-            }
+        if (score.discountIsOn && score.appliedDiscount && discountTexts.show) {
+            if (!discountTexts.replace) text.push(`${score.beforeText}`);
+            if (discountTexts.before !== '') text.push(`${discountTexts.before}`);
         } else {
             text.push(`${score.beforeText}`);
         }
@@ -149,45 +104,9 @@
                     }
                 }
             }
-            if (score.discountShow) {
-                if (score.appliedDiscount) {
-                    if (score.replaceText && score.hideDisValue) {
-                        return '';
-                    }
-                    if (typeof score.discountScore !== 'undefined') value = score.discountScore;
-                } else {
-                    if (discountFlags.isWithinCount || discountFlags.isSimple) {
-                        if (score.replaceText && score.hideDisValue) return '';
-                        if (score.useExpression && score.expValue) {
-                            if (score.discountedFrom && score.discountedFrom.length > 0) {
-                                for (let j = 0; j < score.discountedFrom.length; j++) {
-                                    const cMap = choiceMap.get(score.discountedFrom[j]);
-
-                                    if (typeof cMap !== 'undefined') {
-                                        const dChoice = cMap.choice;
-
-                                        value = calcStackDiscount(value, dChoice.discountOperator!, dChoice.discountValue!);
-
-                                        if (dChoice.discountLowLimitIsOn && typeof dChoice.discountLowLimit !== 'undefined') {
-                                            value = Math.max(value, dChoice.discountLowLimit);
-                                        }
-                                    }
-                                }
-                            }
-                        } else if (typeof score.discountScore !== 'undefined') value = score.discountScore;
-                    } else {
-                        if (typeof score.tmpDiscount !== 'undefined') {
-                            let hideValue = false;
-                            for (let j = 0; j < score.tmpDiscount.length; j++) {
-                                if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                    value = score.tmpDiscount[j].discountedValue;
-                                    hideValue = score.tmpDiscount[j].hideValue || false;
-                                }
-                            }
-                            if (hideValue) return '';
-                        }
-                    }
-                }
+            if (discountTexts.show && score.appliedDiscount) {
+                if (discountTexts.replace && discountTexts.hideVal) return '';
+                if (typeof score.discountScore !== 'undefined') value = score.discountScore;
             }
             value = Math.abs(value);
             if (!pointType?.allowFloat) {
@@ -264,7 +183,7 @@
     });
     let checkNegative = $derived.by(() => {
         if (score.discountShow) {
-            return (typeof score.discountScore !== 'undefined' && (score.appliedDiscount || discountFlags.isWithinCount || discountFlags.isSimple) ? score.discountScore : score.value) < 0;
+            return (typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value) < 0;
         }
         return score.value < 0;
     });
@@ -295,32 +214,12 @@
     });
     let scoreIcon = $derived.by(() => {
         if (!pointType || !pointType.iconIsOn) return false;
-        if (score.discountIsOn && score.discountShow) {
-            if (score.appliedDiscount) {
-                if (score.replaceText && score.hideDisIcon) return false;
-            } else {
-                if (discountFlags.isWithinCount) {
-                    if (score.replaceText && score.hideDisIcon) return false;
-                } else if (discountFlags.isSimple) {
-                    if (score.hideDisIcon) return false;
-                } else {
-                    if (typeof score.tmpDiscount !== 'undefined') {
-                        let value = score.value;
-                        let hideIcon = false;
-                        for (let j = 0; j < score.tmpDiscount.length; j++) {
-                            if (score.tmpDiscount[j].showDiscount && value > score.tmpDiscount[j].discountedValue) {
-                                value = score.tmpDiscount[j].discountedValue;
-                                hideIcon = score.tmpDiscount[j].hideIcon || false;
-                            }
-                        }
-                        if (hideIcon) return false;
-                    }
-                }
-            }
+        if (score.appliedDiscount && discountTexts.show) {
+            if (discountTexts.replace && discountTexts.hideIcon) return false;
         }
         return true;
     });
-    let isNegIcon = $derived(pointType?.negativeIconIsOn && checkNegative);
+    let isNegIcon = $derived(pointType?.negativeIconIsOn && !checkNegative);
     let imageSidePlacement = $derived.by(() => {
         if (!pointType) return false;
         if (isNegIcon) {

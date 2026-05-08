@@ -287,9 +287,9 @@
     }
 
     function clonePointType(point: PointType) {
-        let id = generateId(0, 4, 'point');
-        let clone = JSON.parse(JSON.stringify(point));
-        let num = app.pointTypes.indexOf(point);
+        const id = generateId(0, 4, 'point');
+        const num = app.pointTypes.indexOf(point);
+        const clone = JSON.parse(JSON.stringify(point));
         clone.id = id;
         app.pointTypes.splice(num + 1, 0, clone);
         pointTypeMap.set(id, app.pointTypes[num + 1]);

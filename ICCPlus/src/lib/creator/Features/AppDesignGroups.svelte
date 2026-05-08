@@ -42,7 +42,7 @@
                                             <IconButton class="mdi mdi-pencil" onclickcapture={() => {currentDialog = 'privateDesign', data = group}} />
                                         </Wrapper>
                                         <Wrapper text="Clone Design">
-                                            <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(group, i)} />
+                                            <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneDesign(group)} />
                                         </Wrapper>
                                         <Wrapper text="Move Down">
                                             <IconButton class="mdi mdi-chevron-right" onclickcapture={() => moveDesignDown(group, gRow.index * 3 + i)} />
@@ -218,33 +218,36 @@
         }
     }
 
-    function cloneDesign(group: RowDesignGroup | ObjectDesignGroup, num: number) {
-        let id = generateId(0, 4, 'design');
-        let clone = JSON.parse(JSON.stringify(designGroup));
+    function cloneDesign(group: RowDesignGroup | ObjectDesignGroup) {
+        const id = generateId(0, 4, 'design');
+        const num = designGroup.indexOf(group);
+        const clone = JSON.parse(JSON.stringify(group));
         clone.id = id;
-        let designMap = isRow ? rowDesignMap : objectDesignMap;
+        const designMap = isRow ? rowDesignMap : objectDesignMap;
 
         designGroup.splice(num + 1, 0, clone);
         designMap.set(id, designGroup[num + 1]);
-        let ori = designMap.get(group.id);
+        const ori = designMap.get(group.id);
 
         if (typeof ori !== 'undefined') {
             for (let i = 0; i < ori.elements.length; i++) {
                 if (isRow) {
-                    let rMap = rowMap.get(ori.elements[i]);
+                    const rMap = rowMap.get(ori.elements[i]);
                     if (typeof rMap !== 'undefined') {
-                        let design = rMap.rowDesignGroups;
-                        design?.push(id);
+                        const design = rMap.rowDesignGroups;
+                        if (typeof design !== 'undefined') design.push(id);
                     }
                 } else {
-                    let cMap = choiceMap.get(ori.elements[i]);
+                    const cMap = choiceMap.get(ori.elements[i]);
                     if (typeof cMap !== 'undefined') {
-                        let design = cMap.choice.objectDesignGroups;
-                        design?.push(id);
+                        const design = cMap.choice.objectDesignGroups;
+                        if (typeof design !== 'undefined') design.push(id);
                     }
                 }
             }
         }
+        
+        console.log(clone, ori, group);
 
         $virtualizer.setOptions({
             count: rowCount()
@@ -254,8 +257,8 @@
     }
     
     function createNewDesignGroup() {
-        let id = generateId(0, 4, 'design');
-        let designMap = isRow ? rowDesignMap : objectDesignMap;
+        const id = generateId(0, 4, 'design');
+        const designMap = isRow ? rowDesignMap : objectDesignMap;
 
         designGroup.push({
             id: id,

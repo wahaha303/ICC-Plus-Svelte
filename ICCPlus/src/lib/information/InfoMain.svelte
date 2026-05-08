@@ -224,16 +224,38 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.9.1 / ${getDate('2026-04-10T14:00:00Z')}`,
+        title: `v2.9.2 / ${getDate('2026-05-08T13:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
-        - Added option to not count choice as selected choice in the row.
-        - Fixed issue where the adjust allowed choices feature would sometimes not work properly.
+        - Added options to apply separate sound effects for selection and deselection.
+        - Fixed issue where count limit broke when choice was set to not count as selected choice.
+        - Fixed issue where sound effects did not work in multi-selectable choices.
+        - Fixed issue where score was calculated incorrectly when using option to discount only a specific number of choices.
+        - Fixed issue where score expression did not work properly when score had requirements.
+        - Fixed issue where requirements were not applied properly to sound effects.
 
         <span style="color: green">Addon</span>
+        - Added option to use custom word.
+        - Fixed issue where selected choices were not calculated properly when using option to ignore allowed choice restrictions.
         - Fixed issue where addon border radius was applied incorrectly when using selectable and non-selectable addons together.
+
+        <span style="color: green">Design Group</span>
+        - Fixed issue where page froze when clicking clone design button.
 
         <span style="color: green">Design</span>
         - Added option to adjust spacing between row header and choices in Row Design.
+
+        <span style="color: green">Save / Load</span>
+        - Fixed issue where some CYOAs did not work properly when exported with local viewer.
+        `
+    }, {
+        open: false,
+        title: `v2.9.1 / ${getDate('2026-04-10T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Added option to not count choice as selected choice in the row.
+        - Updated Deactivate Other Choices to fully deselect the specified multi-selectable choice when only its ID is entered.
+
+        <span style="color: green">Save / Load</span>
+        - Fixed issue where some projects were not saved properly when saving with local viewer.
         `
     }, {
         open: false,

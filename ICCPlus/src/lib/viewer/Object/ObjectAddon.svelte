@@ -347,7 +347,12 @@
                     }
                 }
                 if (addon.isSelectable) {
-                    if (!useDesign) bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
+                    if (!useDesign) {
+                        bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
+                        if (objectStyle.objectGradientIsOn) {
+                            bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                        }
+                    }
                     if (filterStyle.selBgColorIsOn) {
                         bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
                     }

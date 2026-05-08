@@ -226,13 +226,14 @@
         scrollToLastRow($virtualizer, virtualListEl, app.groups.length - 1);
     }
 
-    function cloneGroup(num: number) {
-        const group = app.groups[num];
+    function cloneGroup(group: Group) {
+        const id = generateId(0, 4, 'group');
+        const num = app.groups.indexOf(group);
         const clone = JSON.parse(JSON.stringify(group));
         
-        clone.id = generateId(0, 4, 'group');
+        clone.id = id;
         app.groups.splice(num + 1, 0, clone);
-        groupMap.set(clone.id, app.groups[num + 1]);
+        groupMap.set(id, app.groups[num + 1]);
 
         for (let i = 0; i < clone.rowElements.length; i++) {
             const row = rowMap.get(clone.rowElements[i]);

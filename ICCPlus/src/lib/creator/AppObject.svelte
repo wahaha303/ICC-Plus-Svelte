@@ -657,7 +657,9 @@
                                                 {/if}
                                                 <FormField class="col-12 m-1 p-0">
                                                     <Checkbox bind:checked={() => choice.discountShow ?? false, (e) => choice.discountShow = e} onchange={() => {
-                                                        if (!choice.discountShow) {
+                                                        if (choice.discountShow) {
+                                                            choice.discountTextDuplicated = true;
+                                                        } else {
                                                             delete choice.discountShow;
                                                             delete choice.discountBeforeText;
                                                             delete choice.discountAfterText;
@@ -1279,6 +1281,20 @@
                                                         Play on Choice Selected
                                                     {/snippet}
                                                 </FormField>
+                                                {#if choice.sfxOnSelect}
+                                                    <div class="col-12 m-1 px-2">
+                                                        <Autocomplete
+                                                            options={getSoundEffects()}
+                                                            getOptionLabel={getSfxLabel}
+                                                            bind:value={choice.sfxIdOnSelect}
+                                                            label="Sound Effect"
+                                                            toggle={true}
+                                                            showMenuWithNoInput={true}
+                                                            textfield$variant="filled"
+                                                            class="w-100 p-0"
+                                                        />
+                                                    </div>
+                                                {/if}
                                                 <FormField class="col-12 m-1 p-0">
                                                     <Checkbox bind:checked={() => choice.sfxOnDeselect ?? false, (e) => choice.sfxOnDeselect = e} onchange={() => {
                                                         if (!choice.sfxOnDeselect) {
@@ -1289,16 +1305,20 @@
                                                         Play on Choice Deselected
                                                     {/snippet}
                                                 </FormField>
-                                                <Autocomplete
-                                                    options={getSoundEffects()}
-                                                    getOptionLabel={getSfxLabel}
-                                                    bind:value={choice.sfxId}
-                                                    label="Sound Effect"
-                                                    toggle={true}
-                                                    showMenuWithNoInput={true}
-                                                    textfield$variant="filled"
-                                                    class="w-100 p-0"
-                                                />
+                                                {#if choice.sfxOnDeselect}
+                                                    <div class="col-12 m-1 px-2">
+                                                        <Autocomplete
+                                                            options={getSoundEffects()}
+                                                            getOptionLabel={getSfxLabel}
+                                                            bind:value={choice.sfxIdOnDeselect}
+                                                            label="Sound Effect"
+                                                            toggle={true}
+                                                            showMenuWithNoInput={true}
+                                                            textfield$variant="filled"
+                                                            class="w-100 p-0"
+                                                        />
+                                                    </div>
+                                                {/if}
                                                 <div class="b-line"></div>
                                             {/if}
                                             <FormField class="col-12 m-1 p-0">

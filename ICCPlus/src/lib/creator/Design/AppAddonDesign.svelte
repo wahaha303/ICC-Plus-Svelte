@@ -183,7 +183,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-4 col-12 gy-2 text-center">
-                                <div class="col-12 px-3">Color of the addpm shadow</div>
+                                <div class="col-12 px-3">Color of the addon shadow</div>
                                 <div class:disabled={!styling.addonDropShadowIsOn}>
                                     <ColorPicker bind:hex={() => styling.addonDropShadowColor ?? '#000000', (e) => styling.addonDropShadowColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                                 </div>
