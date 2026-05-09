@@ -41,10 +41,10 @@
             if (dc.state === ACTIVE && dc.showDiscount) {
                 result.show = true;
                 if (dc.beforeText !== '') {
-                    if (!dc.consolidate || dc.consolidate && beforeTexts.indexOf(dc.beforeText) !== DISABLED) beforeTexts.push(dc.beforeText);
+                    if (!dc.consolidate || dc.consolidate && beforeTexts.indexOf(dc.beforeText) === DISABLED) beforeTexts.push(dc.beforeText);
                 }
                 if (dc.afterText !== '') {
-                    if (!dc.consolidate || dc.consolidate && afterTexts.indexOf(dc.afterText) !== DISABLED) afterTexts.push(dc.beforeText);
+                    if (!dc.consolidate || dc.consolidate && afterTexts.indexOf(dc.afterText) === DISABLED) afterTexts.push(dc.afterText);
                 }
                 if (dc.replaceText) result.replace = true;
                 if (dc.hideValue) result.hideVal = true;

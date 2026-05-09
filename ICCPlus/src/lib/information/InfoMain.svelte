@@ -224,6 +224,16 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.3 / ${getDate('2026-05-09T04:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where discounted score text was not displayed correctly.
+        - Fixed issue where choices that did not meet requirements were not deselected when loading build code.
+        - Fixed issue where score for multi-selectable choices was not calculated correctly when loading build code.
+        - Fixed issue where "Force Other Choices to Be Active" option did not override "Cannot Be Selected Manually" option.
+        - Fixed issue where "Deactivate Other Choices" option did not override "Cannot Be Deselected Manually" option.
+        `
+    }, {
+        open: false,
         title: `v2.9.2 / ${getDate('2026-05-08T13:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Added options to apply separate sound effects for selection and deselection.
