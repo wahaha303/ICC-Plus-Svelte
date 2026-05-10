@@ -8,7 +8,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.3';
+export const appVersion = '2.9.4';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2815,6 +2815,7 @@ export function selectDiscount(localChoice: Choice | SelectableAddon, targetChoi
         const score = targetChoice.scores[i];
         const point = pointTypeMap.get(score.id);
         if (typeof point === 'undefined') continue;
+        if (score.isNotDiscountable) continue;
         if (typeof score.discounts === 'undefined') score.discounts = [];
         if (!score.setValue && (score.isRandom || score.useExpression)) {
             setScoreValue(point, score, targetChoice.isSelectableMultiple && targetChoice.isMultipleUseVariable);
@@ -5085,7 +5086,7 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
         } else {
             isActive = !!score.isActive;
         }
-        if (checkRequirements(score.requireds) && isActive) {
+        if (isActive) {
             const point = pointTypeMap.get(score.id);
             if (typeof point !== 'undefined') {
                 let val = score.value;

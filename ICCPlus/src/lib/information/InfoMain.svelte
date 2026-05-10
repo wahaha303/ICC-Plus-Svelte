@@ -224,6 +224,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.4 / ${getDate('2026-05-10T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where score calculation did not work correctly when deselecting choice.
+        - Fixed issue where no discount option for score did not work.
+        `
+    }, {
+        open: false,
         title: `v2.9.3 / ${getDate('2026-05-09T04:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where discounted score text was not displayed correctly.
