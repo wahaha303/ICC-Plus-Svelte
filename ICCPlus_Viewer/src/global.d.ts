@@ -17,6 +17,7 @@ declare global {
 					isPlayable?: boolean;
 				}
 			}
+			destroy: () => void;
 		}
 	}
 	interface Window {

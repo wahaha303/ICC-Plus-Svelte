@@ -290,7 +290,7 @@
         const result = [];
         for (let i = 0; i < list.length; i++) {
             const addon = list[i];
-            if (addon.isSelectable === true && (!row.unselAddonRemoved || addon.isActive) && (app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds)))) result.push(addon);
+            if (addon.isSelectable === true && (!row.unselAddonRemoved || addon.isActive) && (!row.isResultRow || addon.isActive) && (app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || checkRequirements(addon.requireds)))) result.push(addon);
         }
         return result.length === 0 ? null : result;
     });

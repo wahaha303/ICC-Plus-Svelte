@@ -111,7 +111,7 @@
         </div>
     {/if}
     {#if isEnabled}
-        <div class="row gx-0 m-0 p-0 {rowJustify}">
+        <div class="row gx-0 m-0 p-0{rowJustify}">
             {#if row.isResultRow}
                 {#each resultRow as val, i}
                     <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} preloadImages={preloadImages} />
@@ -133,7 +133,7 @@
     import Button, { Label } from '@smui/button';
     import DOMPurify from 'dompurify';
     import { app, getStyling, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, activatedMap, variableMap, hexToRgba, groupMap, snackbarVariables, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices } from '$lib/store/store.svelte';
-    import type { Choice, ChoiceOptions, Row } from '$lib/store/types';
+    import type { Choice, SelectableAddon, ChoiceOptions, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { SvelteMap } from 'svelte/reactivity';
 
@@ -149,7 +149,7 @@
     let rowImageBoxWidth = $derived(typeof rowImageStyle.rowImageBoxWidth !== 'undefined' ? rowImageStyle.rowImageBoxWidth : 50);
     let isEnabled = $derived(checkRequirements(row.requireds));
     let isButtonPressable = $derived(row.onlyIfNoChoices && row.currentChoices !== 0);
-    let rowJustify = $derived(row.rowJustify ? `justify-${row.rowJustify}` : '');
+    let rowJustify = $derived(row.rowJustify ? ` justify-${row.rowJustify}` : '');
     let rowTitleKey = $derived(replaceText(row.title));
     let rowTextKey = $derived(replaceText(row.titleText));
 
@@ -163,7 +163,7 @@
                     const aChoice = cMap.choice;
                     const aRow = cMap.row;
 
-                    if (!aChoice.isNotResult) {
+                    if (!aChoice.isNotResult && typeof aChoice.parentId === 'undefined') {
                         result.push({choice: aChoice, row: aRow});
                     }
                 }
@@ -176,7 +176,7 @@
                     const aChoice = cMap.choice;
                     const aRow = cMap.row;
 
-                    if (!aChoice.isNotResult) {
+                    if (!aChoice.isNotResult && typeof aChoice.parentId === 'undefined') {
                         if (row.resultGroupId === aRow.resultGroupId) {
                             result.push({choice: aChoice, row: aRow});
                         } else {
@@ -203,7 +203,7 @@
     });
 
     let groupRow = $derived.by(() => {
-        const result = [];
+        const groupSet = new Set<{choice: Choice | SelectableAddon, row: Row}>();
         if (typeof row.resultGroupId !== 'undefined') {
             const group = groupMap.get(row.resultGroupId);
 
@@ -212,11 +212,29 @@
                     const cMap = choiceMap.get(group.elements[i]);
                     
                     if (typeof cMap !== 'undefined') {
-                        result.push({choice: cMap.choice, row: cMap.row});
+                        const gChoice = cMap.choice;
+                        const gRow = cMap.row;
+                        const gSet = {choice: gChoice, row: gRow};
+
+                        if (typeof gChoice.parentId !== 'undefined') {
+                            const pMap = choiceMap.get(gChoice.parentId);
+
+                            if (typeof pMap !== 'undefined') {
+                                const pChoice = pMap.choice;
+                                const pRow = pMap.row;
+                                const pSet = {choice: pChoice, row: pRow};
+
+                                groupSet.add(pSet);
+                            }
+                        } else {
+                            groupSet.add(gSet);
+                        }
                     }
                 }
             }
         }
+
+        const result = [...groupSet];
 
         result.sort((a, b) => {
             if (a.row.index !== b.row.index) return a.row.index - b.row.index;

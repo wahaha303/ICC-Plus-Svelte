@@ -8,7 +8,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.4';
+export const appVersion = '2.9.5';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,

@@ -224,6 +224,14 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.5 / ${getDate('2026-05-11T04:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where unselected selectable addons within choice were displayed in result row.
+        - Fixed issue where selectable addon was separately displayed in result row.
+        - Fixed issue where selectable addon was separately displayed in group row.
+        `
+    }, {
+        open: false,
         title: `v2.9.4 / ${getDate('2026-05-10T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where score calculation did not work correctly when deselecting choice.

@@ -415,7 +415,7 @@
         </div>
     {/if}
     {#if (bCreatorMode && row.isEditModeOn) || isEnabled}
-        <div class="row gx-0 m-0 p-0 {rowJustify}">
+        <div class="row gx-0 m-0 p-0{rowJustify}">
             {#if row.isResultRow}
                 {#each resultRow as val, i}
                     <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} />
@@ -459,7 +459,7 @@
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
     import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices, imgDialog } from '$lib/store/store.svelte';
-    import type { Choice, ChoiceOptions, Row } from '$lib/store/types';
+    import type { Choice, SelectableAddon, ChoiceOptions, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { tick } from 'svelte';
     import Tiptap from '$lib/store/Tiptap.svelte';
@@ -545,7 +545,7 @@
         else return 'col-12';
     });
     let isButtonPressable = $derived(row.onlyIfNoChoices && row.currentChoices !== 0);
-    let rowJustify = $derived(row.rowJustify ? `justify-${row.rowJustify}` : '');
+    let rowJustify = $derived(row.rowJustify ? ` justify-${row.rowJustify}` : '');
     let rowTitleKey = $derived(replaceText(row.title));
     let rowTextKey = $derived(replaceText(row.titleText));
 
@@ -599,7 +599,7 @@
     });
 
     let groupRow = $derived.by(() => {
-        const result = [];
+        const groupSet = new Set<{choice: Choice | SelectableAddon, row: Row}>();
         if (typeof row.resultGroupId !== 'undefined') {
             const group = groupMap.get(row.resultGroupId);
 
@@ -608,11 +608,29 @@
                     const cMap = choiceMap.get(group.elements[i]);
                     
                     if (typeof cMap !== 'undefined') {
-                        result.push({choice: cMap.choice, row: cMap.row});
+                        const gChoice = cMap.choice;
+                        const gRow = cMap.row;
+                        const gSet = {choice: gChoice, row: gRow};
+
+                        if (typeof gChoice.parentId !== 'undefined') {
+                            const pMap = choiceMap.get(gChoice.parentId);
+
+                            if (typeof pMap !== 'undefined') {
+                                const pChoice = pMap.choice;
+                                const pRow = pMap.row;
+                                const pSet = {choice: pChoice, row: pRow};
+
+                                groupSet.add(pSet);
+                            }
+                        } else {
+                            groupSet.add(gSet);
+                        }
                     }
                 }
             }
         }
+
+        const result = [...groupSet];
 
         result.sort((a, b) => {
             if (a.row.index !== b.row.index) return a.row.index - b.row.index;
