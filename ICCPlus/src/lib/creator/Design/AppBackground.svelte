@@ -50,34 +50,46 @@
             <CardContent>
                 <div class:disabled={isDisabled} class="container-fluid">
                     <div class="row">
-                        <div class="col-lg-4 col-12 gy-2 text-center">
+                        <div class="col-lg-4 col-12 gy-2">
                             <div class:transparent={typeof data === 'undefined'}>
                                 <FormField class="w-100">
-                                    <Checkbox bind:checked={() => styling.bgColorIsOn ?? false, (e) => styling.bgColorIsOn = e} />
+                                    <Checkbox bind:checked={() => styling.bgColorIsOn ?? false, (e) => styling.bgColorIsOn = e} onchange={() => {
+                                        if (!styling.bgColorIsOn && styling.isBackgroundOverlay) styling.isBackgroundOverlay = false;
+                                    }} />
                                     {#snippet label()}
                                         Color of the background
                                     {/snippet}
                                 </FormField>
                             </div>
-                            <div class:disabled={typeof data !== 'undefined' && !styling.bgColorIsOn}>
+                            <div class:disabled={typeof data !== 'undefined' && !styling.bgColorIsOn} class="text-center">
                                 <ColorPicker bind:hex={() => styling.backgroundColor ?? '#000000', (e) => styling.backgroundColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
-                            <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isBackgroundRepeat ?? false, (e) => styling.isBackgroundRepeat = e} onchange={() => {
-                                    if (styling.isBackgroundRepeat) styling.isBackgroundFitIn = false;
-                                }} />
-                                {#snippet label()}
-                                    Does it repeat?
-                                {/snippet}
-                            </FormField>
-                            <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isBackgroundFitIn ?? false, (e) => styling.isBackgroundFitIn = e} onchange={() => {
-                                    if (styling.isBackgroundFitIn) styling.isBackgroundRepeat = false;
-                                }} />
-                                {#snippet label()}
-                                    Does it fit in?
-                                {/snippet}
-                            </FormField>
+                            {#if styling.backgroundImage}
+                                {#if typeof data === 'undefined' || styling.bgColorIsOn}
+                                    <FormField class="w-100">
+                                        <Checkbox bind:checked={() => styling.isBackgroundOverlay ?? false, (e) => styling.isBackgroundOverlay = e} />
+                                        {#snippet label()}
+                                            Overlay color on image?
+                                        {/snippet}
+                                    </FormField>
+                                {/if}
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isBackgroundRepeat ?? false, (e) => styling.isBackgroundRepeat = e} onchange={() => {
+                                        if (styling.isBackgroundRepeat) styling.isBackgroundFitIn = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it repeat?
+                                    {/snippet}
+                                </FormField>
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isBackgroundFitIn ?? false, (e) => styling.isBackgroundFitIn = e} onchange={() => {
+                                        if (styling.isBackgroundFitIn) styling.isBackgroundRepeat = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it fit in?
+                                    {/snippet}
+                                </FormField>
+                            {/if}
                             <div class="px-5">
                                 {#if styling.backgroundImage}
                                     <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'backgroundImage'}} class="btn--image-background">
@@ -89,32 +101,44 @@
                                 </Button>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2 text-center">
+                        <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.rowBgColorIsOn ?? false, (e) => styling.rowBgColorIsOn = e} />
+                                <Checkbox bind:checked={() => styling.rowBgColorIsOn ?? false, (e) => styling.rowBgColorIsOn = e} onchange={() => {
+                                        if (!styling.rowBgColorIsOn && styling.isRowBackgroundOverlay) styling.isRowBackgroundOverlay = false;
+                                    }} />
                                 {#snippet label()}
                                     Color of the row background
                                 {/snippet}
                             </FormField>
-                            <div class:disabled={!styling.rowBgColorIsOn}>
+                            <div class:disabled={!styling.rowBgColorIsOn} class="text-center">
                                 <ColorPicker bind:hex={() => styling.rowBgColor ?? '#000000', (e) => styling.rowBgColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
-                            <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isRowBackgroundRepeat ?? false, (e) => styling.isRowBackgroundRepeat = e} onchange={() => {
-                                    if (styling.isRowBackgroundRepeat) styling.isRowBackgroundFitIn = false;
-                                }} />
-                                {#snippet label()}
-                                    Does it repeat?
-                                {/snippet}
-                            </FormField>
-                            <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isRowBackgroundFitIn ?? false, (e) => styling.isRowBackgroundFitIn = e} onchange={() => {
-                                    if (styling.isRowBackgroundFitIn) styling.isRowBackgroundRepeat = false;
-                                }} />
-                                {#snippet label()}
-                                    Does it fit in?
-                                {/snippet}
-                            </FormField>
+                            {#if styling.rowBackgroundImage}
+                                {#if styling.rowBgColorIsOn}    
+                                    <FormField class="w-100">
+                                        <Checkbox bind:checked={() => styling.isRowBackgroundOverlay ?? false, (e) => styling.isRowBackgroundOverlay = e} />
+                                        {#snippet label()}
+                                            Overlay color on image?
+                                        {/snippet}
+                                    </FormField>
+                                {/if}
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isRowBackgroundRepeat ?? false, (e) => styling.isRowBackgroundRepeat = e} onchange={() => {
+                                        if (styling.isRowBackgroundRepeat) styling.isRowBackgroundFitIn = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it repeat?
+                                    {/snippet}
+                                </FormField>
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isRowBackgroundFitIn ?? false, (e) => styling.isRowBackgroundFitIn = e} onchange={() => {
+                                        if (styling.isRowBackgroundFitIn) styling.isRowBackgroundRepeat = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it fit in?
+                                    {/snippet}
+                                </FormField>
+                            {/if}
                             <div class="px-5">
                                 {#if styling.rowBackgroundImage}
                                     <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'rowBackgroundImage'}} class="btn--image-background">
@@ -126,32 +150,44 @@
                                 </Button>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-12 gy-2 text-center">
+                        <div class="col-lg-4 col-12 gy-2">
                             <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.objectBgColorIsOn ?? false, (e) => styling.objectBgColorIsOn = e} />
+                                <Checkbox bind:checked={() => styling.objectBgColorIsOn ?? false, (e) => styling.objectBgColorIsOn = e} onchange={() => {
+                                        if (!styling.objectBgColorIsOn && styling.isObjectBackgroundOverlay) styling.isObjectBackgroundOverlay = false;
+                                    }} />
                                 {#snippet label()}
                                     Color of the choice background
                                 {/snippet}
                             </FormField>
-                            <div class:disabled={!styling.objectBgColorIsOn}>
+                            <div class:disabled={!styling.objectBgColorIsOn} class="text-center">
                                 <ColorPicker bind:hex={() => styling.objectBgColor ?? '#000000', (e) => styling.objectBgColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} />
                             </div>
-                            <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isObjectBackgroundRepeat ?? false, (e) => styling.isObjectBackgroundRepeat = e} onchange={() => {
-                                    if (styling.isObjectBackgroundRepeat) styling.isObjectBackgroundFitIn = false;
-                                }} />
-                                {#snippet label()}
-                                    Does it repeat?
-                                {/snippet}
-                            </FormField>
-                            <FormField class="w-100">
-                                <Checkbox bind:checked={() => styling.isObjectBackgroundFitIn ?? false, (e) => styling.isObjectBackgroundFitIn = e} onchange={() => {
-                                    if (styling.isObjectBackgroundFitIn) styling.isObjectBackgroundRepeat = false;
-                                }} />
-                                {#snippet label()}
-                                    Does it fit in?
-                                {/snippet}
-                            </FormField>
+                            {#if styling.objectBackgroundImage}
+                                {#if styling.objectBgColorIsOn}
+                                    <FormField class="w-100">
+                                        <Checkbox bind:checked={() => styling.isObjectBackgroundOverlay ?? false, (e) => styling.isObjectBackgroundOverlay = e} />
+                                        {#snippet label()}
+                                            Overlay color on image?
+                                        {/snippet}
+                                    </FormField>
+                                {/if}
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isObjectBackgroundRepeat ?? false, (e) => styling.isObjectBackgroundRepeat = e} onchange={() => {
+                                        if (styling.isObjectBackgroundRepeat) styling.isObjectBackgroundFitIn = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it repeat?
+                                    {/snippet}
+                                </FormField>
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isObjectBackgroundFitIn ?? false, (e) => styling.isObjectBackgroundFitIn = e} onchange={() => {
+                                        if (styling.isObjectBackgroundFitIn) styling.isObjectBackgroundRepeat = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it fit in?
+                                    {/snippet}
+                                </FormField>
+                            {/if}
                             <div class="px-5">
                                 {#if styling.objectBackgroundImage}
                                     <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'objectBackgroundImage'}} class="btn--image-background">
@@ -195,4 +231,14 @@
     let isTransparent = $state(false);
     let dialogStyle = $derived(isTransparent ? 'opacity: 0.2' : '');
     let isDisabled = $derived(typeof data !== 'undefined' && !data.privateBackgroundIsOn);
+
+    $effect(() => {
+        if (styling.backgroundImage === '') styling.isBackgroundOverlay = false;
+    });
+    $effect(() => {
+        if (styling.rowBackgroundImage === '') styling.isRowBackgroundOverlay = false;
+    });
+    $effect(() => {
+        if (styling.objectBackgroundImage === '') styling.isObjectBackgroundOverlay = false;
+    });
 </script>

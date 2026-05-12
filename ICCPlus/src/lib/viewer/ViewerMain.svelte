@@ -1,4 +1,4 @@
-<div bind:clientWidth={width} bind:this={thisDiv} class="ab-0" style={background}>
+<div bind:clientWidth={width} bind:this={thisDiv} class="ab-0{app.styling.isBackgroundOverlay ? ' bg-overlay' : ''}" style={background}>
     <div class="fadeOverlay" style={fadeStyle}></div>
     <TopAppBar class="viewer-menu" style={viewerMenuStyle} variant="static">
         <AppBarRow>

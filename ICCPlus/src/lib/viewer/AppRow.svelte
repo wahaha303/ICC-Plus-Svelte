@@ -1,6 +1,6 @@
-<div class="row-{row.id}-bg text-center{!isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
+<div class="row-{row.id}-bg text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
     {#if isEnabled}
-        <div class="row gx-0 row-{row.id} row-{row.id}-header" style={row.title !== '' ? rowBackground : ''}>
+        <div class="row gx-0 row-{row.id} row-{row.id}-header{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" style={row.title !== '' ? rowBackground : ''}>
             {#if row.template >= 4 || row.template === 1 || windowWidth <= 1280}
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || windowWidth <= 1280)}

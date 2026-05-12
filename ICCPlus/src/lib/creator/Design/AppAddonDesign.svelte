@@ -207,13 +207,39 @@
                                     <Textfield bind:value={() => styling.addonGradientOnReq ?? '', (e) => styling.addonGradientOnReq = e} label="Gradient when Missing Requirement" variant="filled" input$placeholder="to left, blue, red" />
                                     <div class="col-12">You might need to leave for the main menu if things stop updating, using something like (green, green) works. <a href="https://www.w3schools.com/css/css3_gradients.asp">https://www.w3schools.com/css/css3_gradients.asp</a></div>
                                 {/if}
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.addonBgColorIsOn ?? false, (e) => styling.addonBgColorIsOn = e} onchange={() => {
+                                        if (!styling.addonBgColorIsOn && styling.isAddonBackgroundOverlay) styling.isAddonBackgroundOverlay = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Use addon background color?
+                                    {/snippet}
+                                </FormField>
+                                <div class:disabled={!styling.addonBgColorIsOn}>
+                                    <ColorPicker bind:hex={() => styling.addonBgColor ?? '#000000', (e) => styling.addonBgColor = e} components={ChromeVariant} sliderDirection="horizontal" />
+                                </div>
                                 <FormField>
-                                    <Switch bind:checked={() => styling.useAddonBackgroundImage ?? false, (e) => styling.useAddonBackgroundImage = e} disabled={isDisabled} color="secondary" class="switch-scale" />
+                                    <Checkbox bind:checked={() => styling.useAddonBackgroundImage ?? false, (e) => styling.useAddonBackgroundImage = e} onchange={() => {
+                                        if (!styling.useAddonBackgroundImage) {
+                                            styling.isAddonBackgroundOverlay = false;
+                                            styling.isAddonBackgroundRepeat = false;
+                                            styling.isAddonBackgroundFitIn = false;
+                                            styling.addonBackgroundImage = '';
+                                        }
+                                    }} />
                                     {#snippet label()}
                                         Use a Background Image?
                                     {/snippet}
                                 </FormField>
                                 {#if styling.useAddonBackgroundImage}
+                                    {#if styling.addonBgColorIsOn}
+                                        <FormField class="w-100">
+                                            <Checkbox bind:checked={() => styling.isAddonBackgroundOverlay ?? false, (e) => styling.isAddonBackgroundOverlay = e} />
+                                            {#snippet label()}
+                                                Overlay color on image?
+                                            {/snippet}
+                                        </FormField>
+                                    {/if}
                                     <FormField class="w-100">
                                         <Checkbox bind:checked={() => styling.isAddonBackgroundRepeat ?? false, (e) => styling.isAddonBackgroundRepeat = e} onchange={() => {
                                             if (styling.isAddonBackgroundRepeat) styling.isAddonBackgroundFitIn = false;
@@ -239,16 +265,6 @@
                                         <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'addonBackgroundImage'}} variant="raised">
                                             <Label>Change Image</Label>
                                         </Button>
-                                    </div>
-                                {:else}
-                                    <FormField class="w-100">
-                                        <Checkbox bind:checked={() => styling.addonBgColorIsOn ?? false, (e) => styling.addonBgColorIsOn = e} />
-                                        {#snippet label()}
-                                            Use addon background color?
-                                        {/snippet}
-                                    </FormField>
-                                    <div class:disabled={!styling.addonBgColorIsOn}>
-                                        <ColorPicker bind:hex={() => styling.addonBgColor ?? '#000000', (e) => styling.addonBgColor = e} components={ChromeVariant} sliderDirection="horizontal" />
                                     </div>
                                 {/if}
                             </div>

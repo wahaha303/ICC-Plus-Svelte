@@ -224,6 +224,17 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.6 / ${getDate('2026-05-12T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where discount applied to all point types even when specific point type was set.
+        - Fixed issue where discount was not applied when discounted score value was lower than default score value.
+
+        <span style="color: green">Design</span>
+        - Added option to overlay background color on background image when both are used together.
+        - Fixed issue where filter color was not displayed correctly on choices with background image.
+        `
+    }, {
+        open: false,
         title: `v2.9.5 / ${getDate('2026-05-11T04:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where unselected selectable addons within choice were displayed in result row.

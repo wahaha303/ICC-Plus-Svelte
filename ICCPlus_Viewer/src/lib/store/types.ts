@@ -195,12 +195,15 @@ export type backgroundStyling = {
     objectBgColor?: string,
     isBackgroundRepeat?: boolean,
     isBackgroundFitIn?: boolean,
+    isBackgroundOverlay?: boolean,
     backgroundImage?: string,
     isRowBackgroundRepeat?: boolean,
     isRowBackgroundFitIn?: boolean,
+    isRowBackgroundOverlay?: boolean,
     rowBackgroundImage?: string,
     isObjectBackgroundRepeat?: boolean,
     isObjectBackgroundFitIn?: boolean,
+    isObjectBackgroundOverlay?: boolean,
     objectBackgroundImage?: string
 };
 export type objectStyling = {
@@ -315,6 +318,7 @@ export type addonStyling = {
     addonBackgroundImage?: string,
     isAddonBackgroundFitIn?: boolean,
     isAddonBackgroundRepeat?: boolean,
+    isAddonBackgroundOverlay?: boolean,
     addonBgColorIsOn?: boolean,
     addonBgColor?: string,
     addonTitlePaddingIsOn?: boolean

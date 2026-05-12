@@ -1,4 +1,4 @@
-<div bind:clientWidth={width} class="ab-0" style={background}>
+<div bind:clientWidth={width} class="ab-0{app.styling.isBackgroundOverlay ? ' bg-overlay' : ''}" style={background}>
     <div class="fadeOverlay" style={fadeStyle}></div>
     {#if useAltMenu.value}
         <TopAppBar style={creatorMenu} variant="fixed">

@@ -1,4 +1,4 @@
-<div bind:clientWidth={width} class="ab-0" style={background}>
+<div bind:clientWidth={width} class="ab-0{app.styling.isBackgroundOverlay ? ' bg-overlay' : ''}" style={background}>
     <div class="fadeOverlay" style={fadeStyle}></div>
     <Drawer bind:open={menuOpen} style="top: 0;" variant="modal">
         <Content class="navigation-drawer">

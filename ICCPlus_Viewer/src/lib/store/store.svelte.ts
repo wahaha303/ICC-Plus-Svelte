@@ -8,7 +8,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.5';
+export const appVersion = '2.9.6';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -206,12 +206,15 @@ export const backgroundStyling = {
     objectBgColor: '#FFFFFFFF',
     isBackgroundRepeat: false,
     isBackgroundFitIn: false,
+    isBackgroundOverlay: false,
     backgroundImage: '',
     isRowBackgroundRepeat: false,
     isRowBackgroundFitIn: false,
+    isRowBackgroundOverlay: false,
     rowBackgroundImage: '',
     isObjectBackgroundRepeat: false,
     isObjectBackgroundFitIn: false,
+    isObjectBackgroundOverlay: false,
     objectBackgroundImage: ''
 }
 export const objectStyling = {
@@ -325,6 +328,7 @@ export const addonStyling = {
     addonBackgroundImage: '',
     isAddonBackgroundFitIn: false,
     isAddonBackgroundRepeat: false,
+    isAddonBackgroundOverlay: false,
     addonBgColorIsOn: false,
     addonBgColor: '#FFFFFFFF',
     addonTitlePaddingIsOn: false
@@ -2517,7 +2521,7 @@ function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choi
                 } else {
                     let dcVal = calcStackDiscount(score.value, dc.operator, dc.value);
                     if (dc.lowLimit) dcVal = Math.max(dcVal, dc.lowLimit);
-                    if (nonStackVal > dcVal) {
+                    if (nonStackNum === DISABLED || nonStackVal > dcVal) {
                         nonStackVal = dcVal;
                         nonStackNum = j;
                     }
@@ -2816,6 +2820,7 @@ export function selectDiscount(localChoice: Choice | SelectableAddon, targetChoi
         const point = pointTypeMap.get(score.id);
         if (typeof point === 'undefined') continue;
         if (score.isNotDiscountable) continue;
+        if (typeof localChoice.discountPointTypes !== 'undefined' && localChoice.discountPointTypes.length > 0 && localChoice.discountPointTypes.indexOf(score.id) === -1) continue;
         if (typeof score.discounts === 'undefined') score.discounts = [];
         if (!score.setValue && (score.isRandom || score.useExpression)) {
             setScoreValue(point, score, targetChoice.isSelectableMultiple && targetChoice.isMultipleUseVariable);
