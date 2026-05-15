@@ -492,7 +492,7 @@
 
     let loremStyle = $derived(`font-family: '${fontName}'`);
     let dialogStyle = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push('transition:opacity 0.1s;');
         if (currentDialog !== 'none') {

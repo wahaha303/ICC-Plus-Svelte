@@ -475,7 +475,7 @@
     });
 
     let addonTitle = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push(`white-space: pre-line; font-family: '${textStyle.addonTitle}'; font-size: ${textStyle.addonTitleTextSize}%; text-align: ${textStyle.addonTitleAlign};`);
         if (!isEnabled && filterStyle.reqATitleColorIsOn) {
@@ -497,7 +497,7 @@
     });
 
     let addonText = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push(`white-space: pre-wrap; font-family: '${textStyle.addonText}'; text-align: ${textStyle.addonTextAlign}; font-size: ${textStyle.addonTextTextSize}%;`);
         if (!isEnabled && filterStyle.reqATextColorIsOn) {
@@ -517,7 +517,7 @@
     });
 
     let addonImage = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
         let useDesign = addonImageStyle.useAddonImage;
         let suffix = (useDesign ? addonImageStyle.addonImgBorderRadiusIsPixels : objectImageStyle.objectImgBorderRadiusIsPixels) ? 'px' : '%';
 
@@ -561,7 +561,7 @@
     });
 
     let scoreText = $derived.by(() => {
-        let style: string[] = [];
+        const style: string[] = [];
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (!isEnabled && filterStyle.reqScoreTextColorIsOn) {

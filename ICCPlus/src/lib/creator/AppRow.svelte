@@ -683,7 +683,7 @@
     });
 
     let rowBody = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         if (bCreatorMode && row.isEditModeOn) {
             styles.push(`margin: 1%;`);
@@ -701,7 +701,7 @@
 
     let rowBackground = $derived.by(() => {
         let suffix = rowStyle.rowBorderRadiusIsPixels ? 'px' : '%';
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         if (rowStyle.rowBorderImage) {
             styles.push(`border-image: url('${rowStyle.rowBorderImage}') ${rowStyle.rowBorderImageSliceTop} ${rowStyle.rowBorderImageSliceRight} ${rowStyle.rowBorderImageSliceBottom} ${rowStyle.rowBorderImageSliceLeft} / ${rowStyle.rowBorderImageWidth}px ${rowStyle.rowBorderImageRepeat}; border-style: solid; padding: ${rowStyle.rowBorderImageWidth}px;`);
@@ -745,7 +745,7 @@
 
     let rowImage = $derived.by(() => {
         let suffix = rowImageStyle.rowImgBorderRadiusIsPixels ? 'px' : '%';
-        let styles: string[] = [];
+        const styles: string[] = [];
         
         styles.push(`width: ${rowImageStyle.rowImageWidth}%; margin-top: ${rowImageStyle.rowImageMarginTop}%; margin-bottom: ${rowImageStyle.rowImageMarginBottom}%;`);
         if (rowImageStyle.rowImgObjectFillIsOn) {

@@ -86,7 +86,7 @@
         return result;
     });
     let background = $derived.by(() => {
-        let styles: string[] = [];
+        const styles: string[] = [];
 
         styles.push('min-height: 451px;')
         if (app.styling.backgroundImage) {

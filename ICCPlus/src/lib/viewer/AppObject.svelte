@@ -485,9 +485,9 @@
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (!isEnabled && filterStyle.reqScoreTextColorIsOn) {
-            style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
+            style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)};`);
         } else if (choice.isActive && filterStyle.selScoreTextColorIsOn) {
-            style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
+            style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)};`);
         } else {
             style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         }

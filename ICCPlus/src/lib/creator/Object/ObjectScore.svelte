@@ -191,7 +191,7 @@
     </div>
 {:else if isPointtypeActivated() && checkRequirements(score.requireds)}
     <div class="row m-0">
-        <div class="col-12 p-0 m-0 d-flex align-items-center justify-center" style={scoreText}>
+        <div class="col-12 p-0 m-0 d-flex align-items-center justify-{textAlign}" style={scoreText}>
             {#key scoreWholeText}
                 <p class="m-0 d-flex text-prewrap align-items-center">
                     {#if scoreIcon}
@@ -396,27 +396,28 @@
         return score.value < 0;
     });
     let scoreText = $derived.by(() => {
-        let style: string[] = [];
+        const style: string[] = [];
+        let color = hexToRgba(textStyle.scoreTextColor);
 
-        style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
-        if (pointType?.pointColorsIsOn) {
+        style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%;`);
+        
+        if (pointType && pointType.pointColorsIsOn) {
             if (checkNegative) {
-                style.push(`color: ${hexToRgba(pointType.positiveColor)};`);
+                color = hexToRgba(pointType.positiveColor);
             } else {
-                style.push(`color: ${hexToRgba(pointType.negativeColor)};`);
+                color = hexToRgba(pointType.negativeColor);
             }
-        } else {
-            style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         }
         if (!isEnabled) {
             if (filterStyle.reqScoreTextColorIsOn)  {
-                style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
+                color = hexToRgba(filterStyle.reqFilterSTextColor);
             }
         } else if (data.isActive) {
             if (filterStyle.selScoreTextColorIsOn) {
-                style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
+                color = hexToRgba(filterStyle.selFilterSTextColor);
             }
         }
+        style.push(`color: ${color};`);
 
         return style.join(' ');
     });
@@ -441,6 +442,14 @@
             return pointType.useSeperatePosition ? !!pointType.negativeImageOnSideInChoice : !!pointType.negativeImageOnSide;
         }
         return pointType.useSeperatePosition ? !!pointType.imageOnSideInChoice : !!pointType.imageOnSide;
+    });
+    let textAlign = $derived.by(() => {
+        const align = textStyle.scoreTextAlign;
+
+        if (align === 'left') return 'start';
+        if (align === 'right') return 'end';
+        if (align === 'justify') return 'space-between';
+        return 'center';
     });
     let iconImage = $derived((isNegIcon ? pointType?.negativeImage : pointType?.image) || '');
     let iconWidth = $derived((isNegIcon ? pointType?.negativeIconWidth : pointType?.iconWidth) || 0);

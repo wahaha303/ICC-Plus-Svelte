@@ -224,6 +224,14 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.7 / ${getDate('2026-05-15T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where filter color was not applied to counter in multi-selectable choice.
+        - Fixed issue where text-align was not applied to score.
+        - Fixed issue where discount was not properly applied when score requirement satisfaction status was updated.
+        `
+    }, {
+        open: false,
         title: `v2.9.6 / ${getDate('2026-05-12T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where discount applied to all point types even when specific point type was set.

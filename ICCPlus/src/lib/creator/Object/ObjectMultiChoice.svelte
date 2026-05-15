@@ -45,12 +45,42 @@
         }
     });
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
+    let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let multiChoiceStyle = $derived(getStyling('privateMultiChoiceIsOn', row, choice));
     let multiChoiceText = $derived.by(() => {
-        return `font-family: '${multiChoiceStyle.multiChoiceTextFont}'; color: ${hexToRgba(textStyle.scoreTextColor)}; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`;
+        const style: string[] = [];
+        let color = hexToRgba(textStyle.scoreTextColor);
+
+        style.push(`font-family: '${multiChoiceStyle.multiChoiceTextFont}'; font-size: ${multiChoiceStyle.multiChoiceTextSize}%; align-content: center;`);
+
+        if (!isEnabled) {
+            if (filterStyle.reqScoreTextColorIsOn)  {
+                color = hexToRgba(filterStyle.reqFilterSTextColor);
+            }
+        } else if (data.isActive) {
+            if (filterStyle.selScoreTextColorIsOn) {
+                color = hexToRgba(filterStyle.selFilterSTextColor);
+            }
+        }
+
+        style.push(`color: ${color}`);
+
+        return style.join(' ');
     });
     let multiChoiceButton = $derived.by(() => {
-        return `font-size: ${multiChoiceStyle.multiChoiceCounterSize}%; color: ${hexToRgba(textStyle.scoreTextColor)};`;
+        let color = hexToRgba(textStyle.scoreTextColor);
+
+        if (!isEnabled) {
+            if (filterStyle.reqScoreTextColorIsOn)  {
+                color = hexToRgba(filterStyle.reqFilterSTextColor);
+            }
+        } else if (data.isActive) {
+            if (filterStyle.selScoreTextColorIsOn) {
+                color = hexToRgba(filterStyle.selFilterSTextColor);
+            }
+        }
+
+        return `font-size: ${multiChoiceStyle.multiChoiceCounterSize}%; color: ${color};`;
     });
 
     $effect(() => {

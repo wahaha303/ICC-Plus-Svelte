@@ -246,8 +246,6 @@
                 }
             }
         }
-        
-        console.log(clone, ori, group);
 
         $virtualizer.setOptions({
             count: rowCount()

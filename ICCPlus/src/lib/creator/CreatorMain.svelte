@@ -363,7 +363,7 @@
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
     let pointBar = $derived.by(() => {
-        let styles: string[] = [];;
+        const styles: string[] = [];;
 
         if (useAltMenu.value) {
             styles.push(`max-width: 100%;`);
@@ -389,7 +389,7 @@
     let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}'; font-size: ${app.styling.barTextSize}px`);
     let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {
-        let styles: string[] = [];;
+        const styles: string[] = [];;
 
         if (app.styling.backgroundImage) {
             styles.push(`background-image: url('${app.styling.backgroundImage}');`);
@@ -413,7 +413,7 @@
         return styles.join(' '); 
     });
     let mainStyle = $derived.by(() => {
-        let styles: string[] = [];;
+        const styles: string[] = [];;
 
         if (useAltMenu.value) {
             if (altMenuHeight) {

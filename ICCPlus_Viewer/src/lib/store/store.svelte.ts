@@ -8,7 +8,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.6';
+export const appVersion = '2.9.7';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4266,52 +4266,51 @@ function selectForceRandomActivate(localChoice: Choice | SelectableAddon, option
 }
 
 function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
-    if (typeof dChoice.appliedDisChoices !== 'undefined') {
-        const idx = dChoice.appliedDisChoices.indexOf(localChoice.id);
-
-        if (idx !== DISABLED) {
-            dChoice.appliedDisChoices.splice(idx, 1);
-            const dList = new Set(dChoice.appliedDisChoices);
-            if (dChoice.isDisChoices) {
-                if (typeof dChoice.discountRows !== 'undefined') {
-                    for (let i = 0; i < dChoice.discountRows.length; i++) {
-                        const tRow = rowMap.get(dChoice.discountRows[i]);
-                        if (typeof tRow !== 'undefined') {
-                            for (let j = 0; j < tRow.objects.length; j++) {
-                                const tChoice = tRow.objects[j];
-                                if (!dList.has(tChoice.id)) {
-                                    emptyDiscount(dChoice, tChoice);
-                                    dList.add(tChoice.id);
-                                }
-                            }
+    if (typeof dChoice.appliedDisChoices === 'undefined') return;
+    
+    const idx = dChoice.appliedDisChoices.indexOf(localChoice.id);
+    if (idx === DISABLED) return;
+    
+    dChoice.appliedDisChoices.splice(idx, 1);
+    const dList = new Set(dChoice.appliedDisChoices);
+    if (dChoice.isDisChoices) {
+        if (typeof dChoice.discountRows !== 'undefined') {
+            for (let i = 0; i < dChoice.discountRows.length; i++) {
+                const tRow = rowMap.get(dChoice.discountRows[i]);
+                if (typeof tRow !== 'undefined') {
+                    for (let j = 0; j < tRow.objects.length; j++) {
+                        const tChoice = tRow.objects[j];
+                        if (!dList.has(tChoice.id)) {
+                            emptyDiscount(dChoice, tChoice);
+                            dList.add(tChoice.id);
                         }
                     }
                 }
-                if (typeof dChoice.discountChoices !== 'undefined') {
-                    for (let i = 0; i < dChoice.discountChoices.length; i++) {
-                        if (!dList.has(dChoice.discountChoices[i])) {
-                            const cMap = choiceMap.get(dChoice.discountChoices[i]);
-                            if (typeof cMap !== 'undefined') {
-                                const tChoice = cMap.choice;
+            }
+        }
+        if (typeof dChoice.discountChoices !== 'undefined') {
+            for (let i = 0; i < dChoice.discountChoices.length; i++) {
+                if (!dList.has(dChoice.discountChoices[i])) {
+                    const cMap = choiceMap.get(dChoice.discountChoices[i]);
+                    if (typeof cMap !== 'undefined') {
+                        const tChoice = cMap.choice;
 
-                                if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
-                            }
-                        }
+                        if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
                     }
                 }
-            } else {
-                if (typeof dChoice.discountGroups !== 'undefined') {
-                    for (let i = 0; i < dChoice.discountGroups.length; i++) {
-                        const groupData = groupMap.get(dChoice.discountGroups[i]);
-                        if (typeof groupData !== 'undefined') {
-                            for (let j = 0; j < groupData.elements.length; j++) {
-                                const cMap = choiceMap.get(groupData.elements[j]);
-                                if (typeof cMap !== 'undefined') {
-                                    const tChoice = cMap.choice;
+            }
+        }
+    } else {
+        if (typeof dChoice.discountGroups !== 'undefined') {
+            for (let i = 0; i < dChoice.discountGroups.length; i++) {
+                const groupData = groupMap.get(dChoice.discountGroups[i]);
+                if (typeof groupData !== 'undefined') {
+                    for (let j = 0; j < groupData.elements.length; j++) {
+                        const cMap = choiceMap.get(groupData.elements[j]);
+                        if (typeof cMap !== 'undefined') {
+                            const tChoice = cMap.choice;
 
-                                    if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
-                                }
-                            }
+                            if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
                         }
                     }
                 }
@@ -4323,47 +4322,47 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
 function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
     if (typeof dChoice.appliedDisChoices === 'undefined') dChoice.appliedDisChoices = [];
     if (dChoice.appliedDisChoices.indexOf(localChoice.id) === -1) dChoice.appliedDisChoices.push(localChoice.id);
-    if (typeof dChoice.discountCount !== 'undefined' && dChoice.appliedDisChoices.length >= dChoice.discountCount) {
-        const dList = new Set(dChoice.appliedDisChoices);
-        if (dChoice.isDisChoices) {
-            if (typeof dChoice.discountRows !== 'undefined') {
-                for (let i = 0; i < dChoice.discountRows.length; i++) {
-                    const tRow = rowMap.get(dChoice.discountRows[i]);
-                    if (typeof tRow !== 'undefined') {
-                        for (let j = 0; j < tRow.objects.length; j++) {
-                            const tChoice = tRow.objects[j];
-                            if (!dList.has(tChoice.id)) {
-                                fillDiscount(dChoice, tChoice);
-                            }
-                        }
-                    }
-                }
-            }
-            if (typeof dChoice.discountChoices !== 'undefined') {
-                for (let i = 0; i < dChoice.discountChoices.length; i++) {
-                    if (!dList.has(dChoice.discountChoices[i])) {
-                        const cMap = choiceMap.get(dChoice.discountChoices[i]);
-                        if (typeof cMap !== 'undefined') {
-                            const tChoice = cMap.choice;
-
+    if (typeof dChoice.discountCount === 'undefined' || dChoice.appliedDisChoices.length < dChoice.discountCount) return;
+    
+    const dList = new Set(dChoice.appliedDisChoices);
+    if (dChoice.isDisChoices) {
+        if (typeof dChoice.discountRows !== 'undefined') {
+            for (let i = 0; i < dChoice.discountRows.length; i++) {
+                const tRow = rowMap.get(dChoice.discountRows[i]);
+                if (typeof tRow !== 'undefined') {
+                    for (let j = 0; j < tRow.objects.length; j++) {
+                        const tChoice = tRow.objects[j];
+                        if (!dList.has(tChoice.id)) {
                             fillDiscount(dChoice, tChoice);
                         }
                     }
                 }
             }
-        } else {
-            if (typeof dChoice.discountGroups !== 'undefined') {
-                for (let i = 0; i < dChoice.discountGroups.length; i++) {
-                    const groupData = groupMap.get(dChoice.discountGroups[i]);
-                    if (typeof groupData !== 'undefined') {
-                        for (let j = 0; j < groupData.elements.length; j++) {
-                            const cMap = choiceMap.get(groupData.elements[j]);
-                            if (typeof cMap !== 'undefined') {
-                                const tChoice = cMap.choice;
+        }
+        if (typeof dChoice.discountChoices !== 'undefined') {
+            for (let i = 0; i < dChoice.discountChoices.length; i++) {
+                if (!dList.has(dChoice.discountChoices[i])) {
+                    const cMap = choiceMap.get(dChoice.discountChoices[i]);
+                    if (typeof cMap !== 'undefined') {
+                        const tChoice = cMap.choice;
 
-                                if (!dList.has(tChoice.id)) {
-                                    fillDiscount(dChoice, tChoice);
-                                }
+                        fillDiscount(dChoice, tChoice);
+                    }
+                }
+            }
+        }
+    } else {
+        if (typeof dChoice.discountGroups !== 'undefined') {
+            for (let i = 0; i < dChoice.discountGroups.length; i++) {
+                const groupData = groupMap.get(dChoice.discountGroups[i]);
+                if (typeof groupData !== 'undefined') {
+                    for (let j = 0; j < groupData.elements.length; j++) {
+                        const cMap = choiceMap.get(groupData.elements[j]);
+                        if (typeof cMap !== 'undefined') {
+                            const tChoice = cMap.choice;
+
+                            if (!dList.has(tChoice.id)) {
+                                fillDiscount(dChoice, tChoice);
                             }
                         }
                     }
@@ -4373,32 +4372,217 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
     }
 }
 
+function updateCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
+    if (typeof dChoice.appliedDisChoices === 'undefined') return;
+
+    let totalNum = 0;
+    let appliedNum = 0;
+
+    for (let i = 0; i < localChoice.scores.length; i++) {
+        const score = localChoice.scores[i];
+        if (typeof score.discounts === 'undefined' || score.discounts.length === 0) continue;
+
+        for (let j = 0; j < score.discounts.length; j++) {
+            const dc = score.discounts[j];
+
+            if (dc.id === dChoice.id) {
+                if (dc.state === ACTIVE) appliedNum += 1;
+                totalNum += 1;
+            }
+        }
+    }
+
+    if (appliedNum === totalNum) removeCount(localChoice, dChoice);
+}
+
 function deselectUpdateScore(localChoice: Choice | SelectableAddon, tmpScores: TempScore, count: number, changedScores = new Set<string>(), scoreUpdate: string[] = [], options: ChoiceOptions) {
     const activated = Array.from(activatedMap.keys());
 
     for (let i = 0; i < activated.length; i++) {
         const id = activated[i];
         const cMap = choiceMap.get(id);
-        if (typeof cMap !== 'undefined') {
-            const aRow = cMap.row;
-            const aChoice = cMap.choice;
-            const thisTmpScores = new SvelteMap<string, number>();
-            const countSet = new Set<Choice | SelectableAddon>();
-            let isChanged = false;
-            for (let j = 0; j < aChoice.scores.length; j++) {
-                const aScore = aChoice.scores[j];
-                if (!aScore.isNotRecalculatable) {
-                    const point = pointTypeMap.get(aScore.id);
-                    const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
-                    if (typeof point !== 'undefined') {
-                        if (aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
-                            const mul = aChoice.multipleUseVariable;
+        if (typeof cMap === 'undefined') continue;
 
+        const aRow = cMap.row;
+        const aChoice = cMap.choice;
+        if (!aChoice.isActive) continue;
+
+        const thisTmpScores = new SvelteMap<string, number>();
+        const countSet = new Set<Choice | SelectableAddon>();
+        const addSet = new Set<Choice | SelectableAddon>();
+        const removeSet = new Set<Choice | SelectableAddon>();
+        let isChanged = false;
+        for (let j = 0; j < aChoice.scores.length; j++) {
+            const aScore = aChoice.scores[j];
+            if (aScore.isNotRecalculatable) continue;
+
+            const point = pointTypeMap.get(aScore.id);
+            if (typeof point === 'undefined') continue;
+
+            const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
+
+            if (aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
+                const mul = aChoice.multipleUseVariable;
+
+                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                    let isChangedMul = false;
+                    for (let k = mul - 1; k >= 0; k--) {
+                        if (aChoice.isActive && aScore.isActiveMul && aScore.isActiveMul[k]) {
+                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                if (aChoice.forcedActivated && aChoice.isActive) {
+                                    aChoice.forcedActivated = false;
+                                    aChoice.numMultipleTimesMinus--;
+                                    selectedOneLess(aChoice, aRow, options);
+                                    aChoice.forcedActivated = true;
+                                } else {
+                                    selectedOneLess(aChoice, aRow, options);
+                                }
+                            } else {
+                                point.startingSum += aScore.tmpDisScore;
+                            }
+                            isChangedMul = true;
+                        }
+                    }
+
+                    const tmpDisScore = aScore.tmpDisScore;
+                    delete aScore.isChangeDiscount;
+                    delete aScore.tmpDisScore;
+
+                    if (!aChoice.isActive) break;
+
+                    thisTmpScores.set(aScore.id, tmpDisScore);
+
+                    if (isChangedMul) {
+                        isChanged = localChoice.id !== aChoice.id;
+                    }
+                } else if (!aChoice.isSelectableMultiple) {
+                    if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                        if (aChoice.forcedActivated) {
+                            delete aChoice.forcedActivated;
+                            tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
+                        }
+                        if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
+                            for (let k = 0; k < aChoice.multipleUseVariable; k++) {
+                                if (aChoice.isActive) selectedOneLess(aChoice, aRow, options);
+                            }
+                        } else {
+                            if (aChoice.isActive) deselectObject(aChoice, aRow, options);
+                        }
+                    } else {
+                        point.startingSum += aScore.tmpDisScore;
+                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                        delete aScore.isChangeDiscount;
+                        delete aScore.tmpDisScore;
+                    }
+
+                    if (!aChoice.isActive) break;
+
+                    isChanged = localChoice.id !== aChoice.id;
+                }
+
+                if (isChanged) {
+                    if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
+                        for (let k = 0; k < aScore.discounts.length; k++) {
+                            const dc = aScore.discounts[k];
+
+                            if (dc.state === ACTIVE && dc.count !== DISABLED) {
+                                const cMap = choiceMap.get(dc.id);
+
+                                if (typeof cMap !== 'undefined') {
+                                    const dChoice = cMap.choice;
+
+                                    countSet.add(dChoice);
+                                    addSet.add(dChoice);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                delete aScore.isChangeDiscount;
+                delete aScore.tmpDisScore;
+            }
+            if (!changedScores.has(aScore.idx)) {
+                const hasScore = localChoice.scores.length > 0;
+                const scoreLeng = localChoice.scores.length || 1;
+                for (let k = 0; k < scoreLeng; k++) {
+                    const lScore = hasScore ? localChoice.scores[k] : null;
+                    const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
+                    const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
+                    if (!hasScore || hasScore && lPoint) {
+                        const afterDeselected = checkRequirements(aScore.requireds);
+                        const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                        tmpActivated.set(localChoice.id, {multiple : localChoice.multipleUseVariable});
+                        aRow.currentChoices += 1;
+                        if (lPoint) lPoint.startingSum += tmpScore;
+                        const beforeDeselected = checkRequirements(aScore.requireds, tmpActivated);
+                        aRow.currentChoices -= 1;
+                        if (lPoint) lPoint.startingSum -= tmpScore;
+                        if (beforeDeselected === afterDeselected) continue;
+
+                        if (!aScore.setValue) setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
+                        let scoreVal = aScore.appliedDiscount && typeof aScore.discountScore !== 'undefined' ? aScore.discountScore : aScore.value;
+                        scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
+                        if (beforeDeselected) {
                             if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                let isChangedMul = false;
-                                for (let k = mul - 1; k >= 0; k--) {
-                                    if (aChoice.isActive && aScore.isActiveMul && aScore.isActiveMul[k]) {
-                                        if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                const mul = aChoice.multipleUseVariable;
+
+                                for (let l = mul - 1; l >= 0; l--) {
+                                    if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
+                                        if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                            if (aChoice.forcedActivated) {
+                                                aChoice.forcedActivated = false;
+                                                aChoice.numMultipleTimesMinus--;
+                                                selectedOneLess(aChoice, aRow, options);
+                                                aChoice.forcedActivated = true;
+                                            } else {
+                                                selectedOneLess(aChoice, aRow, options);
+                                            }
+                                        } else {
+                                            point.startingSum += scoreVal;
+                                            thisTmpScores.set(aScore.id, scoreVal);
+                                            aScore.isActiveMul[l] = false;
+                                        }
+                                    }
+                                }
+                            } else if (!aChoice.isSelectableMultiple) {
+                                if (aScore.isActive) {
+                                    if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                        deselectObject(aChoice, aRow, options);
+                                    } else {
+                                        point.startingSum += scoreVal;
+                                        thisTmpScores.set(aScore.id, scoreVal);
+                                        delete aScore.isActive;
+                                    }
+                                }
+                            }
+                            if (aScore.setValue) delete aScore.setValue;
+                            if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
+                                for (let k = 0; k < aScore.discounts.length; k++) {
+                                    const dc = aScore.discounts[k];
+
+                                    if (dc.state === ACTIVE && dc.count !== DISABLED) {
+                                        const cMap = choiceMap.get(dc.id);
+
+                                        if (typeof cMap !== 'undefined') {
+                                            const dChoice = cMap.choice;
+
+                                            if (!countSet.has(dChoice)) {
+                                                countSet.add(dChoice);
+                                                removeSet.add(dChoice);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                const mul = aChoice.multipleUseVariable;
+                                if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
+                                for (let l = mul - 1; l >= 0; l--) {
+                                    if (!aScore.isActiveMul[l]) {
+                                        if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
                                             if (aChoice.forcedActivated && aChoice.isActive) {
                                                 aChoice.forcedActivated = false;
                                                 aChoice.numMultipleTimesMinus--;
@@ -4408,225 +4592,109 @@ function deselectUpdateScore(localChoice: Choice | SelectableAddon, tmpScores: T
                                                 selectedOneLess(aChoice, aRow, options);
                                             }
                                         } else {
-                                            point.startingSum += aScore.tmpDisScore;
-                                        }
-                                        isChangedMul = true;
-                                    }
-                                }
-
-                                if (aChoice.isActive) {
-                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                    delete aScore.isChangeDiscount;
-                                    delete aScore.tmpDisScore;
-                                }
-                                if (isChangedMul) {
-                                    isChanged = localChoice.id !== aChoice.id;
-                                    if (aScore.value === aScore.discountScore) delete aScore.appliedDiscount;
-                                    if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
-                                        for (let k = 0; k < aScore.discounts.length; k++) {
-                                            const dc = aScore.discounts[k];
-
-                                            if (dc.state === ACTIVE && dc.count !== DISABLED) {
-                                                const cMap = choiceMap.get(dc.id);
-
-                                                if (typeof cMap !== 'undefined') {
-                                                    countSet.add(cMap.choice);
-                                                }
-                                            }
+                                            point.startingSum -= scoreVal;
+                                            thisTmpScores.set(aScore.id, scoreVal);
+                                            aScore.isActiveMul[l] = true;
                                         }
                                     }
                                 }
                             } else if (!aChoice.isSelectableMultiple) {
-                                if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
-                                    if (aChoice.forcedActivated) {
-                                        delete aChoice.forcedActivated;
-                                        tmpActivatedMap.set(aChoice.id, {multiple: aChoice.multipleUseVariable});
-                                    }
-                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable) {
-                                        for (let k = 0; k < aChoice.multipleUseVariable; k++) {
-                                            if (aChoice.isActive) selectedOneLess(aChoice, aRow, options);
-                                        }
+                                if (!aScore.isActive) {
+                                    if (point.belowZeroNotAllowed && point.startingSum - scoreVal < 0) {
+                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                        deselectObject(aChoice, aRow, options);
                                     } else {
-                                        if (aChoice.isActive) deselectObject(aChoice, aRow, options);
-                                    }
-                                } else {
-                                    point.startingSum += aScore.tmpDisScore;
-                                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                    delete aScore.isChangeDiscount;
-                                    delete aScore.tmpDisScore;
-                                }
-                                isChanged = localChoice.id !== aChoice.id;
-                                if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
-                                    for (let k = 0; k < aScore.discounts.length; k++) {
-                                        const dc = aScore.discounts[k];
-
-                                        if (dc.state === ACTIVE && dc.count !== DISABLED) {
-                                            const cMap = choiceMap.get(dc.id);
-
-                                            if (typeof cMap !== 'undefined') {
-                                                countSet.add(cMap.choice);
-                                            }
-                                        }
+                                        point.startingSum -= scoreVal;
+                                        thisTmpScores.set(aScore.id, scoreVal);
+                                        aScore.isActive = true;
                                     }
                                 }
                             }
-                        }
-                        if (!changedScores.has(aScore.idx)) {
-                            const hasScore = localChoice.scores.length > 0;
-                            const scoreLeng = localChoice.scores.length || 1;
-                            for (let k = 0; k < scoreLeng; k++) {
-                                const lScore = hasScore ? localChoice.scores[k] : null;
-                                const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
-                                const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
-                                if (!hasScore || hasScore && lPoint) {
-                                    if (aChoice.isActive) {
-                                        const afterDeselected = checkRequirements(aScore.requireds);
-                                        const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
-                                        tmpActivated.set(localChoice.id, {multiple : localChoice.multipleUseVariable});
-                                        aRow.currentChoices += 1;
-                                        if (lPoint) lPoint.startingSum += tmpScore;
-                                        const beforeDeselected = checkRequirements(aScore.requireds, tmpActivated);
-                                        aRow.currentChoices -= 1;
-                                        if (lPoint) lPoint.startingSum -= tmpScore;
-                                        if (beforeDeselected !== afterDeselected) {
-                                            if (!aScore.setValue) setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
-                                            let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.appliedDiscount ? aScore.discountScore : aScore.value;
-                                            scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
-                                            if (beforeDeselected) {
-                                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                                    const mul = aChoice.multipleUseVariable;
+                            if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
+                                for (let k = 0; k < aScore.discounts.length; k++) {
+                                    const dc = aScore.discounts[k];
 
-                                                    for (let l = mul - 1; l >= 0; l--) {
-                                                        if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                                                            if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
-                                                                if (aChoice.forcedActivated && aChoice.isActive) {
-                                                                    aChoice.forcedActivated = false;
-                                                                    aChoice.numMultipleTimesMinus--;
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                    aChoice.forcedActivated = true;
-                                                                } else {
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                }
-                                                            } else {
-                                                                point.startingSum += scoreVal;
-                                                                thisTmpScores.set(aScore.id, scoreVal);
-                                                                aScore.isActiveMul[l] = false;
-                                                            }
-                                                        }
-                                                    }
-                                                } else if (!aChoice.isSelectableMultiple) {
-                                                    if (aScore.isActive) {
-                                                        if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
-                                                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                                            deselectObject(aChoice, aRow, options);
-                                                        } else {
-                                                            point.startingSum += scoreVal;
-                                                            thisTmpScores.set(aScore.id, scoreVal);
-                                                            delete aScore.isActive;
-                                                        }
-                                                    }
-                                                }
-                                                if (aScore.setValue) delete aScore.setValue;
-                                            } else {
-                                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                                    const mul = aChoice.multipleUseVariable;
-                                                    if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
-                                                    for (let l = mul - 1; l >= 0; l--) {
-                                                        if (!aScore.isActiveMul[l]) {
-                                                            if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
-                                                                if (aChoice.forcedActivated && aChoice.isActive) {
-                                                                    aChoice.forcedActivated = false;
-                                                                    aChoice.numMultipleTimesMinus--;
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                    aChoice.forcedActivated = true;
-                                                                } else {
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                }
-                                                            } else {
-                                                                point.startingSum -= scoreVal;
-                                                                thisTmpScores.set(aScore.id, scoreVal);
-                                                                aScore.isActiveMul[l] = true;
-                                                            }
-                                                        }
-                                                    }
-                                                } else if (!aChoice.isSelectableMultiple) {
-                                                    if (!aScore.isActive) {
-                                                        if (point.belowZeroNotAllowed && point.startingSum - scoreVal < 0) {
-                                                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                                            deselectObject(aChoice, aRow, options);
-                                                        } else {
-                                                            point.startingSum -= scoreVal;
-                                                            thisTmpScores.set(aScore.id, scoreVal);
-                                                            aScore.isActive = true;
-                                                        }
-                                                    }
-                                                }
+                                    if (dc.state === ACTIVE && dc.count !== DISABLED) {
+                                        const cMap = choiceMap.get(dc.id);
+
+                                        if (typeof cMap !== 'undefined') {
+                                            const dChoice = cMap.choice;
+
+                                            if (!countSet.has(dChoice)) {
+                                                countSet.add(dChoice);
+                                                addSet.add(dChoice);
                                             }
-                                            if (!isChanged) {
-                                                isChanged = true;
-                                            }
-                                            changedScores.add(aScore.idx);
                                         }
                                     }
                                 }
                             }
                         }
                         if (!isChanged) {
-                            if (aScore.useExpression) {
-                                const oldVal = aScore.value;
-                                
-                                setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
-                                if (oldVal !== aScore.value) {
-                                    let expVal = oldVal - aScore.value;
-                                    if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                        const mul = aChoice.multipleUseVariable;
+                            isChanged = true;
+                        }
+                        changedScores.add(aScore.idx);
+                        if (!aChoice.isActive) break;
+                    }
+                }
+            }
+            if (!isChanged) {
+                if (aScore.useExpression) {
+                    const oldVal = aScore.value;
+                    
+                    setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
+                    if (oldVal !== aScore.value) {
+                        let expVal = oldVal - aScore.value;
+                        if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                            const mul = aChoice.multipleUseVariable;
 
-                                        for (let l = mul - 1; l >= 0; l--) {
-                                            if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                                                if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
-                                                    if (aChoice.forcedActivated && aChoice.isActive) {
-                                                        aChoice.forcedActivated = false;
-                                                        aChoice.numMultipleTimesMinus--;
-                                                        selectedOneLess(aChoice, aRow, options);
-                                                        aChoice.forcedActivated = true;
-                                                    } else {
-                                                        selectedOneLess(aChoice, aRow, options);
-                                                    }
-                                                } else {
-                                                    point.startingSum += expVal;
-                                                    thisTmpScores.set(aScore.id, expVal);
-                                                }
-                                                isChanged = true;
-                                            }
+                            for (let l = mul - 1; l >= 0; l--) {
+                                if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
+                                    if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
+                                        if (aChoice.forcedActivated && aChoice.isActive) {
+                                            aChoice.forcedActivated = false;
+                                            aChoice.numMultipleTimesMinus--;
+                                            selectedOneLess(aChoice, aRow, options);
+                                            aChoice.forcedActivated = true;
+                                        } else {
+                                            selectedOneLess(aChoice, aRow, options);
                                         }
-                                    } else if (!aChoice.isSelectableMultiple) {
-                                        if (aScore.isActive) {
-                                            if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
-                                                if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                                deselectObject(aChoice, aRow, options);
-                                            } else {
-                                                point.startingSum += expVal;
-                                                thisTmpScores.set(aScore.id, expVal);
-                                            }
-                                            isChanged = true;
-                                        }
+                                    } else {
+                                        point.startingSum += expVal;
+                                        thisTmpScores.set(aScore.id, expVal);
                                     }
+                                    isChanged = true;
                                 }
+                            }
+                        } else if (!aChoice.isSelectableMultiple) {
+                            if (aScore.isActive) {
+                                if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
+                                    if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                    deselectObject(aChoice, aRow, options);
+                                } else {
+                                    point.startingSum += expVal;
+                                    thisTmpScores.set(aScore.id, expVal);
+                                }
+                                isChanged = true;
                             }
                         }
                     }
                 }
             }
-            
-            if (countSet.size > 0) {
-                countSet.forEach((dChoice) => {
-                    addCount(aChoice, dChoice);
-                });
-            }
-            if (isChanged) {
-                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
-                deselectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
-            }
+        }
+        
+        if (addSet.size > 0) {
+            addSet.forEach((dChoice) => {
+                addCount(aChoice, dChoice);
+            });
+        }
+        if (removeSet.size > 0) {
+            removeSet.forEach((dChoice) => {
+                updateCount(aChoice, dChoice);
+            });
+        }
+        if (isChanged) {
+            scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+            deselectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
         }
     }
     if (count === 0) {
@@ -4647,29 +4715,141 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
     for (let i = 0; i < activated.length; i++) {
         const id = activated[i];
         const cMap = choiceMap.get(id);
-        if (typeof cMap !== 'undefined') {
-            const aRow = cMap.row;
-            const aChoice = cMap.choice;
-            const thisTmpScores = new SvelteMap<string, number>();
-            let isDiscounted = false;
-            let isChanged = false;
-            if (localChoice && localChoice.useDiscountCount && !localChoice.appliedDisChoices) localChoice.appliedDisChoices = [];
-            for (let j = 0; j < aChoice.scores.length; j++) {
-                const aScore = aChoice.scores[j];
-                const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
-                if (!aScore.isNotRecalculatable) {
-                    const point = pointTypeMap.get(aScore.id);
-                    if (typeof point !== 'undefined') {
-                        if (localChoice && localChoice.discountOther && aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined' && aChoice.id !== localChoice.id) {
-                            const mul = aChoice.multipleUseVariable;
-                            const count = localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable && !localChoice.stackableDiscount && localChoice.discountCount ? localChoice.discountCount * localChoice.multipleUseVariable : localChoice.discountCount;
+        if (typeof cMap === 'undefined') continue;
+        
+        const aRow = cMap.row;
+        const aChoice = cMap.choice;
+        const thisTmpScores = new SvelteMap<string, number>();
+        const countSet = new Set<Choice | SelectableAddon>();
+        const addSet = new Set<Choice | SelectableAddon>();
+        const removeSet = new Set<Choice | SelectableAddon>();
+        let isChanged = false;
+        if (localChoice && localChoice.useDiscountCount && !localChoice.appliedDisChoices) localChoice.appliedDisChoices = [];
+        for (let j = 0; j < aChoice.scores.length; j++) {
+            const aScore = aChoice.scores[j];
+            if (aScore.isNotRecalculatable) continue;
 
-                            if (!localChoice.useDiscountCount || (localChoice.useDiscountCount && typeof count !== 'undefined' && count > localChoice.appliedDisChoices!.length)) {
+            const point = pointTypeMap.get(aScore.id);
+            if (typeof point === 'undefined') continue;
+            
+            const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
+            
+            if (aScore.appliedDiscount && aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
+                const mul = aChoice.multipleUseVariable;
+                
+                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                    let isChangedMul = false;
+                    for (let k = mul - 1; k >= 0; k--) {
+                        if (aChoice.isActive && aScore.isActiveMul && aScore.isActiveMul[k]) {
+                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                if (aChoice.forcedActivated && aChoice.isActive) {
+                                    aChoice.forcedActivated = false;
+                                    aChoice.numMultipleTimesMinus--;
+                                    selectedOneLess(aChoice, aRow, options);
+                                    aChoice.forcedActivated = true;
+                                } else {
+                                    selectedOneLess(aChoice, aRow, options);
+                                }
+                            } else {
+                                point.startingSum += aScore.tmpDisScore;
+                            }
+                            isChangedMul = true;
+                        }
+                    }
+
+                    if (isChangedMul) {
+                        isChanged = true;
+                    }
+
+                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                } else if (!aChoice.isSelectableMultiple) {
+                    if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                        deselectObject(aChoice, aRow, options);
+                    } else {
+                        point.startingSum += aScore.tmpDisScore;
+                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                    }
+
+                    isChanged = true;
+                }
+
+                if (isChanged) {
+                    if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
+                        for (let k = 0; k < aScore.discounts.length; k++) {
+                            const dc = aScore.discounts[k];
+
+                            if (dc.state === ACTIVE && dc.count !== DISABLED) {
+                                const cMap = choiceMap.get(dc.id);
+
+                                if (typeof cMap !== 'undefined') {
+                                    const dChoice = cMap.choice;
+
+                                    countSet.add(dChoice);
+                                    addSet.add(dChoice);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            delete aScore.isChangeDiscount;
+            delete aScore.tmpDisScore;
+
+            if (!aChoice.isActive) break;
+
+            let isChangedExp = false;
+            let expVal = aScore.value;
+            if (aScore.useExpression) {
+                const oldVal = aScore.value;
+                
+                setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
+                if (oldVal !== aScore.value) {
+                    expVal = oldVal - aScore.value;
+                    if (!isChangedExp) {
+                        isChangedExp = true;
+                    }
+                }
+            }
+            if (!changedScores.has(aScore.idx)) {
+                const hasScore = localChoice && localChoice.scores.length > 0;
+                const scoreLeng = localChoice && localChoice.scores.length || 1;
+                for (let k = 0; k < scoreLeng; k++) {
+                    const lScore = hasScore ? localChoice.scores[k] : null;
+                    const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
+                    const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
+                    const rPoint = !localChoice ? pointTypeMap.get(tmpScores.keys().next().value || '') : null;
+                    const tmpPoint = rPoint ? tmpScores.values().next().value || 0 : 0;
+                    if (!hasScore || hasScore && lPoint) {
+                        if (aChoice.isActive && !aScore.isChanged) {
+                            const afterSelected = checkRequirements(aScore.requireds);
+                            const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                            if (localChoice) {
+                                tmpActivated.delete(localChoice.id);
+                                aRow.currentChoices -= 1;
+                                if (lPoint) lPoint.startingSum += tmpScore;
+                            } else if (rPoint) {
+                                rPoint.startingSum -= tmpPoint;
+                            }
+                            const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
+                            if (localChoice) {
+                                aRow.currentChoices += 1;
+                                if (lPoint) lPoint.startingSum -= tmpScore;
+                            } else if (rPoint) {
+                                rPoint.startingSum += tmpPoint;
+                            }
+                            if (beforeSelected === afterSelected) continue;
+
+                            if (!aScore.setValue) setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
+                            let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.appliedDiscount ? aScore.discountScore : aScore.value;
+                            scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
+                            if (beforeSelected) {
                                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                    let isChangedMul = false;
-                                    for (let k = mul - 1; k >= 0; k--) {
-                                        if (aChoice.isActive && aScore.isActiveMul && aScore.isActiveMul[k]) {
-                                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                                    const mul = aChoice.multipleUseVariable;
+                                    
+                                    for (let l = mul - 1; l >= 0; l--) {
+                                        if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
+                                            if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
                                                 if (aChoice.forcedActivated && aChoice.isActive) {
                                                     aChoice.forcedActivated = false;
                                                     aChoice.numMultipleTimesMinus--;
@@ -4679,212 +4859,154 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                                                     selectedOneLess(aChoice, aRow, options);
                                                 }
                                             } else {
-                                                point.startingSum += aScore.tmpDisScore;
+                                                point.startingSum += scoreVal;
+                                                thisTmpScores.set(aScore.id, scoreVal);
+                                                aScore.isActiveMul[l] = false;
                                             }
-                                            isChangedMul = true;
                                         }
                                     }
-
-                                    if (aChoice.isActive) {
-                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                        delete aScore.isChangeDiscount;
-                                        delete aScore.tmpDisScore;
-                                        aScore.appliedDiscount = true;
-                                        isDiscounted = true;
-                                    }
-                                    if (isChangedMul) {
-                                        isChanged = true;
-                                    }
                                 } else if (!aChoice.isSelectableMultiple) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
-                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                        deselectObject(aChoice, aRow, options);
-                                    } else {
-                                        point.startingSum += aScore.tmpDisScore;
-                                        thisTmpScores.set(aScore.id, aScore.tmpDisScore);
-                                        delete aScore.isChangeDiscount;
-                                        delete aScore.tmpDisScore;
+                                    if (aScore.isActive) {
+                                        if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                            deselectObject(aChoice, aRow, options);
+                                        } else {
+                                            point.startingSum += scoreVal;
+                                            thisTmpScores.set(aScore.id, scoreVal);
+                                            delete aScore.isActive;
+                                        }
                                     }
-                                    isChanged = true;
-                                    if (aChoice.isActive) {
-                                        aScore.appliedDiscount = true;
-                                        isDiscounted = true;
+                                }
+                                if (aScore.setValue) delete aScore.setValue;
+                                if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
+                                    for (let k = 0; k < aScore.discounts.length; k++) {
+                                        const dc = aScore.discounts[k];
+
+                                        if (dc.state === ACTIVE && dc.count !== DISABLED) {
+                                            const cMap = choiceMap.get(dc.id);
+
+                                            if (typeof cMap !== 'undefined') {
+                                                const dChoice = cMap.choice;
+
+                                                if (!countSet.has(dChoice)) {
+                                                    countSet.add(dChoice);
+                                                    removeSet.add(dChoice);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             } else {
-                                delete aScore.isChangeDiscount;
-                                delete aScore.tmpDisScore;
-                            }
-                        }
-                        let isChangedExp = false;
-                        let expVal = aScore.value;
-                        if (aScore.useExpression) {
-                            const oldVal = aScore.value;
-                            
-                            setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
-                            if (oldVal !== aScore.value) {
-                                expVal = oldVal - aScore.value;
-                                if (!isChangedExp) {
-                                    isChangedExp = true;
-                                }
-                            }
-                        }
-                        if (!changedScores.has(aScore.idx)) {
-                            const hasScore = localChoice && localChoice.scores.length > 0;
-                            const scoreLeng = localChoice && localChoice.scores.length || 1;
-                            for (let k = 0; k < scoreLeng; k++) {
-                                const lScore = hasScore ? localChoice.scores[k] : null;
-                                const tmpScore = lScore ? (tmpScores.get(lScore.id) || 0) : 0;
-                                const lPoint = lScore ? pointTypeMap.get(lScore.id) : null;
-                                const rPoint = !localChoice ? pointTypeMap.get(tmpScores.keys().next().value || '') : null;
-                                const tmpPoint = rPoint ? tmpScores.values().next().value || 0 : 0;
-                                if (!hasScore || hasScore && lPoint) {
-                                    if (aChoice.isActive && !aScore.isChanged) {
-                                        const afterSelected = checkRequirements(aScore.requireds);
-                                        const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
-                                        if (localChoice) {
-                                            tmpActivated.delete(localChoice.id);
-                                            aRow.currentChoices -= 1;
-                                            if (lPoint) lPoint.startingSum += tmpScore;
-                                        } else if (rPoint) {
-                                            rPoint.startingSum -= tmpPoint;
-                                        }
-                                        const beforeSelected = checkRequirements(aScore.requireds, tmpActivated);
-                                        if (localChoice) {
-                                            aRow.currentChoices += 1;
-                                            if (lPoint) lPoint.startingSum -= tmpScore;
-                                        } else if (rPoint) {
-                                            rPoint.startingSum += tmpPoint;
-                                        }
-                                        if (beforeSelected !== afterSelected) {
-                                            if (!aScore.setValue) setScoreValue(point, aScore, aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable);
-                                            let scoreVal = aScore.discountIsOn && typeof aScore.discountScore !== 'undefined' && aScore.appliedDiscount ? aScore.discountScore : aScore.value;
-                                            scoreVal = point.allowFloat ? scoreVal : Math.floor(scoreVal);
-                                            if (beforeSelected) {
-                                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                                    const mul = aChoice.multipleUseVariable;
-                                                    
-                                                    for (let l = mul - 1; l >= 0; l--) {
-                                                        if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                                                            if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
-                                                                if (aChoice.forcedActivated && aChoice.isActive) {
-                                                                    aChoice.forcedActivated = false;
-                                                                    aChoice.numMultipleTimesMinus--;
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                    aChoice.forcedActivated = true;
-                                                                } else {
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                }
-                                                            } else {
-                                                                point.startingSum += scoreVal;
-                                                                thisTmpScores.set(aScore.id, scoreVal);
-                                                                aScore.isActiveMul[l] = false;
-                                                            }
-                                                        }
-                                                    }
-                                                } else if (!aChoice.isSelectableMultiple) {
-                                                    if (aScore.isActive) {
-                                                        if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
-                                                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                                            deselectObject(aChoice, aRow, options);
-                                                        } else {
-                                                            point.startingSum += scoreVal;
-                                                            thisTmpScores.set(aScore.id, scoreVal);
-                                                            delete aScore.isActive;
-                                                        }
-                                                    }
+                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                                    const mul = aChoice.multipleUseVariable;
+                                    if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
+                                    for (let l = mul - 1; l >= 0; l--) {
+                                        if (!aScore.isActiveMul[l]) {
+                                            if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                                if (aChoice.forcedActivated && aChoice.isActive) {
+                                                    aChoice.forcedActivated = false;
+                                                    aChoice.numMultipleTimesMinus--;
+                                                    selectedOneLess(aChoice, aRow, options);
+                                                    aChoice.forcedActivated = true;
+                                                } else {
+                                                    selectedOneLess(aChoice, aRow, options);
                                                 }
-                                                if (aScore.setValue) delete aScore.setValue;
                                             } else {
-                                                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                                    const mul = aChoice.multipleUseVariable;
-                                                    if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
-                                                    for (let l = mul - 1; l >= 0; l--) {
-                                                        if (!aScore.isActiveMul[l]) {
-                                                            if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
-                                                                if (aChoice.forcedActivated && aChoice.isActive) {
-                                                                    aChoice.forcedActivated = false;
-                                                                    aChoice.numMultipleTimesMinus--;
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                    aChoice.forcedActivated = true;
-                                                                } else {
-                                                                    selectedOneLess(aChoice, aRow, options);
-                                                                }
-                                                            } else {
-                                                                point.startingSum -= scoreVal;
-                                                                thisTmpScores.set(aScore.id, scoreVal);
-                                                                aScore.isActiveMul[l] = true;
-                                                            }
-                                                        }
-                                                    }
-                                                } else if (!aChoice.isSelectableMultiple) {
-                                                    if (!aScore.isActive) {
-                                                        if (point.belowZeroNotAllowed && point.startingSum - scoreVal < 0) {
-                                                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                                            deselectObject(aChoice, aRow, options);
-                                                        } else {
-                                                            point.startingSum -= scoreVal;
-                                                            thisTmpScores.set(aScore.id, scoreVal);
-                                                            aScore.isActive = true;
-                                                        }
-                                                    }
-                                                }
+                                                point.startingSum -= scoreVal;
+                                                thisTmpScores.set(aScore.id, scoreVal);
+                                                aScore.isActiveMul[l] = true;
                                             }
-                                            if (!isChanged) {
-                                                isChanged = true;
-                                            }
-                                            changedScores.add(aScore.idx);
                                         }
                                     }
-                                }
-                            }
-                        }
-                        if (isChangedExp && !isChanged) {
-                            if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
-                                const mul = aChoice.multipleUseVariable;
-
-                                for (let l = mul - 1; l >= 0; l--) {
-                                    if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                                        if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
-                                            if (aChoice.forcedActivated && aChoice.isActive) {
-                                                aChoice.forcedActivated = false;
-                                                aChoice.numMultipleTimesMinus--;
-                                                selectedOneLess(aChoice, aRow, options);
-                                                aChoice.forcedActivated = true;
-                                            } else {
-                                                selectedOneLess(aChoice, aRow, options);
-                                            }
+                                } else if (!aChoice.isSelectableMultiple) {
+                                    if (!aScore.isActive) {
+                                        if (point.belowZeroNotAllowed && point.startingSum - scoreVal < 0) {
+                                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                                            deselectObject(aChoice, aRow, options);
                                         } else {
-                                            point.startingSum += expVal;
-                                            thisTmpScores.set(aScore.id, expVal);
+                                            point.startingSum -= scoreVal;
+                                            thisTmpScores.set(aScore.id, scoreVal);
+                                            aScore.isActive = true;
                                         }
-                                        isChanged = true;
                                     }
                                 }
-                            } else if (!aChoice.isSelectableMultiple) {
-                                if (aScore.isActive) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
-                                        if (aChoice.forcedActivated) delete aChoice.forcedActivated;
-                                        deselectObject(aChoice, aRow, options);
-                                    } else {
-                                        point.startingSum += expVal;
-                                        thisTmpScores.set(aScore.id, expVal);
+                                if (aScore.appliedDiscount && typeof aScore.discounts !== 'undefined') {
+                                    for (let k = 0; k < aScore.discounts.length; k++) {
+                                        const dc = aScore.discounts[k];
+
+                                        if (dc.state === ACTIVE && dc.count !== DISABLED) {
+                                            const cMap = choiceMap.get(dc.id);
+
+                                            if (typeof cMap !== 'undefined') {
+                                                const dChoice = cMap.choice;
+
+                                                if (!countSet.has(dChoice)) {
+                                                    countSet.add(dChoice);
+                                                    addSet.add(dChoice);
+                                                }
+                                            }
+                                        }
                                     }
-                                    isChanged = true;
                                 }
                             }
+                            if (!isChanged) {
+                                isChanged = true;
+                            }
+                            changedScores.add(aScore.idx);
                         }
                     }
                 }
             }
-            if (isDiscounted && localChoice && localChoice.appliedDisChoices) {
-                addCount(aChoice, localChoice);
+            if (isChangedExp && !isChanged) {
+                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                    const mul = aChoice.multipleUseVariable;
+
+                    for (let l = mul - 1; l >= 0; l--) {
+                        if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
+                            if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
+                                if (aChoice.forcedActivated && aChoice.isActive) {
+                                    aChoice.forcedActivated = false;
+                                    aChoice.numMultipleTimesMinus--;
+                                    selectedOneLess(aChoice, aRow, options);
+                                    aChoice.forcedActivated = true;
+                                } else {
+                                    selectedOneLess(aChoice, aRow, options);
+                                }
+                            } else {
+                                point.startingSum += expVal;
+                                thisTmpScores.set(aScore.id, expVal);
+                            }
+                            isChanged = true;
+                        }
+                    }
+                } else if (!aChoice.isSelectableMultiple) {
+                    if (aScore.isActive) {
+                        if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
+                            if (aChoice.forcedActivated) delete aChoice.forcedActivated;
+                            deselectObject(aChoice, aRow, options);
+                        } else {
+                            point.startingSum += expVal;
+                            thisTmpScores.set(aScore.id, expVal);
+                        }
+                        isChanged = true;
+                    }
+                }
             }
-            
-            if (isChanged) {
-                scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
-                selectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
-            }
+        }
+
+        if (addSet.size > 0) {
+            addSet.forEach((dChoice) => {
+                addCount(aChoice, dChoice);
+            });
+        }
+        if (removeSet.size > 0) {
+            removeSet.forEach((dChoice) => {
+                updateCount(aChoice, dChoice);
+            });
+        }
+        if (isChanged) {
+            scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
+            selectUpdateScore(aChoice, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
         }
     }
     if (count === 0) {
@@ -5142,6 +5264,9 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
         } else {
             delete score.setValue;
         }
+
+        delete score.isChangeDiscount;
+        delete score.tmpDisScore;
     }
 
     if (countSet.size > 0) {
