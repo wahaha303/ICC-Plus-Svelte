@@ -229,6 +229,7 @@
         - Fixed issue where filter color was not applied to counter in multi-selectable choice.
         - Fixed issue where text-align was not applied to score.
         - Fixed issue where discount was not properly applied when score requirement satisfaction status was updated.
+        - Fixed issue where special characters were not escaped when exporting ID / Title list as CSV.
         `
     }, {
         open: false,

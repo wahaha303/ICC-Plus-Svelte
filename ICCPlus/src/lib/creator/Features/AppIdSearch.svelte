@@ -54,20 +54,34 @@
     import { app, sanitizeArg } from '$lib/store/store.svelte';
     
     let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+
+    function escapeCsv(str: string) {
+        if (typeof str === 'undefined' || str === '') return '';
+
+        let result = str;
+
+        if (/^[=+\-@]/.test(result)) result = "'" + result;
+
+        result = result.replace(/"/g, '""');
+
+        if (/[",\n\r\t]/.test(result) || /^\s/.test(result) || /\s$/.test(result)) result = `"${result}"`;
+
+        return result;
+    }
     
     function exportAsCsv() {
         const fields = ['id', 'title', 'debugTitle'];
-        const result = ['id,title,debugTitle'];
+        const result = [fields.join(',')];
 
         for (let i = 0; i < app.rows.length; i++) {
             const row = app.rows[i];
 
-            result.push(fields.map(item => JSON.stringify(row[item] || '')).join(','));
+            result.push(fields.map(item => escapeCsv(row[item])).join(','));
 
             for (let j = 0; j < row.objects.length; j++) {
                 const choice = row.objects[j];
 
-                result.push(fields.map(item => JSON.stringify(choice[item] || '')).join(','));
+                result.push(fields.map(item => escapeCsv(choice[item])).join(','));
             }
             result.push('');
         }
