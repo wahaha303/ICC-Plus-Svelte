@@ -693,12 +693,12 @@
                                             {/if}
                                             <div class="col-12 m-1 px-2">
                                                 {#if addon.isDisChoices}
-                                                    <CustomChipInput acValue={addon.discountRows ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Rows to apply discount" getLabel={getRowLabel} selectProp={choice} />
-                                                    <CustomChipInput acValue={addon.discountChoices ?? []} acOptions={isBackpack ? getBackpackSelectables() : getSelectables()} inputLabel="Choices to apply discount" getLabel={getChoiceLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={addon.discountRows ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Rows to apply discount" getLabel={getRowLabel} selectProp={addon} />
+                                                    <CustomChipInput acValue={addon.discountChoices ?? []} acOptions={isBackpack ? getBackpackSelectables() : getSelectables()} inputLabel="Choices to apply discount" getLabel={getChoiceLabel} selectProp={addon} />
                                                 {:else}
-                                                    <CustomChipInput acValue={addon.discountGroups ?? []} acOptions={getGroups()} inputLabel="Groups to apply discount" getLabel={getGroupLabel} selectProp={choice} />
+                                                    <CustomChipInput acValue={addon.discountGroups ?? []} acOptions={getGroups()} inputLabel="Groups to apply discount" getLabel={getGroupLabel} selectProp={addon} />
                                                 {/if}
-                                                <CustomChipInput acValue={addon.discountPointTypes ?? []} acOptions={getPointTypes()} inputLabel="Point Types to apply discount" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                <CustomChipInput acValue={addon.discountPointTypes ?? []} acOptions={getPointTypes()} inputLabel="Point Types to apply discount" getLabel={getPointTypeLabel} selectProp={addon} />
                                             </div>
                                             <div class={col6}>
                                                 <Select bind:value={addon.discountOperator} label="Operator" variant="filled">
@@ -791,8 +791,8 @@
                                         </FormField>
                                         {#if addon.isContentHidden}
                                             <div class="col-12 m-1 px-2">
-                                                <CustomChipInput acValue={addon.hiddenContentsRow ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
-                                                <CustomChipInput acValue={addon.hiddenContentsType ?? []} acOptions={hideContentValue} inputLabel="Target Content" getLabel={(e) => hideContentText[parseInt(e) - 1]} selectProp={choice} />
+                                                <CustomChipInput acValue={addon.hiddenContentsRow ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Target Row" getLabel={getRowLabel} selectProp={addon} />
+                                                <CustomChipInput acValue={addon.hiddenContentsType ?? []} acOptions={hideContentValue} inputLabel="Target Content" getLabel={(e) => hideContentText[parseInt(e) - 1]} selectProp={addon} />
                                             </div>
                                             <div class="b-line"></div>
                                         {/if}
@@ -812,7 +812,7 @@
                                         </FormField>
                                         {#if addon.addToAllowChoice}
                                             <div class="col-12 m-1 px-2">
-                                                <CustomChipInput acValue={addon.idOfAllowChoice ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Target Row" getLabel={getRowLabel} selectProp={choice} />
+                                                <CustomChipInput acValue={addon.idOfAllowChoice ?? []} acOptions={isBackpack ? getBackpackRows() : getRows()} inputLabel="Target Row" getLabel={getRowLabel} selectProp={addon} />
                                                 <Textfield bind:value={() => addon.numbAddToAllowChoice ?? 0, (e) => addon.numbAddToAllowChoice = e} label="Number to increase or decrease" type="number" variant="filled" />
                                             </div>
                                             <div class="b-line"></div>
@@ -1073,11 +1073,11 @@
                                             {#if addon.changeBgImage}
                                                 <div class="col-12 px-5 py-3">
                                                     {#if addon.bgImage && !app.hideImages}
-                                                        <button type="button" onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = choice; imgDialog.imgProp = 'bgImage'}} class="btn--image-background">
+                                                        <button type="button" onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = addon; imgDialog.imgProp = 'bgImage'}} class="btn--image-background">
                                                             <img src={addon.bgImage} alt="" loading="lazy" class="btn--image" style="max-height: 175px"/>
                                                         </button>
                                                     {/if}
-                                                    <Button onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = choice; imgDialog.imgProp = 'bgImage'}} variant="raised">
+                                                    <Button onclickcapture={() => {imgDialog.currentDialog = 'appImageUpload'; imgDialog.data = addon; imgDialog.imgProp = 'bgImage'}} variant="raised">
                                                         <Label>Change Image</Label>
                                                     </Button>
                                                 </div>
@@ -1224,7 +1224,7 @@
                                                 {/snippet}
                                             </FormField>
                                             <div class="col-12 m-1 px-2">
-                                                <CustomChipInput acValue={addon.pointTypeToMultiply ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                <CustomChipInput acValue={addon.pointTypeToMultiply ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={addon} />
                                                     {#if addon.multiplyPointtypeIsId}
                                                         <Autocomplete
                                                             options={getPointTypes()}
@@ -1259,7 +1259,7 @@
                                         </FormField>
                                         {#if addon.dividePointtypeIsOn}
                                             <div class="col-12 m-1 px-2">
-                                                <CustomChipInput acValue={addon.pointTypeToDivide ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                <CustomChipInput acValue={addon.pointTypeToDivide ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={addon} />
                                                 <Textfield bind:value={() => addon.divideWithThis ?? 0, (e) => addon.divideWithThis = e} label="Divided by" type="number" variant="filled" />
                                             </div>
                                             <div class="b-line"></div>
@@ -1281,7 +1281,7 @@
                                         </FormField>
                                         {#if addon.setPointtypeIsOn}
                                             <div class="col-12 m-1 px-2">
-                                                <CustomChipInput acValue={addon.pointTypeToSet ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={choice} />
+                                                <CustomChipInput acValue={addon.pointTypeToSet ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={addon} />
                                                 <Textfield bind:value={() => addon.setWithThis ?? '', (e) => addon.setWithThis = e} label="Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
                                             </div>
                                             <div class="b-line"></div>
@@ -1303,7 +1303,7 @@
                                         </FormField>
                                         {#if addon.isChangeVariables}
                                             <div class="col-12 m-1 px-2">
-                                                <CustomChipInput acValue={addon.changedVariables ?? []} acOptions={getVariables()} inputLabel="Target Variable" selectProp={choice} />
+                                                <CustomChipInput acValue={addon.changedVariables ?? []} acOptions={getVariables()} inputLabel="Target Variable" selectProp={addon} />
                                                 <Select bind:value={addon.changeType} label="Value" variant="filled">
                                                     {#each variableTypes as type (type.text)}
                                                         <Option value={type.value}>{type.text}</Option>

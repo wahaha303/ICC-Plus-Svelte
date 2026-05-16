@@ -132,7 +132,7 @@
                     </div>
                 {/if}
                 {#each app.rows as row, i}
-                    <div class={row.width ? 'col-6': 'col-12'}>
+                    <div class={rowWidthClass(row)}>
                         {#if bCreatorMode}
                             <div class="p-2 col-12">
                                 <Card>
@@ -260,7 +260,7 @@
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateId, dlgVariables, tmpActivatedMap, bgmVariables, toggleTheme, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog, imgDialog } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateId, dlgVariables, tmpActivatedMap, bgmVariables, toggleTheme, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog, imgDialog, winWidth } from '$lib/store/store.svelte';
     import type { Row, SelectableAddon } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
@@ -933,6 +933,12 @@
             app.rows[num].index -= 1;
             app.rows[num + 1].index += 1;
         }
+    }
+    
+    function rowWidthClass(row: Row) {
+        if (!row.width) return 'col-12';
+        if ($winWidth > 1280 || app.enableHalfRow) return 'col-6';
+        return 'col-12';
     }
 
     function handlePlayButton() {

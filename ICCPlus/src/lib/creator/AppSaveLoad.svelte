@@ -313,6 +313,14 @@
 
                                 addon.image = addImage(path, addon.image, imgMap, zip);
                             }
+
+                            if (addon.changeBgImage && addon.bgImage && isDataURL(addon.bgImage)) {
+                                const mime = getMime(addon.bgImage);
+                                const ext = getExt(mime);
+                                const path = `images/R${i + 1}C${j + 1}A${k + 1}_Change.${ext}`;
+
+                                addon.bgImage = addImage(path, addon.bgImage, imgMap, zip);
+                            }
                         }
                     }
                 }
@@ -407,6 +415,14 @@
                                     const path = `images/BR${i + 1}C${j + 1}A${k + 1}.${ext}`;
 
                                     addon.image = addImage(path, addon.image, imgMap, zip);
+                                }
+
+                                if (addon.changeBgImage && addon.bgImage && isDataURL(addon.bgImage)) {
+                                    const mime = getMime(addon.bgImage);
+                                    const ext = getExt(mime);
+                                    const path = `images/R${i + 1}C${j + 1}A${k + 1}_Change.${ext}`;
+
+                                    addon.bgImage = addImage(path, addon.bgImage, imgMap, zip);
                                 }
                             }
                         }

@@ -39,6 +39,14 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
+                                    <Switch bind:checked={() => app.enableHalfRow ?? false, (e) => app.enableHalfRow = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Enable Half Row on Small Screens.
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
                                     <Switch bind:checked={() => app.buildAutoSaveIsOn || false, (e) => app.buildAutoSaveIsOn = e} onSMUISwitchChange={() => {
                                         if (app.buildAutoSaveIsOn) {
                                             saveProcess();

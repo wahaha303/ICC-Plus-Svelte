@@ -263,7 +263,7 @@
     import ObjectRequired from './Object/ObjectRequired.svelte';
     import ObjectScore from './Object/ObjectScore.svelte';
 	import type { BgStyles, Choice, ChoiceOptions, Filters, Row, SelectableAddon } from '$lib/store/types';
-	import { app, choiceMap, getStyling, checkRequirements, sanitizeArg, replaceText, objectWidthToNum, snackbarVariables, winWidth, hexToRgba, selectObject, deselectObject, selectedOneMore, selectedOneLess, wordDialog, closestByClassPrefix, fixedWidth } from '$lib/store/store.svelte';
+	import { app, choiceMap, getStyling, checkRequirements, sanitizeArg, replaceText, objectWidthToNum, snackbarVariables, winWidth, hexToRgba, selectObject, deselectObject, selectedOneMore, selectedOneLess, closestByClassPrefix, fixedWidth } from '$lib/store/store.svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 
     export { activateObject, options };
@@ -640,7 +640,7 @@
         options.isOverDlg = false;
         options.isOverImg = false;
 
-        if (target && localChoice.isActive && localChoice.addons && localChoice.addons.length > 0) {
+        if (target && localChoice.addons && localChoice.addons.length > 0) {
             if (closestByClassPrefix(target, 'addon-', 'addon')) return;
         }
 

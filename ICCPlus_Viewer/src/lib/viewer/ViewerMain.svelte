@@ -114,7 +114,7 @@
         <div class="container-fluid p-0">
             <div bind:this={mainDiv} class="row gx-0">
                 {#each app.rows as row}
-                    <div class={row.width ? 'col-6': 'col-12'}>
+                    <div class={rowWidthClass(row)}>
                         <AppRow row={row} windowWidth={width} mainDiv={mainDiv} />
                     </div>
                 {/each}
@@ -159,7 +159,7 @@
     import Slider from '@smui/slider';
     import Tooltip from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentTheme, dlgVariables, bgmVariables, cleanActivated, checkPointEnable, hexToRgba, musicPlayer, wordDialog, imgDialog } from '$lib/store/store.svelte';
+    import { app, currentTheme, dlgVariables, bgmVariables, cleanActivated, checkPointEnable, hexToRgba, musicPlayer, wordDialog, imgDialog, winWidth } from '$lib/store/store.svelte';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppGlobalSettings from './AppGlobalSettings.svelte';
     import AppPointBar from './AppPointBar.svelte';
@@ -172,6 +172,7 @@
     import ObjectSelectDialog from './Object/ObjectSelectDialog.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
 	import { get } from 'svelte/store';
+    import type { Row } from '$lib/store/types';
 
     const confirmDialog = {
         action: () => {},
@@ -282,6 +283,12 @@
             }
         }
         localStorage.setItem('theme', currentTheme.value);
+    }
+
+    function rowWidthClass(row: Row) {
+        if (!row.width) return 'col-12';
+        if ($winWidth > 1280 || app.enableHalfRow) return 'col-6';
+        return 'col-12';
     }
 
     function handlePlayButton() {

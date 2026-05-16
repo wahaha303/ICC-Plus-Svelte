@@ -1035,6 +1035,7 @@ export type App = {
     enableSearch: boolean,
     useDesignGroupBtn: boolean,
     smallerScreenPx: number,
+    enableHalfRow: boolean,
     viewerConfig: ViewerConfig
 } & DefaultSettings;
 export type RowMap = {

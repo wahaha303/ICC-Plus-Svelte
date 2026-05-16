@@ -222,9 +222,17 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
+                                    <Switch bind:checked={() => app.enableHalfRow ?? false, (e) => app.enableHalfRow = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Enable Half Row on Small Screens.
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
                                     <Switch bind:checked={() => app.useToolbarBtn ?? false, (e) => app.useToolbarBtn = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
-                                        Use Toolbar Button to Add Row
+                                        Enable Toolbar Button to Add Row
                                     {/snippet}
                                 </FormField>
                             </div>
@@ -232,7 +240,7 @@
                                 <FormField>
                                     <Switch bind:checked={() => app.useDesignGroupBtn ?? false, (e) => app.useDesignGroupBtn = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
-                                        Use Design Group Button in Choice
+                                        Enable Design Group Button in Choice
                                     {/snippet}
                                 </FormField>
                             </div>

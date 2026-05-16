@@ -2475,7 +2475,7 @@
         }
         menuVariables.anchor = target.parentElement;
         menuVariables.copy = () => copyObject();
-        menuVariables.paste = () => pasteObject(row, choice.index + 1);
+        menuVariables.paste = () => pasteObject(row, choice.index);
         menuVariables.clear = () => clearClipboard(1);
         menuVariables.export = () => exportData(choice, 'choice');
         menuVariables.parent = row;
@@ -2967,7 +2967,7 @@
         options.isOverDlg = false;
         options.isOverImg = false;
 
-        if (target && localChoice.isActive && localChoice.addons && localChoice.addons.length > 0) {
+        if (target && localChoice.addons && localChoice.addons.length > 0) {
             if (closestByClassPrefix(target, 'addon-', 'addon')) return;
         }
 
