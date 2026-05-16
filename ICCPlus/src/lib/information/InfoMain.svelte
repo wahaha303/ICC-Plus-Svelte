@@ -226,14 +226,14 @@
         open: true,
         title: `v2.9.8 / ${getDate('2026-05-16T17:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
-        - Fix issue where some functions could not be configured properly in selectable addon.
-        - Fix issue where parent choice was not selected when selecting addon.
+        - Fixed issue where some functions could not be configured properly in selectable addon.
+        - Fixed issue where parent choice was not selected when selecting addon.
 
         <span style="color: green">Global Settings</span>
-        - Add option to enable half row on small screens in display tab.
+        - Added option to enable half row on small screens in display tab.
 
         <span style="color: green">Miscellaneous</span>
-        - Fix issue where pasting a choice caused the page to stop working properly.
+        - Fixed issue where pasting a choice caused the page to stop working properly.
         `
     }, {
         open: false,
