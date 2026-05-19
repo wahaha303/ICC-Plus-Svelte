@@ -224,6 +224,23 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.9 / ${getDate('2026-05-19T15:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where creating new addon changed addon justify to start.
+        
+        <span style="color: green">Requirement</span>
+        - Fixed issue where pasting requirement into Or Requirement pasted it outside Requirement.
+
+        <span style="color: green">Row</span>
+        - Fixed issue where adjusted allowed choices were not applied immediately when the corresponding choice was selected.
+        - Fixed issue where choices were not properly deselected by allowed choices.
+
+        <span style="color: green">Choice</span>
+        - Fixed issue where score was calculated incorrectly when using option to discount only a specific number of choices.
+        - Fixed issue where automatically selected choice could be deselected.
+        `
+    }, {
+        open: false,
         title: `v2.9.8 / ${getDate('2026-05-16T17:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where some functions could not be configured properly in selectable addon.

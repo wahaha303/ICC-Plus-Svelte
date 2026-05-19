@@ -207,16 +207,18 @@
             snackbarVariables.isOpen = true;
         } else {
             const tmpRequired = JSON.parse(JSON.stringify(app.tmpRequired));
+            const rData = data as Requireds;
+            const req = orReq && rData.orRequireds ? rData.orRequireds : data.requireds;
             if (tmpRequired.length > 1) {
                 for (var i = 0; i < tmpRequired.length; i++) {
-                    data.requireds.push(tmpRequired[i]);
+                    req.push(tmpRequired[i]);
                 }
             } else {
                 if ('reqId' in data) {
                     tmpRequired[0].requireds = [];
-                    data.requireds.push(tmpRequired[0]);
+                    req.push(tmpRequired[0]);
                 } else {
-                    data.requireds.push(tmpRequired[0]);
+                    req.push(tmpRequired[0]);
                 }
             }
         }

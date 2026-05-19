@@ -2257,7 +2257,7 @@
     }
 
     function createNewAddon() {
-        if (!choice.addonJsutify) choice.addonJustify = app.defaultAddonJustify;
+        if (!choice.addonJustify) choice.addonJustify = app.defaultAddonJustify;
         if (!choice.useSeperateAddon) choice.useSeperateAddon = app.defaultUseSeperateAddon;
         choice.addons.push({
             id: '',
