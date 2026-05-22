@@ -1183,6 +1183,7 @@ export type ChoiceOptions = {
     isAllowDeselect?: boolean;
     isLinked?: boolean;
     fromTemp?: boolean;
+    fromAddon?: boolean;
 };
 export type Filters = {
     dropShadow?: string,

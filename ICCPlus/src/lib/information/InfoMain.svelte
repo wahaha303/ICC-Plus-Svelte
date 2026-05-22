@@ -224,6 +224,19 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.10 / ${getDate('2026-05-22T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where automatically selected choice was not activated automatically.
+        - Fixed issue where discount count was not calculated correctly when discounted score activation status changed.
+
+        <span style="color: green">Design</span>
+        - Fixed issue where overlay background color option was not applied.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where custom CSS data persisted when loading new project without refreshing page.
+        `
+    }, {
+        open: false,
         title: `v2.9.9 / ${getDate('2026-05-19T15:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where creating new addon changed addon justify to start.

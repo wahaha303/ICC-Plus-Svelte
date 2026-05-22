@@ -3,7 +3,7 @@
         <div class:fullHeight={fullHeight} class="d-flex">
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
+            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
                 {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
                     <div class="d-column w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle || isSearch}
@@ -485,9 +485,9 @@
 
         style.push(`font-family: '${textStyle.scoreText}'; font-size: ${textStyle.scoreTextSize}%; text-align: ${textStyle.scoreTextAlign};`);
         if (!isEnabled && filterStyle.reqScoreTextColorIsOn) {
-            style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)}`);
+            style.push(`color: ${hexToRgba(filterStyle.reqFilterSTextColor)};`);
         } else if (choice.isActive && filterStyle.selScoreTextColorIsOn) {
-            style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)}`);
+            style.push(`color: ${hexToRgba(filterStyle.selFilterSTextColor)};`);
         } else {
             style.push(`color: ${hexToRgba(textStyle.scoreTextColor)};`);
         }
@@ -532,9 +532,11 @@
                 }
                 if (filterStyle.selBgColorIsOn) {
                     bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
+                    if (!filterStyle.selOverlayOnImage) bgStyles.bgImage = '';
                 }
-                if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnSelect) {
+                    const gradient = objectStyle.objectGradientOnSelect.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             } else {
                 if (filterStyle.unselFilterBlurIsOn) {
@@ -564,8 +566,9 @@
                 if (filterStyle.unselFilterSepiaIsOn) {
                     filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
                 }
-                if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
+                if (objectStyle.objectGradientIsOn && objectStyle.objectGradient) {
+                    const gradient = objectStyle.objectGradient.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             }
             if (app.isPointerCursor && !choice.isNotSelectable && (!choice.isSelectableMultiple || (choice.allowSelectByClick && choice.multipleUseVariable === 0))) {
@@ -601,9 +604,11 @@
             }
             if (filterStyle.reqBgColorIsOn) {
                 bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
+                if (!filterStyle.reqOverlayOnImage) bgStyles.bgImage = '';
             }
-            if (objectStyle.objectGradientIsOn) {
-                bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
+            if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnReq) {
+                const gradient = objectStyle.objectGradientOnReq.split(')')[0];
+                bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
             }
         }
     }

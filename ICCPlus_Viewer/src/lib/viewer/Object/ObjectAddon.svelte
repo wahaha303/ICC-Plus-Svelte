@@ -1,6 +1,6 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''} {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(addon as SelectableAddon, row, e, true) : undefined}>
+<div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''}{overlay ? ' bg-overlay' : ''}  {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(addon as SelectableAddon, row, e, true) : undefined}>
     {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
         <div>
             {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}
@@ -286,6 +286,14 @@
     let addonTitleKey = $derived(replaceText(addon.title));
     let addonTextKey = $derived(replaceText(addon.text));
     let addonImageBoxWidth = $derived(typeof addonImageStyle.addonImageBoxWidth !== 'undefined' ? addonImageStyle.addonImageBoxWidth : 50);
+    let overlay = $derived.by(() => {
+        if (addonStyle.useAddonDesign && addonStyle.isAddonBackgroundOverlay) return true;
+        if (addon.isSelectable) {
+            if (addon.isActive && filterStyle.selOverlayOnImage) return true;
+            if (!addonEnabled && filterStyle.reqOverlayOnImage) return true;
+        }
+        return false
+    });
     let multiChoiceCounter = $derived.by(() => {
         if (isFirst && choice.showMulInAddon) {
             if (choice.hideMultipleCounter) return isEnabled;
@@ -325,8 +333,9 @@
             if (addonStyle.addonBorderIsOn) {
                 bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(addonStyle.addonBorderColor)};`;
             }
-            if (addonStyle.addonGradientIsOn) {
-                bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradient});`;
+            if (addonStyle.addonGradientIsOn && addonStyle.addonGradient) {
+                const gradient = addonStyle.addonGradient.split(')')[0];
+                bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
             }
             if (addonStyle.addonDropShadowIsOn) {
                 if (addonStyle.addonUseBoxShadowIsOn) {
@@ -342,19 +351,22 @@
                     if (filterStyle.selBorderColorIsOn) {
                         bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
                     }
-                    if (addonStyle.addonGradientIsOn) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`;
+                    if (addonStyle.addonGradientIsOn && addonStyle.addonGradientOnSelect) {
+                        const gradient = addonStyle.addonGradientOnSelect.split(')')[0];
+                        bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                     }
                 }
                 if (addon.isSelectable) {
-                    if (!useDesign) {
-                        bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
-                        if (objectStyle.objectGradientIsOn) {
-                            bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
-                        }
-                    }
                     if (filterStyle.selBgColorIsOn) {
                         bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
+                        if (!filterStyle.selOverlayOnImage) bgStyles.bgImage = '';
+                    }
+                    if (!useDesign) {
+                        bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
+                        if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnSelect) {
+                            const gradient = objectStyle.objectGradientOnSelect.split(')')[0];
+                            bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
+                        }
                     }
                     if (filterStyle.selFilterBlurIsOn) {
                         filters.blur = ` blur(${filterStyle.selFilterBlur}px)`;
@@ -386,11 +398,13 @@
                 }
             } else if (addon.isSelectable) {
                 if (useDesign) {
-                    if (addonStyle.objectGradientIsOn) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradient});`;
+                    if (addonStyle.objectGradientIsOn && addonStyle.addonGradient) {
+                        const gradient = addonStyle.addonGradient.split(')')[0];
+                        bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                     }
-                } else if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
+                } else if (objectStyle.objectGradientIsOn && objectStyle.objectGradient) {
+                    const gradient = objectStyle.objectGradient.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
                 if (filterStyle.unselFilterBlurIsOn) {
                     filters.blur = ` blur(${filterStyle.unselFilterBlur}px)`;
@@ -421,23 +435,26 @@
                 }
             }
         } else if (addon.isSelectable || isEnabled) {
+            if (filterStyle.reqBgColorIsOn) {
+                bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
+                if (!filterStyle.reqOverlayOnImage) bgStyles.bgImage = '';
+            }
             if (useDesign) {
                 if (filterStyle.reqBorderColorIsOn) {
                     bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
                 }
-                if (addonStyle.addonGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnReq});`;
+                if (addonStyle.addonGradientIsOn && addonStyle.addonGradientOnReq) {
+                    const gradient = addonStyle.addonGradientOnReq.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             } else if (addon.isSelectable) {
                 if (filterStyle.reqBorderColorIsOn) {
                     bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
                 }
-                if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
+                if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnReq) {
+                    const gradient = objectStyle.objectGradientOnReq.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
-            }
-            if (filterStyle.reqBgColorIsOn) {
-                bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
             }
             if (filterStyle.reqFilterBlurIsOn) {
                 filters.blur = ` blur(${filterStyle.reqFilterBlur}px)`;

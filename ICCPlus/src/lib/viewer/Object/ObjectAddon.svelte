@@ -333,8 +333,9 @@
             if (addonStyle.addonBorderIsOn) {
                 bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(addonStyle.addonBorderColor)};`;
             }
-            if (addonStyle.addonGradientIsOn) {
-                bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradient});`;
+            if (addonStyle.addonGradientIsOn && addonStyle.addonGradient) {
+                const gradient = addonStyle.addonGradient.split(')')[0];
+                bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
             }
             if (addonStyle.addonDropShadowIsOn) {
                 if (addonStyle.addonUseBoxShadowIsOn) {
@@ -350,8 +351,9 @@
                     if (filterStyle.selBorderColorIsOn) {
                         bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
                     }
-                    if (addonStyle.addonGradientIsOn) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnSelect});`;
+                    if (addonStyle.addonGradientIsOn && addonStyle.addonGradientOnSelect) {
+                        const gradient = addonStyle.addonGradientOnSelect.split(')')[0];
+                        bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                     }
                 }
                 if (addon.isSelectable) {
@@ -361,8 +363,9 @@
                     }
                     if (!useDesign) {
                         bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
-                        if (objectStyle.objectGradientIsOn) {
-                            bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                        if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnSelect) {
+                            const gradient = objectStyle.objectGradientOnSelect.split(')')[0];
+                            bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                         }
                     }
                     if (filterStyle.selFilterBlurIsOn) {
@@ -395,11 +398,13 @@
                 }
             } else if (addon.isSelectable) {
                 if (useDesign) {
-                    if (addonStyle.objectGradientIsOn) {
-                        bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradient});`;
+                    if (addonStyle.objectGradientIsOn && addonStyle.addonGradient) {
+                        const gradient = addonStyle.addonGradient.split(')')[0];
+                        bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                     }
-                } else if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
+                } else if (objectStyle.objectGradientIsOn && objectStyle.objectGradient) {
+                    const gradient = objectStyle.objectGradient.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
                 if (filterStyle.unselFilterBlurIsOn) {
                     filters.blur = ` blur(${filterStyle.unselFilterBlur}px)`;
@@ -438,15 +443,17 @@
                 if (filterStyle.reqBorderColorIsOn) {
                     bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
                 }
-                if (addonStyle.addonGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${addonStyle.addonGradientOnReq});`;
+                if (addonStyle.addonGradientIsOn && addonStyle.addonGradientOnReq) {
+                    const gradient = addonStyle.addonGradientOnReq.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             } else if (addon.isSelectable) {
                 if (filterStyle.reqBorderColorIsOn) {
                     bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
                 }
-                if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
+                if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnReq) {
+                    const gradient = objectStyle.objectGradientOnReq.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             }
             if (filterStyle.reqFilterBlurIsOn) {

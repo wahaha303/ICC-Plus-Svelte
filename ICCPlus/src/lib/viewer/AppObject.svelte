@@ -534,8 +534,9 @@
                     bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.selFilterBgColor)};`;
                     if (!filterStyle.selOverlayOnImage) bgStyles.bgImage = '';
                 }
-                if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnSelect});`;
+                if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnSelect) {
+                    const gradient = objectStyle.objectGradientOnSelect.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             } else {
                 if (filterStyle.unselFilterBlurIsOn) {
@@ -565,8 +566,9 @@
                 if (filterStyle.unselFilterSepiaIsOn) {
                     filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
                 }
-                if (objectStyle.objectGradientIsOn) {
-                    bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradient});`;
+                if (objectStyle.objectGradientIsOn && objectStyle.objectGradient) {
+                    const gradient = objectStyle.objectGradient.split(')')[0];
+                    bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             }
             if (app.isPointerCursor && !choice.isNotSelectable && (!choice.isSelectableMultiple || (choice.allowSelectByClick && choice.multipleUseVariable === 0))) {
@@ -604,8 +606,9 @@
                 bgStyles.bgColor = `background-color: ${hexToRgba(filterStyle.reqFilterBgColor)};`;
                 if (!filterStyle.reqOverlayOnImage) bgStyles.bgImage = '';
             }
-            if (objectStyle.objectGradientIsOn) {
-                bgStyles.bgImage = `background-image: linear-gradient(${objectStyle.objectGradientOnReq});`;
+            if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnReq) {
+                const gradient = objectStyle.objectGradientOnReq.split(')')[0];
+                bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
             }
         }
     }
