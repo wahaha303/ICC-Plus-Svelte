@@ -451,7 +451,7 @@
                 activatedMap.set(row.id, {multiple: 0, isRowButton: true, rndPoint: row.pointTypeRandom, pointNum: pNum + rnd});
                 tmpScores.set(point.id, rnd);
 
-                selectUpdateScore(null, tmpScores, 0, undefined, undefined, blankOptions);
+                selectUpdateScore(null, row, tmpScores, 0, undefined, undefined, blankOptions);
                 activateTempChoices(blankOptions);
             }
             return;
