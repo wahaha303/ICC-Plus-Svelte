@@ -224,6 +224,23 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.12 / ${getDate('2026-05-24T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where the page froze when using the "Hide Requirements When Met" option.
+
+        <span style="color: green">Design</span>
+        - Fixed issue where gradients were not applied correctly.
+        `
+    }, {
+        open: false,
+        title: `v2.9.11 / ${getDate('2026-05-23T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where some choices remained active when using the clear selected choices feature.
+        - Fixed issue where initially selected choices were activated twice on first load.
+        - Fixed issue where score updates did not work correctly when using the "Selected X or more From" requirement.
+        `
+    }, {
+        open: false,
         title: `v2.9.10 / ${getDate('2026-05-22T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where automatically selected choice was not activated automatically.

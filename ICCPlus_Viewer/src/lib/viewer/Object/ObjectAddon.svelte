@@ -334,7 +334,7 @@
                 bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(addonStyle.addonBorderColor)};`;
             }
             if (addonStyle.addonGradientIsOn && addonStyle.addonGradient) {
-                const gradient = addonStyle.addonGradient.split(')')[0];
+                const gradient = addonStyle.addonGradient.split(');')[0];
                 bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
             }
             if (addonStyle.addonDropShadowIsOn) {
@@ -352,7 +352,7 @@
                         bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.selFilterBorderColor)};`;
                     }
                     if (addonStyle.addonGradientIsOn && addonStyle.addonGradientOnSelect) {
-                        const gradient = addonStyle.addonGradientOnSelect.split(')')[0];
+                        const gradient = addonStyle.addonGradientOnSelect.split(');')[0];
                         bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                     }
                 }
@@ -364,7 +364,7 @@
                     if (!useDesign) {
                         bgStyles.borderRadius = `border-radius: ${rtl}${suffix} ${rtr}${suffix} ${rbr}${suffix} ${rbl}${suffix};`;
                         if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnSelect) {
-                            const gradient = objectStyle.objectGradientOnSelect.split(')')[0];
+                            const gradient = objectStyle.objectGradientOnSelect.split(');')[0];
                             bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                         }
                     }
@@ -399,11 +399,11 @@
             } else if (addon.isSelectable) {
                 if (useDesign) {
                     if (addonStyle.objectGradientIsOn && addonStyle.addonGradient) {
-                        const gradient = addonStyle.addonGradient.split(')')[0];
+                        const gradient = addonStyle.addonGradient.split(');')[0];
                         bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                     }
                 } else if (objectStyle.objectGradientIsOn && objectStyle.objectGradient) {
-                    const gradient = objectStyle.objectGradient.split(')')[0];
+                    const gradient = objectStyle.objectGradient.split(');')[0];
                     bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
                 if (filterStyle.unselFilterBlurIsOn) {
@@ -444,7 +444,7 @@
                     bgStyles.border = `border: ${addonStyle.addonBorderWidth}px ${addonStyle.addonBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
                 }
                 if (addonStyle.addonGradientIsOn && addonStyle.addonGradientOnReq) {
-                    const gradient = addonStyle.addonGradientOnReq.split(')')[0];
+                    const gradient = addonStyle.addonGradientOnReq.split(');')[0];
                     bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             } else if (addon.isSelectable) {
@@ -452,7 +452,7 @@
                     bgStyles.border = `border: ${objectStyle.objectBorderWidth}px ${objectStyle.objectBorderStyle} ${hexToRgba(filterStyle.reqFilterBorderColor)};`;
                 }
                 if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnReq) {
-                    const gradient = objectStyle.objectGradientOnReq.split(')')[0];
+                    const gradient = objectStyle.objectGradientOnReq.split(');')[0];
                     bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             }

@@ -2840,7 +2840,7 @@
                     if (!filterStyle.selOverlayOnImage) bgStyles.bgImage = '';
                 }
                 if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnSelect) {
-                    const gradient = objectStyle.objectGradientOnSelect.split(')')[0];
+                    const gradient = objectStyle.objectGradientOnSelect.split(');')[0];
                     bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             } else {
@@ -2872,7 +2872,7 @@
                     filters.sepia = ` sepia(${filterStyle.unselFilterGray}%)`;
                 }
                 if (objectStyle.objectGradientIsOn && objectStyle.objectGradient) {
-                    const gradient = objectStyle.objectGradient.split(')')[0];
+                    const gradient = objectStyle.objectGradient.split(');')[0];
                     bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
                 }
             }
@@ -2912,7 +2912,7 @@
                 if (!filterStyle.reqOverlayOnImage) bgStyles.bgImage = '';
             }
             if (objectStyle.objectGradientIsOn && objectStyle.objectGradientOnReq) {
-                const gradient = objectStyle.objectGradientOnReq.split(')')[0];
+                const gradient = objectStyle.objectGradientOnReq.split(');')[0];
                 bgStyles.bgImage = `background-image: linear-gradient(${gradient});`;
             }
         }

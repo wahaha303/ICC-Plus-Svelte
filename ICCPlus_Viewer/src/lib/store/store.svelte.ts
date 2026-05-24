@@ -8,7 +8,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.11';
+export const appVersion = '2.9.12';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -1690,7 +1690,7 @@ function evaluateNode(node: number | string | ExprNode): number {
         default: return left;
     }
 }
-export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap>) {
+export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> = activatedMap) {
     if (req.required) {
         switch (req.type) {
             case 'id':
