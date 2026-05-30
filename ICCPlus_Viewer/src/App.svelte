@@ -10,9 +10,6 @@
     import { app, AppSchema, bgmPlayer, currentTheme, externalImages, hasAvif, initBuildSaves, initializeApp, removeNulls, snackbarVariables, isMediaSupport } from '$lib/store/store.svelte';
     import { onDestroy, onMount } from 'svelte';
 
-    const loadingMessage = $state('Loading');
-	const progressText = $state('');
-	const showIndicator = $state(true);
     let boxEl: HTMLElement | null;
     let indicatorEl: HTMLElement | null;
     let sizeEl: HTMLElement | null;

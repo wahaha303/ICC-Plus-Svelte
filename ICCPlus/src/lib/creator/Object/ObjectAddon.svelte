@@ -1416,9 +1416,9 @@
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''}{overlay ? ' bg-overlay' : ''} {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(addon as SelectableAddon, row, e, true) : undefined}>
-        {#if addon.template >= 4 || addon.template === 1 || windowWidth <= 1280}
+        {#if addon.template >= 4 || addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
             <div>
-                {#if (addon.template === 1 || windowWidth <= 1280) && addon.image && !row.addonImageRemoved}
+                {#if (addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)) && addon.image && !row.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
@@ -1478,7 +1478,7 @@
                         <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
                     {/if}
                 {/if}
-                {#if addon.template === 5 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
+                {#if addon.template === 5 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx) && addon.image && !row.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}
@@ -1500,7 +1500,7 @@
                         <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} addon={addon as SelectableAddon} selectedOneMore={() => selectedOneMore(addon as SelectableAddon, row, options)} selectedOneLess={() => selectedOneLess(addon as SelectableAddon, row, options)} />
                     {/if}
                 {/if}
-                {#if addon.template === 4 && windowWidth > 1280 && addon.image && !row.addonImageRemoved}
+                {#if addon.template === 4 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx) && addon.image && !row.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                     {:else}

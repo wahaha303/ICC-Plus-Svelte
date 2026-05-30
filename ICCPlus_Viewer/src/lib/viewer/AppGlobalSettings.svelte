@@ -1,7 +1,7 @@
 <Dialog
     bind:open
     surface$style="width: 600px; max-width: calc(100vw - 32px);"
-    onSMUIDialogClosed={onclose}
+    onSMUIDialogClosed={beforeClose}
 >
     <Title class="text-left dialog-title" tabindex={0} autofocus>
         Settings
@@ -39,9 +39,17 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
+                                    <Switch bind:checked={() => app.minimizeTemplate ?? false, (e) => app.minimizeTemplate = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Place Image Template at Top on Small Screens
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
                                     <Switch bind:checked={() => app.enableHalfRow ?? false, (e) => app.enableHalfRow = e} color="secondary" class="switch-scale" />
                                     {#snippet label()}
-                                        Enable Half Row on Small Screens.
+                                        Enable Half Row on Small Screens
                                     {/snippet}
                                 </FormField>
                             </div>
@@ -284,5 +292,25 @@
                 row.isInfoRow = !check;
             }
         }
+    }
+
+    function beforeClose() {
+        const settings = {
+            objectsPerRow: app.objectsPerRow,
+            smallerScreenPx: app.smallerScreenPx,
+            minimizeTemplate: app.minimizeTemplate,
+            enableHalfRow: app.enableHalfRow,
+            buildAutoSaveIsOn: app.buildAutoSaveIsOn,
+            buildAutoSaveInterval: app.buildAutoSaveInterval,
+            preloadImages: app.preloadImages,
+            allowDeselect: app.allowDeselect,
+            isSingleFile: app.isSingleFile,
+            showMusicPlayer: app.showMusicPlayer,
+            cropperPosition: app.cropperPosition,
+            backPackWidth: app.backPackWidth
+        };
+
+        localStorage.setItem('settings', JSON.stringify(settings));
+        onclose();
     }
 </script>

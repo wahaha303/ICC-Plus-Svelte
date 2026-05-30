@@ -188,6 +188,9 @@
     }, {
         text: '< Less than',
         value: '5'
+    }, {
+        text: '!= Not Equal to',
+        value: '6'
     }];
     const moreOperators = [{
         text: "+ Plus",
@@ -214,6 +217,9 @@
     }, {
         text: '≤ Less or equal',
         value: '3'
+    }, {
+        text: '!= Not Equal to',
+        value: '4'
     }];
     let width = $state(0);
     let col6 = $derived.by(() => {

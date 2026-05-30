@@ -66,11 +66,11 @@
                                 </Select>
                                 <Textfield class="mb-half" bind:value={() => styling.addonImgBorderWidth ?? 0, (e) => styling.addonImgBorderWidth = e} label="Thickness of the border" type="number" suffix="px" variant="filled" />
                                 <div class="col-12 px-3">Size and Margin of the addon image</div>
-                                <Textfield class="mb-4" bind:value={() => styling.addonImageWidth ?? 0, (e) => styling.addonImageWidth = e} label="Width of the image inside of the row" type="number" suffix="%" variant="filled" />
-                                <Textfield class="mb-4" bind:value={() => styling.addonImageMarginTop ?? 0, (e) => styling.addonImageMarginTop = e} label="Space Between Top of row and Image" type="number" suffix="%" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.addonImageWidth ?? 0, (e) => styling.addonImageWidth = e} label="Width of the image inside of the addon" type="number" suffix="%" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.addonImageMarginTop ?? 0, (e) => styling.addonImageMarginTop = e} label="Space Between Top of Addon and Image" type="number" suffix="%" variant="filled" />
                                 <Textfield class="mb-half" bind:value={() => styling.addonImageMarginBottom ?? 0, (e) => styling.addonImageMarginBottom = e} label="Space Between Title and Image" type="number" suffix="%" variant="filled" />
                                 <div class="col-12 px-3">Works only with the Image Left/Right template</div>
-                                <Textfield class="mb-half" bind:value={() => styling.addonImageBoxWidth ?? 0, (e) => styling.addonImageBoxWidth = e} label="Width of the image box inside of row" type="number" suffix="%" variant="filled" onchange={() => styling.addonImageBoxWidth = Math.max(0, Math.min(100, (styling.addonImageBoxWidth ?? 50)))} input$min={0} input$max={100} />
+                                <Textfield class="mb-half" bind:value={() => styling.addonImageBoxWidth ?? 0, (e) => styling.addonImageBoxWidth = e} label="Width of the image box inside of addon" type="number" suffix="%" variant="filled" onchange={() => styling.addonImageBoxWidth = Math.max(0, Math.min(100, (styling.addonImageBoxWidth ?? 50)))} input$min={0} input$max={100} />
                             </div>
                             <div class="col-lg-4 col-12 gy-2">
                                 <div class="col-12 px-3">Rounded corners on the image</div>

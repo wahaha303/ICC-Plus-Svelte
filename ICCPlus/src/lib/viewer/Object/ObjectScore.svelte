@@ -9,7 +9,7 @@
                         {@html DOMPurify.sanitize(scoreValueText, sanitizeArg)}{#if iconAfterTextL}<img src={iconImage} class="mx-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">{/if}
                         {@html DOMPurify.sanitize(scoreAfterText, sanitizeArg)}{#if iconAfterTextR}<img src={iconImage} class="ms-1" style="width: {iconWidth}px; height: {iconHeight}px;" alt="">{/if}
                     {:else}
-                        {@html DOMPurify.sanitize(`${scoreBeforeText} ${scoreValueText} ${scoreAfterText}`, sanitizeArg)}
+                        {@html DOMPurify.sanitize(`${scoreFullText}`, sanitizeArg)}
                     {/if}
                 </p>
             {/key}
@@ -82,48 +82,47 @@
         return text.join(' ');
     });
     let scoreValueText = $derived.by(() => {
+        if (score.hideValue || !score.id) return '';
+
         let value = score.value;
-        if (!score.hideValue) {
-            if (score.isRandom && !score.setValue) {
-                return scoreRandomValue;
-            }
-            if (!score.setValue && score.useExpression && score.expValue) {
-                const point = pointTypeMap.get(score.id);
-                if (typeof point !== 'undefined') {
-                    try {
-                        const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
-                            const vPoint = pointTypeMap.get(vStr);
-                            if (typeof vPoint !== 'undefined') {
-                                return `${vPoint.startingSum}`;
-                            }
-                            throw new Error(`Undefined variable: "${vStr}"`);
-                        });
-                        value = evaluate(replaced);
-                    } catch (e) {
-                        console.error(e);
-                    }
+        if (score.isRandom && !score.setValue) {
+            return scoreRandomValue;
+        }
+        if (!score.setValue && score.useExpression && score.expValue) {
+            const point = pointTypeMap.get(score.id);
+            if (typeof point !== 'undefined') {
+                try {
+                    const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                        const vPoint = pointTypeMap.get(vStr);
+                        if (typeof vPoint !== 'undefined') {
+                            return `${vPoint.startingSum}`;
+                        }
+                        throw new Error(`Undefined variable: "${vStr}"`);
+                    });
+                    value = evaluate(replaced);
+                } catch (e) {
+                    console.error(e);
                 }
             }
-            if (discountTexts.show && score.appliedDiscount) {
-                if (discountTexts.replace && discountTexts.hideVal) return '';
-                if (typeof score.discountScore !== 'undefined') value = score.discountScore;
-            }
-            value = Math.abs(value);
-            if (!pointType?.allowFloat) {
-                value = Math.floor(value);
-            } else {
-                value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
-            }
-            if (data.isSelectableMultiple && data.isMultipleUseVariable && score.multiplyByTimes && score.displayMulScore) {
-                value = value * (data.multipleUseVariable + 1);
-            }
-            if (pointType?.plussOrMinusAdded) {
-                let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
-                return `${prefix}${value}`;
-            }
-            return `${value}`;
         }
-        return '';
+        if (discountTexts.show && score.appliedDiscount) {
+            if (discountTexts.replace && discountTexts.hideVal) return '';
+            if (typeof score.discountScore !== 'undefined') value = score.discountScore;
+        }
+        value = Math.abs(value);
+        if (!pointType?.allowFloat) {
+            value = Math.floor(value);
+        } else {
+            value = value % 1 === 0 ? value : parseFloat(value.toFixed(typeof pointType.decimalPlaces !== 'undefined' ? pointType.decimalPlaces : 2));
+        }
+        if (data.isSelectableMultiple && data.isMultipleUseVariable && score.multiplyByTimes && score.displayMulScore) {
+            value = value * (data.multipleUseVariable + 1);
+        }
+        if (pointType?.plussOrMinusAdded) {
+            let prefix = pointType.plussOrMinusInverted ? (checkNegative ? '-' : '+') : (checkNegative ? '+' : '-');
+            return `${prefix}${value}`;
+        }
+        return `${value}`;
     });
     let scoreRandomValue = $derived.by(() => {
         let maxVal = 0;
@@ -186,6 +185,14 @@
             return (typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value) < 0;
         }
         return score.value < 0;
+    });
+    let scoreFullText = $derived.by(() => {
+        let result = '';
+        if (scoreBeforeText) result += scoreBeforeText;
+        if (scoreValueText) result += (result ? ' ' : '') + scoreValueText;
+        if (scoreAfterText) result += (result ? ' ' : '') + scoreAfterText;
+
+        return result;
     });
     let scoreText = $derived.by(() => {
         const style: string[] = [];

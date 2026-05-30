@@ -224,6 +224,27 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.13 / ${getDate('2026-05-30T16:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where Addon Justify was not being applied.
+
+        <span style="color: green">Score</span>
+        - Fixed issue where Score displayed value when Point was not set.
+
+        <span style="color: green">Requirement</span>
+        - Added option to use != (Not Equal to) operator in Point Requirement.
+
+        <span style="color: green">Choice</span>
+        - Fixed issue where "Force Other Choice to Be Active" option did not affect already selected choices.
+        - Fixed issue where multi choice filter color was not applied in result row.
+        - Fixed issue where "This score is not allowed to go under 0" option was not applied when deselecting a choice.
+        - Fixed issue where "Force Other Choice to Be Active" did not work correctly for choices in rows with allowed choices set.
+
+        <span style="color: green">Global Settings</span>
+        - Added option to toggle displaying image template at top on small screens.
+        `
+    }, {
+        open: false,
         title: `v2.9.12 / ${getDate('2026-05-24T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where the page froze when using the "Hide Requirements When Met" option.

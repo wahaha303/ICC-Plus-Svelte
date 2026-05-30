@@ -4,7 +4,7 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
-                {#if choice.template >= 4 || choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate}
+                {#if choice.template >= 4 || choice.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx) || row.choicesShareTemplate}
                     <div class="d-column w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle || isSearch}
                             {#key oriTitleKey}
@@ -13,7 +13,7 @@
                                 </div>
                             {/key}
                         {/if}
-                        {#if (choice.template === 1 || windowWidth <= 1280 || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
+                        {#if (choice.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx) || row.choicesShareTemplate) && choice.image && !row.objectImageRemoved}
                             {#if choice.imageSourceTooltip}
                                 <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                             {:else}
@@ -29,7 +29,7 @@
                                 {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
                             {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                 {#each choice.scores as score}
@@ -37,7 +37,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
                             {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                 {#each choice.requireds as required}
@@ -45,9 +45,9 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
-                            {#if choice.template === 5 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
+                            {#if choice.template === 5 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx) && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
                                     <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
@@ -62,9 +62,9 @@
                                 {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                             {/if}
-                            {#if choice.template === 4 && windowWidth > 1280 && choice.image && !row.objectImageRemoved}
+                            {#if choice.template === 4 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx) && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
                                     <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
                                 {:else}
@@ -73,18 +73,18 @@
                             {/if}
                         </div>
                         {#if nAddons}
-                            <div class="row g-0 p-0 w-100{addonJustify}">
+                            <div class="d-column flex-fill p-0 w-100{addonJustify}">
                                 {#each nAddons as addon, i}
                                     <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
                                 {/each}
                             </div>
                         {/if}
                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                            <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                         {/if}
                     </div>
                     {#if sAddons}
-                        <div class="row g-0 p-0 w-100{addonJustify}">
+                        <div class="d-column flex-fill p-0 w-100{addonJustify}">
                             {#each sAddons as addon, i}
                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                             {/each}
@@ -92,158 +92,162 @@
                     {/if}
                 {:else}
                     {#if choice.template === 2}
-                        <div class="row g-0" style={sAddons ? objectFilter : undefined}>
-                            <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
-                                {#if choice.image && !row.objectImageRemoved}
-                                    {#if choice.imageSourceTooltip}
-                                        <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                    {:else}
-                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                        <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                            <div class="row g-0 p-0{choice.useSeperateAddon ? '' : ' flex-grow-1'}">
+                                <div class="p-0 align-items-center" style="max-width: {choiceImageBoxWidth}%">
+                                    {#if choice.image && !row.objectImageRemoved}
+                                        {#if choice.imageSourceTooltip}
+                                            <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                        {:else}
+                                            <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                        {/if}
                                     {/if}
-                                {/if}
-                            </div>
-                            <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
-                                {#if choice.title !== '' && !row.objectTitleRemoved}
-                                    {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
-                                    {#each choice.scores as score}
-                                        <ObjectScore score={score} row={row} choice={choice} />
-                                    {/each}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
-                                    {#each choice.requireds as required}
-                                        <ObjectRequired required={required} scoreText={scoreText} />
-                                    {/each}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if choice.text !== '' && !row.objectTextRemoved}
-                                    {#key choiceTextKey}
-                                        <p class="mb-0" style={objectText}>
-                                            {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
-                                        </p>
-                                    {/key}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if !choice.useSeperateAddon}
-                                    {#if nAddons}
-                                        <div class="row g-0 p-0 col w-100{addonJustify}">
-                                            {#each nAddons as addon, i}
-                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
-                                            {/each}
-                                        </div>
+                                </div>
+                                <div class="d-column p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
+                                    {#if choice.title !== '' && !row.objectTitleRemoved}
+                                        {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
                                     {/if}
-                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                                     {/if}
-                                {/if}
+                                    {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
+                                        {#each choice.scores as score}
+                                            <ObjectScore score={score} row={row} choice={choice} />
+                                        {/each}
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                    {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
+                                        {#each choice.requireds as required}
+                                            <ObjectRequired required={required} scoreText={scoreText} />
+                                        {/each}
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                    {#if choice.text !== '' && !row.objectTextRemoved}
+                                        {#key choiceTextKey}
+                                            <p class="mb-0" style={objectText}>
+                                                {@html DOMPurify.sanitize(replaceText(choice.text), sanitizeArg)}
+                                            </p>
+                                        {/key}
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                    {#if !choice.useSeperateAddon}
+                                        {#if nAddons}
+                                            <div class="d-column p-0 col w-100{addonJustify}">
+                                                {#each nAddons as addon, i}
+                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                                {/each}
+                                            </div>
+                                        {/if}
+                                        {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        {/if}
+                                    {/if}
+                                </div>
                             </div>
                             {#if choice.useSeperateAddon}
-                                <div class="col-12 text-center">
+                                <div class="d-column flex-fill text-center w-100">
                                     {#if nAddons}
-                                        <div class="row g-0 p-0 col w-100{addonJustify}">
+                                        <div class="d-column p-0 col w-100{addonJustify}">
                                             {#each nAddons as addon, i}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
                                             {/each}
                                         </div>
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                                     {/if}
                                 </div>
                             {/if}
                         </div>
                         {#if sAddons}
-                            <div class="row g-0 p-0 col w-100{addonJustify}">
+                            <div class="d-column flex-fill p-0 col w-100{addonJustify}">
                                 {#each sAddons as addon, i}
                                     <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                 {/each}
                             </div>
                         {/if}
                     {:else if choice.template === 3}
-                        <div class="row g-0" style={sAddons ? objectFilter : undefined}>
-                            <div class="col p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
-                                {#if choice.title !== '' && !row.objectTitleRemoved}
-                                    {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
-                                    {#each choice.scores as score}
-                                        <ObjectScore score={score} row={row} choice={choice} />
-                                    {/each}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
-                                    {#each choice.requireds as required}
-                                        <ObjectRequired required={required} scoreText={scoreText} />
-                                    {/each}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if choice.text !== '' && !row.objectTextRemoved}
-                                    {#key choiceTextKey}
-                                        <p class="mb-0" style={objectText}>
-                                            {@html DOMPurify.sanitize(choiceTextKey, sanitizeArg)}
-                                        </p>
-                                    {/key}
-                                {/if}
-                                {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                    <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
-                                {/if}
-                                {#if !choice.useSeperateAddon}
-                                    {#if nAddons}
-                                        <div class="row g-0 p-0 col w-100{addonJustify}">
-                                            {#each nAddons as addon, i}
-                                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
-                                            {/each}
-                                        </div>
+                        <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                            <div class="row g-0 p-0{choice.useSeperateAddon ? '' : ' flex-grow-1'}">
+                                <div class="d-column p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
+                                    {#if choice.title !== '' && !row.objectTitleRemoved}
+                                        {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
                                     {/if}
-                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                                     {/if}
-                                {/if}
-                            </div>
-                            <div class="col p-0 text-center" style="max-width: {choiceImageBoxWidth}%">
-                                {#if choice.image && !row.objectImageRemoved}
-                                    {#if choice.imageSourceTooltip}
-                                        <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
-                                    {:else}
-                                        <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                    {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
+                                        {#each choice.scores as score}
+                                            <ObjectScore score={score} row={row} choice={choice} />
+                                        {/each}
                                     {/if}
-                                {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                    {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
+                                        {#each choice.requireds as required}
+                                            <ObjectRequired required={required} scoreText={scoreText} />
+                                        {/each}
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                    {#if choice.text !== '' && !row.objectTextRemoved}
+                                        {#key choiceTextKey}
+                                            <p class="mb-0" style={objectText}>
+                                                {@html DOMPurify.sanitize(choiceTextKey, sanitizeArg)}
+                                            </p>
+                                        {/key}
+                                    {/if}
+                                    {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                    {/if}
+                                    {#if !choice.useSeperateAddon}
+                                        {#if nAddons}
+                                            <div class="d-column p-0 col w-100{addonJustify}">
+                                                {#each nAddons as addon, i}
+                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                                {/each}
+                                            </div>
+                                        {/if}
+                                        {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
+                                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        {/if}
+                                    {/if}
+                                </div>
+                                <div class="p-0 align-items-center" style="max-width: {choiceImageBoxWidth}%">
+                                    {#if choice.image && !row.objectImageRemoved}
+                                        {#if choice.imageSourceTooltip}
+                                            <img use:tooltip={choice.imageSourceTooltip} oncontextmenu={copyTooltip} src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                        {:else}
+                                            <img src={choice.image} style={objectImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
+                                        {/if}
+                                    {/if}
+                                </div>
                             </div>
                             {#if choice.useSeperateAddon}
-                                <div class="col-12 text-center">
+                                <div class="d-column flex-fill text-center w-100">
                                     {#if nAddons}
-                                        <div class="row g-0 p-0 col w-100{addonJustify}">
+                                        <div class="d-column flex-fill p-0 col w-100{addonJustify}">
                                             {#each nAddons as addon, i}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
                                             {/each}
                                         </div>
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                        <ObjectMultiChoice isEnabled={isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
                                     {/if}
                                 </div>
                             {/if}
                         </div>
                         {#if sAddons}
-                            <div class="row g-0 p-0 col w-100{addonJustify}">
+                            <div class="d-column flex-fill p-0 col w-100{addonJustify}">
                                 {#each sAddons as addon, i}
                                     <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                 {/each}

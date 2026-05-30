@@ -1,7 +1,7 @@
 {#if !data.hideCounterUntilSelect || data.multipleUseVariable !== 0}
     <div class="d-row justify-space-around w-100 multi-counter">
         {#if !data.hideCounter}
-            <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterMinus}>
+            <IconButton class="counter-icons" disabled={!enabled} onclickcapture={clickCounterMinus}>
                 <i class="mdi mdi-minus" style={multiChoiceButton}></i>
             </IconButton>
         {/if}
@@ -9,14 +9,14 @@
             {multipleNum}
         </div>
         {#if !data.hideCounter}
-            <IconButton class="counter-icons" disabled={!isEnabled} onclickcapture={clickCounterPlus}>
+            <IconButton class="counter-icons" disabled={!enabled} onclickcapture={clickCounterPlus}>
                 <i class="mdi mdi-plus" style={multiChoiceButton}></i>
             </IconButton>
         {/if}
     </div>
     {#if data.useSlider}
         <div class="px-5 w-100 multi-slider">
-            <Slider bind:value={sliderNum} min={data.numMultipleTimesMinus} max={data.numMultipleTimesPluss} step={1} class="mx-2" onpointerup={handleSliderUp} disabled={!isEnabled} discrete />
+            <Slider bind:value={sliderNum} min={data.numMultipleTimesMinus} max={data.numMultipleTimesPluss} step={1} class="mx-2" onpointerup={handleSliderUp} disabled={!enabled} discrete />
         </div>
     {/if}
 {/if}
@@ -44,6 +44,7 @@
             return 0;
         }
     });
+    let enabled = $derived(isEnabled && !row.isInfoRow && !choice.isNotSelectable);
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let multiChoiceStyle = $derived(getStyling('privateMultiChoiceIsOn', row, choice));
@@ -112,7 +113,7 @@
     }
 
     function clickNumber(e: Event) {
-        if (isEnabled) {
+        if (enabled) {
             dlgVariables.currentDialog = 'selectDialog';
             dlgVariables.choice = choice;
             dlgVariables.func = handleManually;

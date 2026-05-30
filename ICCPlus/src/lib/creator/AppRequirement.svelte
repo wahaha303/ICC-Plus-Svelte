@@ -139,6 +139,9 @@
     }, {
         text: '< Less than',
         value: '5'
+    }, {
+        text: '!= Not Equal to',
+        value: '6'
     }];
     let pointRequire = $state('1');
     let pointComparisonRequire = $state('1');

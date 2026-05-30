@@ -1,9 +1,9 @@
 <div class="row-{row.id}-bg text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
     {#if isEnabled}
         <div class="row gx-0 row-{row.id} row-{row.id}-header{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" style={row.title !== '' ? rowBackground : ''}>
-            {#if row.template >= 4 || row.template === 1 || windowWidth <= 1280}
+            {#if row.template >= 4 || row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
                 <div class="col-12 m-0 p-0">
-                    {#if (row.template === 1 || windowWidth <= 1280)}
+                    {#if (row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx))}
                         {#if row.isButtonRow}
                             <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
@@ -19,7 +19,7 @@
                     {#if row.title !== ''}
                         {#key rowTitleKey}<h2 class="mb-0" style={rowTitle}>{@html DOMPurify.sanitize(rowTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
-                    {#if row.template === 5 && windowWidth > 1280}
+                    {#if row.template === 5 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx)}
                         {#if row.isButtonRow}
                             <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
@@ -39,7 +39,7 @@
                             </p>
                         {/key}
                     {/if}
-                    {#if row.template === 4 && windowWidth > 1280}
+                    {#if row.template === 4 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx)}
                         {#if row.isButtonRow}
                             <Button class="row-button" onclickcapture={buttonActivate} disabled={!row.buttonType && (typeof row.buttonId !== 'undefined' && activatedMap.has(row.buttonId)) || isButtonPressable} style={rowButton} variant="raised" >
                                 <Label>{@html typeof row.buttonText !== 'undefined' ? row.buttonText : 'Click'}</Label>
