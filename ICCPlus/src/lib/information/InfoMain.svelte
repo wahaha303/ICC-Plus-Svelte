@@ -224,6 +224,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.14 / ${getDate('2026-06-01T10:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where addon per row was not being applied.
+
+        <span style="color: green">Choice</span>
+        - Fixed issue where scores using the "Multiply by Number of Selections" option were not updated correctly.
+        `
+    }, {
+        open: false,
         title: `v2.9.13 / ${getDate('2026-05-30T16:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where Addon Justify was not being applied.

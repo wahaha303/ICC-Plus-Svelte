@@ -10,7 +10,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.13';
+export const appVersion = '2.9.14';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4371,10 +4371,12 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
 
                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                     let isChangedMul = false;
+                    let totalScore = 0;
                     for (let k = mul - 1; k >= 0; k--) {
                         if (!aChoice.isActive || !aScore.isActiveMul) break;
                         if (!aScore.isActiveMul[k]) continue;
-                        if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                        let tmpScore = aScore.multiplyByTimes ? aScore.tmpDisScore * (k + 1) : aScore.tmpDisScore;
+                        if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
                             if (aChoice.forcedActivated && aChoice.isActive) {
                                 aChoice.forcedActivated = false;
                                 aChoice.numMultipleTimesMinus--;
@@ -4384,18 +4386,18 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                                 selectedOneLess(aChoice, aRow, newOptions);
                             }
                         } else {
-                            point.startingSum += aScore.tmpDisScore;
+                            point.startingSum += tmpScore;
+                            totalScore += tmpScore;
                         }
                         isChangedMul = true;
                     }
 
-                    const tmpDisScore = aScore.tmpDisScore;
                     delete aScore.isChangeDiscount;
                     delete aScore.tmpDisScore;
 
                     if (!aChoice.isActive) break;
 
-                    thisTmpScores.set(aScore.id, tmpDisScore);
+                    thisTmpScores.set(aScore.id, totalScore);
 
                     if (isChangedMul) {
                         isChanged = localChoice.id !== aChoice.id;
@@ -4497,7 +4499,8 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
 
                             for (let l = mul - 1; l >= 0; l--) {
                                 if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                    const sValue = aScore.multiplyByTimes ? scoreVal * (l + 1) : scoreVal;
+                                    if (point.belowZeroNotAllowed && point.startingSum + sValue < 0) {
                                         if (aChoice.forcedActivated) {
                                             aChoice.forcedActivated = false;
                                             aChoice.numMultipleTimesMinus--;
@@ -4507,8 +4510,8 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                                             selectedOneLess(aChoice, aRow, newOptions);
                                         }
                                     } else {
-                                        point.startingSum += scoreVal;
-                                        thisTmpScores.set(aScore.id, scoreVal);
+                                        point.startingSum += sValue;
+                                        thisTmpScores.set(aScore.id, sValue);
                                         aScore.isActiveMul[l] = false;
                                     }
                                 }
@@ -4549,7 +4552,8 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                             if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
                             for (let l = mul - 1; l >= 0; l--) {
                                 if (!aScore.isActiveMul[l]) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                    const sValue = aScore.multiplyByTimes ? scoreVal * (l + 1) : scoreVal;
+                                    if (point.belowZeroNotAllowed && point.startingSum + sValue < 0) {
                                         if (aChoice.forcedActivated && aChoice.isActive) {
                                             aChoice.forcedActivated = false;
                                             aChoice.numMultipleTimesMinus--;
@@ -4559,8 +4563,8 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                                             selectedOneLess(aChoice, aRow, newOptions);
                                         }
                                     } else {
-                                        point.startingSum -= scoreVal;
-                                        thisTmpScores.set(aScore.id, scoreVal);
+                                        point.startingSum -= sValue;
+                                        thisTmpScores.set(aScore.id, sValue);
                                         aScore.isActiveMul[l] = true;
                                     }
                                 }
@@ -4612,7 +4616,8 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
 
                             for (let l = mul - 1; l >= 0; l--) {
                                 if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
+                                    const sValue = aScore.multiplyByTimes ? expVal * (l + 1) : expVal;
+                                    if (point.belowZeroNotAllowed && point.startingSum + sValue < 0) {
                                         if (aChoice.forcedActivated && aChoice.isActive) {
                                             aChoice.forcedActivated = false;
                                             aChoice.numMultipleTimesMinus--;
@@ -4622,8 +4627,8 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                                             selectedOneLess(aChoice, aRow, newOptions);
                                         }
                                     } else {
-                                        point.startingSum += expVal;
-                                        thisTmpScores.set(aScore.id, expVal);
+                                        point.startingSum += sValue;
+                                        thisTmpScores.set(aScore.id, sValue);
                                     }
                                     isChanged = true;
                                 }
@@ -4704,9 +4709,11 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                 
                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                     let isChangedMul = false;
+                    let totalScore = 0;
                     for (let k = mul - 1; k >= 0; k--) {
                         if (aChoice.isActive && aScore.isActiveMul && aScore.isActiveMul[k]) {
-                            if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
+                            let tmpScore = aScore.multiplyByTimes ? aScore.tmpDisScore * (k + 1) : aScore.tmpDisScore;
+                            if (point.belowZeroNotAllowed && point.startingSum + tmpScore < 0) {
                                 if (aChoice.forcedActivated && aChoice.isActive) {
                                     aChoice.forcedActivated = false;
                                     aChoice.numMultipleTimesMinus--;
@@ -4716,7 +4723,8 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                                     selectedOneLess(aChoice, aRow, newOptions);
                                 }
                             } else {
-                                point.startingSum += aScore.tmpDisScore;
+                                point.startingSum += tmpScore;
+                                totalScore += tmpScore;
                             }
                             isChangedMul = true;
                         }
@@ -4726,7 +4734,7 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                         isChanged = true;
                     }
 
-                    thisTmpScores.set(aScore.id, aScore.tmpDisScore);
+                    thisTmpScores.set(aScore.id, totalScore);
                 } else if (!aChoice.isSelectableMultiple) {
                     if (point.belowZeroNotAllowed && point.startingSum + aScore.tmpDisScore < 0) {
                         if (aChoice.forcedActivated) delete aChoice.forcedActivated;
@@ -4835,7 +4843,8 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                             
                             for (let l = mul - 1; l >= 0; l--) {
                                 if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                    const sValue = aScore.multiplyByTimes ? scoreVal * (l + 1) : scoreVal;
+                                    if (point.belowZeroNotAllowed && point.startingSum + sValue < 0) {
                                         if (aChoice.forcedActivated && aChoice.isActive) {
                                             aChoice.forcedActivated = false;
                                             aChoice.numMultipleTimesMinus--;
@@ -4845,8 +4854,8 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                                             selectedOneLess(aChoice, aRow, newOptions);
                                         }
                                     } else {
-                                        point.startingSum += scoreVal;
-                                        thisTmpScores.set(aScore.id, scoreVal);
+                                        point.startingSum += sValue;
+                                        thisTmpScores.set(aScore.id, sValue);
                                         aScore.isActiveMul[l] = false;
                                     }
                                 }
@@ -4887,7 +4896,9 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                             if (typeof aScore.isActiveMul === 'undefined') aScore.isActiveMul = [];
                             for (let l = mul - 1; l >= 0; l--) {
                                 if (!aScore.isActiveMul[l]) {
-                                    if (point.belowZeroNotAllowed && point.startingSum + scoreVal < 0) {
+                                    const sValue = aScore.multiplyByTimes ? scoreVal * (l + 1) : scoreVal;
+                                    console.log(sValue);
+                                    if (point.belowZeroNotAllowed && point.startingSum + sValue < 0) {
                                         if (aChoice.forcedActivated && aChoice.isActive) {
                                             aChoice.forcedActivated = false;
                                             aChoice.numMultipleTimesMinus--;
@@ -4897,8 +4908,8 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                                             selectedOneLess(aChoice, aRow, newOptions);
                                         }
                                     } else {
-                                        point.startingSum -= scoreVal;
-                                        thisTmpScores.set(aScore.id, scoreVal);
+                                        point.startingSum -= sValue;
+                                        thisTmpScores.set(aScore.id, sValue);
                                         aScore.isActiveMul[l] = true;
                                     }
                                 }
@@ -4943,7 +4954,8 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
 
                     for (let l = mul - 1; l >= 0; l--) {
                         if (typeof aScore.isActiveMul !== 'undefined' && aScore.isActiveMul[l]) {
-                            if (point.belowZeroNotAllowed && point.startingSum + expVal < 0) {
+                            const sValue = aScore.multiplyByTimes ? expVal * (l + 1) : expVal;
+                            if (point.belowZeroNotAllowed && point.startingSum + sValue < 0) {
                                 if (aChoice.forcedActivated && aChoice.isActive) {
                                     aChoice.forcedActivated = false;
                                     aChoice.numMultipleTimesMinus--;
@@ -4953,8 +4965,8 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                                     selectedOneLess(aChoice, aRow, newOptions);
                                 }
                             } else {
-                                point.startingSum += expVal;
-                                thisTmpScores.set(aScore.id, expVal);
+                                point.startingSum += sValue;
+                                thisTmpScores.set(aScore.id, sValue);
                             }
                             isChanged = true;
                         }

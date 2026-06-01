@@ -55,8 +55,8 @@
                             <Textfield class="mb-half" bind:value={() => styling.rowImgBorderWidth ?? 0, (e) => styling.rowImgBorderWidth = e} label="Thickness of the border" type="number" suffix="px" variant="filled" />
                             <div class="col-12 px-3">Size and Margin of the row image</div>
                             <Textfield class="mb-4" bind:value={() => styling.rowImageWidth ?? 0, (e) => styling.rowImageWidth = e} label="Width of the image inside of the row" type="number" suffix="%" variant="filled" />
-                            <Textfield class="mb-4" bind:value={() => styling.rowImageMarginTop ?? 0, (e) => styling.rowImageMarginTop = e} label="Space Between Top of row and Image" type="number" suffix="%" variant="filled" />
-                            <Textfield class="mb-half" bind:value={() => styling.rowImageMarginBottom ?? 0, (e) => styling.rowImageMarginBottom = e} label="Space Between Title and Image" type="number" suffix="%" variant="filled" />
+                            <Textfield class="mb-4" bind:value={() => styling.rowImageMarginTop ?? 0, (e) => styling.rowImageMarginTop = e} label="Margin Top" type="number" suffix="%" variant="filled" />
+                            <Textfield class="mb-half" bind:value={() => styling.rowImageMarginBottom ?? 0, (e) => styling.rowImageMarginBottom = e} label="Margin Bottom" type="number" suffix="%" variant="filled" />
                             <div class="col-12 px-3">Works only with the Image Left/Right template</div>
                             <Textfield class="mb-half" bind:value={() => styling.rowImageBoxWidth ?? 0, (e) => styling.rowImageBoxWidth = e} label="Width of the image box inside of row" type="number" suffix="%" variant="filled" onchange={() => styling.rowImageBoxWidth = Math.max(0, Math.min(100, (styling.rowImageBoxWidth ?? 50)))} input$min={0} input$max={100} />
                         </div>

@@ -18,7 +18,27 @@
             <CardContent>
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-lg-4 col-12 gy-2">
+                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                            <div class="col-12">Bar Text Color</div>
+                            <ColorPicker bind:hex={() => styling.barTextColor ?? '#000000', (e) => styling.barTextColor = e} components={ChromeVariant} sliderDirection="horizontal"/>
+                        </div>
+                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                            <div class="col-12">Bar Points Color Positive</div>
+                            <ColorPicker bind:hex={() => styling.barPointPos ?? '#000000', (e) => styling.barPointPos = e} components={ChromeVariant} sliderDirection="horizontal"/>
+                        </div>
+                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                            <div class="col-12">Bar Points Color Negative</div>
+                            <ColorPicker bind:hex={() => styling.barPointNeg ?? '#000000', (e) => styling.barPointNeg = e} components={ChromeVariant} sliderDirection="horizontal"/>
+                        </div>
+                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                            <div class="col-12">Bar Background Color</div>
+                            <ColorPicker bind:hex={() => styling.barBackgroundColor ?? '#000000', (e) => styling.barBackgroundColor = e} components={ChromeVariant} sliderDirection="horizontal"/>
+                        </div>
+                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                            <div class="col-12">Bar Icon Color</div>
+                            <ColorPicker bind:hex={() => styling.barIconColor ?? '#000000', (e) => styling.barIconColor = e} components={ChromeVariant} sliderDirection="horizontal"/>
+                        </div>
+                        <div class="col-lg-6 col-12 gy-2">
                             <div class="col-12 px-3">Style of text inside the point-bar</div>
                             <Textfield class="mb-4" bind:value={() => styling.barTextPadding ?? 0, (e) => styling.barTextPadding = e} label="Bar Text Padding" type="number" suffix="px" variant="filled" />
                             <Textfield class="mb-4" bind:value={() => styling.barTextMargin ?? 0, (e) => styling.barTextMargin = e} label="Bar Text Margin" type="number" suffix="px" variant="filled" />
@@ -37,24 +57,12 @@
                                     {/each}
                                 </Select>
                             {/if}
+                        </div>
+                        <div class="col-lg-6 col-12 gy-2">
                             <div class="col-12 px-3">Style of text inside the point-bar</div>
                             <Textfield class="mb-4" bind:value={() => styling.barPadding ?? 0, (e) => styling.barPadding = e} label="Bar Padding" type="number" suffix="px" variant="filled" />
                             <Textfield class="mb-4" bind:value={() => styling.barMargin ?? 0, (e) => styling.barMargin = e} label="Bar Margin" type="number" suffix="px" variant="filled" />
                             <Textfield class="mb-4" bind:value={() => styling.barTextSize ?? 0, (e) => styling.barTextSize = e} label="Bar Text Size" type="number" suffix="px" variant="filled" />
-                        </div>
-                        <div class="col-lg-4 col-12 gy-2 text-center">
-                            <div class="col-12 px-3">Bar Text Color</div>
-                            <ColorPicker bind:hex={() => styling.barTextColor ?? '#000000', (e) => styling.barTextColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false} --picker-height="100px" />
-                            <div class="col-12 px-3">Bar Points Color Positive</div>
-                            <ColorPicker bind:hex={() => styling.barPointPos ?? '#000000', (e) => styling.barPointPos = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false}  --picker-height="100px"/>
-                            <div class="col-12 px-3">Bar Points Color Negative</div>
-                            <ColorPicker bind:hex={() => styling.barPointNeg ?? '#000000', (e) => styling.barPointNeg = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false}  --picker-height="100px"/>
-                        </div>
-                        <div class="col-lg-4 col-12 gy-2 text-center">
-                            <div class="col-12 px-3">Bar Background Color</div>
-                            <ColorPicker bind:hex={() => styling.barBackgroundColor ?? '#000000', (e) => styling.barBackgroundColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false}  --picker-height="100px"/>
-                            <div class="col-12 px-3">Bar Icon Color</div>
-                            <ColorPicker bind:hex={() => styling.barIconColor ?? '#000000', (e) => styling.barIconColor = e} components={ChromeVariant} sliderDirection="horizontal" isDialog={false}  --picker-height="100px"/>
                         </div>
                     </div>
                 </div>

@@ -135,6 +135,21 @@ img {
 .justify-space-between {
     justify-content: space-between;
 }
+.align-content--start {
+    align-content: flex-start;
+}
+.align-content--center {
+    align-content: center;
+}
+.align-content--end {
+    align-content: flex-end;
+}
+.align-content--space-around {
+    align-content: space-around;
+}
+.align-content--space-between {
+    align-content: space-between;
+}
 .dialog-actions--btn {
     color: #43a047;
 }

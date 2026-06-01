@@ -55,8 +55,8 @@
                             <Textfield class="mb-half" bind:value={() => styling.objectImgBorderWidth ?? 0, (e) => styling.objectImgBorderWidth = e} label="Thickness of the border" type="number" suffix="px" variant="filled" />
                             <div class="col-12 px-3">Size and Margin of the choice image</div>
                             <Textfield class="mb-4" bind:value={() => styling.objectImageWidth ?? 0, (e) => styling.objectImageWidth = e} label="Width of the image inside of the choice" type="number" suffix="%" variant="filled" />
-                            <Textfield class="mb-4" bind:value={() => styling.objectImageMarginTop ?? 0, (e) => styling.objectImageMarginTop = e} label="Space Between Top of Choice and Image" type="number" suffix="%" variant="filled" />
-                            <Textfield class="mb-half" bind:value={() => styling.objectImageMarginBottom ?? 0, (e) => styling.objectImageMarginBottom = e} label="Space Between Title and Image" type="number" suffix="%" variant="filled" />
+                            <Textfield class="mb-4" bind:value={() => styling.objectImageMarginTop ?? 0, (e) => styling.objectImageMarginTop = e} label="Margin Top" type="number" suffix="%" variant="filled" />
+                            <Textfield class="mb-half" bind:value={() => styling.objectImageMarginBottom ?? 0, (e) => styling.objectImageMarginBottom = e} label="Margin Bottom" type="number" suffix="%" variant="filled" />
                             <div class="col-12 px-3">Works only with the Image Left/Right template</div>
                             <Textfield class="mb-half" bind:value={() => styling.objectImageBoxWidth ?? 0, (e) => styling.objectImageBoxWidth = e} label="Width of the image box inside of choice" type="number" suffix="%" variant="filled" onchange={() => styling.objectImageBoxWidth = Math.max(0, Math.min(100, (styling.objectImageBoxWidth ?? 50)))} input$min={0} input$max={100} />
                         </div>

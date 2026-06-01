@@ -73,10 +73,12 @@
                             {/if}
                         </div>
                         {#if nAddons}
-                            <div class="d-column flex-fill p-0 w-100{addonJustify}">
-                                {#each nAddons as addon, i}
-                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
-                                {/each}
+                            <div class="d-column flex-fill p-0 w-100">
+                                <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
+                                    {#each nAddons as addon, i}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                    {/each}
+                                </div>
                             </div>
                         {/if}
                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
@@ -84,10 +86,12 @@
                         {/if}
                     </div>
                     {#if sAddons}
-                        <div class="d-column flex-fill p-0 w-100{addonJustify}">
-                            {#each sAddons as addon, i}
-                                <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
-                            {/each}
+                        <div class="d-column flex-fill p-0 w-100">
+                            <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
+                                {#each sAddons as addon, i}
+                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                {/each}
+                            </div>
                         </div>
                     {/if}
                 {:else}
@@ -138,10 +142,12 @@
                                     {/if}
                                     {#if !choice.useSeperateAddon}
                                         {#if nAddons}
-                                            <div class="d-column p-0 col w-100{addonJustify}">
-                                                {#each nAddons as addon, i}
-                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
-                                                {/each}
+                                            <div class="d-column flex-fill p-0 w-100">
+                                                <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
+                                                    {#each nAddons as addon, i}
+                                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                                    {/each}
+                                                </div>
                                             </div>
                                         {/if}
                                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
@@ -153,7 +159,7 @@
                             {#if choice.useSeperateAddon}
                                 <div class="d-column flex-fill text-center w-100">
                                     {#if nAddons}
-                                        <div class="d-column p-0 col w-100{addonJustify}">
+                                        <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
                                             {#each nAddons as addon, i}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
                                             {/each}
@@ -166,10 +172,12 @@
                             {/if}
                         </div>
                         {#if sAddons}
-                            <div class="d-column flex-fill p-0 col w-100{addonJustify}">
-                                {#each sAddons as addon, i}
-                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
-                                {/each}
+                            <div class="d-column flex-fill p-0 w-100">
+                                <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
+                                    {#each sAddons as addon, i}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                    {/each}
+                                </div>
                             </div>
                         {/if}
                     {:else if choice.template === 3}
@@ -210,10 +218,12 @@
                                     {/if}
                                     {#if !choice.useSeperateAddon}
                                         {#if nAddons}
-                                            <div class="d-column p-0 col w-100{addonJustify}">
-                                                {#each nAddons as addon, i}
-                                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
-                                                {/each}
+                                            <div class="d-column flex-fill p-0 w-100">
+                                                <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
+                                                    {#each nAddons as addon, i}
+                                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
+                                                    {/each}
+                                                </div>
                                             </div>
                                         {/if}
                                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
@@ -234,7 +244,7 @@
                             {#if choice.useSeperateAddon}
                                 <div class="d-column flex-fill text-center w-100">
                                     {#if nAddons}
-                                        <div class="d-column flex-fill p-0 col w-100{addonJustify}">
+                                        <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
                                             {#each nAddons as addon, i}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} />
                                             {/each}
@@ -247,10 +257,12 @@
                             {/if}
                         </div>
                         {#if sAddons}
-                            <div class="d-column flex-fill p-0 col w-100{addonJustify}">
-                                {#each sAddons as addon, i}
-                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
-                                {/each}
+                            <div class="d-column flex-fill p-0 w-100">
+                                    <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
+                                    {#each sAddons as addon, i}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                    {/each}
+                                </div>
                             </div>
                         {/if}
                     {/if}
@@ -338,7 +350,7 @@
         }
         return !filterStyle.unselFilterVisibleIsOn;
     });
-    let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}` : '');
+    let addonJustify = $derived(choice.addonJustify ? ` align-content--${choice.addonJustify} justify-${choice.addonJustify}` : '');
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived(objectStyle.objectHeight && !isSearch);
     let oriRow = $derived.by(() => {
