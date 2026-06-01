@@ -25,10 +25,10 @@
     });
 
     function autoModeWatcher() {
-		let t = localStorage.getItem('theme') as string;
-        let themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
-        let themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
-        let isSupport = isMediaSupport();
+		const t = localStorage.getItem('theme') as string;
+        const themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
+        const themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
+        const isSupport = isMediaSupport();
 
 		if (t === 'dark') {
             if (isSupport) {

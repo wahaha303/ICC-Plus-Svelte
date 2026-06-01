@@ -224,9 +224,13 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.9.14 / ${getDate('2026-06-01T10:00:00Z')}`,
+        title: `v2.9.14 / ${getDate('2026-06-01T13:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where addon per row was not being applied.
+
+        <span style="color: green">Row</span>
+        - Fixed issue where "Deselect choices if row doesn't meet requirements" option was not working correctly.
+        - Fixed issue where row button was not working correctly.
 
         <span style="color: green">Choice</span>
         - Fixed issue where scores using the "Multiply by Number of Selections" option were not updated correctly.

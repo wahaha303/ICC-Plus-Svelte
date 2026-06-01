@@ -418,15 +418,15 @@
         <div class="row gx-0 m-0 p-0{rowJustify}">
             {#if row.isResultRow}
                 {#each resultRow as val, i}
-                    <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} />
+                    <AppObject row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} />
                 {/each}
             {:else if row.isGroupRow}
                 {#each groupRow as val, i}
-                    <AppObject bind:this={choiceRef} row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
+                    <AppObject row={row} choice={val.choice as Choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
                 {/each}
             {:else}
                 {#each row.objects as choice, i}
-                    <AppObject bind:this={choiceRef} row={row} choice={choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
+                    <AppObject row={row} choice={choice} index={i} windowWidth={windowWidth} bCreatorMode={bCreatorMode} preloadImages={preloadImages} isBackpack={isBackpack} mainDiv={mainDiv} />
                 {/each}
             {/if}
             {#if (bCreatorMode && row.isEditModeOn && !row.isResultRow && !row.isGroupRow)}
@@ -458,7 +458,7 @@
 	import IconButton from '@smui/icon-button';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices, imgDialog } from '$lib/store/store.svelte';
+    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices, imgDialog, selectObject } from '$lib/store/store.svelte';
     import type { Choice, SelectableAddon, ChoiceOptions, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { tick } from 'svelte';
@@ -516,8 +516,9 @@
     }, {
         value: 'space-between'
     }];
-    const blankOptions: ChoiceOptions = {linkedObjects: []}
-    let choiceRef = $state<any>();
+    const blankOptions: ChoiceOptions = {linkedObjects: []};
+    const deselectOptions: ChoiceOptions = {linkedObjects: [], isOverImg: true, isOverDlg: true};
+    
     let backgroundStyle = $derived(getStyling('privateBackgroundIsOn', row));
     let rowImageStyle = $derived(getStyling('privateRowImageIsOn', row));
     let rowStyle = $derived(getStyling('privateRowIsOn', row));
@@ -779,16 +780,16 @@
                             const mul = choice.multipleUseVariable;
                             if (mul > 0) {
                                 for (let j = 0; j < mul; j++) {
-                                    selectedOneLess(choice, row, choiceRef.options);
+                                    selectedOneLess(choice, row, deselectOptions);
                                 }
                             } else if (mul < 0) {
                                 for (let j = mul; j < 0; j++) {
-                                    selectedOneMore(choice, row, choiceRef.options);
+                                    selectedOneMore(choice, row, deselectOptions);
                                 }
                             }
                         }
                     } else {
-                        choiceRef.activateObject(choice, row);
+                        deselectObject(choice, row, deselectOptions);
                     }
                 }
             }
@@ -970,18 +971,13 @@
                             }
                             if (val.multiple === 0) {
                                 if (aChoice.isActive) {
-                                    const newOptions = {...blankOptions};
-                                    newOptions.isOverDlg = true;
-                                    newOptions.isOverImg = true;
-                                    deselectObject(aChoice, aRow, newOptions);
+                                    deselectObject(aChoice, aRow, deselectOptions);
                                 }
                             } else if (val.multiple > 0) {
-                                for (let i = 0; i < val.multiple; i++) {
+                                const mul = val.multiple;
+                                for (let i = 0; i < mul; i++) {
                                     if (aChoice.isActive) {
-                                        const newOptions = {...blankOptions};
-                                        newOptions.isOverDlg = true;
-                                        newOptions.isOverImg = true;
-                                        selectedOneLess(aChoice, aRow, newOptions);
+                                        selectedOneLess(aChoice, aRow, deselectOptions);
                                     }
                                 }
                             }
@@ -999,10 +995,9 @@
         }
 
         if (row.buttonRandom) {
-            const selectedIndexes: number[] = [];
-            const validChoices = row.objects.filter(choice => checkRequirements(choice.requireds) && (!choice.isNotSelectable || row.allowActivateUnselectable));
-
             if (row.isWeightedRandom) {
+                const validChoices = row.objects.filter(choice => checkRequirements(choice.requireds) && (!choice.isNotSelectable || row.allowActivateUnselectable) && (!choice.isActive || !row.onlyUnselectedChoices));
+                if (validChoices.length === 0) return;
                 let totalWeight = 0;
 
                 for (let i = 0; i < validChoices.length; i++) {
@@ -1026,12 +1021,16 @@
                             if (rnd < runningTotal) {
                                 if (vChoice.isSelectableMultiple && vChoice.isMultipleUseVariable && vChoice.numMultipleTimesPluss) {
                                     if (vChoice.numMultipleTimesPluss > vChoice.multipleUseVariable) {
-                                        selectedOneMore(vChoice, row, choiceRef.options);
+                                        selectedOneMore(vChoice, row, blankOptions);
                                     } else {
-                                        selectedOneLess(vChoice, row, choiceRef.options);
+                                        selectedOneLess(vChoice, row, deselectOptions);
                                     }
                                 } else {
-                                    choiceRef.activateObject(vChoice, row);
+                                    if (vChoice.isActive) {
+                                        deselectObject(vChoice, row, deselectOptions);
+                                    } else {
+                                        selectObject(vChoice, row, blankOptions);
+                                    }
                                 }
                                 break;
                             }
@@ -1040,11 +1039,15 @@
                 }
             } else {
                 if (typeof row.buttonRandomNumber !== 'undefined') {
+                    const selectedIndexes: number[] = [];
                     for (let i = 0; i < row.buttonRandomNumber; i++) {
+                        const validChoices = row.objects.filter(choice => checkRequirements(choice.requireds) && (!choice.isNotSelectable || row.allowActivateUnselectable) && (!choice.isActive || !row.onlyUnselectedChoices));
+                        if (validChoices.length === 0) return;
+                        
+                        const maxRetries = 100;
                         let retries = 0;
-                        let maxRetries = 100;
                         let choice;
-                        let index;
+                        let index = -1;
 
                         do {
                             index = Math.floor(Math.random() * validChoices.length);
@@ -1060,12 +1063,16 @@
 
                             if (choice.isSelectableMultiple && choice.isMultipleUseVariable && choice.numMultipleTimesPluss) {
                                 if (choice.numMultipleTimesPluss > choice.multipleUseVariable) {
-                                    selectedOneMore(choice, row, choiceRef.options);
+                                    selectedOneMore(choice, row, blankOptions);
                                 } else {
-                                    selectedOneLess(choice, row, choiceRef.options);
+                                    selectedOneLess(choice, row, deselectOptions);
                                 }
                             } else {
-                                choiceRef.activateObject(choice, row);
+                                if (choice.isActive) {
+                                    deselectObject(choice, row, deselectOptions);
+                                } else {
+                                    selectObject(choice, row, blankOptions);
+                                }
                             }
                         }
                     }

@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2026-06-01T10:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2026-06-01T13:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -75,10 +75,10 @@
     ];
 
     function autoModeWatcher() {
-		let t = localStorage.getItem('theme') as string;
-        let themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
-        let themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
-        let isSupport = isMediaSupport();
+		const t = localStorage.getItem('theme') as string;
+        const themeDarkLink: HTMLLinkElement | null = document.head.querySelector('#theme-dark');
+        const themeLightLink: HTMLLinkElement | null = document.head.querySelector('#theme-light');
+        const isSupport = isMediaSupport();
 
 		if (t === 'dark') {
             if (isSupport) {
