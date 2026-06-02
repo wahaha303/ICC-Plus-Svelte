@@ -224,9 +224,17 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.15 / ${getDate('2026-06-02T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Added option to deselect parent choice when all child addons are deselected.
+        - Fixed issue where choices could not be deselected when "Cannot be Selected Manually" was enabled.
+        - 
+        `
+    }, {
+        open: false,
         title: `v2.9.14 / ${getDate('2026-06-01T13:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
-        - Fixed issue where addon per row was not being applied.
+        - Fixed issue where addons per row was not being applied.
 
         <span style="color: green">Row</span>
         - Fixed issue where "Deselect choices if row doesn't meet requirements" option was not working correctly.

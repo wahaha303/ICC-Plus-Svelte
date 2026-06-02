@@ -141,7 +141,7 @@
                                     {#each choice.addons as addon, i}
                                         <div class="col-12 p-0">
                                             <ObjectAddon row={row} choice={choice} addon={addon} isEditModeOn={true} index={i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv}/>
-                                            <Button disabled={addon.isActive} onclickcapture={() => {choiceMap.delete(addon.id); choice.addons.splice(i, 1);}} class="w-100 mt-1" variant="raised">
+                                            <Button disabled={addon.isActive} onclickcapture={() => deleteAddon(i)} class="w-100 mt-1" variant="raised">
                                                 <Label>Delete</Label>
                                             </Button>
                                         </div>
@@ -477,6 +477,18 @@
                                                     Does Not Count as a Selected Choice in This Row
                                                 {/snippet}
                                             </FormField>
+                                            {#if sAddons}
+                                                <FormField class="col-12 m-1 p-0">
+                                                    <Checkbox bind:checked={() => choice.deselectWhenNoAddon ?? false, (e) => choice.deselectWhenNoAddon = e} onchange={() => {
+                                                        if (!choice.deselectWhenNoAddon) {
+                                                            delete choice.deselectWhenNoAddon;
+                                                        }
+                                                    }} />
+                                                    {#snippet label()}
+                                                        Deselect When All Addons Are Deselected
+                                                    {/snippet}
+                                                </FormField>
+                                            {/if}
                                         </div>
                                         {/if}
                                     </AcdContent>
@@ -1597,7 +1609,7 @@
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={(e) => activateObject(choice, row, e, true)}>
+            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
                 {#if choice.template >= 4 || choice.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx) || row.choicesShareTemplate}
                     <div class="d-column w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle || isSearch}
@@ -1623,7 +1635,7 @@
                                 {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                             {/if}
                             {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                 {#each choice.scores as score}
@@ -1631,7 +1643,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                             {/if}
                             {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                 {#each choice.requireds as required}
@@ -1639,7 +1651,7 @@
                                 {/each}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                             {/if}
                             {#if choice.template === 5 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx) && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
@@ -1656,7 +1668,7 @@
                                 {/key}
                             {/if}
                             {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                             {/if}
                             {#if choice.template === 4 && (!app.minimizeTemplate || windowWidth > app.smallerScreenPx) && choice.image && !row.objectImageRemoved}
                                 {#if choice.imageSourceTooltip}
@@ -1676,7 +1688,7 @@
                             </div>
                         {/if}
                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                         {/if}
                     </div>
                     {#if sAddons}
@@ -1706,7 +1718,7 @@
                                         {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                         {#each choice.scores as score}
@@ -1714,7 +1726,7 @@
                                         {/each}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                         {#each choice.requireds as required}
@@ -1722,7 +1734,7 @@
                                         {/each}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if choice.text !== '' && !row.objectTextRemoved}
                                         {#key choiceTextKey}
@@ -1732,7 +1744,7 @@
                                         {/key}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if !choice.useSeperateAddon}
                                         {#if nAddons}
@@ -1745,7 +1757,7 @@
                                             </div>
                                         {/if}
                                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                         {/if}
                                     {/if}
                                 </div>
@@ -1760,7 +1772,7 @@
                                         </div>
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                 </div>
                             {/if}
@@ -1782,7 +1794,7 @@
                                         {#key choiceTitleKey}<h2 class="mb-0" style={objectTitle}>{@html DOMPurify.sanitize(choiceTitleKey, sanitizeArg)}</h2>{/key}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if !row.objectScoreRemoved && !choice.showScoreInAddon}
                                         {#each choice.scores as score}
@@ -1790,7 +1802,7 @@
                                         {/each}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if !row.objectRequirementRemoved && !choice.showReqInAddon}
                                         {#each choice.requireds as required}
@@ -1798,7 +1810,7 @@
                                         {/each}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if choice.text !== '' && !row.objectTextRemoved}
                                         {#key choiceTextKey}
@@ -1808,7 +1820,7 @@
                                         {/key}
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                     {#if !choice.useSeperateAddon}
                                         {#if nAddons}
@@ -1821,7 +1833,7 @@
                                             </div>
                                         {/if}
                                         {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                            <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                         {/if}
                                     {/if}
                                 </div>
@@ -1845,7 +1857,7 @@
                                         </div>
                                     {/if}
                                     {#if choice.isSelectableMultiple && multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => selectedOneMore(choice, row, options)} selectedOneLess={() => selectedOneLess(choice, row, options)} />
+                                        <ObjectMultiChoice isEnabled={isEnabled} row={row} choice={choice} selectedOneMore={() => handleCounter(true)} selectedOneLess={() => handleCounter(false)} />
                                     {/if}
                                 </div>
                             {/if}
@@ -1891,8 +1903,6 @@
 	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, activatedMap, tmpActivatedMap, objectWidthToNum, generateId, dlgVariables, snackbarVariables, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount, exportData, selectObject, deselectObject, selectedOneMore, selectedOneLess, imgDialog, closestByClassPrefix, getSelectables, getBackpackSelectables, fixedWidth, getSoundEffects, getSfxLabel } from '$lib/store/store.svelte';
     import { tick } from 'svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
-
-    export { activateObject, options };
     
     const { row, choice, index, windowWidth, bCreatorMode, preloadImages = false, isBackpack, mainDiv, isSearch = false }: { row: Row, choice: Choice, index: number, windowWidth: number, bCreatorMode: boolean, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement, isSearch?: boolean } = $props();
     const choiceToolbarButtons = [{
@@ -2814,6 +2824,24 @@
         }
     }
 
+    function deleteAddon(num: number) {
+        const addon = choice.addons[num];
+
+        choice.addons.splice(num, 1);
+        if (addon.isSelectable) {
+            choiceMap.delete(addon.id);
+
+            let count = 0;
+            for (let i = 0; i < choice.addons.length; i++) {
+                if (choice.addons[i].isSelectable) count++;
+            }
+
+            if (count === 0) {
+                delete choice.deselectWhenNoAddon;
+            }
+        }
+    }
+
     function moveChoiceLeft() {
         if (index > 0) {
             [row.objects[index - 1], row.objects[index]] = [row.objects[index], row.objects[index - 1]];
@@ -2991,40 +3019,62 @@
         }
     }
 
-    function activateObject(localChoice: Choice, localRow: Row, e?: MouseEvent, isManually: boolean = false) {
-        const target = e && e.target ? e.target as HTMLElement : null
-        let origRow = localRow;
+    function handleCounter(isSel: boolean) {
+        if (row.isInfoRow) return;
+
+        let origRow = row;
 
         options.isOverDlg = false;
         options.isOverImg = false;
 
-        if (target && localChoice.addons && localChoice.addons.length > 0) {
-            if (closestByClassPrefix(target, 'addon-', 'addon')) return;
-        }
-
-        if (localRow.isResultRow || localRow.isGroupRow) {
-            const cMap = choiceMap.get(localChoice.id);
+        if (row.isResultRow || row.isGroupRow) {
+            const cMap = choiceMap.get(choice.id);
 
             if (typeof cMap !== 'undefined') {
                 origRow = cMap.row;
             }
         }
 
-        if (localChoice.isSelectableMultiple) {
-            if (localChoice.id === choice.id && localChoice.allowSelectByClick && localChoice.multipleUseVariable === 0) {
+        if (isSel) {
+            if (!choice.isNotSelectable) selectedOneMore(choice, origRow, options);
+        } else {
+            if (!choice.selectOnce) selectedOneLess(choice, origRow, options);
+        }
+    }
+
+    function activateObject(e?: MouseEvent) {
+        if (row.isInfoRow || choice.forcedActivated || !checkRequirements(choice.requireds)) return;
+
+        const target = e && e.target ? e.target as HTMLElement : null
+        let origRow = row;
+
+        options.isOverDlg = false;
+        options.isOverImg = false;
+
+        if (target && choice.addons && choice.addons.length > 0) {
+            if (closestByClassPrefix(target, 'addon-', 'addon')) return;
+        }
+
+        if (row.isResultRow || row.isGroupRow) {
+            const cMap = choiceMap.get(choice.id);
+
+            if (typeof cMap !== 'undefined') {
+                origRow = cMap.row;
+            }
+        }
+
+        if (choice.isSelectableMultiple) {
+            if (choice.allowSelectByClick && choice.multipleUseVariable === 0) {
                 if (target) {
                     if (closestByClassPrefix(target, 'multi-', 'choice-')) return;
                 }
-
-                selectedOneMore(localChoice, origRow, options);
+                selectedOneMore(choice, origRow, options);
             }
         } else {
-            if (checkRequirements(localChoice.requireds) && !localRow.isInfoRow && (!isManually || !localChoice.isNotSelectable) && !localChoice.forcedActivated) {
-                if (localChoice.isActive) {
-                    if (!localChoice.selectOnce) deselectObject(localChoice, origRow, options);
-                } else {
-                    selectObject(localChoice, origRow, options);
-                }
+            if (choice.isActive) {
+                if (!choice.selectOnce) deselectObject(choice, origRow, options);
+            } else if (!choice.isNotSelectable) {
+                selectObject(choice, origRow, options);
             }
         }
     }

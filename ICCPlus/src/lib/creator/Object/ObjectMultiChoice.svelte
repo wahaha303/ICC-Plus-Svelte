@@ -1,7 +1,7 @@
 {#if !data.hideCounterUntilSelect || data.multipleUseVariable !== 0}
     <div class="d-row justify-space-around w-100 multi-counter">
         {#if !data.hideCounter}
-            <IconButton class="counter-icons" disabled={!enabled} onclickcapture={clickCounterMinus}>
+            <IconButton class="counter-icons" disabled={!minusEnabled} onclickcapture={clickCounterMinus}>
                 <i class="mdi mdi-minus" style={multiChoiceButton}></i>
             </IconButton>
         {/if}
@@ -9,14 +9,14 @@
             {multipleNum}
         </div>
         {#if !data.hideCounter}
-            <IconButton class="counter-icons" disabled={!enabled} onclickcapture={clickCounterPlus}>
+            <IconButton class="counter-icons" disabled={!plusEnabled} onclickcapture={clickCounterPlus}>
                 <i class="mdi mdi-plus" style={multiChoiceButton}></i>
             </IconButton>
         {/if}
     </div>
     {#if data.useSlider}
         <div class="px-5 w-100 multi-slider">
-            <Slider bind:value={sliderNum} min={data.numMultipleTimesMinus} max={data.numMultipleTimesPluss} step={1} class="mx-2" onpointerup={handleSliderUp} disabled={!enabled} discrete />
+            <Slider bind:value={sliderNum} min={data.numMultipleTimesMinus} max={data.numMultipleTimesPluss} step={1} class="mx-2" onpointerup={handleSliderUp} disabled={!plusEnabled && !minusEnabled} discrete />
         </div>
     {/if}
 {/if}
@@ -27,7 +27,7 @@
     import { pointTypeMap, dlgVariables, getStyling, hexToRgba } from '$lib/store/store.svelte';
     import Slider from '@smui/slider';
 
-    const { isEnabled, row, choice, addon, selectedOneMore, selectedOneLess }: { isEnabled:boolean, row: Row, choice: Choice, addon?: SelectableAddon, selectedOneMore: () => void, selectedOneLess: () => void } = $props();
+    const { isEnabled, row, choice, addon, selectedOneMore, selectedOneLess }: { isEnabled: boolean, row: Row, choice: Choice, addon?: SelectableAddon, selectedOneMore: () => void, selectedOneLess: () => void } = $props();
 
     let sliderNum = $state(0);
     let data = $derived(addon ? addon : choice);
@@ -44,7 +44,9 @@
             return 0;
         }
     });
-    let enabled = $derived(isEnabled && !row.isInfoRow && !choice.isNotSelectable);
+    let enabled = $derived(isEnabled && !row.isInfoRow);
+    let plusEnabled = $derived(enabled && !data.isNotSelectable);
+    let minusEnabled = $derived(enabled && !data.selectOnce);
     let textStyle = $derived(getStyling('privateTextIsOn', row, choice));
     let filterStyle = $derived(getStyling('privateFilterIsOn', row, choice));
     let multiChoiceStyle = $derived(getStyling('privateMultiChoiceIsOn', row, choice));
@@ -88,7 +90,7 @@
         if (choice.useSlider) {
             sliderNum = multipleNum;
         }
-    })
+    });
 
     function clickCounterPlus(e: Event) {
         selectedOneMore();

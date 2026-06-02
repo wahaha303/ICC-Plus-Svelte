@@ -1043,20 +1043,9 @@
                     for (let i = 0; i < row.buttonRandomNumber; i++) {
                         const validChoices = row.objects.filter(choice => checkRequirements(choice.requireds) && (!choice.isNotSelectable || row.allowActivateUnselectable) && (!choice.isActive || !row.onlyUnselectedChoices));
                         if (validChoices.length === 0) return;
-                        
-                        const maxRetries = 100;
-                        let retries = 0;
-                        let choice;
-                        let index = -1;
 
-                        do {
-                            index = Math.floor(Math.random() * validChoices.length);
-                            choice = validChoices[index];
-                            retries++;
-                        } while (
-                            (row.onlyUnselectedChoices && (selectedIndexes.indexOf(index) !== -1 || activatedMap.has(choice.id))) &&
-                            retries < maxRetries
-                        );
+                        const index = Math.floor(Math.random() * validChoices.length);
+                        const choice = validChoices[index];
 
                         if (choice && selectedIndexes.indexOf(index) === -1) {
                             selectedIndexes.push(index);

@@ -621,7 +621,8 @@ export type ChoiceFunc = {
     sfxIdOnDeselect?: string,
     sfxOnSelect?: boolean,
     sfxOnDeselect?: boolean,
-    isCountDisabled?: boolean
+    isCountDisabled?: boolean,
+    deselectWhenNoAddon?: boolean
 };
 export type BaseAddon = {
     [key: string]: any;
@@ -1174,17 +1175,17 @@ export type MusicPlayer = {
     getId(): string;
 };
 export type ChoiceOptions = {
-    linkedObjects: string[];
-    mainDiv?: HTMLDivElement;
-    bCreatorMode?: boolean;
-    isBackpack?: boolean;
-    isOverDlg?: boolean;
-    isOverImg?: boolean;
-    isForced?: boolean;
-    isAllowDeselect?: boolean;
-    isLinked?: boolean;
-    fromTemp?: boolean;
-    fromAddon?: boolean;
+    linkedObjects: string[],
+    mainDiv?: HTMLDivElement,
+    bCreatorMode?: boolean,
+    isBackpack?: boolean,
+    isOverDlg?: boolean,
+    isOverImg?: boolean,
+    isForced?: boolean,
+    isAllowDeselect?: boolean,
+    isLinked?: boolean,
+    fromTemp?: boolean,
+    fromAddon?: boolean
 };
 export type Filters = {
     dropShadow?: string,

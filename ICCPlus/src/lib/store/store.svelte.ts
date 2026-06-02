@@ -10,7 +10,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.14';
+export const appVersion = '2.9.15';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3586,6 +3586,7 @@ async function checkAddons(localChoice: Choice, localRow: Row, options: ChoiceOp
         const addon = localChoice.addons[i];
         if (!addon.isSelectable) continue;
         if (!addon.isActive) continue;
+        if (addon.activateThisChoice && addon.activateThisChoice.split(',').indexOf(localChoice.id) !== -1) continue;
         if (addon.selectOnce) return false;
         if (addon.forcedActivated) return false;
 
@@ -6380,7 +6381,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
     const addonCheck = isChoice ? await checkAddons(localChoice as Choice, localRow, options) : true;
     if (!localChoice.isActive || !pointCheck || !addonCheck) return;
 
-    const deselectProcess = () => {
+    const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
         const tmpScores = new SvelteMap<string, number>();
         
@@ -6435,24 +6436,45 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         delete localChoice.appliedDisChoices;
         if (localChoice.isAutoActive) tmpActivatedMap.set(localChoice.id, {multiple: 0});
 
-        if (!localChoice.isActive && localChoice.deselectParent && localChoice.parentId) {
+        if (!localChoice.isActive && localChoice.parentId) {
             const pMap = choiceMap.get(localChoice.parentId);
 
             if (typeof pMap !== 'undefined') {
                 const pChoice = pMap.choice;
 
                 if (pChoice.isActive) {
-                    if (pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable) {
-                        const pNum = pChoice.multipleUseVariable;
-                        for (let i = 0; i < Math.abs(pNum); i++) {
-                            if (pNum > 0) {
-                                selectedOneLess(pChoice, localRow, options);
-                            } else {
-                                selectedOneMore(pChoice, localRow, options);
+                    let deselect = localChoice.deselectParent;
+                    let count = 0;
+
+                    if (pChoice.deselectWhenNoAddon) {
+                        for (let i = 0; i < pChoice.addons.length; i++) {
+                            const cAddon = pChoice.addons[i] as Addon;
+
+                            if (cAddon.isActive) {
+                                count++;
                             }
                         }
-                    } else {
-                        deselectObject(pChoice, localRow, options);
+
+                        if (count === 0) deselect = true;
+                    }
+
+                    if (deselect) {
+                        const newOptions = {...options};
+                        newOptions.fromAddon = true;
+                        newOptions.isOverDlg = true;
+                        newOptions.isOverImg = true;
+                        if (pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable) {
+                            const pNum = pChoice.multipleUseVariable;
+                            for (let i = 0; i < Math.abs(pNum); i++) {
+                                if (pNum > 0) {
+                                    await selectedOneLess(pChoice, localRow, newOptions);
+                                } else {
+                                    await selectedOneMore(pChoice, localRow, newOptions);
+                                }
+                            }
+                        } else {
+                            await deselectObject(pChoice, localRow, newOptions);
+                        }
                     }
                 }
             }
@@ -7060,7 +7082,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
     }
     if (!pointCheck || !addonCheck || localRow.isInfoRow) return;
 
-    const deselectProcess = () => {
+    const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
         const tmpScores = new SvelteMap<string, number>();
         const isPos = localChoice.multipleUseVariable > 0;
@@ -7126,101 +7148,119 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
         deselectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
         activateTempChoices(options);
 
-        if (!localChoice.isActive && localChoice.deselectParent && localChoice.parentId) {
+        if (!localChoice.isActive && localChoice.parentId) {
             const pMap = choiceMap.get(localChoice.parentId);
 
             if (typeof pMap !== 'undefined') {
                 const pChoice = pMap.choice;
 
                 if (pChoice.isActive) {
-                    if (pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable) {
-                        const pNum = pChoice.multipleUseVariable;
-                        for (let i = 0; i < Math.abs(pNum); i++) {
-                            if (pNum > 0) {
-                                selectedOneLess(pChoice, localRow, options);
-                            } else {
-                                selectedOneMore(pChoice, localRow, options);
+                    let deselect = localChoice.deselectParent;
+                    let count = 0;
+
+                    if (pChoice.deselectWhenNoAddon) {
+                        for (let i = 0; i < pChoice.addons.length; i++) {
+                            const cAddon = pChoice.addons[i] as Addon;
+
+                            if (cAddon.isActive) {
+                                count++;
                             }
                         }
-                    } else {
-                        deselectObject(pChoice, localRow, options);
+
+                        if (count === 0) deselect = true;
+                    }
+
+                    if (deselect) {
+                        const newOptions = {...options};
+                        newOptions.isOverDlg = true;
+                        newOptions.isOverImg = true;
+                        if (pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable) {
+                            const pNum = pChoice.multipleUseVariable;
+                            for (let i = 0; i < Math.abs(pNum); i++) {
+                                if (pNum > 0) {
+                                    await selectedOneLess(pChoice, localRow, newOptions);
+                                } else {
+                                    await selectedOneMore(pChoice, localRow, newOptions);
+                                }
+                            }
+                        } else {
+                            await deselectObject(pChoice, localRow, newOptions);
+                        }
                     }
                 }
             }
         }
     }
 
-    if (!localRow.isInfoRow && !localChoice.isNotSelectable && !localChoice.selectOnce) {
-            if (localChoice.isMultipleUseVariable) {
-                if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
-                if (localChoice.multipleUseVariable > localChoice.numMultipleTimesMinus) {
-                    if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
-                        if (localChoice.selectDelayTimer) return;
-                        localChoice.selectDelayTimer = true;
-                        await delayProc(localChoice.selectDelayTime);
-                        delete localChoice.selectDelayTimer;
-                    }
-                    if (!options.isOverDlg) {
-                        if (localChoice.customTextfieldIsOn && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
-                            const result = await openWordDialog(localChoice, {isWord: true, isDeselect: true});
+    if (localChoice.isMultipleUseVariable) {
+        if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
+        if (localChoice.multipleUseVariable > localChoice.numMultipleTimesMinus) {
+            if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
+                if (localChoice.selectDelayTimer) return;
+                localChoice.selectDelayTimer = true;
+                await delayProc(localChoice.selectDelayTime);
+                delete localChoice.selectDelayTimer;
+            }
+            if (!options.isOverDlg) {
+                if (localChoice.customTextfieldIsOn && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
+                    const result = await openWordDialog(localChoice, {isWord: true, isDeselect: true});
 
-                            if (result.status === 'cancel') return;
-                            if (result.status === 'accept' && localChoice.idOfTheTextfieldWord) {
-                                localChoice.wordChangeSelect = result.wordText;
-                                const word = wordMap.get(localChoice.idOfTheTextfieldWord);
-                                if (typeof word !== 'undefined') {
-                                    word.replaceText = result.wordText;
-                                }
-                                return;
-                            }
+                    if (result.status === 'cancel') return;
+                    if (result.status === 'accept' && localChoice.idOfTheTextfieldWord) {
+                        localChoice.wordChangeSelect = result.wordText;
+                        const word = wordMap.get(localChoice.idOfTheTextfieldWord);
+                        if (typeof word !== 'undefined') {
+                            word.replaceText = result.wordText;
                         }
-                    
-                        if (localChoice.isImageUpload && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
-                            const result = await openImgDialog(localChoice, {isDeselect: true});
-
-                            if (result.status !== 'deselect') return;
-                        }
-                    }
-
-                    if (options.linkedObjects.indexOf(localChoice.id) === -1) {
-                        if (localChoice.isFadeTransition) {
-                            if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
-                                app.fadeTransitionColor = '000000FF';
-                            } else {
-                                app.fadeTransitionColor = localChoice.fadeTransitionColor;
-                            }
-
-                            if (typeof localChoice.fadeInTransitionTime === 'undefined') {
-                                app.fadeTransitionTime = 0.25;
-                            } else {
-                                app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
-                            }
-
-                            app.fadeTransitionIsOn = true;
-
-                            await delayProc(app.fadeTransitionTime * 1000);
-
-                            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
-                            }
-                            app.fadeTransitionIsOn = false;
-                        }
-                        deselectProcess();
-                    }
-                    if (options.linkedObjects.indexOf(localChoice.id) === 0) {
-                        options.linkedObjects.splice(0);
+                        return;
                     }
                 }
-            } else if (typeof localChoice.multipleScoreId !== 'undefined') {
-                const point = pointTypeMap.get(localChoice.multipleScoreId);
-                if (typeof point !== 'undefined') {
-                    if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
-                    if (point.startingSum > localChoice.numMultipleTimesMinus) {
-                        point.startingSum -= 1;
-                    }
+            
+                if (localChoice.isImageUpload && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
+                    const result = await openImgDialog(localChoice, {isDeselect: true});
+
+                    if (result.status !== 'deselect') return;
                 }
             }
+
+            if (options.linkedObjects.indexOf(localChoice.id) === -1) {
+                if (localChoice.isFadeTransition) {
+                    if (typeof localChoice.fadeTransitionColor === 'undefined' || localChoice.fadeTransitionColor === '') {
+                        app.fadeTransitionColor = '000000FF';
+                    } else {
+                        app.fadeTransitionColor = localChoice.fadeTransitionColor;
+                    }
+
+                    if (typeof localChoice.fadeInTransitionTime === 'undefined') {
+                        app.fadeTransitionTime = 0.25;
+                    } else {
+                        app.fadeTransitionTime = localChoice.fadeInTransitionTime / 1000;
+                    }
+
+                    app.fadeTransitionIsOn = true;
+
+                    await delayProc(app.fadeTransitionTime * 1000);
+
+                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                    }
+                    app.fadeTransitionIsOn = false;
+                }
+                deselectProcess();
+            }
+            if (options.linkedObjects.indexOf(localChoice.id) === 0) {
+                options.linkedObjects.splice(0);
+            }
         }
+    } else if (typeof localChoice.multipleScoreId !== 'undefined') {
+        const point = pointTypeMap.get(localChoice.multipleScoreId);
+        if (typeof point !== 'undefined') {
+            if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
+            if (point.startingSum > localChoice.numMultipleTimesMinus) {
+                point.startingSum -= 1;
+            }
+        }
+    }
 }
 
 function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
