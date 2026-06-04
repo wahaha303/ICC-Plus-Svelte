@@ -84,7 +84,7 @@
             {#each globalRequireds as globalRequired}
                 {#if globalRequired.showRequired}
                     {#key replaceText(getChoiceTitle(globalRequired))}
-                        <div class="col req text-prewrap" style={scoreText}>
+                        <div class="req text-prewrap" style={scoreText}>
                             {@html DOMPurify.sanitize(replaceText(getChoiceTitle(globalRequired)), sanitizeArg)}
                         </div>
                     {/key}
@@ -92,7 +92,7 @@
             {/each}
         {:else}
             {#key reqTitle}
-                <div class="col req text-prewrap" style={scoreText}>
+                <div class="req text-prewrap" style={scoreText}>
                     {@html DOMPurify.sanitize(reqTitle, sanitizeArg)}
                 </div>
             {/key}

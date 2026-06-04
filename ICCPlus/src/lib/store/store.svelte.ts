@@ -10,7 +10,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.15';
+export const appVersion = '2.9.16';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -742,6 +742,7 @@ export const bgmVariables = $state<BgmPlayer>({
     bgmTitleInterval: 0,
     bgmFadeInterval: 0,
     bgmFadeTimer: 0,
+    bgmWaitTimer: 0,
     bgmTitle: 'No Audio Title',
     curBgmTime: 0,
     curBgmLength: 0,
@@ -751,6 +752,7 @@ export const bgmVariables = $state<BgmPlayer>({
     bgmObjectId: '',
     noCors: false
 });
+export const waitingBgmList: string[] = [];
 export const dlgVariables = $state<DlgVariables>({
     currentDialog: 'none',
 });
@@ -855,6 +857,7 @@ let optimizedSelectables = $derived([...optimizedChoices, ...optimizedAddons]);
 let optimizedBackpackSelectables = $derived([...optimizedBackpackChoices, ...optimizedBackpackAddons]);
 let optimizedSearchables = $derived([...app.rows.flatMap(row => row.objects).filter(choice => !choice.isNotSelectable && !choice.isNotSearchable).map(({ id }) => id), ...app.rows.flatMap(row => row.objects).flatMap(obj => obj.addons ?? []).filter(addon => addon.isSelectable && !addon.isNotSelectable && !addon.isNotSearchable).map(({ id }) => id)]);
 let optimizedSoundEffects = $derived(app.soundEffects.map(({id}) => id));
+let tempEffectTimer = 0;
 export function getRows() {
     return optimizedRows;
 }
@@ -2547,7 +2550,7 @@ function bgmFadeOut(localChoice: Choice | SelectableAddon, player: MusicPlayer) 
         bgmVariables.curBgmLength = 0;
     }
 }
-export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, count: number) {
+export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, count: number, isSel: boolean) {
     const youPlayer = get(bgmPlayer);
     let player = get(musicPlayer);
 
@@ -2566,37 +2569,49 @@ export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, co
     }
 
     if (player) {
-        const isPlaying = bgmVariables.bgmIsPlaying;
-
-        if (player.getId() === bgmId) {
+        const curId = player.getId();
+        if (curId === bgmId) {
             if (bgmVariables.bgmObjectId === localChoice.id) {
-                if (isPlaying) {
+                if (isSel) {
                     if (player.isStopped()) {
                         bgmFadeIn(localChoice, bgmId, false, player);
                     } else {
                         player.stop();
                         bgmFadeIn(localChoice, bgmId, false, player);
                     }
+                    bgmVariables.bgmIsPlaying = true;
                 } else {
                     bgmFadeOut(localChoice, player);
+                    bgmVariables.bgmIsPlaying = false;
                 }
             } else {
-                if (isPlaying) {
+                if (isSel) {
                     player.stop();
                     bgmFadeIn(localChoice, bgmId, false, player);
+                    bgmVariables.bgmIsPlaying = true;
                 } else {
                     bgmFadeOut(localChoice, player);
+                    bgmVariables.bgmIsPlaying = false;
                 }
             }
         } else {
-            if (isPlaying) {
+            if (isSel) {
+                if (bgmVariables.bgmIsPlaying && bgmVariables.bgmObjectId && waitingBgmList.indexOf(bgmVariables.bgmObjectId) === DISABLED) {
+                    waitingBgmList.push(bgmVariables.bgmObjectId);
+                }
+                
+                if (bgmVariables.bgmWaitTimer !== 0) {
+                    window.clearTimeout(bgmVariables.bgmWaitTimer);
+                    bgmVariables.bgmWaitTimer = 0;
+                }
                 bgmFadeIn(localChoice, bgmId, true, player);
+                bgmVariables.bgmIsPlaying = true;
             }
         }
     } else {
         if (count < 10) {
             window.setTimeout(() => {
-                playBgm(localChoice, bgmId, ++count);
+                playBgm(localChoice, bgmId, ++count, isSel);
             }, 200);
         } else {
             console.log('Failed to play bgm');
@@ -2623,7 +2638,7 @@ export async function initYoutubePlayer(localChoice: Choice | SelectableAddon) {
         events: {
             onReady: () => {
                 bgmPlayer.set(player);
-                playBgm(localChoice, localChoice.bgmId || '', 0);
+                playBgm(localChoice, localChoice.bgmId || '', 0, true);
                 if (app.isMute && !player.isMuted()) {
                     player.mute();
                 }
@@ -3694,7 +3709,6 @@ export function cleanActivated(isReset: boolean = true) {
 
                 if (player && player.getId() === cChoice.bgmId) {
                     player.stop();
-                    bgmVariables.bgmIsPlaying = false;
                     if (bgmVariables.bgmFadeInterval !== 0) {
                         window.clearInterval(bgmVariables.bgmFadeInterval);
                         bgmVariables.bgmFadeInterval = 0;
@@ -3712,6 +3726,12 @@ export function cleanActivated(isReset: boolean = true) {
                     bgmVariables.bgmTitle = 'No Audio Title';
                     bgmVariables.curBgmTime = 0;
                     bgmVariables.curBgmLength = 0;
+                    
+                    const idx = waitingBgmList.indexOf(cChoice.id);
+
+                    if (idx !== DISABLED) {
+                        waitingBgmList.splice(idx, 1);
+                    }
                 }
             }
         }
@@ -3811,6 +3831,14 @@ export function cleanActivated(isReset: boolean = true) {
 
     tmpActivatedMap.clear();
     const reactivateCode: string[] = [];
+    if (bgmVariables.bgmWaitTimer !== 0) {
+        window.clearTimeout(bgmVariables.bgmWaitTimer);
+        bgmVariables.bgmWaitTimer = 0;
+    }
+    if (tempEffectTimer !== 0) {
+        window.clearTimeout(tempEffectTimer);
+        tempEffectTimer = 0;
+    }
 
     for (const [id] of activatedMap) {
         const cMap = choiceMap.get(id);
@@ -4053,9 +4081,11 @@ async function selectForceActivate(localChoice: Choice | SelectableAddon, fChoic
         if (!fChoice.isActive) {
             await selectObject(fChoice, fRow, options);
         } else {
-            fChoice.forcedActivated = true;
-            if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
-            fChoice.activatedFrom += 1;
+            if (!options.isAllowDeselect) {
+                fChoice.forcedActivated = true;
+                if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                fChoice.activatedFrom += 1;
+            }
         }
     }
 }
@@ -5868,8 +5898,32 @@ function addAllowedChoice(localChoice: Choice | SelectableAddon, options: Choice
 function deselectEffectProc(localChoice: Choice | SelectableAddon) {
     if (localChoice.setBgmIsOn && musicPlayer) {
         if (localChoice.bgmId) {
-            bgmVariables.bgmIsPlaying = false;
-            playBgm(localChoice, localChoice.bgmId, 0);
+            playBgm(localChoice, localChoice.bgmId, 0, false);
+            let idx = waitingBgmList.indexOf(localChoice.id);
+            if (idx !== DISABLED) {
+                waitingBgmList.splice(idx, 1);
+            }
+            idx = waitingBgmList.length - 1;
+            if (idx > DISABLED) {
+                const cMap = choiceMap.get(waitingBgmList[idx]);
+
+                if (typeof cMap !== 'undefined') {
+                    const wChoice = cMap.choice;
+                    const wId = wChoice.bgmId;
+
+                    if (!bgmVariables.bgmIsPlaying && wId) {
+                        if (bgmVariables.bgmWaitTimer !== 0) {
+                            window.clearTimeout(bgmVariables.bgmWaitTimer);
+                            bgmVariables.bgmWaitTimer = 0;
+                        }
+
+                        bgmVariables.bgmWaitTimer = window.setTimeout(() => {
+                            waitingBgmList.splice(idx, 1);
+                            playBgm(wChoice, wId, 0, true);
+                        }, 100);
+                    }
+                }
+            }
         }
     }
 
@@ -6067,10 +6121,8 @@ function deselectEffectProc(localChoice: Choice | SelectableAddon) {
 function selectEffectProc(localChoice: Choice | SelectableAddon) {
     if (localChoice.setBgmIsOn) {
         if (localChoice.bgmId) {
-            bgmVariables.bgmIsPlaying = true;
-
             if (bgmVariables.isBgmInit || localChoice.useAudioURL) {
-                playBgm(localChoice, localChoice.bgmId, 0);
+                playBgm(localChoice, localChoice.bgmId, 0, true);
             } else {
                 initYoutubePlayer(localChoice);
                 bgmVariables.isBgmInit = true;
@@ -7758,7 +7810,13 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
 
     selectModifyPoint(localChoice);
 
-    selectEffectProc(localChoice);
+    if (tempEffectTimer !== 0) {
+        window.clearTimeout(tempEffectTimer);
+        tempEffectTimer = 0;
+    }
+    tempEffectTimer = window.setTimeout(() => {
+        selectEffectProc(localChoice);
+    }, 100);
 
     selectHideContent(localChoice);
 
@@ -8082,7 +8140,13 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
         if (!wasActive) {
             setVariables(localChoice, true);
 
-            selectEffectProc(localChoice);
+            if (tempEffectTimer !== 0) {
+                window.clearTimeout(tempEffectTimer);
+                tempEffectTimer = 0;
+            }
+            tempEffectTimer = window.setTimeout(() => {
+                selectEffectProc(localChoice);
+            }, 100);
 
             selectHideContent(localChoice);
 

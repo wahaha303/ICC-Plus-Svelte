@@ -1609,7 +1609,7 @@
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
+            <div class="d-column row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
                 {#if choice.template >= 4 || choice.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx) || row.choicesShareTemplate}
                     <div class="d-column w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle || isSearch}
@@ -3043,7 +3043,7 @@
     }
 
     function activateObject(e?: MouseEvent) {
-        if (row.isInfoRow || choice.forcedActivated || !checkRequirements(choice.requireds)) return;
+        if (row.isInfoRow) return;
 
         const target = e && e.target ? e.target as HTMLElement : null
         let origRow = row;
@@ -3072,7 +3072,7 @@
             }
         } else {
             if (choice.isActive) {
-                if (!choice.selectOnce) deselectObject(choice, origRow, options);
+                if (!choice.selectOnce && !choice.forcedActivated) deselectObject(choice, origRow, options);
             } else if (!choice.isNotSelectable) {
                 selectObject(choice, origRow, options);
             }

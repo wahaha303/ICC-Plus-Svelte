@@ -1075,6 +1075,7 @@ export type BgmPlayer = {
     bgmTitleInterval: number,
     bgmFadeInterval: number,
     bgmFadeTimer: number,
+    bgmWaitTimer: number,
     bgmTitle: string,
     curBgmTime: number,
     curBgmLength: number,

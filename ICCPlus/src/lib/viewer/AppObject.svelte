@@ -674,7 +674,7 @@
     }
 
     function activateObject(e?: MouseEvent) {
-        if (row.isInfoRow || choice.forcedActivated || !checkRequirements(choice.requireds)) return;
+        if (row.isInfoRow) return;
         
         const target = e && e.target ? e.target as HTMLElement : null
         let origRow = row;
@@ -703,7 +703,7 @@
             }
         } else {
             if (choice.isActive) {
-                if (!choice.selectOnce) deselectObject(choice, origRow, options);
+                if (!choice.selectOnce && !choice.forcedActivated) deselectObject(choice, origRow, options);
             } else if (!choice.isNotSelectable) {
                 selectObject(choice, origRow, options);
             }

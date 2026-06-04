@@ -82,7 +82,7 @@
         return text.join(' ');
     });
     let scoreValueText = $derived.by(() => {
-        if (score.hideValue || !score.id) return '';
+        if (score.hideValue) return '';
 
         let value = score.value;
         if (score.isRandom && !score.setValue) {

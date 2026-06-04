@@ -224,6 +224,18 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.16 / ${getDate('2026-06-04T10:00:00Z')}`,
+        text: `<span style="color: green">Score</span>
+        - Rolled back to display score values even when Point is not set.
+
+        <span style="color: green">Choice</span>
+        - Fixed issue where extra spacing appeared below requirements.
+        - Fixed issue where previously selected BGM did not resume after deselecting one of multiple selected BGM choices.
+        - Fixed issue where unintended spacing appeared between choices and addons.
+        - Fixed issue where "Allow Deselection of Activated Choice" option was not working correctly.
+        `
+    }, {
+        open: false,
         title: `v2.9.15 / ${getDate('2026-06-02T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Added option to deselect parent choice when all child addons are deselected.
