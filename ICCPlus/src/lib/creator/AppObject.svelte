@@ -1703,6 +1703,13 @@
                 {:else}
                     {#if choice.template === 2}
                         <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                            {#if row.resultShowRowTitle || isSearch}
+                                {#key oriTitleKey}
+                                    <div class="col-12" style={scoreText}>
+                                        {@html DOMPurify.sanitize(oriTitleKey, sanitizeArg)}
+                                    </div>
+                                {/key}
+                            {/if}
                             <div class="row g-0 p-0{choice.useSeperateAddon ? '' : ' flex-grow-1'}">
                                 <div class="p-0 align-items-center" style="max-width: {choiceImageBoxWidth}%">
                                     {#if choice.image && !row.objectImageRemoved}
@@ -1788,6 +1795,13 @@
                         {/if}
                     {:else if choice.template === 3}
                         <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                            {#if row.resultShowRowTitle || isSearch}
+                                {#key oriTitleKey}
+                                    <div class="col-12" style={scoreText}>
+                                        {@html DOMPurify.sanitize(oriTitleKey, sanitizeArg)}
+                                    </div>
+                                {/key}
+                            {/if}
                             <div class="row g-0 p-0{choice.useSeperateAddon ? '' : ' flex-grow-1'}">
                                 <div class="d-column p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
                                     {#if choice.title !== '' && !row.objectTitleRemoved}
@@ -1993,8 +2007,7 @@
         value: '3'
     }];
     const justifies = ['start', 'center', 'end', 'space-around', 'space-between'];
-    const linkedObjects: string[] = [];
-    const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
+    const options: ChoiceOptions = {linkedObjects: [], mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     const nAddons = $derived.by(() => {
         const list = choice.addons;
         if (!list || list.length === 0) return null;
@@ -3012,6 +3025,7 @@
             const newOptions = {...options};
 
             newOptions.isOverDlg = true;
+            newOptions.linkedObjects = [];
             delete choice.isAutoActive;
             delete choice.forcedActivated;
             tmpActivatedMap.delete(choice.id);
@@ -3026,6 +3040,7 @@
 
         options.isOverDlg = false;
         options.isOverImg = false;
+        options.linkedObjects = [];
 
         if (row.isResultRow || row.isGroupRow) {
             const cMap = choiceMap.get(choice.id);
@@ -3050,7 +3065,7 @@
 
         options.isOverDlg = false;
         options.isOverImg = false;
-
+        options.linkedObjects = [];
         if (target && choice.addons && choice.addons.length > 0) {
             if (closestByClassPrefix(target, 'addon-', 'addon')) return;
         }

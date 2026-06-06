@@ -11,7 +11,7 @@
             <span class="main-title">Interactive CYOA Creator Plus</span>
             <span class="sub-title">Created by MeanDelay / Recreated by Wahaha303</span>
             <span class="sub-title--version">v{appVersion}</span>
-            <span class="sub-title--date">Last Updated: {getDate('2026-06-04T10:00:00Z')}</span>
+            <span class="sub-title--date">Last Updated: {getDate('2026-06-06T16:00:00Z')}</span>
         </Title>
         <Content>
             <div class="row g-4">
@@ -62,7 +62,7 @@
     import Snackbar, {Label as SnackbarLabel } from '@smui/snackbar';
     import ViewerMain from '$lib/viewer/ViewerMain.svelte';
     import InfoMain from '$lib/information/InfoMain.svelte';
-    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, snackbarVariables, appVersion, getDate, isMediaSupport, useAltMenu } from '$lib/store/store.svelte';
+    import { app, bgmPlayer, currentComponent, currentTheme, initStoreSaves, initBuildSaves, setShortcut, snackbarVariables, appVersion, getDate, isMediaSupport, useAltMenu, activatedMap, tmpActivatedMap, waitingBgmList, bgmVariables } from '$lib/store/store.svelte';
     import { onDestroy, onMount } from 'svelte';
 
     let open = $state(true);
@@ -126,6 +126,13 @@
 
     onMount(() => {
         window.debugApp = app;
+        window.debug = {
+            app: app,
+            activated: activatedMap,
+            tmpActivated: tmpActivatedMap,
+            waitingBgmList: waitingBgmList,
+            bgmVariables: bgmVariables
+        };
         autoModeWatcher();
         initStoreSaves();
         initBuildSaves();

@@ -1069,7 +1069,7 @@ export type ChoiceMap = {
     row: Row
 };
 export type BgmPlayer = {
-    isBgmInit: boolean,
+    isBgmInit: number,
     bgmIsPlaying: boolean,
     bgmPlayInterval: number,
     bgmTitleInterval: number,
@@ -1171,6 +1171,7 @@ export type MusicPlayer = {
 
     getCurrentTime(): number;
     getDuration(): number;
+    getPlayerState(): number;
 
     getTitle(): string;
     getId(): string;

@@ -1,6 +1,5 @@
 import { get, readable, writable } from 'svelte/store';
 import type { App, RowDesignGroup, ObjectDesignGroup, Group, Row, Choice, PointType, GlobalRequirement, Word, Variable, Requireds, Score, ActivatedMap, ChoiceMap, BgmPlayer, SaveSlot, Discount, TempScore, DlgVariables, SnackBarVariables, Addon, ViewerSetting, ExprNode, MusicPlayer, ChoiceOptions, WordDialog, ImgDialog, SelectableAddon, MDObject, LastPages, SoundEffect } from './types';
-import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { z } from 'zod';
 import canvasSize from '$lib/utils/canvas-size.esm.min.js';
 import { toBlob } from 'html-to-image';
@@ -8,7 +7,7 @@ import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 
-export const appVersion = '2.9.16';
+export const appVersion = '2.9.17';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -711,20 +710,20 @@ export const objectWidths = [{
     text: '12 per row',
     value: 'col-xl-1'
 }];
-export const activatedMap = $state<SvelteMap<string, ActivatedMap>>(new SvelteMap());
-export const tmpActivatedMap = $state<SvelteMap<string, ActivatedMap>>(new SvelteMap());
-export const pointTypeMap = $state<SvelteMap<string, PointType>>(new SvelteMap());
-export const rowMap = $state<SvelteMap<string, Row>>(new SvelteMap());
-export const choiceMap = $state<SvelteMap<string, ChoiceMap>>(new SvelteMap());
-export const groupMap = $state<SvelteMap<string, Group>>(new SvelteMap());
-export const globalReqMap = $state<SvelteMap<string, GlobalRequirement>>(new SvelteMap());
-export const wordMap = $state<SvelteMap<string, Word>>(new SvelteMap());
-export const variableMap = $state<SvelteMap<string, Variable>>(new SvelteMap());
-export const rowDesignMap = $state<SvelteMap<string, RowDesignGroup>>(new SvelteMap());
-export const objectDesignMap = $state<SvelteMap<string, ObjectDesignGroup>>(new SvelteMap());
-export const sfxMap = $state<SvelteMap<string, SoundEffect>>(new SvelteMap());
-export const scoreSet = $state<SvelteSet<string>>(new SvelteSet());
-export const mdObjects = $state<MDObject[]>([]);
+export const activatedMap = new Map<string, ActivatedMap>();
+export const tmpActivatedMap = new Map<string, ActivatedMap>();
+export const pointTypeMap = new Map<string, PointType>();
+export const rowMap = new Map<string, Row>();
+export const choiceMap = new Map<string, ChoiceMap>();
+export const groupMap = new Map<string, Group>();
+export const globalReqMap = new Map<string, GlobalRequirement>();
+export const wordMap = new Map<string, Word>();
+export const variableMap = new Map<string, Variable>();
+export const rowDesignMap = new Map<string, RowDesignGroup>();
+export const objectDesignMap = new Map<string, ObjectDesignGroup>();
+export const sfxMap = new Map<string, SoundEffect>();
+export const scoreSet = new Set<string>();
+export const mdObjects: MDObject[] = [];
 export const currentComponent = $state({ value: 'appCyoaViewer'});
 export const currentTheme = $state({ value: 'light' });
 export const sanitizeArg = {
@@ -734,7 +733,7 @@ export const sanitizeArg = {
 export const musicPlayer = writable<MusicPlayer | null>(null);
 export const bgmPlayer = writable<YT.Player | null>(null);
 export const bgmVariables = $state<BgmPlayer>({
-    isBgmInit: false,
+    isBgmInit: 0,
     bgmIsPlaying: false,
     bgmPlayInterval: 0,
     bgmTitleInterval: 0,
@@ -1658,7 +1657,7 @@ export function checkPointEnable(point: PointType) {
     }
     return true;
 }
-export function checkActivated(str: string, actMap: SvelteMap<string, ActivatedMap> = activatedMap) {
+export function checkActivated(str: string, actMap: Map<string, ActivatedMap> = activatedMap) {
     const [key, val = '0'] = str.split('/ON#');
     const num = parseInt(val);
     if (num > 0) {
@@ -1695,7 +1694,7 @@ function evaluateNode(node: number | string | ExprNode): number {
         default: return left;
     }
 }
-export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> = activatedMap) {
+export function checkReq(req: Requireds, aMap: Map<string, ActivatedMap> = activatedMap) {
     if (req.required) {
         switch (req.type) {
             case 'id':
@@ -1898,7 +1897,7 @@ export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> =
     }
     return false;
 }
-export function checkRequirements(requireds: Requireds[], actMap: SvelteMap<string, ActivatedMap> = activatedMap): boolean {
+export function checkRequirements(requireds: Requireds[], actMap: Map<string, ActivatedMap> = activatedMap): boolean {
     if (typeof requireds === 'undefined') return true;
     
     let result = true;
@@ -1915,6 +1914,7 @@ export function checkRequirements(requireds: Requireds[], actMap: SvelteMap<stri
     }
     return result;
 }
+let requestId = 0;
 export function wrapYoutubePlayer(player: YT.Player): MusicPlayer {
     return {
         type: 'youtube',
@@ -1946,11 +1946,12 @@ export function wrapYoutubePlayer(player: YT.Player): MusicPlayer {
 
         getCurrentTime: () => player.getCurrentTime(),
         getDuration: () => player.getDuration(),
+        getPlayerState: () => player.getPlayerState(),
 
         getTitle: () => player.playerInfo?.videoData?.title ?? '',
 
         getId: () => player.playerInfo?.videoData?.video_id ?? ''
-    };
+    }
 }
 export function wrapAudioPlayer(audio: HTMLAudioElement): MusicPlayer {
     let muted = false;
@@ -2025,10 +2026,11 @@ export function wrapAudioPlayer(audio: HTMLAudioElement): MusicPlayer {
 
         getCurrentTime: () => canSeek ? audio.currentTime : 0,
         getDuration: () => canSeek ? audio.duration : 0,
+        getPlayerState: () => audio.paused ? 2 : 1,
 
         getTitle: () => audio.src.split('/').pop() ?? '',
         getId: () => audio.src
-    };
+    }
 }
 function createAudioPlayer(useCors: boolean): MusicPlayer {
     const audio = new Audio();
@@ -2237,9 +2239,11 @@ function bgmFadeOut(localChoice: Choice | SelectableAddon, player: MusicPlayer) 
         bgmVariables.curBgmLength = 0;
     }
 }
-export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, count: number, isSel: boolean) {
+export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, count: number, isSel: boolean, currentId: number) {
     const youPlayer = get(bgmPlayer);
     let player = get(musicPlayer);
+
+    if (currentId !== requestId) return;
 
     if (localChoice.useAudioURL) {
         if (!player || player.type !== 'audio' || (player.getId() !== bgmId && bgmVariables.noCors === true)) {
@@ -2286,7 +2290,7 @@ export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, co
                 if (bgmVariables.bgmIsPlaying && bgmVariables.bgmObjectId && waitingBgmList.indexOf(bgmVariables.bgmObjectId) === DISABLED) {
                     waitingBgmList.push(bgmVariables.bgmObjectId);
                 }
-                
+
                 if (bgmVariables.bgmWaitTimer !== 0) {
                     window.clearTimeout(bgmVariables.bgmWaitTimer);
                     bgmVariables.bgmWaitTimer = 0;
@@ -2298,8 +2302,15 @@ export function playBgm(localChoice: Choice | SelectableAddon, bgmId: string, co
     } else {
         if (count < 10) {
             window.setTimeout(() => {
-                playBgm(localChoice, bgmId, ++count, isSel);
-            }, 200);
+                const curPlayer = get(musicPlayer);
+
+                if (curPlayer) {
+                    const state = curPlayer.getPlayerState();
+
+                    if (state === 1) return;
+                }
+                playBgm(localChoice, bgmId, ++count, isSel, currentId);
+            }, 1000);
         } else {
             console.log('Failed to play bgm');
         }
@@ -2318,17 +2329,27 @@ export function loadYouTubeAPI(): Promise<typeof YT> {
     });
 }
 export async function initYoutubePlayer(localChoice: Choice | SelectableAddon) {
+    bgmVariables.isBgmInit = 3;
+    const currentId = requestId;
     const YT = await loadYouTubeAPI();
     const player = new YT.Player('bgm-player', {
         width: 0,
         height: 0,
         events: {
             onReady: () => {
+                bgmVariables.isBgmInit = 1;
                 bgmPlayer.set(player);
-                playBgm(localChoice, localChoice.bgmId || '', 0, true);
                 if (app.isMute && !player.isMuted()) {
                     player.mute();
                 }
+                if (currentId !== requestId) {
+                    const state = player.getPlayerState();
+                    if (state > 0) {
+                        if (waitingBgmList.indexOf(localChoice.id) === DISABLED) waitingBgmList.push(localChoice.id);
+                        return;
+                    }
+                }
+                playBgm(localChoice, localChoice.bgmId || '', 0, true, ++requestId);
             }
         }
     });
@@ -3012,7 +3033,7 @@ export function expDiscount(point: PointType, score: Score) {
 export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolean) {
     let isPositve = true;
     const scoreMap = new Map<string, number>();
-    const acMap: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+    const acMap = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
     const tChoice = acMap.get(localChoice.id);
 
     if (isSel) {
@@ -3389,39 +3410,6 @@ export function cleanActivated(isReset: boolean = true) {
         if (cChoice.isImageUpload) {
             if (typeof cChoice.defaultImage !== 'undefined') cChoice.image = cChoice.defaultImage;
         }
-
-        if (cChoice.setBgmIsOn && musicPlayer) {
-            if (cChoice.bgmId) {
-                const player = get(musicPlayer);
-
-                if (player && player.getId() === cChoice.bgmId) {
-                    player.stop();
-                    if (bgmVariables.bgmFadeInterval !== 0) {
-                        window.clearInterval(bgmVariables.bgmFadeInterval);
-                        bgmVariables.bgmFadeInterval = 0;
-                    }
-                    if (bgmVariables.bgmTitleInterval !== 0) {
-                        window.clearInterval(bgmVariables.bgmTitleInterval);
-                        bgmVariables.bgmTitleInterval = 0;
-                    }
-                    if (bgmVariables.bgmPlayInterval !== 0) {
-                        window.clearInterval(bgmVariables.bgmPlayInterval);
-                        bgmVariables.bgmPlayInterval = 0;
-                    }
-                    bgmVariables.lastFadeTime = 0;
-                    bgmVariables.isFadingOut = false;
-                    bgmVariables.bgmTitle = 'No Audio Title';
-                    bgmVariables.curBgmTime = 0;
-                    bgmVariables.curBgmLength = 0;
-                    
-                    const idx = waitingBgmList.indexOf(cChoice.id);
-
-                    if (idx !== DISABLED) {
-                        waitingBgmList.splice(idx, 1);
-                    }
-                }
-            }
-        }
         
         if (typeof cChoice.initMultipleTimesMinus !== 'undefined') cChoice.numMultipleTimesMinus = cChoice.initMultipleTimesMinus;
         cChoice.multipleUseVariable = 0;
@@ -3518,6 +3506,30 @@ export function cleanActivated(isReset: boolean = true) {
 
     tmpActivatedMap.clear();
     const reactivateCode: string[] = [];
+    if (musicPlayer) {
+        const player = get(musicPlayer);
+
+        if (player) {
+            player.stop();
+        }
+    }
+    if (bgmVariables.bgmFadeInterval !== 0) {
+        window.clearInterval(bgmVariables.bgmFadeInterval);
+        bgmVariables.bgmFadeInterval = 0;
+    }
+    if (bgmVariables.bgmTitleInterval !== 0) {
+        window.clearInterval(bgmVariables.bgmTitleInterval);
+        bgmVariables.bgmTitleInterval = 0;
+    }
+    if (bgmVariables.bgmPlayInterval !== 0) {
+        window.clearInterval(bgmVariables.bgmPlayInterval);
+        bgmVariables.bgmPlayInterval = 0;
+    }
+    bgmVariables.lastFadeTime = 0;
+    bgmVariables.isFadingOut = false;
+    bgmVariables.bgmTitle = 'No Audio Title';
+    bgmVariables.curBgmTime = 0;
+    bgmVariables.curBgmLength = 0;
     if (bgmVariables.bgmWaitTimer !== 0) {
         window.clearTimeout(bgmVariables.bgmWaitTimer);
         bgmVariables.bgmWaitTimer = 0;
@@ -3526,6 +3538,7 @@ export function cleanActivated(isReset: boolean = true) {
         window.clearTimeout(tempEffectTimer);
         tempEffectTimer = 0;
     }
+    waitingBgmList.splice(0);
 
     for (const [id] of activatedMap) {
         const cMap = choiceMap.get(id);
@@ -3801,9 +3814,8 @@ async function deselectTempActivate(localChoice: Choice | SelectableAddon, fChoi
 }
 
 async function deselectForceActivate(localChoice: Choice | SelectableAddon, fChoice: Choice | SelectableAddon, fRow: Row, num: number, options: ChoiceOptions) {
-    const newOption = {...options}
-    newOption.isOverDlg = true;
-    newOption.isOverImg = true;
+    options.isOverDlg = true;
+    options.isOverImg = true;
     if (fChoice.activateOtherChoice && typeof fChoice.activateThisChoice !== 'undefined' && options.linkedObjects.indexOf(localChoice.id) === -1 && fChoice.activateThisChoice.split(',').some(item => item.split('/ON#')[0] === localChoice.id)) {
         options.linkedObjects.push(localChoice.id);
     }
@@ -3814,14 +3826,14 @@ async function deselectForceActivate(localChoice: Choice | SelectableAddon, fCho
                     for (let i = 0; i < num; i++) {
                         if (!localChoice.isAllowDeselect) fChoice.numMultipleTimesMinus -= 1;
                         if (!localChoice.isNotDeactivate) {
-                            selectedOneLess(fChoice, fRow, newOption);
+                            selectedOneLess(fChoice, fRow, options);
                         }
                     }
                 } else if (num < 0) {
                     for (let i = 0; i > (num * -1); i++) {
                         if (!localChoice.isAllowDeselect) fChoice.numMultipleTimesPluss += 1;
                         if (!localChoice.isNotDeactivate) {
-                            selectedOneMore(fChoice, fRow, newOption);
+                            selectedOneMore(fChoice, fRow, options);
                         }
                     }
                 }
@@ -3832,11 +3844,11 @@ async function deselectForceActivate(localChoice: Choice | SelectableAddon, fCho
                 if (fChoice.activatedFrom <= 0 || options.linkedObjects.indexOf(localChoice.id) !== -1) {
                     delete fChoice.activatedFrom;
                     delete fChoice.forcedActivated;
-                    if (!localChoice.isNotDeactivate) deselectObject(fChoice, fRow, newOption);
+                    if (!localChoice.isNotDeactivate) deselectObject(fChoice, fRow, options);
                 }
             } else {
                 delete fChoice.forcedActivated;
-                if (!localChoice.isNotDeactivate && fChoice.isActive) deselectObject(fChoice, fRow, newOption);
+                if (!localChoice.isNotDeactivate && fChoice.isActive) deselectObject(fChoice, fRow, options);
             }
         }
     } else {
@@ -4072,7 +4084,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
         const aChoice = cMap.choice;
         if (!aChoice.isActive) continue;
 
-        const thisTmpScores = new SvelteMap<string, number>();
+        const thisTmpScores = new Map<string, number>();
         const addSet = new Set<Choice | SelectableAddon>();
         const removeSet = new Set<Choice | SelectableAddon>();
         let isChanged = false;
@@ -4179,7 +4191,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                     if (hasScore && !lPoint) continue;
 
                     const afterDeselected = checkRequirements(aScore.requireds);
-                    const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
                     const isMultiple = localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable;
                     if (isMultiple) {
                         if (localChoice.multipleUseVariable === -1) {
@@ -4405,7 +4417,7 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
         
         const aRow = cMap.row;
         const aChoice = cMap.choice;
-        const thisTmpScores = new SvelteMap<string, number>();
+        const thisTmpScores = new Map<string, number>();
         const addSet = new Set<Choice | SelectableAddon>();
         const removeSet = new Set<Choice | SelectableAddon>();
         const newOptions = {...options};
@@ -4516,7 +4528,7 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                     if (hasScore && !lPoint) continue;
                     
                     const afterSelected = checkRequirements(aScore.requireds);
-                    const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
                     if (localChoice) {
                         if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
                             if (localChoice.multipleUseVariable === 0) {
@@ -4911,7 +4923,7 @@ function selectDiscountOther(localChoice: Choice | SelectableAddon) {
     }
 }
 
-function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
+function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: Map<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
     const countSet = new Set<Choice | SelectableAddon>();
     const key = options.isPos ? 'isActiveMul' : 'isActiveMulMinus';
     for (let i = 0; i < localChoice.scores.length; i++) {
@@ -4986,7 +4998,7 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
     }
 }
 
-function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
+function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: Map<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
     const countSet = new Set<Choice | SelectableAddon>();
     const key = options.isPos ? 'isActiveMul' : 'isActiveMulMinus';
     for (let i = 0; i < localChoice.scores.length; i++) {
@@ -5585,7 +5597,7 @@ function addAllowedChoice(localChoice: Choice | SelectableAddon, options: Choice
 function deselectEffectProc(localChoice: Choice | SelectableAddon) {
     if (localChoice.setBgmIsOn && musicPlayer) {
         if (localChoice.bgmId) {
-            playBgm(localChoice, localChoice.bgmId, 0, false);
+            playBgm(localChoice, localChoice.bgmId, 0, false, ++requestId);
             let idx = waitingBgmList.indexOf(localChoice.id);
             if (idx !== DISABLED) {
                 waitingBgmList.splice(idx, 1);
@@ -5605,9 +5617,13 @@ function deselectEffectProc(localChoice: Choice | SelectableAddon) {
                         }
 
                         bgmVariables.bgmWaitTimer = window.setTimeout(() => {
-                            waitingBgmList.splice(idx, 1);
-                            playBgm(wChoice, wId, 0, true);
-                        }, 100);
+                            if (!bgmVariables.bgmIsPlaying && wChoice.isActive) {
+                                waitingBgmList.splice(idx, 1);
+                                playBgm(wChoice, wId, 0, true, ++requestId);
+                            }
+                            window.clearTimeout(bgmVariables.bgmWaitTimer);
+                            bgmVariables.bgmWaitTimer = 0;
+                        }, 1000);
                     }
                 }
             }
@@ -5808,11 +5824,14 @@ function deselectEffectProc(localChoice: Choice | SelectableAddon) {
 function selectEffectProc(localChoice: Choice | SelectableAddon) {
     if (localChoice.setBgmIsOn) {
         if (localChoice.bgmId) {
+            if (bgmVariables.bgmWaitTimer !== 0) {
+                window.clearTimeout(bgmVariables.bgmWaitTimer);
+                bgmVariables.bgmWaitTimer = 0;
+            }
             if (bgmVariables.isBgmInit || localChoice.useAudioURL) {
-                playBgm(localChoice, localChoice.bgmId, 0, true);
+                playBgm(localChoice, localChoice.bgmId, 0, true, ++requestId);
             } else {
                 initYoutubePlayer(localChoice);
-                bgmVariables.isBgmInit = true;
             }
         }
     }
@@ -6122,7 +6141,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
 
     const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
-        const tmpScores = new SvelteMap<string, number>();
+        const tmpScores = new Map<string, number>();
         
         deselectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
 
@@ -6380,7 +6399,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
         if (pointCheck) {
             const selectProcess = () => {
                 playSfxOnSelect(localChoice);
-                const tmpScores = new SvelteMap<string, number>();
+                const tmpScores = new Map<string, number>();
 
                 localChoice.isActive = true;
                 if (options.isForced && !options.isAllowDeselect && !options.fromAddon) {
@@ -6617,7 +6636,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
         if (pointCheck) {
             const selectProcess = () => {
                 playSfxOnSelect(localChoice);
-                const tmpScores = new SvelteMap<string, number>();
+                const tmpScores = new Map<string, number>();
                 const wasActive = localChoice.isActive;
                 const isPos = localChoice.multipleUseVariable >= 0;
                 const selNum = Math.abs(localChoice.multipleUseVariable);
@@ -6823,7 +6842,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
 
     const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
-        const tmpScores = new SvelteMap<string, number>();
+        const tmpScores = new Map<string, number>();
         const isPos = localChoice.multipleUseVariable > 0;
         const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
@@ -7012,7 +7031,7 @@ function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpS
 
         const aRow = cMap.row;
         const aChoice = cMap.choice;
-        const thisTmpScores = new SvelteMap<string, number>();
+        const thisTmpScores = new Map<string, number>();
         const addSet = new Set<Choice | SelectableAddon>();
         const removeSet = new Set<Choice | SelectableAddon>();
         let isChanged = false;
@@ -7100,7 +7119,7 @@ function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpS
                     if (hasScore && !lPoint) continue;
                     
                     const afterSelected = checkRequirements(aScore.requireds);
-                    const tmpActivated: SvelteMap<string, ActivatedMap> = new SvelteMap(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
                     if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
                         if (localChoice.multipleUseVariable === 0) {
                             tmpActivated.delete(localChoice.id);
@@ -7290,7 +7309,7 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
         }
     }
 
-    const tmpScores = new SvelteMap<string, number>();
+    const tmpScores = new Map<string, number>();
 
     localChoice.isActive = true;
     activatedMap.set(localChoice.id, {multiple: 0});
@@ -7594,7 +7613,7 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
             }
         }
 
-        const tmpScores = new SvelteMap<string, number>();
+        const tmpScores = new Map<string, number>();
         const wasActive = localChoice.isActive;
         const isPos = localChoice.multipleUseVariable >= 0;
         const selNum = Math.abs(localChoice.multipleUseVariable);
@@ -7876,7 +7895,7 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
 }
 function selectedOneLessL(localChoice: Choice | SelectableAddon, localRow: Row) {
     
-    const tmpScores = new SvelteMap<string, number>();
+    const tmpScores = new Map<string, number>();
     const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
     for (let i = 0; i < localChoice.scores.length; i++) {

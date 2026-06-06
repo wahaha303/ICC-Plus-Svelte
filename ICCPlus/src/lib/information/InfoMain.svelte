@@ -224,6 +224,14 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.17 / ${getDate('2026-06-06T16:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where choices linked using the "Force Other Choice to Be Active" option did not work correctly.
+        - Fixed issue where row titles were not displayed for choices with templates other than "image top" in Backpack.
+        - Fixed issue where spacing appeared between choices and addons in Viewer.
+        `
+    }, {
+        open: false,
         title: `v2.9.16 / ${getDate('2026-06-04T10:00:00Z')}`,
         text: `<span style="color: green">Score</span>
         - Rolled back to display score values even when Point is not set.
@@ -240,7 +248,6 @@
         text: `<span style="color: green">Choice</span>
         - Added option to deselect parent choice when all child addons are deselected.
         - Fixed issue where choices could not be deselected when "Cannot be Selected Manually" was enabled.
-        - 
         `
     }, {
         open: false,

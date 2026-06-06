@@ -3,7 +3,7 @@
         <div class:fullHeight={fullHeight} class="d-flex">
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="row row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
+            <div class="d-column row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
                 {#if choice.template >= 4 || choice.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx) || row.choicesShareTemplate}
                     <div class="d-column w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle || isSearch}
@@ -97,6 +97,13 @@
                 {:else}
                     {#if choice.template === 2}
                         <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                            {#if row.resultShowRowTitle || isSearch}
+                                {#key oriTitleKey}
+                                    <div class="col-12" style={scoreText}>
+                                        {@html DOMPurify.sanitize(oriTitleKey, sanitizeArg)}
+                                    </div>
+                                {/key}
+                            {/if}
                             <div class="row g-0 p-0{choice.useSeperateAddon ? '' : ' flex-grow-1'}">
                                 <div class="p-0 align-items-center" style="max-width: {choiceImageBoxWidth}%">
                                     {#if choice.image && !row.objectImageRemoved}
@@ -182,6 +189,13 @@
                         {/if}
                     {:else if choice.template === 3}
                         <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                            {#if row.resultShowRowTitle || isSearch}
+                                {#key oriTitleKey}
+                                    <div class="col-12" style={scoreText}>
+                                        {@html DOMPurify.sanitize(oriTitleKey, sanitizeArg)}
+                                    </div>
+                                {/key}
+                            {/if}
                             <div class="row g-0 p-0{choice.useSeperateAddon ? '' : ' flex-grow-1'}">
                                 <div class="d-column p-0 text-center" style="max-width: {100 - choiceImageBoxWidth}%">
                                     {#if choice.title !== '' && !row.objectTitleRemoved}
@@ -283,8 +297,7 @@
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     
     const { row, choice, windowWidth, preloadImages = false, isBackpack, mainDiv, isSearch = false }: { row: Row, choice: Choice, index: number, windowWidth: number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement, isSearch?: boolean } = $props();
-    const linkedObjects: string[] = [];
-    const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
+    const options: ChoiceOptions = {linkedObjects: [], mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     const nAddons = $derived.by(() => {
         const list = choice.addons;
         if (!list || list.length === 0) return null;
@@ -657,6 +670,7 @@
 
         options.isOverDlg = false;
         options.isOverImg = false;
+        options.linkedObjects = [];
 
         if (row.isResultRow || row.isGroupRow) {
             const cMap = choiceMap.get(choice.id);
@@ -675,13 +689,13 @@
 
     function activateObject(e?: MouseEvent) {
         if (row.isInfoRow) return;
-        
+
         const target = e && e.target ? e.target as HTMLElement : null
         let origRow = row;
 
         options.isOverDlg = false;
         options.isOverImg = false;
-
+        options.linkedObjects = [];
         if (target && choice.addons && choice.addons.length > 0) {
             if (closestByClassPrefix(target, 'addon-', 'addon')) return;
         }
