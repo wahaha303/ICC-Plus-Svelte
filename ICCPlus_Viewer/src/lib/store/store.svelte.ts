@@ -6,8 +6,9 @@ import { toBlob } from 'html-to-image';
 import { evaluate } from '@antv/expr';
 import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.17';
+export const appVersion = '2.9.18';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -710,20 +711,20 @@ export const objectWidths = [{
     text: '12 per row',
     value: 'col-xl-1'
 }];
-export const activatedMap = new Map<string, ActivatedMap>();
-export const tmpActivatedMap = new Map<string, ActivatedMap>();
-export const pointTypeMap = new Map<string, PointType>();
-export const rowMap = new Map<string, Row>();
-export const choiceMap = new Map<string, ChoiceMap>();
-export const groupMap = new Map<string, Group>();
-export const globalReqMap = new Map<string, GlobalRequirement>();
-export const wordMap = new Map<string, Word>();
-export const variableMap = new Map<string, Variable>();
-export const rowDesignMap = new Map<string, RowDesignGroup>();
-export const objectDesignMap = new Map<string, ObjectDesignGroup>();
-export const sfxMap = new Map<string, SoundEffect>();
-export const scoreSet = new Set<string>();
-export const mdObjects: MDObject[] = [];
+export const activatedMap = new SvelteMap<string, ActivatedMap>();
+export const tmpActivatedMap = new SvelteMap<string, ActivatedMap>();
+export const pointTypeMap = new SvelteMap<string, PointType>();
+export const rowMap = new SvelteMap<string, Row>();
+export const choiceMap = new SvelteMap<string, ChoiceMap>();
+export const groupMap = new SvelteMap<string, Group>();
+export const globalReqMap = new SvelteMap<string, GlobalRequirement>();
+export const wordMap = new SvelteMap<string, Word>();
+export const variableMap = new SvelteMap<string, Variable>();
+export const rowDesignMap = new SvelteMap<string, RowDesignGroup>();
+export const objectDesignMap = new SvelteMap<string, ObjectDesignGroup>();
+export const sfxMap = new SvelteMap<string, SoundEffect>();
+export const scoreSet = new SvelteSet<string>();
+export const mdObjects =  $state<MDObject[]>([]);
 export const currentComponent = $state({ value: 'appCyoaViewer'});
 export const currentTheme = $state({ value: 'light' });
 export const sanitizeArg = {
@@ -1633,7 +1634,7 @@ export function getStyling(prop: string, row?: Row, choice?: Choice) {
     }
     return app.styling;
 }
-export function checkDupId(id: string, dataMap: Map<string, PointType | Row | ChoiceMap | Group | Variable | Word | RowDesignGroup | ObjectDesignGroup | GlobalRequirement> | Set<string>) {
+export function checkDupId(id: string, dataMap: SvelteMap<string, PointType | Row | ChoiceMap | Group | Variable | Word | RowDesignGroup | ObjectDesignGroup | GlobalRequirement> | Set<string>) {
     if (dataMap.has(id)) {
         const tempId = `${id}_dup`;
         return checkDupId(tempId, dataMap);
@@ -1657,7 +1658,7 @@ export function checkPointEnable(point: PointType) {
     }
     return true;
 }
-export function checkActivated(str: string, actMap: Map<string, ActivatedMap> = activatedMap) {
+export function checkActivated(str: string, actMap: SvelteMap<string, ActivatedMap> = activatedMap) {
     const [key, val = '0'] = str.split('/ON#');
     const num = parseInt(val);
     if (num > 0) {
@@ -1694,7 +1695,7 @@ function evaluateNode(node: number | string | ExprNode): number {
         default: return left;
     }
 }
-export function checkReq(req: Requireds, aMap: Map<string, ActivatedMap> = activatedMap) {
+export function checkReq(req: Requireds, aMap: SvelteMap<string, ActivatedMap> = activatedMap) {
     if (req.required) {
         switch (req.type) {
             case 'id':
@@ -1897,7 +1898,7 @@ export function checkReq(req: Requireds, aMap: Map<string, ActivatedMap> = activ
     }
     return false;
 }
-export function checkRequirements(requireds: Requireds[], actMap: Map<string, ActivatedMap> = activatedMap): boolean {
+export function checkRequirements(requireds: Requireds[], actMap: SvelteMap<string, ActivatedMap> = activatedMap): boolean {
     if (typeof requireds === 'undefined') return true;
     
     let result = true;
@@ -3033,7 +3034,7 @@ export function expDiscount(point: PointType, score: Score) {
 export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolean) {
     let isPositve = true;
     const scoreMap = new Map<string, number>();
-    const acMap = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+    const acMap = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
     const tChoice = acMap.get(localChoice.id);
 
     if (isSel) {
@@ -4084,7 +4085,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
         const aChoice = cMap.choice;
         if (!aChoice.isActive) continue;
 
-        const thisTmpScores = new Map<string, number>();
+        const thisTmpScores = new SvelteMap<string, number>();
         const addSet = new Set<Choice | SelectableAddon>();
         const removeSet = new Set<Choice | SelectableAddon>();
         let isChanged = false;
@@ -4191,7 +4192,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                     if (hasScore && !lPoint) continue;
 
                     const afterDeselected = checkRequirements(aScore.requireds);
-                    const tmpActivated = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
                     const isMultiple = localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable;
                     if (isMultiple) {
                         if (localChoice.multipleUseVariable === -1) {
@@ -4417,7 +4418,7 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
         
         const aRow = cMap.row;
         const aChoice = cMap.choice;
-        const thisTmpScores = new Map<string, number>();
+        const thisTmpScores = new SvelteMap<string, number>();
         const addSet = new Set<Choice | SelectableAddon>();
         const removeSet = new Set<Choice | SelectableAddon>();
         const newOptions = {...options};
@@ -4528,7 +4529,7 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                     if (hasScore && !lPoint) continue;
                     
                     const afterSelected = checkRequirements(aScore.requireds);
-                    const tmpActivated = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
                     if (localChoice) {
                         if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
                             if (localChoice.multipleUseVariable === 0) {
@@ -4923,7 +4924,7 @@ function selectDiscountOther(localChoice: Choice | SelectableAddon) {
     }
 }
 
-function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: Map<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
+function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
     const countSet = new Set<Choice | SelectableAddon>();
     const key = options.isPos ? 'isActiveMul' : 'isActiveMulMinus';
     for (let i = 0; i < localChoice.scores.length; i++) {
@@ -4998,7 +4999,7 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
     }
 }
 
-function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: Map<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
+function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
     const countSet = new Set<Choice | SelectableAddon>();
     const key = options.isPos ? 'isActiveMul' : 'isActiveMulMinus';
     for (let i = 0; i < localChoice.scores.length; i++) {
@@ -6141,7 +6142,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
 
     const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
-        const tmpScores = new Map<string, number>();
+        const tmpScores = new SvelteMap<string, number>();
         
         deselectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
 
@@ -6399,7 +6400,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
         if (pointCheck) {
             const selectProcess = () => {
                 playSfxOnSelect(localChoice);
-                const tmpScores = new Map<string, number>();
+                const tmpScores = new SvelteMap<string, number>();
 
                 localChoice.isActive = true;
                 if (options.isForced && !options.isAllowDeselect && !options.fromAddon) {
@@ -6636,7 +6637,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
         if (pointCheck) {
             const selectProcess = () => {
                 playSfxOnSelect(localChoice);
-                const tmpScores = new Map<string, number>();
+                const tmpScores = new SvelteMap<string, number>();
                 const wasActive = localChoice.isActive;
                 const isPos = localChoice.multipleUseVariable >= 0;
                 const selNum = Math.abs(localChoice.multipleUseVariable);
@@ -6842,7 +6843,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
 
     const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
-        const tmpScores = new Map<string, number>();
+        const tmpScores = new SvelteMap<string, number>();
         const isPos = localChoice.multipleUseVariable > 0;
         const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
@@ -7031,7 +7032,7 @@ function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpS
 
         const aRow = cMap.row;
         const aChoice = cMap.choice;
-        const thisTmpScores = new Map<string, number>();
+        const thisTmpScores = new SvelteMap<string, number>();
         const addSet = new Set<Choice | SelectableAddon>();
         const removeSet = new Set<Choice | SelectableAddon>();
         let isChanged = false;
@@ -7119,7 +7120,7 @@ function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpS
                     if (hasScore && !lPoint) continue;
                     
                     const afterSelected = checkRequirements(aScore.requireds);
-                    const tmpActivated = new Map<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
                     if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
                         if (localChoice.multipleUseVariable === 0) {
                             tmpActivated.delete(localChoice.id);
@@ -7309,7 +7310,7 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
         }
     }
 
-    const tmpScores = new Map<string, number>();
+    const tmpScores = new SvelteMap<string, number>();
 
     localChoice.isActive = true;
     activatedMap.set(localChoice.id, {multiple: 0});
@@ -7613,7 +7614,7 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
             }
         }
 
-        const tmpScores = new Map<string, number>();
+        const tmpScores = new SvelteMap<string, number>();
         const wasActive = localChoice.isActive;
         const isPos = localChoice.multipleUseVariable >= 0;
         const selNum = Math.abs(localChoice.multipleUseVariable);
@@ -7895,7 +7896,7 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
 }
 function selectedOneLessL(localChoice: Choice | SelectableAddon, localRow: Row) {
     
-    const tmpScores = new Map<string, number>();
+    const tmpScores = new SvelteMap<string, number>();
     const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
     for (let i = 0; i < localChoice.scores.length; i++) {

@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.18 / ${getDate('2026-06-07T00:00:00Z')}`,
+        text: `<span style="color: green">Requirement</span>
+        - Fixed issue where requirements did not work correctly.
+        `
+    }, {
+        open: false,
         title: `v2.9.17 / ${getDate('2026-06-06T16:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where choices linked using the "Force Other Choice to Be Active" option did not work correctly.
