@@ -17,10 +17,9 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
-    "moduleDetection": "force",    
-    "baseUrl": ".",
+    "moduleDetection": "force",
     "paths": {
-      "$lib/*": ["src/lib/*"]
+      "$lib/*": ["./src/lib/*"]
     },
     "outDir": "./dist"
     

@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.18';
+export const appVersion = '2.9.19';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3034,7 +3034,7 @@ export function expDiscount(point: PointType, score: Score) {
 export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolean) {
     let isPositve = true;
     const scoreMap = new Map<string, number>();
-    const acMap = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+    const acMap = new SvelteMap<string, ActivatedMap>([...activatedMap].map(([key, value]) => [key, {...value}]));
     const tChoice = acMap.get(localChoice.id);
 
     if (isSel) {
@@ -4192,7 +4192,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                     if (hasScore && !lPoint) continue;
 
                     const afterDeselected = checkRequirements(aScore.requireds);
-                    const tmpActivated = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new SvelteMap<string, ActivatedMap>([...activatedMap].map(([key, value]) => [key, {...value}]));
                     const isMultiple = localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable;
                     if (isMultiple) {
                         if (localChoice.multipleUseVariable === -1) {
@@ -4401,7 +4401,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
             const tempDiv = document.createElement('div');
     
             tempDiv.innerHTML = scoreUpdate.join('');
-            snackbarVariables.labelText = tempDiv.textContent;
+            snackbarVariables.labelText = tempDiv.textContent || '';
             snackbarVariables.isOpen = true;
         }
         scoreUpdate.splice(0);
@@ -4529,7 +4529,7 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
                     if (hasScore && !lPoint) continue;
                     
                     const afterSelected = checkRequirements(aScore.requireds);
-                    const tmpActivated = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new SvelteMap<string, ActivatedMap>([...activatedMap].map(([key, value]) => [key, {...value}]));
                     if (localChoice) {
                         if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
                             if (localChoice.multipleUseVariable === 0) {
@@ -4736,7 +4736,7 @@ export function selectUpdateScore(localChoice: Choice | SelectableAddon | null, 
             const tempDiv = document.createElement('div');
     
             tempDiv.innerHTML = scoreUpdate.join('');
-            snackbarVariables.labelText = tempDiv.textContent;
+            snackbarVariables.labelText = tempDiv.textContent || '';
             snackbarVariables.isOpen = true;
         }
         scoreUpdate.splice(0);
@@ -5052,7 +5052,7 @@ function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: 
                     score.isActive = true;
                 }
                 point.startingSum -= val;
-                let tmpScore = tmpScores.get(score.id);
+                const tmpScore = tmpScores.get(score.id);
                 if (typeof tmpScore !== 'undefined') {
                     tmpScores.set(score.id, val + tmpScore);
                 } else {
@@ -6133,12 +6133,156 @@ function selectScroll(localChoice: Choice | SelectableAddon, options: ChoiceOpti
     }
 }
 
-export async function deselectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+function checkAddonDeselectable(localChoice: Choice, localRow: Row) {
+    if (!localChoice.addons || localChoice.addons.length === 0) return true;
+
+    let result = true;
+    for (let i = 0; i < localChoice.addons.length; i++) {
+        const addon = localChoice.addons[i];
+        if (!addon.isSelectable) continue;
+        if (!addon.isActive) continue;
+        if (addon.activateThisChoice && addon.activateThisChoice.split(',').indexOf(localChoice.id) !== -1) continue;
+        if (addon.selectOnce) return false;
+        if (addon.forcedActivated) return false;
+
+        if (addon.isSelectableMultiple && addon.isMultipleUseVariable) {
+            const pNum = addon.multipleUseVariable;
+            for (let i = 0; i < Math.abs(pNum); i++) {
+                if (pNum > 0) {
+                    result = result && checkDeselectable(addon, localRow);
+                } else {
+                    result = result && checkSelectable(addon, localRow);
+                }
+            }
+        } else {
+            result = result && checkDeselectable(addon, localRow);
+        }
+
+        if (!result) return false;
+    }
+    return result;
+}
+
+function checkDeselectable(localChoice: Choice | SelectableAddon, localRow: Row): boolean {
+    const isChoice = typeof localChoice.parentId === 'undefined';
+    const pointCheck = checkPoints(localChoice, false);
+    const addonCheck = isChoice ? checkAddonDeselectable(localChoice as Choice, localRow) : true;
+    if (!pointCheck || !addonCheck) return false;
+
+    return true;
+}
+
+function checkSelectable(localChoice: Choice | SelectableAddon, localRow: Row, aMap: SvelteMap<string, ActivatedMap> = new SvelteMap([...activatedMap].map(([key, value]) => [key, {...value}])), pMap: SvelteMap<string, PointType> = new SvelteMap([...pointTypeMap].map(([key, value]) => [key, {...value}]))): boolean {
     const isChoice = typeof localChoice.parentId === 'undefined';
     const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
+    const reqCheck = checkRequirements(localChoice.requireds) && !localRow.isInfoRow;
+    if (!reqCheck) return false;
+
+    let origRow = localRow;
+    if (localRow.isResultRow) {
+        const cMap = choiceMap.get(localChoice.id);
+
+        if (typeof cMap !== 'undefined') {
+            origRow = cMap.row;
+        }
+    }
+    let allowedNum = origRow.allowedChoices;
+
+    if (localChoice.addToAllowChoice && typeof localChoice.idOfAllowChoice !== 'undefined' && typeof localChoice.numbAddToAllowChoice !== 'undefined') {
+        for (let i = 0; i < localChoice.idOfAllowChoice.length; i++) {
+            if (localChoice.idOfAllowChoice[i] === localRow.id) {
+                allowedNum += localChoice.numbAddToAllowChoice;
+                break;
+            }
+        }
+    }
+
+    if (!isChoice) {
+        const cMap = choiceMap.get(localChoice.parentId);
+
+        if (typeof cMap !== 'undefined') {
+            const pChoice = cMap.choice;
+            const pRow = cMap.row;
+
+            if (!pChoice.isActive) {
+                const isMul = pChoice.isSelectableMultiple && pChoice.isMultipleUseVariable;
+                if (!checkSelectable(pChoice, pRow, aMap, pMap)) return false;
+
+                aMap.set(pChoice.id, { multiple: isMul ? 1 : 0 });
+
+                for (let i = 0; i < localChoice.scores.length; i++) {
+                    const score = localChoice.scores[i];
+
+                    if (checkRequirements(score.requireds)) {
+                        const point = pMap.get(score.id);
+                        if (typeof point !== 'undefined') {
+                            let val = score.value;
+                            if (score.useExpression && score.setValue) {
+                                expDiscount(point, score);
+                            }
+
+                            if (score.discountIsOn && score.appliedDiscount && typeof score.discountScore !== 'undefined' && typeof score.discounts !== 'undefined') {
+                                val = score.discountScore;
+                            }
+                            val = point.allowFloat ? val : Math.floor(val);
+                            point.startingSum -= val;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (countCheck && allowedNum > 0 && origRow.currentChoices >= allowedNum) {
+        let deselectable = false;
+        for (const [id] of aMap) {
+            const cMap = choiceMap.get(id);
+
+            if (typeof cMap !== 'undefined') {
+                const aRow = cMap.row;
+                if (aRow.id !== origRow.id) continue;
+
+                const aChoice = cMap.choice;
+
+                if (typeof aChoice.parentId === 'undefined' ? !aChoice.isCountDisabled : aChoice.countAsChoice) {
+                    if (!aChoice.forcedActivated && !aChoice.selectOnce && aChoice.id !== localChoice.parentId) {
+                        if (aChoice.isSelectableMultiple) {
+                            let counter = aChoice.multipleUseVariable;
+                            for (let i = 0; i < counter; i++) {
+                                deselectable = checkDeselectable(aChoice, origRow);
+                            }
+                        } else {
+                            deselectable = checkDeselectable(aChoice, origRow);
+                        }
+                        if (deselectable) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (!deselectable) {
+            return false;
+        }
+    }
+
+    return checkPoints(localChoice, true);
+}
+
+export async function deselectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+    if (!localChoice.isActive) return;
+
+    const isChoice = typeof localChoice.parentId === 'undefined';
+    const deselectable = checkDeselectable(localChoice, localRow);
+    if (!deselectable) return;
+
     const pointCheck = checkPoints(localChoice, false);
+    if (!pointCheck) return;
+
     const addonCheck = isChoice ? await checkAddons(localChoice as Choice, localRow, options) : true;
-    if (!localChoice.isActive || !pointCheck || !addonCheck) return;
+    if (!addonCheck) return;
+
+    const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
 
     const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
@@ -6301,32 +6445,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
 
 export async function selectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
     const isChoice = typeof localChoice.parentId === 'undefined';
-    let selectable = true;
-
-    if (!isChoice) {
-        const cMap = choiceMap.get(localChoice.parentId);
-
-        if (typeof cMap !== 'undefined') {
-            const pChoice = cMap.choice;
-            const pRow = cMap.row;
-
-            if (!pChoice.isActive) {
-                const newOptions = {...options};
-                if (pChoice.isSelectableMultiple) {
-                    await selectedOneMore(pChoice, pRow, newOptions);
-                } else {
-                    newOptions.fromAddon = true;
-                    await selectObject(pChoice, pRow, newOptions);
-                }
-                if (!pChoice.isActive) {
-                    selectable = false;
-                }
-            }
-        }
-    }
-
     const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
-    const reqCheck = checkRequirements(localChoice.requireds) && !localRow.isInfoRow;
     const tmpAdd = () => {
         if (options.isForced && !options.isAllowDeselect && !options.fromTemp) {
             const tmpAct = tmpActivatedMap.get(localChoice.id);
@@ -6338,12 +6457,13 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
             }
         }
     }
+    const selectable = checkSelectable(localChoice, localRow);
 
-    if (!reqCheck) {
+    if (!selectable) {
         tmpAdd();
         return;
     }
-    
+
     let origRow = localRow;
     if (localRow.isResultRow) {
         const cMap = choiceMap.get(localChoice.id);
@@ -6363,35 +6483,59 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
         }
     }
 
+    if (!isChoice) {
+        const cMap = choiceMap.get(localChoice.parentId);
+
+        if (typeof cMap !== 'undefined') {
+            const pChoice = cMap.choice;
+            const pRow = cMap.row;
+
+            if (!pChoice.isActive) {
+                const newOptions = {...options};
+                if (pChoice.isSelectableMultiple) {
+                    await selectedOneMore(pChoice, pRow, newOptions);
+                } else {
+                    newOptions.fromAddon = true;
+                    await selectObject(pChoice, pRow, newOptions);
+                }
+                if (!pChoice.isActive) {
+                    tmpAdd();
+                    return;
+                }
+            }
+        }
+    }
+
     if (countCheck && allowedNum > 0 && origRow.currentChoices >= allowedNum) {
         const newOptions = {...options};
         newOptions.isOverDlg = true;
         newOptions.isOverImg = true;
-        let count = 0;
-        for (let i = 0; i < origRow.objects.length; i++) {
-            const thisChoice = origRow.objects[i];
-            if (thisChoice.isActive && !thisChoice.isCountDisabled) {
-                if (!thisChoice.forcedActivated && !thisChoice.selectOnce && thisChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(thisChoice.id) === -1) {
-                    if (thisChoice.isSelectableMultiple) {
-                        let counter = thisChoice.multipleUseVariable;
-                        for (let j = 0; j < counter; j++) {
-                            await selectedOneLess(thisChoice, origRow, newOptions);
+
+        for (const [id] of activatedMap) {
+            const cMap = choiceMap.get(id);
+
+            if (typeof cMap !== 'undefined') {
+                const aRow = cMap.row;
+                if (aRow.id !== origRow.id) continue;
+
+                const aChoice = cMap.choice;
+
+                if (typeof aChoice.parentId === 'undefined' ? !aChoice.isCountDisabled : aChoice.countAsChoice) {
+                    if (!aChoice.forcedActivated && !aChoice.selectOnce && aChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(aChoice.id) === -1) {
+                        if (aChoice.isSelectableMultiple) {
+                            let counter = aChoice.multipleUseVariable;
+                            for (let i = 0; i < counter; i++) {
+                                await selectedOneLess(aChoice, origRow, newOptions);
+                            }
+                        } else {
+                            await deselectObject(aChoice, origRow, newOptions);
                         }
-                    } else {
-                        await deselectObject(thisChoice, origRow, newOptions);
+                        if (!aChoice.isActive) {
+                            break;
+                        }
                     }
-                    if (thisChoice.isActive) {
-                        count++;
-                    } else {
-                        break;
-                    }
-                } else {
-                    count++;
                 }
             }
-        }
-        if (count >= allowedNum) {
-            selectable = false;
         }
     }
 
@@ -6543,45 +6687,21 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
 
 export async function selectedOneMore(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
     const isChoice = typeof localChoice.parentId === 'undefined';
-    let selectable = true;
-
-    if (!isChoice) {
-        const cMap = choiceMap.get(localChoice.parentId);
-
-        if (typeof cMap !== 'undefined') {
-            const pChoice = cMap.choice;
-            const pRow = cMap.row;
-
-            if (!pChoice.isActive) {
-                const newOptions = {...options};
-                if (pChoice.isSelectableMultiple) {
-                    await selectedOneMore(pChoice, pRow, options);
-                } else {
-                    newOptions.fromAddon = true;
-                    await selectObject(pChoice, pRow, options);
-                }
-                if (!pChoice.isActive) {
-                    selectable = false;
-                }
-            }
-        }
-    }
-
     const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
-    const reqCheck = checkRequirements(localChoice.requireds) && !localRow.isInfoRow;
     const tmpAdd = () => {
         if (options.isForced && !options.isAllowDeselect && !options.fromTemp) {
             const tmpAct = tmpActivatedMap.get(localChoice.id);
 
-            if (typeof tmpAct !== 'undefined') {
-                tmpAct.multiple += 1;
+            if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
+                tmpAct.activatedFrom += 1;
             } else {
-                tmpActivatedMap.set(localChoice.id, {multiple: 1});
+                tmpActivatedMap.set(localChoice.id, {multiple: 0, activatedFrom: 1});
             }
         }
     }
+    const selectable = checkSelectable(localChoice, localRow);
 
-    if (!reqCheck) {
+    if (!selectable) {
         tmpAdd();
         return;
     }
@@ -6605,29 +6725,58 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
         }
     }
 
-    if (countCheck && localChoice.isMultipleUseVariable && localChoice.multipleUseVariable === 0) {
-        if (allowedNum > 0 && origRow.currentChoices >= allowedNum) {
-            let count = 0;
-            for (let i = 0; i < origRow.objects.length; i++) {
-                const thisChoice = origRow.objects[i];
-                if (thisChoice.isActive && !thisChoice.isCountDisabled) {
-                    if (!thisChoice.forcedActivated && !thisChoice.selectOnce && thisChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(thisChoice.id) === -1) {
-                        if (thisChoice.isSelectableMultiple) {
-                            let counter = thisChoice.multipleUseVariable;
-                            for (let j = 0; j < counter; j++) {
-                                await selectedOneLess(thisChoice, origRow, options);
-                            }
-                        } else {
-                            await deselectObject(thisChoice, origRow, options);
-                        }
-                        break;
-                    } else {
-                        count++;
-                    }
+    if (!isChoice) {
+        const cMap = choiceMap.get(localChoice.parentId);
+
+        if (typeof cMap !== 'undefined') {
+            const pChoice = cMap.choice;
+            const pRow = cMap.row;
+
+            if (!pChoice.isActive) {
+                const newOptions = {...options};
+                if (pChoice.isSelectableMultiple) {
+                    await selectedOneMore(pChoice, pRow, newOptions);
+                } else {
+                    newOptions.fromAddon = true;
+                    await selectObject(pChoice, pRow, newOptions);
+                }
+                if (!pChoice.isActive) {
+                    tmpAdd();
+                    return;
                 }
             }
-            if (count >= allowedNum) {
-                selectable = false;
+        }
+    }
+
+    if (countCheck && allowedNum > 0 && origRow.currentChoices >= allowedNum) {
+        const newOptions = {...options};
+        newOptions.isOverDlg = true;
+        newOptions.isOverImg = true;
+
+        for (const [id] of activatedMap) {
+            const cMap = choiceMap.get(id);
+
+            if (typeof cMap !== 'undefined') {
+                const aRow = cMap.row;
+                if (aRow.id !== origRow.id) continue;
+
+                const aChoice = cMap.choice;
+
+                if (typeof aChoice.parentId === 'undefined' ? !aChoice.isCountDisabled : aChoice.countAsChoice) {
+                    if (!aChoice.forcedActivated && !aChoice.selectOnce && aChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(aChoice.id) === -1) {
+                        if (aChoice.isSelectableMultiple) {
+                            let counter = aChoice.multipleUseVariable;
+                            for (let i = 0; i < counter; i++) {
+                                await selectedOneLess(aChoice, origRow, newOptions);
+                            }
+                        } else {
+                            await deselectObject(aChoice, origRow, newOptions);
+                        }
+                        if (!aChoice.isActive) {
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
@@ -6828,9 +6977,16 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
 
 export async function selectedOneLess(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
     const isChoice = typeof localChoice.parentId === 'undefined';
-    const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
+    const deselectable = checkDeselectable(localChoice, localRow);
+    if (!deselectable) return;
+
     const pointCheck = checkPoints(localChoice, false);
-    const addonCheck = isChoice ? await checkAddons(localChoice as Choice, localRow, options) : true;
+    if (!pointCheck) return;
+
+    const addonCheck = isChoice && localChoice.multipleUseVariable === 1 ? await checkAddons(localChoice as Choice, localRow, options) : true;
+    if (!addonCheck) return;
+
+    const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
     let origRow = localRow;
     if (localRow.isResultRow) {
         const cMap = choiceMap.get(localChoice.id);
@@ -6839,7 +6995,6 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
             origRow = cMap.row;
         }
     }
-    if (!pointCheck || !addonCheck || localRow.isInfoRow) return;
 
     const deselectProcess = async() => {
         playSfxOnDeselect(localChoice);
@@ -7120,7 +7275,7 @@ function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpS
                     if (hasScore && !lPoint) continue;
                     
                     const afterSelected = checkRequirements(aScore.requireds);
-                    const tmpActivated = new SvelteMap<string, ActivatedMap>(JSON.parse(JSON.stringify([...activatedMap])));
+                    const tmpActivated = new SvelteMap<string, ActivatedMap>([...activatedMap].map(([key, value]) => [key, {...value}]));
                     if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
                         if (localChoice.multipleUseVariable === 0) {
                             tmpActivated.delete(localChoice.id);

@@ -1611,7 +1611,7 @@
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div class="d-column row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
                 {#if choice.template >= 4 || choice.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx) || row.choicesShareTemplate}
-                    <div class="d-column w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
+                    <div class="d-column{sAddons ? '' : ' flex-fill'} w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle || isSearch}
                             {#key oriTitleKey}
                                 <div class="col-12" style={scoreText}>
@@ -1702,7 +1702,7 @@
                     {/if}
                 {:else}
                     {#if choice.template === 2}
-                        <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                        <div class="d-column{sAddons ? '' : ' flex-fill'} g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
                             {#if row.resultShowRowTitle || isSearch}
                                 {#key oriTitleKey}
                                     <div class="col-12" style={scoreText}>
@@ -1794,7 +1794,7 @@
                             </div>
                         {/if}
                     {:else if choice.template === 3}
-                        <div class="d-column g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
+                        <div class="d-column{sAddons ? '' : ' flex-fill'} g-0 align-items-start" style={sAddons ? objectFilter : undefined}>
                             {#if row.resultShowRowTitle || isSearch}
                                 {#key oriTitleKey}
                                     <div class="col-12" style={scoreText}>
@@ -2092,7 +2092,7 @@
         }
         return !filterStyle.unselFilterVisibleIsOn;
     });
-    let addonJustify = $derived(choice.addonJustify ? ` align-content--${choice.addonJustify} justify-${choice.addonJustify}` : '');
+    let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}${sAddons ? '' : ` align-content--${choice.addonJustify}`}` : '');
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight && !isSearch);
     let oriRow = $derived.by(() => {

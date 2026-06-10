@@ -18,7 +18,7 @@
                 {/key}
             {/if}
             {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                {#if choice.showMulInAddon}
+                {#if choice.showMulInAddon && isFirst}
                     <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                 {/if}
                 {#if addon.isSelectableMultiple}
@@ -38,7 +38,7 @@
                 {/if}
             {/if}
             {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                {#if choice.showMulInAddon}
+                {#if choice.showMulInAddon && isFirst}
                     <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                 {/if}
                 {#if addon.isSelectableMultiple}
@@ -56,7 +56,7 @@
                 {/each}
             {/if}
             {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                {#if choice.showMulInAddon}
+                {#if choice.showMulInAddon && isFirst}
                     <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                 {/if}
                 {#if addon.isSelectableMultiple}
@@ -78,7 +78,7 @@
                 {/key}
             {/if}
             {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 3}
-                {#if choice.showMulInAddon}
+                {#if choice.showMulInAddon && isFirst}
                     <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                 {/if}
                 {#if addon.isSelectableMultiple}
@@ -93,7 +93,7 @@
                 {/if}
             {/if}
             {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 4}
-                {#if choice.showMulInAddon}
+                {#if choice.showMulInAddon && isFirst}
                     <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                 {/if}
                 {#if addon.isSelectableMultiple}
@@ -118,7 +118,7 @@
                         {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
                     {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -138,7 +138,7 @@
                         {/if}
                     {/if}
                     {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -156,7 +156,7 @@
                         {/each}
                     {/if}
                     {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -171,7 +171,7 @@
                         {/key}
                     {/if}
                     {#if multiChoiceCounter && (multiChoiceStyle.multiChoiceCounterPosition === 3 || multiChoiceStyle.multiChoiceCounterPosition === 4)}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -185,7 +185,7 @@
                         {#key addonTitleKey}<h2 class="mb-0" style={addonTitle}>{@html DOMPurify.sanitize(addonTitleKey, sanitizeArg)}</h2>{/key}
                     {/if}
                     {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 0}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -205,7 +205,7 @@
                         {/if}
                     {/if}
                     {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 1}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -223,7 +223,7 @@
                         {/each}
                     {/if}
                     {#if multiChoiceCounter && multiChoiceStyle.multiChoiceCounterPosition === 2}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -238,7 +238,7 @@
                         {/key}
                     {/if}
                     {#if multiChoiceCounter && (multiChoiceStyle.multiChoiceCounterPosition === 3 || multiChoiceStyle.multiChoiceCounterPosition === 4)}
-                        {#if choice.showMulInAddon}
+                        {#if choice.showMulInAddon && isFirst}
                             <ObjectMultiChoice isEnabled={!!isEnabled && !row.isInfoRow && !choice.isNotSelectable} row={row} choice={choice} selectedOneMore={() => handleCounter(choice, true)} selectedOneLess={() => handleCounter(choice, false)} />
                         {/if}
                         {#if addon.isSelectableMultiple}
@@ -295,7 +295,7 @@
         return false
     });
     let multiChoiceCounter = $derived.by(() => {
-        if (isFirst && choice.showMulInAddon) {
+        if (isFirst && choice.showMulInAddon && isFirst) {
             if (choice.hideMultipleCounter) return isEnabled;
             return true;
         } else if ((addon.isSelectable && addon.hideMultipleCounter)) {

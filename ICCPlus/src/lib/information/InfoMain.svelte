@@ -224,6 +224,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.19 / ${getDate('2026-06-10T11:00:00Z')}`,
+        text: `<span style="color: green">Addon</span>
+        - Fixed issue where Multiple Counter intended for first addon was displayed on all addons.
+        - Fixed issue where selectable addon did not occupy full available space.
+        - Fixed issue where addon justify was not applied to non-selectable addons.
+        - Fixed issue where parent choice was selected when clicking addon that could not be selected due to score restrictions.
+        `
+    }, {
+        open: false,
         title: `v2.9.18 / ${getDate('2026-06-07T00:00:00Z')}`,
         text: `<span style="color: green">Requirement</span>
         - Fixed issue where requirements did not work correctly.
