@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.19';
+export const appVersion = '2.9.20';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5514,10 +5514,10 @@ async function selectDeactivateOther(localChoice : Choice | SelectableAddon, opt
                 if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
                     const num = deactiveNum === -1 ? dChoice.multipleUseVariable : deactiveNum;
                     for (let j = 0; j < num; j++) {
-                        selectedOneLess(dChoice, dRow, newOptions);
+                        await selectedOneLess(dChoice, dRow, newOptions);
                     }
                 } else {
-                    deselectObject(dChoice, dRow, newOptions);
+                    await deselectObject(dChoice, dRow, newOptions);
                 }
             }
         } else {
@@ -5533,10 +5533,10 @@ async function selectDeactivateOther(localChoice : Choice | SelectableAddon, opt
                             if (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable) {
                                 const num = deactiveNum === -1 ? dChoice.multipleUseVariable : deactiveNum;
                                 for (let k = 0; k < num; k++) {
-                                    selectedOneLess(dChoice, dRow, newOptions);
+                                    await selectedOneLess(dChoice, dRow, newOptions);
                                 }
                             } else {
-                                deselectObject(dChoice, dRow, newOptions);
+                                await deselectObject(dChoice, dRow, newOptions);
                             }
                         }
                     }
@@ -5546,7 +5546,7 @@ async function selectDeactivateOther(localChoice : Choice | SelectableAddon, opt
     }
 }
 
-function deselectMissingReq(localID: string, options: ChoiceOptions) {
+async function deselectMissingReq(localID: string, options: ChoiceOptions) {
     const newOptions = {...options};
     newOptions.linkedObjects = [];
     newOptions.isOverDlg = true;
@@ -5566,7 +5566,7 @@ function deselectMissingReq(localID: string, options: ChoiceOptions) {
             }
             if (val.multiple === 0) {
                 if (aChoice.isActive) {
-                    deselectObject(aChoice, aRow, newOptions);
+                    await deselectObject(aChoice, aRow, newOptions);
                 }
             } else if (val.multiple > 0) {
                 let num = 0;
@@ -5576,7 +5576,7 @@ function deselectMissingReq(localID: string, options: ChoiceOptions) {
                             aChoice.numMultipleTimesMinus -= 1;
                             num += 1;
                         }
-                        selectedOneLess(aChoice, aRow, newOptions);
+                        await selectedOneLess(aChoice, aRow, newOptions);
                     }
                 }
                 if (num > 0) {
@@ -6582,18 +6582,29 @@ function checkSelectable(localChoice: Choice | SelectableAddon, localRow: Row, a
     return checkPoints(localChoice, true);
 }
 
+const deselectQue = new Set<string>();
 export async function deselectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
-    if (!localChoice.isActive) return;
+    if (deselectQue.has(localChoice.id) || !localChoice.isActive) return;
+    deselectQue.add(localChoice.id);
 
     const isChoice = typeof localChoice.parentId === 'undefined';
     const deselectable = checkDeselectable(localChoice, localRow);
-    if (!deselectable) return;
+    if (!deselectable) {
+        deselectQue.delete(localChoice.id);
+        return;
+    }
 
     const pointCheck = checkPoints(localChoice, false);
-    if (!pointCheck) return;
+    if (!pointCheck) {
+        deselectQue.delete(localChoice.id);
+        return;
+    }
 
     const addonCheck = isChoice ? await checkAddons(localChoice as Choice, localRow, options) : true;
-    if (!addonCheck) return;
+    if (!addonCheck) {
+        deselectQue.delete(localChoice.id);
+        return;
+    }
 
     const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
 
@@ -6749,11 +6760,12 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
             }
             app.fadeTransitionIsOn = false;
         }
-        deselectProcess();
+        await deselectProcess();
     }
     if (options.linkedObjects.indexOf(localChoice.id) === 0) {
         options.linkedObjects.splice(0);
     }
+    deselectQue.delete(localChoice.id);
 }
 
 export async function selectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
@@ -6883,7 +6895,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
                 }
 
                 addAllowedChoice(localChoice, options, ADD);
-                
+
                 selectActivateOther(localChoice, options);
 
                 selectDeactivateOther(localChoice, options);
@@ -7289,15 +7301,27 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
 }
 
 export async function selectedOneLess(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+    if (deselectQue.has(localChoice.id) || !localChoice.isActive) return;
+    deselectQue.add(localChoice.id);
+
     const isChoice = typeof localChoice.parentId === 'undefined';
     const deselectable = checkDeselectable(localChoice, localRow);
-    if (!deselectable) return;
+    if (!deselectable) {
+        deselectQue.delete(localChoice.id);
+        return;
+    }
 
     const pointCheck = checkPoints(localChoice, false);
-    if (!pointCheck) return;
+    if (!pointCheck) {
+        deselectQue.delete(localChoice.id);
+        return;
+    }
 
     const addonCheck = isChoice && localChoice.multipleUseVariable === 1 ? await checkAddons(localChoice as Choice, localRow, options) : true;
-    if (!addonCheck) return;
+    if (!addonCheck) {
+        deselectQue.delete(localChoice.id);
+        return;
+    }
 
     const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
     let origRow = localRow;
@@ -7473,7 +7497,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
                     }
                     app.fadeTransitionIsOn = false;
                 }
-                deselectProcess();
+                await deselectProcess();
             }
             if (options.linkedObjects.indexOf(localChoice.id) === 0) {
                 options.linkedObjects.splice(0);
@@ -7488,6 +7512,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
             }
         }
     }
+    deselectQue.delete(localChoice.id);
 }
 
 function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {

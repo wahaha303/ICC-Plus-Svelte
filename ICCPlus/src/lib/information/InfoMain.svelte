@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.20 / ${getDate('2026-06-14T16:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where same choice could be deselected multiple times under specific conditions.
+        `
+    }, {
+        open: false,
         title: `v2.9.19 / ${getDate('2026-06-10T11:00:00Z')}`,
         text: `<span style="color: green">Addon</span>
         - Fixed issue where Multiple Counter intended for first addon was displayed on all addons.
