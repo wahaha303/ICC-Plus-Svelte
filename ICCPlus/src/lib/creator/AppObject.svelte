@@ -1,6 +1,13 @@
 {#if bCreatorMode && (row.isEditModeOn || choice.isEditModeOn) && !row.isResultRow && !row.isGroupRow}
     <div class={objectWidthClass()}>
-        <div bind:clientWidth={width} class:position-relative={app.useChoiceEditBtn && !row.isEditModeOn && choice.isEditModeOn} class="container-fluid gx-0">
+        <div bind:clientWidth={width} class="container-fluid gx-0 position-relative">
+            {#if row.isEditModeOn || choice.isEditModeOn}
+                <div class="choice-active-button">
+                    <IconButton disabled={row.infoRow || (choice.isActive ? choice.selectOnce || choice.forcedActivated : choice.isNotSelectable)} onclickcapture={activateObject} size="button">
+                        <Icon class="mdi {choice.isActive ? 'mdi-checkbox-outline' : 'mdi-checkbox-blank-outline'}" />
+                    </IconButton>
+                </div>
+            {/if}
             {#if app.useChoiceEditBtn && !row.isEditModeOn && choice.isEditModeOn}
                 <div class="choice-edit-button__edit-mode">
                     <IconButton onclickcapture={() => delete choice.isEditModeOn} size="button"><i class="mdi mdi-wrench"></i></IconButton>
@@ -2041,6 +2048,7 @@
     let panel02 = $state(false);
     let panel03 = $state(false);
     let panel04 = $state(false);
+    let cActive = $state(choice.isActive);
 
     let firstAddonIndex = $derived.by(() => {
         if (nAddons) {
@@ -3033,7 +3041,7 @@
         }
     }
 
-    function handleCounter(isSel: boolean) {
+    async function handleCounter(isSel: boolean) {
         if (row.isInfoRow) return;
 
         let origRow = row;
@@ -3051,9 +3059,9 @@
         }
 
         if (isSel) {
-            if (!choice.isNotSelectable) selectedOneMore(choice, origRow, options);
+            if (!choice.isNotSelectable) await selectedOneMore(choice, origRow, options);
         } else {
-            if (!choice.selectOnce) selectedOneLess(choice, origRow, options);
+            if (!choice.selectOnce) await selectedOneLess(choice, origRow, options);
         }
     }
 

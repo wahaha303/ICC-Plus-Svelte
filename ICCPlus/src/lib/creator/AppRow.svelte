@@ -269,7 +269,7 @@
                 <div class="row gx-0">
                     {#each row.requireds as required, i}
                         <div class="col p-2">
-                            <ObjectRequired isEditModeOn={true} required={required} data={row} index={i} />
+                            <ObjectRequired isEditModeOn={true} required={required} data={row} index={i} isNotShown={true} />
                             <div class="col-12 pt-1">
                                 <Button onclickcapture={() => row.requireds.splice(i, 1)} variant="raised">
                                     <Label>Delete</Label>

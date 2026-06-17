@@ -2293,7 +2293,7 @@
         return {l: false, r: false};
     }
 
-    function handleCounter(data: Choice | SelectableAddon, isSel: boolean) {
+    async function handleCounter(data: Choice | SelectableAddon, isSel: boolean) {
         if (row.isInfoRow || (data.parentId && !data.isSelectable)) return;
 
         let origRow = row;
@@ -2310,9 +2310,9 @@
         }
 
         if (isSel) {
-            if (!data.isNotSelectable) selectedOneMore(data, origRow, options);
+            if (!data.isNotSelectable) await selectedOneMore(data, origRow, options);
         } else {
-            if (!data.selectOnce) selectedOneLess(data, origRow, options);
+            if (!data.selectOnce) await selectedOneLess(data, origRow, options);
         }
     }
 

@@ -1098,7 +1098,7 @@ export type DlgVariables = {
     point?: PointType,
     func?: (e: number) => void,
     cFunc?: (e: any, word?: string) => void,
-    choice?: Choice,
+    choice?: Choice | SelectableAddon,
     row?: Row,
     imgProp?: string,
     title?: string,

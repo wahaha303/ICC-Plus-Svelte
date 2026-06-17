@@ -224,6 +224,21 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.21 / ${getDate('2026-06-17T10:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where expressions did not work properly in multiple selectable choices.
+        - Fixed issue where multiple selectable choices behaved incorrectly on rows with allowed choices set.
+        - Fixed issue where "Deactivate Other Choices" did not work in multiple selectable choices.
+        - Fixed issue where slider did not work properly in multiple selectable choices.
+        - Fixed issue where counter input did not work properly in multiple selectable choices.
+        - Fixed issue where low limit was applied even when not set while using discount feature.
+        - Fixed issue where score requirement were not properly validated when selecting choices.
+
+        <span style="color: green">Miscellaneous</span>
+        - Added button in top-left corner of choices to select/deselect them in edit mode.
+        `
+    }, {
+        open: false,
         title: `v2.9.20 / ${getDate('2026-06-14T16:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where same choice could be deselected multiple times under specific conditions.

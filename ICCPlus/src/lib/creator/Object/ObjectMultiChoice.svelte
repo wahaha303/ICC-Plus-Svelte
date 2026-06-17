@@ -27,7 +27,7 @@
     import { pointTypeMap, dlgVariables, getStyling, hexToRgba } from '$lib/store/store.svelte';
     import Slider from '@smui/slider';
 
-    const { isEnabled, row, choice, addon, selectedOneMore, selectedOneLess }: { isEnabled: boolean, row: Row, choice: Choice, addon?: SelectableAddon, selectedOneMore: () => void, selectedOneLess: () => void } = $props();
+    const { isEnabled, row, choice, addon, selectedOneMore, selectedOneLess }: { isEnabled: boolean, row: Row, choice: Choice, addon?: SelectableAddon, selectedOneMore: () => Promise<void>, selectedOneLess: () => Promise<void> } = $props();
 
     let sliderNum = $state(0);
     let data = $derived(addon ? addon : choice);
@@ -87,7 +87,7 @@
     });
 
     $effect(() => {
-        if (choice.useSlider) {
+        if (data.useSlider) {
             sliderNum = multipleNum;
         }
     });
@@ -100,13 +100,13 @@
         selectedOneLess();
     }
 
-    function handleSliderUp() {
+    async function handleSliderUp() {
         const loop = sliderNum - multipleNum;
         for (let i = 0; i < Math.abs(loop); i++) {
             if (loop > 0) {
-                selectedOneMore();
+                await selectedOneMore();
             } else {
-                selectedOneLess();
+                await selectedOneLess();
             }
         }
         if (document.activeElement) {
@@ -117,18 +117,18 @@
     function clickNumber(e: Event) {
         if (enabled) {
             dlgVariables.currentDialog = 'selectDialog';
-            dlgVariables.choice = choice;
+            dlgVariables.choice = data;
             dlgVariables.func = handleManually;
         }
     }
 
-    function handleManually(num: number) {
-        const loop = num - choice.multipleUseVariable;
+    async function handleManually(num: number) {
+        const loop = num - data.multipleUseVariable;
         for (let i = 0; i < Math.abs(loop); i++) {
             if (loop > 0) {
-                selectedOneMore();
+                await selectedOneMore();
             } else {
-                selectedOneLess();
+                await selectedOneLess();
             }
         }
     }

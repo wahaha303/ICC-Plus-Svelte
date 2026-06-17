@@ -663,7 +663,7 @@
         }
     }
 
-    function handleCounter(isSel: boolean) {
+    async function handleCounter(isSel: boolean) {
         if (row.isInfoRow) return;
 
         let origRow = row;
@@ -681,9 +681,9 @@
         }
 
         if (isSel) {
-            if (!choice.isNotSelectable) selectedOneMore(choice, origRow, options);
+            if (!choice.isNotSelectable) await selectedOneMore(choice, origRow, options);
         } else {
-            if (!choice.selectOnce) selectedOneLess(choice, origRow, options);
+            if (!choice.selectOnce) await selectedOneLess(choice, origRow, options);
         }
     }
 

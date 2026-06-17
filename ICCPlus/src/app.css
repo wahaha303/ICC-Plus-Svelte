@@ -562,6 +562,13 @@ img {
     color: grey;
     z-index: 1;
 }
+.choice-active-button {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    color: grey;
+    z-index: 1;
+}
 .row-edit-button {
     position: absolute;
     top: 0;
