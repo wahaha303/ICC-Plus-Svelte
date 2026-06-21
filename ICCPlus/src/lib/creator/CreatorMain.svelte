@@ -218,7 +218,7 @@
 {:else if dlgVariables.currentDialog === 'appRowSettings' && typeof dlgVariables.row !== 'undefined'}
     <AppRowSettings open={dlgVariables.currentDialog === 'appRowSettings'} onclose={() => (dlgVariables.currentDialog = 'none')} row={dlgVariables.row} />
 {:else if dlgVariables.currentDialog === 'appObjectSettings' && typeof dlgVariables.row !== 'undefined' && typeof dlgVariables.choice !== 'undefined'}
-    <AppObjectSettings open={dlgVariables.currentDialog === 'appObjectSettings'} onclose={() => (dlgVariables.currentDialog = 'none')} choice={dlgVariables.choice} />
+    <AppObjectSettings open={dlgVariables.currentDialog === 'appObjectSettings'} onclose={() => (dlgVariables.currentDialog = 'none')} choice={dlgVariables.choice as Choice} />
 {:else if dlgVariables.currentDialog === 'appObjectList' && typeof dlgVariables.row !== 'undefined'}
     <AppObjectList open={dlgVariables.currentDialog === 'appObjectList'} onclose={() => (dlgVariables.currentDialog = 'none')} row={dlgVariables.row} mainDiv={mainDiv} />
 {:else if dlgVariables.currentDialog === 'dlgCommon' && typeof dlgVariables.cFunc !== 'undefined' && typeof dlgVariables.context !== 'undefined'}
@@ -261,7 +261,7 @@
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
     import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateId, dlgVariables, tmpActivatedMap, bgmVariables, toggleTheme, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog, imgDialog, winWidth } from '$lib/store/store.svelte';
-    import type { Row, SelectableAddon } from '$lib/store/types';
+    import type { Row, Choice, SelectableAddon } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
 	import AppFeature from './AppFeature.svelte';

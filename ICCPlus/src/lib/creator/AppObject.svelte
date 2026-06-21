@@ -3,7 +3,7 @@
         <div bind:clientWidth={width} class="container-fluid gx-0 position-relative">
             {#if row.isEditModeOn || choice.isEditModeOn}
                 <div class="choice-active-button">
-                    <IconButton disabled={row.infoRow || (choice.isActive ? choice.selectOnce || choice.forcedActivated : choice.isNotSelectable)} onclickcapture={activateObject} size="button">
+                    <IconButton disabled={row.infoRow || (choice.isActive ? choice.selectOnce || choice.forcedActivated : choice.isNotSelectable)} onclickcapture={toggleActive} size="button">
                         <Icon class="mdi {choice.isActive ? 'mdi-checkbox-outline' : 'mdi-checkbox-blank-outline'}" />
                     </IconButton>
                 </div>
@@ -436,6 +436,25 @@
                                                 <div class="col-12 m-1">Do not use this feature unless you know exactly what you're doing. User interactions during the delay may cause unexpected issues.</div>
                                                 <div class="col-12 m-1 px-2">
                                                     <Textfield bind:value={() => choice.selectDelayTime ?? 0, (e) => choice.selectDelayTime = e} label="Delay" type="number" suffix="ms" variant="filled" />
+                                                </div>
+                                            {/if}
+                                            <FormField class="{choice.isAutoActive ? 'disabled ' : ''}col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isDeselectDelayed ?? false, (e) => choice.isDeselectDelayed = e} onchange={() => {
+                                                    if (choice.isDeselectDelayed) {
+                                                        choice.deselectDelayTime = 1000;
+                                                    } else {
+                                                        delete choice.isDeselectDelayed;
+                                                        delete choice.deselectDelayTime;
+                                                    }
+                                                }} />
+                                                {#snippet label()}
+                                                    Will Be Deselected After a Delay
+                                                {/snippet}
+                                            </FormField>
+                                            {#if choice.isDeselectDelayed}
+                                                <div class="col-12 m-1">Do not use this feature unless you know exactly what you're doing. User interactions during the delay may cause unexpected issues.</div>
+                                                <div class="col-12 m-1 px-2">
+                                                    <Textfield bind:value={() => choice.deselectDelayTime ?? 0, (e) => choice.deselectDelayTime = e} label="Delay" type="number" suffix="ms" variant="filled" />
                                                 </div>
                                             {/if}
                                             <FormField class="{choice.isSelectableMultiple ? 'disabled ' : ''}col-12 m-1 p-0">
@@ -3098,6 +3117,31 @@
                 if (!choice.selectOnce && !choice.forcedActivated) deselectObject(choice, origRow, options);
             } else if (!choice.isNotSelectable) {
                 selectObject(choice, origRow, options);
+            }
+        }
+    }
+
+    async function toggleActive() {
+        if (row.infoRow) return;
+        if (choice.isActive) {
+            if (choice.isSelectableMultiple && choice.isMultipleUseVariable) {
+                const mul = choice.multipleUseVariable;
+
+                for (let i = 0; i < Math.abs(mul); i++) {
+                    if (mul > 0) {
+                        await selectedOneLess(choice, row, options);
+                    } else if (mul < 0) {
+                        await selectedOneMore(choice, row, options);
+                    }
+                }
+            } else if (!choice.selectOnce && !choice.forcedActivated) {
+                deselectObject(choice, row, options);
+            }
+        } else if (!choice.isNotSelectable) {
+            if (choice.isSelectableMultiple && choice.isMultipleUseVariable) {
+                selectedOneMore(choice, row, options);
+            } else {
+                selectObject(choice, row, options);
             }
         }
     }

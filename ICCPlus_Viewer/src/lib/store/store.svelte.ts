@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.21';
+export const appVersion = '2.9.22';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4820,6 +4820,8 @@ export async function selectUpdateScore(localChoice: Choice | SelectableAddon | 
 export async function activateTempChoices(options: ChoiceOptions) {
     let isActivated = false;
     for (const [id, val] of tmpActivatedMap) {
+        if (deselectQue.has(id)) continue;
+
         const cMap = choiceMap.get(id);
         if (typeof cMap !== 'undefined') {
             const aRow = cMap.row;
@@ -4839,7 +4841,7 @@ export async function activateTempChoices(options: ChoiceOptions) {
         }
     }
 
-    if (isActivated) activateTempChoices(options);
+    if (isActivated) await activateTempChoices(options);
 }
 
 function clearWordDialog() {
@@ -6372,7 +6374,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         deselectActivateOther(localChoice, options);
 
         deselectDiscountOther(localChoice);
-        
+
         localChoice.isActive = false;
         if (countCheck) localRow.currentChoices -= 1;
         activatedMap.delete(localChoice.id);
@@ -6463,11 +6465,11 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         }
     }
 
-    if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
-        if (localChoice.selectDelayTimer) return;
-        localChoice.selectDelayTimer = true;
-        await delayProc(localChoice.selectDelayTime);
-        delete localChoice.selectDelayTimer;
+    if (localChoice.isDeselectDelayed && typeof localChoice.deselectDelayTime !== 'undefined') {
+        if (localChoice.deselectDelayTimer) return;
+        localChoice.deselectDelayTimer = true;
+        await delayProc(localChoice.deselectDelayTime);
+        delete localChoice.deselectDelayTimer;
     }
 
     if (!options.isOverDlg) {
@@ -7058,7 +7060,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
 }
 
 export async function selectedOneLess(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
-    if (deselectQue.has(localChoice.id) || !localChoice.isActive) return;
+    if (deselectQue.has(localChoice.id)) return;
     deselectQue.add(localChoice.id);
 
     const isChoice = typeof localChoice.parentId === 'undefined';
@@ -7197,11 +7199,11 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
     if (localChoice.isMultipleUseVariable) {
         if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
         if (localChoice.multipleUseVariable > localChoice.numMultipleTimesMinus) {
-            if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
-                if (localChoice.selectDelayTimer) return;
-                localChoice.selectDelayTimer = true;
-                await delayProc(localChoice.selectDelayTime);
-                delete localChoice.selectDelayTimer;
+            if (localChoice.isdeselectDelayed && typeof localChoice.deselectDelayTime !== 'undefined') {
+                if (localChoice.deselectDelayTimer) return;
+                localChoice.deselectDelayTimer = true;
+                await delayProc(localChoice.deselectDelayTime);
+                delete localChoice.deselectDelayTimer;
             }
             if (!options.isOverDlg) {
                 if (localChoice.customTextfieldIsOn && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {

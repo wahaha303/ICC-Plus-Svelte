@@ -224,6 +224,14 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.22 / ${getDate('2026-06-21T12:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Added option to delay choice deselection.
+        - Fixed issue where page would freeze when using delay deselection option.
+        - Fixed issue where delay choice selection option was applied to deselection as well.
+        `
+    }, {
+        open: false,
         title: `v2.9.21 / ${getDate('2026-06-17T10:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where expressions did not work properly in multiple selectable choices.
