@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.23 / ${getDate('2026-06-22T11:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where choices with custom word/image could not be deselected.
+        `
+    }, {
+        open: false,
         title: `v2.9.22 / ${getDate('2026-06-21T12:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Added option to delay choice deselection.

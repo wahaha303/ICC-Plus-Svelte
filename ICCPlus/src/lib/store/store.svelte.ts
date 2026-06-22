@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.22';
+export const appVersion = '2.9.23';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3825,6 +3825,7 @@ export function cleanActivated(isReset: boolean = true) {
     }
 
     tmpActivatedMap.clear();
+    deselectQue.clear();
     const reactivateCode: string[] = [];
     if (musicPlayer) {
         const player = get(musicPlayer);
@@ -5214,6 +5215,8 @@ function openImgDialog(localChoice: Choice | SelectableAddon, options: {isDesele
             clearImgDialog();
             if (e.detail.action === 'deselect') {
                 resolve({ status: 'deselect' });
+            } else {
+                resolve({ status: 'cancel' });
             }
         }
     });
@@ -6779,7 +6782,10 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
     }
 
     if (localChoice.isDeselectDelayed && typeof localChoice.deselectDelayTime !== 'undefined') {
-        if (localChoice.deselectDelayTimer) return;
+        if (localChoice.deselectDelayTimer) {
+            deselectQue.delete(localChoice.id);
+            return;
+        }
         localChoice.deselectDelayTimer = true;
         await delayProc(localChoice.deselectDelayTime);
         delete localChoice.deselectDelayTimer;
@@ -6789,13 +6795,17 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         if (localChoice.customTextfieldIsOn) {
             const result = await openWordDialog(localChoice, {isWord: true, isDeselect: true});
 
-            if (result.status === 'cancel') return;
+            if (result.status === 'cancel') {
+                deselectQue.delete(localChoice.id);
+                return;
+            }
             if (result.status === 'accept' && localChoice.idOfTheTextfieldWord) {
                 localChoice.wordChangeSelect = result.wordText;
                 const word = wordMap.get(localChoice.idOfTheTextfieldWord);
                 if (typeof word !== 'undefined') {
                     word.replaceText = result.wordText;
                 }
+                deselectQue.delete(localChoice.id);
                 return;
             }
         }
@@ -6803,7 +6813,10 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         if (localChoice.isImageUpload) {
             const result = await openImgDialog(localChoice, {isDeselect: true});
 
-            if (result.status !== 'deselect') return;
+            if (result.status !== 'deselect') {
+                deselectQue.delete(localChoice.id);
+                return;
+            }
         }
     }
 
@@ -6836,6 +6849,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         options.linkedObjects.splice(0);
     }
     deselectQue.delete(localChoice.id);
+
 }
 
 export async function selectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
@@ -7513,7 +7527,10 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
         if (typeof localChoice.numMultipleTimesMinus === 'undefined') localChoice.numMultipleTimesMinus = 0;
         if (localChoice.multipleUseVariable > localChoice.numMultipleTimesMinus) {
             if (localChoice.isdeselectDelayed && typeof localChoice.deselectDelayTime !== 'undefined') {
-                if (localChoice.deselectDelayTimer) return;
+                if (localChoice.deselectDelayTimer) {
+                    deselectQue.delete(localChoice.id);
+                    return;
+                }
                 localChoice.deselectDelayTimer = true;
                 await delayProc(localChoice.deselectDelayTime);
                 delete localChoice.deselectDelayTimer;
@@ -7522,13 +7539,17 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
                 if (localChoice.customTextfieldIsOn && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
                     const result = await openWordDialog(localChoice, {isWord: true, isDeselect: true});
 
-                    if (result.status === 'cancel') return;
+                    if (result.status === 'cancel') {
+                        deselectQue.delete(localChoice.id);
+                        return;
+                    }
                     if (result.status === 'accept' && localChoice.idOfTheTextfieldWord) {
                         localChoice.wordChangeSelect = result.wordText;
                         const word = wordMap.get(localChoice.idOfTheTextfieldWord);
                         if (typeof word !== 'undefined') {
                             word.replaceText = result.wordText;
                         }
+                        deselectQue.delete(localChoice.id);
                         return;
                     }
                 }
@@ -7536,7 +7557,10 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
                 if (localChoice.isImageUpload && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
                     const result = await openImgDialog(localChoice, {isDeselect: true});
 
-                    if (result.status !== 'deselect') return;
+                    if (result.status !== 'deselect') {
+                        deselectQue.delete(localChoice.id);
+                        return;
+                    }
                 }
             }
 
