@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.23';
+export const appVersion = '2.9.24';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2859,7 +2859,7 @@ function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choi
         if (typeof point === 'undefined') continue;
         if (typeof score.discounts === 'undefined') continue;
 
-        const scoreVal = score.discountIsOn && score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        let scoreVal = score.discountIsOn && score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         let disVal = score.value;
         let actVal = score.value;
         const actNum: number[] = [];
@@ -2873,9 +2873,15 @@ function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choi
             const dc = score.discounts[j];
 
             if (dc.state !== FULL || dc.id === localChoice.id) {
-                if (dc.state === ACTIVE) {
+                const inCount = dc.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+
+                if (inCount && typeof score.discountScore !== 'undefined') {
+                    scoreVal = score.discountScore;
+                }
+
+                if (dc.state === ACTIVE || inCount) {
                     actVal = calcStackDiscount(actVal, dc.operator, dc.value);
-                    if (dc.useLowLimit) actVal = Math.max(actVal, dc.lowLimit)
+                    if (dc.useLowLimit) actVal = Math.max(actVal, dc.lowLimit);
                     actNum.push(j);
                 }
                 dc.state = INACTIVE;
@@ -2978,7 +2984,6 @@ function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choic
 
         for (let j = 0; j < score.discounts.length; j++) {
             const dc = score.discounts[j];
-
             if (dc.id === localChoice.id) {
                 dc.state = FULL;
             } else {
@@ -3056,6 +3061,7 @@ function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choic
                 isDiscounted = true;
             }
         }
+
         if (isDiscounted) {
             disVal = point.allowFloat ? disVal : Math.floor(disVal);
             if (score.discountScore !== disVal) {
@@ -3075,6 +3081,7 @@ function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choic
     }
 }
 export function deselectDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
+    const countNum: number[] = [];
     for (let i = 0; i < targetChoice.scores.length; i++) {
         const score = targetChoice.scores[i];
         const point = pointTypeMap.get(score.id);
@@ -3085,7 +3092,8 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
         if (idx === -1) continue;
 
         const discount = score.discounts[idx];
-        const scoreVal = score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        const inCount = discount.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+        const scoreVal = (score.appliedDiscount || inCount) && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         let disVal = score.value;
         let actVal = score.value;
         let actNum: number[] = [];
@@ -3093,10 +3101,28 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
         let stackNum: number[] = [];
         let nonStackVal = score.value;
         let nonStackNum = DISABLED;
-        
+
         if (discount.stack > 1) {
             discount.stack -= 1;
-            if (discount.state === INACTIVE || discount.state === FULL) continue;
+            if (discount.state === INACTIVE || (discount.state === FULL && !targetChoice.isSelectableMultiple)) continue;
+            if (!discount.stackable) {
+                if (discount.count === DISABLED) continue;
+                const leng = discount.count * discount.stack;
+
+                if (typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.appliedDisChoices.length > leng) {
+                    for (let j = leng; j < localChoice.appliedDisChoices.length; j++) {
+                        const id = localChoice.appliedDisChoices[j];
+
+                        if (id === targetChoice.id) {
+                            discount.state = FULL;
+                            countNum.push(j);
+                        }
+                    }
+                } else {
+                    continue;
+                }
+            }
+            if (countNum.length === 0 && discount.state === FULL) continue;
         } else {
             score.discounts.splice(idx, 1);
             if (discount.state === INACTIVE || discount.state === FULL) {
@@ -3109,7 +3135,8 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
             const dc = score.discounts[j];
 
             if (dc.state === ACTIVE) {
-                for (let k = 0; k < dc.stack; k++) {
+                const num = dc.stackable ? dc.stack : 1;
+                for (let k = 0; k < num; k++) {
                     actVal = calcStackDiscount(actVal, dc.operator, dc.value);
                     if (dc.useLowLimit) actVal = Math.max(actVal, dc.lowLimit);
                 }
@@ -3183,10 +3210,16 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
         }
         disVal = point.allowFloat ? disVal : Math.floor(disVal);
         score.discountScore = disVal;
-        
-        if (targetChoice.isActive) {
+
+        if (targetChoice.isActive && scoreVal !== disVal) {
             score.tmpDisScore = scoreVal - disVal;
             score.isChangeDiscount = true;
+        }
+    }
+    for (let i = countNum.length - 1; i >= 0; i--) {
+        const idx = countNum[i];
+        if (typeof localChoice.appliedDisChoices !== 'undefined') {
+            localChoice.appliedDisChoices.splice(idx, 1);
         }
     }
 }
@@ -3345,7 +3378,7 @@ export function expDiscount(point: PointType, score: Score) {
     score.discountScore = disVal;
 }
 export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolean) {
-    let isPositve = true;
+    let isPositive = true;
     const scoreMap = new Map<string, number>();
     const acMap = new SvelteMap<string, ActivatedMap>([...activatedMap].map(([key, value]) => [key, {...value}]));
     const tChoice = acMap.get(localChoice.id);
@@ -3376,7 +3409,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
         const point = pointTypeMap.get(score.id);
         if (typeof point === 'undefined') continue;
 
-        if (score.useExpression && !score.setValue) {
+        if (score.useExpression) {
             if (score.isRandom && score.expMinValue && score.expMaxValue) {
                 try {
                     const minReplaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
@@ -3440,7 +3473,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     console.error(e);
                 }
             }
-        } else if (score.isRandom && !score.setValue) {
+        } else if (score.isRandom) {
             setScoreValue(point, score, localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable, localChoice.multipleUseVariable);
         }
 
@@ -3453,11 +3486,22 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
         const data = scoreMap.get(score.id);
 
         if (typeof data !== 'undefined') {
-            if (point.belowZeroNotAllowed) isPositve = isPositve && (isSel ? data - scoreVal >= 0 : data + scoreVal >= 0);
-            scoreMap.set(score.id, data - scoreVal);
+            const val = isSel ? data - scoreVal : data + scoreVal;
+            scoreMap.set(score.id, val);
         } else {
-            if (point.belowZeroNotAllowed) isPositve = isPositve && (isSel ? point.startingSum - scoreVal >= 0 : point.startingSum + scoreVal >= 0);
-            scoreMap.set(score.id, point.startingSum - scoreVal);
+            const val = isSel ? point.startingSum - scoreVal : point.startingSum + scoreVal;
+            scoreMap.set(score.id, val);
+        }
+    }
+
+    for (const [id, val] of scoreMap) {
+        const point = pointTypeMap.get(id);
+
+        if (typeof point !== 'undefined') {
+            if (point.belowZeroNotAllowed && val < 0) {
+                isPositive = false;
+                break;
+            }
         }
     }
 
@@ -3508,7 +3552,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     }
                 }
 
-                isPositve = isPositve && pointVal >= 0;
+                isPositive = isPositive && pointVal >= 0;
             }
         }
     }
@@ -3560,7 +3604,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     }
                 }
 
-                isPositve = isPositve && pointVal >= 0;
+                isPositive = isPositive && pointVal >= 0;
             }
         }
     }
@@ -3612,12 +3656,12 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     }
                 }
 
-                isPositve = isPositve && pointVal >= 0;
+                isPositive = isPositive && pointVal >= 0;
             }
         }
     }
 
-    return isPositve;
+    return isPositive;
 }
 async function checkAddons(localChoice: Choice, localRow: Row, options: ChoiceOptions) {
     if (!localChoice.addons || localChoice.addons.length === 0) return true;
@@ -4260,7 +4304,7 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
     
     const idx = dChoice.appliedDisChoices.indexOf(localChoice.id);
     if (idx === DISABLED) return;
-    
+
     dChoice.appliedDisChoices.splice(idx, 1);
     const dList = new Set(dChoice.appliedDisChoices);
     if (dChoice.isDisChoices) {
@@ -4270,7 +4314,7 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                 if (typeof tRow !== 'undefined') {
                     for (let j = 0; j < tRow.objects.length; j++) {
                         const tChoice = tRow.objects[j];
-                        if (!dList.has(tChoice.id)) {
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
                             emptyDiscount(dChoice, tChoice);
                             dList.add(tChoice.id);
                         }
@@ -4285,7 +4329,9 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                     if (typeof cMap !== 'undefined') {
                         const tChoice = cMap.choice;
 
-                        if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                            emptyDiscount(dChoice, tChoice);
+                        }
                     }
                 }
             }
@@ -4300,7 +4346,9 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                         if (typeof cMap !== 'undefined') {
                             const tChoice = cMap.choice;
 
-                            if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
+                            if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                                emptyDiscount(dChoice, tChoice);
+                            }
                         }
                     }
                 }
@@ -4311,14 +4359,22 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
 
 function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
     if (!dChoice.discountCount) return;
+
+    let count = dChoice.discountCount * (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable ? dChoice.multipleUseVariable : 1);
     
     if (typeof dChoice.appliedDisChoices === 'undefined') dChoice.appliedDisChoices = [];
-    
-    if (dChoice.appliedDisChoices.indexOf(localChoice.id) !== DISABLED) return;
-    dChoice.appliedDisChoices.push(localChoice.id);
 
-    if (dChoice.appliedDisChoices.length < dChoice.discountCount) return;
-    
+    if (!localChoice.isSelectableMultiple && dChoice.appliedDisChoices.indexOf(localChoice.id) !== DISABLED) return;
+
+    if (localChoice.isSelectableMultiple && dChoice.countPerSelection) {
+        if (dChoice.appliedDisChoices.length < count && dChoice.appliedDisChoices.filter(id => id === localChoice.id).length < localChoice.multipleUseVariable) dChoice.appliedDisChoices.push(localChoice.id);
+    } else {
+        if (dChoice.appliedDisChoices.indexOf(localChoice.id) !== DISABLED) return;
+        dChoice.appliedDisChoices.push(localChoice.id);
+    }
+
+    if (dChoice.appliedDisChoices.length < count) return;
+
     const dList = new Set(dChoice.appliedDisChoices);
     if (dChoice.isDisChoices) {
         if (typeof dChoice.discountRows !== 'undefined') {
@@ -4327,8 +4383,9 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                 if (typeof tRow !== 'undefined') {
                     for (let j = 0; j < tRow.objects.length; j++) {
                         const tChoice = tRow.objects[j];
-                        if (!dList.has(tChoice.id)) {
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
                             fillDiscount(dChoice, tChoice);
+                            dList.add(tChoice.id);
                         }
                     }
                 }
@@ -4341,7 +4398,9 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                     if (typeof cMap !== 'undefined') {
                         const tChoice = cMap.choice;
 
-                        fillDiscount(dChoice, tChoice);
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                            fillDiscount(dChoice, tChoice);
+                        }
                     }
                 }
             }
@@ -4356,7 +4415,7 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                         if (typeof cMap !== 'undefined') {
                             const tChoice = cMap.choice;
 
-                            if (!dList.has(tChoice.id)) {
+                            if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
                                 fillDiscount(dChoice, tChoice);
                             }
                         }
@@ -4419,11 +4478,30 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
             const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
 
             if (aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
-                const mul = aChoice.multipleUseVariable;
-
                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                    let mul = aChoice.multipleUseVariable;
                     let isChangedMul = false;
                     let totalScore = 0;
+
+                    if (aScore.discounts) {
+                        for (let k = 0; k < aScore.discounts.length; k++) {
+                            const dc = aScore.discounts[k];
+                            if (dc.state !== INACTIVE) {
+                                const dMap = choiceMap.get(dc.id);
+
+                                if (typeof dMap !== 'undefined') {
+                                    const dChoice = dMap.choice;
+
+                                    if (typeof dChoice.appliedDisChoices !== 'undefined' && dChoice.countPerSelection) {
+                                        const count = dChoice.appliedDisChoices.filter(id => id === aChoice.id).length;
+                                        if (count === 0) continue;
+                                        mul = mul - count;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     for (let k = mul - 1; k >= 0; k--) {
                         if (!aChoice.isActive || !aScore.isActiveMul) break;
                         if (!aScore.isActiveMul[k]) continue;
@@ -4432,7 +4510,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                             if (aChoice.forcedActivated) {
                                 aChoice.numMultipleTimesMinus--;
                                 await selectedOneLess(aChoice, aRow, newOptions);
-                                
+
                                 const tmpAct = tmpActivatedMap.get(aChoice.id);
                                 if (typeof tmpAct !== 'undefined') {
                                     tmpAct.multiple += 1;
@@ -4786,11 +4864,30 @@ export async function selectUpdateScore(localChoice: Choice | SelectableAddon | 
             const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
             
             if (aScore.appliedDiscount && aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
-                const mul = aChoice.multipleUseVariable;
-
                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                    let mul = aChoice.multipleUseVariable;
                     let isChangedMul = false;
                     let totalScore = 0;
+
+                    if (aScore.discounts) {
+                        for (let k = 0; k < aScore.discounts.length; k++) {
+                            const dc = aScore.discounts[k];
+                            if (dc.state !== INACTIVE) {
+                                const dMap = choiceMap.get(dc.id);
+
+                                if (typeof dMap !== 'undefined') {
+                                    const dChoice = dMap.choice;
+
+                                    if (typeof dChoice.appliedDisChoices !== 'undefined' && dChoice.countPerSelection) {
+                                        const count = dChoice.appliedDisChoices.filter(id => id === aChoice.id).length;
+                                        if (count === 0) continue;
+                                        mul = mul - count;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     for (let k = mul - 1; k >= 0; k--) {
                         if (aChoice.isActive && aScore.isActiveMul && aScore.isActiveMul[k]) {
                             let tmpScore = aScore.multiplyByTimes ? aScore.tmpDisScore * (k + 1) : aScore.tmpDisScore;
@@ -5323,7 +5420,7 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
         const score = localChoice.scores[i];
         let isActive = false;
         if (options.isMultiple) {
-            if (!score[key]) score[key] = [];
+            if (typeof score[key] === 'undefined') score[key] = [];
             isActive = options.isPos ? !!score[key][options.selNum] : !score[key][options.selNum];
         } else {
             isActive = !!score.isActive;
@@ -5332,19 +5429,26 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
             const point = pointTypeMap.get(score.id);
             if (typeof point !== 'undefined') {
                 let val = score.value;
-                if (score.appliedDiscount && typeof score.discountScore !== 'undefined' && typeof score.discounts !== 'undefined') {
-                    val = score.discountScore;
+                if (typeof score.discountScore !== 'undefined' && typeof score.discounts !== 'undefined') {
+                    if (score.appliedDiscount) val = score.discountScore;
                     for (let j = 0; j < score.discounts.length; j++) {
                         const dc = score.discounts[j];
 
-                        if (dc.state === ACTIVE) {
+                        if (dc.state === ACTIVE || (dc.state === FULL && localChoice.isSelectableMultiple)) {
                             const cMap = choiceMap.get(dc.id);
 
                             if (typeof cMap !== 'undefined') {
                                 const dChoice = cMap.choice;
 
-                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
-                                    if (!options.isMultiple || options.selNum === 0) countSet.add(dChoice);
+                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.appliedDisChoices !== 'undefined') {
+                                    const inCount = localChoice.isSelectableMultiple && dChoice.countPerSelection && dChoice.appliedDisChoices.filter(id => id === localChoice.id).length === options.selNum + 1;
+
+                                    if (inCount) {
+                                        score.appliedDiscount = true;
+                                        val = score.discountScore;
+                                    }
+
+                                    if (!options.isMultiple || options.selNum === 0 || inCount) countSet.add(dChoice);
                                 }
                             }
                         }
@@ -5398,7 +5502,7 @@ function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: 
         const score = localChoice.scores[i];
         let isInactive = false;
         if (options.isMultiple) {
-            if (!score[key]) score[key] = [];
+            if (typeof score[key] === 'undefined') score[key] = [];
             isInactive = !score[key][options.selNum];
         } else {
             isInactive = !score.isActive;
@@ -6214,9 +6318,11 @@ function deselectEffectProc(localChoice: Choice | SelectableAddon) {
     }
 }
 
-function selectEffectProc(localChoice: Choice | SelectableAddon) {
-    if (localChoice.setBgmIsOn) {
-        if (localChoice.bgmId) {
+function selectEffectProc(localChoice: Choice | SelectableAddon, isLoad: boolean = false) {
+    if (localChoice.setBgmIsOn && localChoice.bgmId) {
+        const play = () => {
+            if (!localChoice.bgmId) return;
+
             if (bgmVariables.bgmWaitTimer !== 0) {
                 window.clearTimeout(bgmVariables.bgmWaitTimer);
                 bgmVariables.bgmWaitTimer = 0;
@@ -6226,6 +6332,16 @@ function selectEffectProc(localChoice: Choice | SelectableAddon) {
             } else {
                 initYoutubePlayer(localChoice);
             }
+        }
+
+        if (isLoad) {
+            if (tempEffectTimer !== 0) {
+                window.clearTimeout(tempEffectTimer);
+                tempEffectTimer = 0;
+            }
+            tempEffectTimer = window.setTimeout(play, 100);
+        } else {
+            play();
         }
     }
 
@@ -8100,13 +8216,7 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
 
     selectModifyPoint(localChoice);
 
-    if (tempEffectTimer !== 0) {
-        window.clearTimeout(tempEffectTimer);
-        tempEffectTimer = 0;
-    }
-    tempEffectTimer = window.setTimeout(() => {
-        selectEffectProc(localChoice);
-    }, 100);
+    selectEffectProc(localChoice, true);
 
     selectHideContent(localChoice);
 
@@ -8430,13 +8540,7 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
         if (!wasActive) {
             setVariables(localChoice, true);
 
-            if (tempEffectTimer !== 0) {
-                window.clearTimeout(tempEffectTimer);
-                tempEffectTimer = 0;
-            }
-            tempEffectTimer = window.setTimeout(() => {
-                selectEffectProc(localChoice);
-            }, 100);
+            selectEffectProc(localChoice, true);
 
             selectHideContent(localChoice);
 
@@ -9023,8 +9127,24 @@ export const StylingSchema = z.preprocess((val) => {
     if (val === '') return {};
     return val;
 }, filterStylingSchema.merge(textStylingSchema).merge(objectImageStylingSchema).merge(rowImageStylingSchema).merge(addonImageStylingSchema).merge(objectStylingSchema).merge(rowStylingSchema).merge(addonStylingSchema).merge(multiChoiceStylingSchema).merge(pointBarStylingSchema).merge(backpackStylingSchema).passthrough());
+const RequiredSchema = z.object({
+    required: z.boolean(),
+    requireds: z.array(z.any()),
+    orRequired: z.array(z.any()),
+    id: z.string(),
+    type: z.string(),
+    reqId: z.string(),
+    reqId1: z.string(),
+    reqId2: z.string(),
+    reqId3: z.string(),
+    reqPoints: z.coerce.number(),
+    showRequired: z.boolean(),
+    afterText: z.string(),
+    beforeText: z.string(),
+}).passthrough();
 const AddonSchema = z.object({
-    template: z.coerce.number().optional()
+    template: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const ScoreSchema = z.object({
     value: z.coerce.number().optional(),
@@ -9032,7 +9152,8 @@ const ScoreSchema = z.object({
     maxValue: z.coerce.number().optional(),
     discountScore: z.coerce.number().optional(),
     discountScoreCal: z.coerce.number().optional(),
-    tmpDisScore: z.coerce.number().optional()
+    tmpDisScore: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const ChoiceSchema = z.object({
     index: z.coerce.number().optional(),
@@ -9053,7 +9174,8 @@ const ChoiceSchema = z.object({
     bgmFadeOutSec: z.coerce.number().optional(),
     fadeTransitionTime: z.coerce.number().optional(),
     divideWithThis: z.coerce.number().optional(),
-    activatedFrom: z.coerce.number().optional()
+    activatedFrom: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const RowSchema = z.object({
     index: z.coerce.number().optional(),
@@ -9067,7 +9189,8 @@ const RowSchema = z.object({
     styling: StylingSchema.optional(),
     objectImgObjectFillHeight: z.coerce.number().optional(),
     randomMin: z.coerce.number().optional(),
-    randomMax: z.coerce.number().optional()
+    randomMax: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const PointTypeSchema = z.object({
     startingSum: z.coerce.number().optional(),
@@ -9083,20 +9206,8 @@ const RowDesignGroupSchema = z.object({
 const ObjectDesignGroupSchema = z.object({
     styling: StylingSchema.optional()
 }).passthrough();
-const RequiredSchema = z.object({
-    required: z.boolean(),
-    requireds: z.array(z.any()),
-    orRequired: z.array(z.any()),
-    id: z.string(),
-    type: z.string(),
-    reqId: z.string(),
-    reqId1: z.string(),
-    reqId2: z.string(),
-    reqId3: z.string(),
-    reqPoints: z.number(),
-    showRequired: z.boolean(),
-    afterText: z.string(),
-    beforeText: z.string(),
+const globalRequirementSchema = z.object({
+    requireds: z.array(RequiredSchema).optional()
 }).passthrough();
 export const AppSchema = z.object({
     curVolume: z.coerce.number().optional(),
@@ -9109,6 +9220,7 @@ export const AppSchema = z.object({
     objectDesignGroups: z.array(ObjectDesignGroupSchema).optional(),
     rows: z.array(RowSchema).optional(),
     pointTypes: z.array(PointTypeSchema).optional(),
+    globalRequirements: z.array(globalRequirementSchema).optional(),
     backpack: z.array(RowSchema).optional(),
     styling: StylingSchema.optional()
 }).passthrough() as z.ZodObject<any>;
@@ -10125,6 +10237,10 @@ export function initializeApp(tempApp: any) {
                                 if (kObj.sfxOnSelect && typeof kObj.sfxIdOnSelect === 'undefined') kObj.sfxIdOnSelect = kObj.sfxId;
                                 if (kObj.sfxOnDeselect && typeof kObj.sfxIdOnDeselect === 'undefined') kObj.sfxIdOnDeselect = kObj.sfxId;
                                 delete kObj.sfxId;
+                            }
+
+                            if (!kObj.addonJustify) {
+                                kObj.addonJustify = typeof tempApp.defaultAddonJustify !== 'undefined' ? tempApp.defaultAddonJustify : defaultApp.defaultAddonJustify;
                             }
 
                             if (typeof kObj.scores !== 'undefined') {
@@ -11600,4 +11716,324 @@ export function closestByClassPrefix(el: HTMLElement, prefix: string, endpoint: 
     }
 
     return false;
+}
+function copyObject(localChoice: Choice) {
+    if (typeof app.tmpChoice === 'undefined') app.tmpChoice = [];
+    const tmpChoice = JSON.parse(JSON.stringify(localChoice));
+
+    tmpChoice.isActive = false;
+    delete tmpChoice.forcedActivated;
+    delete tmpChoice.appliedDisChoices;
+    if (typeof tmpChoice.scores !== 'undefined' && tmpChoice.scores.length > 0) {
+        for (let i = 0; i < tmpChoice.scores.length; i++) {
+            const tmpScore = tmpChoice.scores[i];
+            deleteDiscount(tmpScore);
+        }
+    }
+    app.tmpChoice.length = 0;
+    app.tmpChoice.push(tmpChoice);
+    snackbarVariables.labelText = 'Copied to clipboard.';
+    snackbarVariables.isOpen = true;
+}
+function copyScores(data: Choice | SelectableAddon) {
+    if (data.scores && data.scores.length > 0) {
+        if (typeof app.tmpScore === 'undefined') app.tmpScore = [];
+        app.tmpScore.length = 0;
+        for (let i = 0; i < data.scores.length; i++) {
+            const score = JSON.parse(JSON.stringify(data.scores[i]));
+            deleteDiscount(score);
+            app.tmpScore.push(score);
+        }
+        snackbarVariables.labelText = 'Copied to clipboard.';
+        snackbarVariables.isOpen = true;
+    } else {
+        snackbarVariables.labelText = 'Nothing to copy.';
+        snackbarVariables.isOpen = true;
+    }
+}
+
+function pasteScore(data: Choice | SelectableAddon) {
+    if (typeof app.tmpScore === 'undefined' || app.tmpScore.length === 0) {
+        snackbarVariables.labelText = 'The clipboard is empty.';
+        snackbarVariables.isOpen = true;
+    } else {
+        for (var i = 0; i < app.tmpScore.length; i++) {
+            const tmpScore = JSON.parse(JSON.stringify(app.tmpScore[i]));
+            deleteDiscount(tmpScore);
+            tmpScore.idx = generateId(0, 5, 's');
+            if (typeof data.scores === 'undefined') data.scores = [];
+            data.scores.push(tmpScore);
+        }
+    }
+}
+
+function copyAddons(localChoice: Choice) {
+    if (localChoice.addons && localChoice.addons.length > 0) {
+        if (typeof app.tmpAddon === 'undefined') app.tmpAddon = [];
+        app.tmpAddon.length = 0;
+        for (let i = 0; i < localChoice.addons.length; i++) {
+            const addon = JSON.parse(JSON.stringify(localChoice.addons[i]));
+            app.tmpAddon.push(addon);
+        }
+        snackbarVariables.labelText = 'Copied to clipboard.';
+        snackbarVariables.isOpen = true;
+    } else {
+        snackbarVariables.labelText = 'Nothing to copy.';
+        snackbarVariables.isOpen = true;
+    }
+}
+
+function pasteAddon(localRow: Row, localChoice: Choice) {
+    if (typeof app.tmpAddon === 'undefined' || app.tmpAddon.length === 0) {
+        snackbarVariables.labelText = 'The clipboard is empty.';
+        snackbarVariables.isOpen = true;
+    } else {
+        for (var i = 0; i < app.tmpAddon.length; i++) {
+            const tmpAddon = JSON.parse(JSON.stringify(app.tmpAddon[i]));
+            tmpAddon.parentId = localChoice.id;
+            if (tmpAddon.isSelectable) {
+                tmpAddon.isActive = false;
+                delete tmpAddon.forcedActivated;
+                delete tmpAddon.appliedDisChoices;
+                tmpAddon.id = generateId(0, app.objectIdLength, 'addon');
+
+                if (tmpAddon.scores) {
+                    for (let j = 0; j < tmpAddon.scores.length; j++) {
+                        const score = tmpAddon.scores[j];
+
+                        score.idx = generateId(0, 5, 's');
+                        scoreSet.add(score.idx);
+                        if (tmpAddon.isSelectableMultiple) {
+                            delete score.isActiveMul;
+                            delete score.isActiveMulMinus;
+                        } else {
+                            delete score.isActive;
+                        }
+                        delete score.setValue;
+                        deleteDiscount(score);
+                    }
+                }
+            }
+            if (typeof localChoice.addons === 'undefined') localChoice.addons = [];
+            localChoice.addons.push(tmpAddon);
+            if (tmpAddon.isSelectable) {
+                const idx = localChoice.addons.length - 1;
+                const addon = localChoice.addons[idx];
+
+                choiceMap.set(addon.id, {choice: localChoice.addons[idx] as SelectableAddon, row: localRow});
+            }
+        }
+    }
+}
+
+function copyRequireds(data: Choice | Addon) {
+    if (data.requireds && data.requireds.length > 0) {
+        if (typeof app.tmpRequired === 'undefined') app.tmpRequired = [];
+        app.tmpRequired.length = 0;
+        for (let i = 0; i < data.requireds.length; i++) {
+            const required = JSON.parse(JSON.stringify(data.requireds[i]));
+            app.tmpRequired.push(required);
+        }
+        snackbarVariables.labelText = 'Copied to clipboard.';
+        snackbarVariables.isOpen = true;
+    } else {
+        snackbarVariables.labelText = 'Nothing to copy.';
+        snackbarVariables.isOpen = true;
+    }
+}
+
+function pasteRequired(data: Choice | Addon) {
+    if (typeof app.tmpRequired === 'undefined' || app.tmpRequired.length === 0) {
+        snackbarVariables.labelText = 'The clipboard is empty.';
+        snackbarVariables.isOpen = true;
+    } else {
+        for (var i = 0; i < app.tmpRequired.length; i++) {
+            const tmpRequired = JSON.parse(JSON.stringify(app.tmpRequired[i]));
+            if (typeof data.requireds === 'undefined') data.requireds = [];
+            data.requireds.push(tmpRequired);
+        }
+    }
+}
+
+function copyGroups(data: Choice | SelectableAddon) {
+    if (data.groups && data.groups.length > 0) {
+        if (typeof app.tmpGroup === 'undefined') app.tmpGroup = [];
+        app.tmpGroup.length = 0;
+        for (let i = 0; i < data.groups.length; i++) {
+            app.tmpGroup.push(data.groups[i]);
+        }
+        snackbarVariables.labelText = 'Copied to clipboard.';
+        snackbarVariables.isOpen = true;
+    } else {
+        snackbarVariables.labelText = 'Nothing to copy.';
+        snackbarVariables.isOpen = true;
+    }
+}
+
+function pasteGroup(data: Choice | SelectableAddon) {
+    if (typeof app.tmpGroup === 'undefined' || app.tmpGroup.length === 0) {
+        snackbarVariables.labelText = 'The clipboard is empty.';
+        snackbarVariables.isOpen = true;
+    } else {
+        for (var i = 0; i < app.tmpGroup.length; i++) {
+            const group = groupMap.get(app.tmpGroup[i]);
+            if (typeof group !== 'undefined') {
+                if (typeof data.groups === 'undefined') data.groups = [];
+                data.groups.push(app.tmpGroup[i]);
+
+                const elementIndex = group.elements.indexOf(data.id);
+                if (elementIndex === -1) group.elements.push(data.id);
+            }
+        }
+    }
+}
+
+function copyDesignGroups(localChoice: Choice) {
+    if (localChoice.objectDesignGroups && localChoice.objectDesignGroups.length > 0) {
+        if (typeof app.tmpDesignGroup === 'undefined') app.tmpDesignGroup = [];
+        app.tmpDesignGroup.length = 0;
+        for (let i = 0; i < localChoice.objectDesignGroups.length; i++) {
+            app.tmpDesignGroup.push(localChoice.objectDesignGroups[i]);
+        }
+        snackbarVariables.labelText = 'Copied to clipboard.';
+        snackbarVariables.isOpen = true;
+    } else {
+        snackbarVariables.labelText = 'Nothing to copy.';
+        snackbarVariables.isOpen = true;
+    }
+}
+
+function pasteDesignGroup(localChoice: Choice) {
+    if (typeof app.tmpDesignGroup === 'undefined' || app.tmpDesignGroup.length === 0) {
+        snackbarVariables.labelText = 'The clipboard is empty.';
+        snackbarVariables.isOpen = true;
+    } else {
+        for (var i = 0; i < app.tmpDesignGroup.length; i++) {
+            const dGroup = objectDesignMap.get(app.tmpDesignGroup[i]);
+            if (typeof dGroup !== 'undefined') {
+                if (typeof localChoice.objectDesignGroups === 'undefined') localChoice.objectDesignGroups = [];
+                localChoice.objectDesignGroups.push(app.tmpDesignGroup[i]);
+
+                const elementIndex = dGroup.elements.indexOf(localChoice.id);
+                if (elementIndex === -1) dGroup.elements.push(localChoice.id);
+            }
+        }
+    }
+}
+export function choiceContext(e: MouseEvent, localRow: Row, localChoice: Choice) {
+    const target = e.currentTarget as HTMLElement;
+    e.preventDefault();
+    target.blur();
+    if (menuVariables.isOpen) {
+        menuVariables.isOpen = false;
+        removeAnchor();
+    }
+    menuVariables.anchor = target.parentElement;
+    menuVariables.copy = () => copyObject(localChoice);
+    menuVariables.paste = () => pasteObject(localRow, localChoice.index);
+    menuVariables.clear = () => clearClipboard(1);
+    menuVariables.export = () => exportData(localChoice, 'choice');
+    menuVariables.parent = localRow;
+    menuVariables.importType = 'choice';
+    menuVariables.importNum = localChoice.index + 1;
+    tick().then(() => {
+        menuVariables.isOpen = true;
+    });
+}
+
+export function requiredContext(e: MouseEvent, data: Choice | Addon) {
+    const target = e.currentTarget as HTMLElement;
+    e.preventDefault();
+    target.blur();
+    if (menuVariables.isOpen) {
+        menuVariables.isOpen = false;
+        removeAnchor();
+    }
+    menuVariables.anchor = target.parentElement;
+    menuVariables.copy = () => copyRequireds(data);
+    menuVariables.paste = () => pasteRequired(data);
+    menuVariables.clear = () => clearClipboard(2);
+    menuVariables.export = () => exportData(data.requireds, 'req');
+    menuVariables.parent = data;
+    menuVariables.importType = 'req';
+    menuVariables.importNum = data.requireds.length;
+    tick().then(() => {
+        menuVariables.isOpen = true;
+    });
+}
+
+export function scoreContext(e: MouseEvent, data : Choice | SelectableAddon) {
+    const target = e.currentTarget as HTMLElement;
+    e.preventDefault();
+    target.blur();
+    if (menuVariables.isOpen) {
+        menuVariables.isOpen = false;
+        removeAnchor();
+    }
+    menuVariables.anchor = target.parentElement;
+    menuVariables.copy = () => copyScores(data);
+    menuVariables.paste = () => pasteScore(data);
+    menuVariables.clear = () => clearClipboard(3);
+    menuVariables.export = () => exportData(data.scores, 'score');
+    menuVariables.parent = data;
+    menuVariables.importType = 'score';
+    menuVariables.importNum = data.scores.length;
+    tick().then(() => {
+        menuVariables.isOpen = true;
+    });
+}
+
+export function addonContext(e: MouseEvent, localRow: Row, localChoice: Choice) {
+    const target = e.currentTarget as HTMLElement;
+    e.preventDefault();
+    target.blur();
+    if (menuVariables.isOpen) {
+        menuVariables.isOpen = false;
+        removeAnchor();
+    }
+    menuVariables.anchor = target.parentElement;
+    menuVariables.copy = () => copyAddons(localChoice);
+    menuVariables.paste = () => pasteAddon(localRow, localChoice);
+    menuVariables.clear = () => clearClipboard(4);
+    menuVariables.export = () => exportData(localChoice.addons, 'addon');
+    menuVariables.parent = localChoice;
+    menuVariables.importType = 'addon';
+    menuVariables.importNum = localChoice.addons.length;
+    tick().then(() => {
+        menuVariables.isOpen = true;
+    });
+}
+
+export function groupContext(e: MouseEvent, data: Choice | SelectableAddon) {
+    const target = e.currentTarget as HTMLElement;
+    e.preventDefault();
+    target.blur();
+    if (menuVariables.isOpen) {
+        menuVariables.isOpen = false;
+        removeAnchor();
+    }
+    menuVariables.anchor = target.parentElement;
+    menuVariables.copy = () => copyGroups(data);
+    menuVariables.paste = () => pasteGroup(data);
+    menuVariables.clear = () => clearClipboard(5);
+    tick().then(() => {
+        menuVariables.isOpen = true;
+    });
+}
+
+export function dGroupContext(e: MouseEvent, localChoice: Choice) {
+    const target = e.currentTarget as HTMLElement;
+    e.preventDefault();
+    target.blur();
+    if (menuVariables.isOpen) {
+        menuVariables.isOpen = false;
+        removeAnchor();
+    }
+    menuVariables.anchor = target.parentElement;
+    menuVariables.copy = () => copyDesignGroups(localChoice);
+    menuVariables.paste = () => pasteDesignGroup(localChoice);
+    menuVariables.clear = () => clearClipboard(6);
+    tick().then(() => {
+        menuVariables.isOpen = true;
+    });
 }

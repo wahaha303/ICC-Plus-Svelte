@@ -181,8 +181,8 @@
         return isMaxNegative ? `${maxVal} ~ ${minVal}` : `${minVal} ~ ${maxVal}`;
     });
     let checkNegative = $derived.by(() => {
-        if (score.discountShow) {
-            return (typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value) < 0;
+        if (score.appliedDiscount && typeof score.discountScore !== 'undefined' && discountTexts.show) {
+            return score.discountScore < 0;
         }
         return score.value < 0;
     });

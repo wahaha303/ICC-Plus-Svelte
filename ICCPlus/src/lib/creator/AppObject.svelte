@@ -92,7 +92,7 @@
                                 <IconButton disabled={choice.isActive} onclickcapture={() => { 
                                     if (typeof choice.objectDesignGroups === 'undefined') choice.objectDesignGroups = [];
                                     choice.objectDesignGroups.push('');
-                                }} oncontextmenu={(e: MouseEvent) => { dGroupContext(e)}}><i class="mdi mdi-pencil"></i></IconButton>
+                                }} oncontextmenu={(e: MouseEvent) => { dGroupContext(e, choice)}}><i class="mdi mdi-pencil"></i></IconButton>
                             </Wrapper>
                         {/if}
                     </div>
@@ -640,6 +640,8 @@
                                                         choice.discountGroups = [];
                                                         choice.discountPointTypes = [];
                                                         choice.discountValue = 0;
+                                                        choice.discountShow = true;
+                                                        choice.discountTextDuplicated = true;
                                                     } else {
                                                         delete choice.discountOther;
                                                         delete choice.discountLowLimitIsOn;
@@ -660,6 +662,7 @@
                                                         delete choice.hideScoreIcon;
                                                         delete choice.useDiscountCount;
                                                         delete choice.discountCount;
+                                                        delete choice.countPerSelection;
                                                     }
                                                 }} />
                                                 {#snippet label()}
@@ -777,6 +780,7 @@
                                                         } else {
                                                             delete choice.useDiscountCount;
                                                             delete choice.discountCount;
+                                                            delete choice.countPerSelection;
                                                         }
                                                     }} />
                                                     {#snippet label()}
@@ -784,6 +788,16 @@
                                                     {/snippet}
                                                 </FormField>
                                                 {#if choice.useDiscountCount}
+                                                    <FormField class="col-12 m-1 p-0">
+                                                        <Checkbox bind:checked={() => choice.countPerSelection ?? false, (e) => choice.countPerSelection = e} onchange={() => {
+                                                            if (!choice.countPerSelection) {
+                                                                delete choice.countPerSelection;
+                                                            }
+                                                        }} />
+                                                        {#snippet label()}
+                                                            Count Multi-Choice Selections Separately
+                                                        {/snippet}
+                                                    </FormField>
                                                     <div class="col-12 m-1 px-2">
                                                         <Textfield bind:value={() => choice.discountCount ?? 0, (e) => choice.discountCount = e} onchange={() => choice.discountCount = Math.max(0, choice.discountCount || 0)} label="Number of choices" type="number" input$min={0} variant="filled" />
                                                     </div>
@@ -1940,8 +1954,7 @@
     import Tiptap from '$lib/store/Tiptap.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
 	import type { BgStyles, Choice, ChoiceOptions, Filters, Row, SelectableAddon } from '$lib/store/types';
-	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, activatedMap, tmpActivatedMap, objectWidthToNum, generateId, dlgVariables, snackbarVariables, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, menuVariables, removeAnchor, pasteObject, clearClipboard, deleteDiscount, exportData, selectObject, deselectObject, selectedOneMore, selectedOneLess, imgDialog, closestByClassPrefix, getSelectables, getBackpackSelectables, fixedWidth, getSoundEffects, getSfxLabel } from '$lib/store/store.svelte';
-    import { tick } from 'svelte';
+	import { app, checkDupId, choiceMap, groupMap, getChoiceLabel, getRowLabel, getGroupLabel, getStyling, getPointTypeLabel, objectWidths, checkRequirements, sanitizeArg, replaceText, activatedMap, tmpActivatedMap, objectWidthToNum, generateId, dlgVariables, snackbarVariables, getChoices, getGroups, getPointTypes, getRows, getVariables, getWords, objectDesignMap, winWidth, scoreSet, getBackpackChoices, getBackpackRows, hexToRgba, deleteDiscount, selectObject, deselectObject, selectedOneMore, selectedOneLess, imgDialog, closestByClassPrefix, getSelectables, getBackpackSelectables, fixedWidth, getSoundEffects, getSfxLabel, choiceContext, scoreContext, addonContext, requiredContext, groupContext, dGroupContext } from '$lib/store/store.svelte';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     
     const { row, choice, index, windowWidth, bCreatorMode, preloadImages = false, isBackpack, mainDiv, isSearch = false }: { row: Row, choice: Choice, index: number, windowWidth: number, bCreatorMode: boolean, preloadImages?: boolean; isBackpack?: boolean, mainDiv?: HTMLDivElement, isSearch?: boolean } = $props();
@@ -1959,7 +1972,7 @@
         icon: 'mdi mdi-cog'
     }, {
         action: () => { cloneObject() },
-        contextAction: (e: MouseEvent) => { choiceContext(e) },
+        contextAction: (e: MouseEvent) => { choiceContext(e, row, choice) },
         text: 'L: Clone Choice<br>R: Context Menu',
         icon: 'mdi mdi-content-copy'
     }, {
@@ -1969,22 +1982,22 @@
     }];
     const choiceBottomToolbarButtons = [{
         action: () => { createNewScore() },
-        contextAction: (e: MouseEvent) => { scoreContext(e) },
+        contextAction: (e: MouseEvent) => { scoreContext(e, choice) },
         text: 'L: Create Score<br>R: Context Menu',
         icon: 'mdi mdi-numeric-9-plus-box'
     }, {
         action: () => { createNewAddon() },
-        contextAction: (e: MouseEvent) => { addonContext(e) },
+        contextAction: (e: MouseEvent) => { addonContext(e, row, choice) },
         text: 'L: Create Addon<br>R: Context Menu',
         icon: 'mdi mdi-comment-plus'
     }, {
         action: () => { dlgVariables.currentDialog = 'appRequirement'; dlgVariables.data = choice; dlgVariables.isWord = false; },
-        contextAction: (e: MouseEvent) => { requiredContext(e) },
+        contextAction: (e: MouseEvent) => { requiredContext(e, choice) },
         text: 'L: Create Requirement<br>R: Context Menu',
         icon: 'mdi mdi-key-plus'
     }, {
         action: () => { choice.groups.push('') },
-        contextAction: (e: MouseEvent) => { groupContext(e) },
+        contextAction: (e: MouseEvent) => { groupContext(e, choice) },
         text: 'L: Add to Group<br>R: Context Menu',
         icon: 'mdi mdi-group'
     }];
@@ -2067,7 +2080,6 @@
     let panel02 = $state(false);
     let panel03 = $state(false);
     let panel04 = $state(false);
-    let cActive = $state(choice.isActive);
 
     let firstAddonIndex = $derived.by(() => {
         if (nAddons) {
@@ -2354,310 +2366,6 @@
         });
     }
 
-    function copyScores() {
-        if (choice.scores && choice.scores.length > 0) {
-            if (typeof app.tmpScore === 'undefined') app.tmpScore = [];
-            app.tmpScore.length = 0;
-            for (let i = 0; i < choice.scores.length; i++) {
-                const score = JSON.parse(JSON.stringify(choice.scores[i]));
-                deleteDiscount(score);
-                app.tmpScore.push(score);
-            }
-            snackbarVariables.labelText = 'Copied to clipboard.';
-            snackbarVariables.isOpen = true;
-        } else {
-            snackbarVariables.labelText = 'Nothing to copy.';
-            snackbarVariables.isOpen = true;
-        }
-    }
-
-    function pasteScore() {
-        if (typeof app.tmpScore === 'undefined' || app.tmpScore.length === 0) {
-            snackbarVariables.labelText = 'The clipboard is empty.';
-            snackbarVariables.isOpen = true;
-        } else {
-            for (var i = 0; i < app.tmpScore.length; i++) {
-                const tmpScore = JSON.parse(JSON.stringify(app.tmpScore[i]));
-                deleteDiscount(tmpScore);
-                tmpScore.idx = generateId(0, 5, 's');
-                if (typeof choice.scores === 'undefined') choice.scores = [];
-                choice.scores.push(tmpScore);
-            }
-        }
-    }
-
-    function copyAddons() {
-        if (choice.addons && choice.addons.length > 0) {
-            if (typeof app.tmpAddon === 'undefined') app.tmpAddon = [];
-            app.tmpAddon.length = 0;
-            for (let i = 0; i < choice.addons.length; i++) {
-                const addon = JSON.parse(JSON.stringify(choice.addons[i]));
-                app.tmpAddon.push(addon);
-            }
-            snackbarVariables.labelText = 'Copied to clipboard.';
-            snackbarVariables.isOpen = true;
-        } else {
-            snackbarVariables.labelText = 'Nothing to copy.';
-            snackbarVariables.isOpen = true;
-        }
-    }
-
-    function pasteAddon() {
-        if (typeof app.tmpAddon === 'undefined' || app.tmpAddon.length === 0) {
-            snackbarVariables.labelText = 'The clipboard is empty.';
-            snackbarVariables.isOpen = true;
-        } else {
-            for (var i = 0; i < app.tmpAddon.length; i++) {
-                const tmpAddon = JSON.parse(JSON.stringify(app.tmpAddon[i]));
-                tmpAddon.parentId = choice.id;
-                if (tmpAddon.isSelectable) {
-                    tmpAddon.isActive = false;
-                    delete tmpAddon.forcedActivated;
-                    delete tmpAddon.appliedDisChoices;
-                    tmpAddon.id = generateId(0, app.objectIdLength, 'addon');
-
-                    if (tmpAddon.scores) {
-                        for (let j = 0; j < tmpAddon.scores.length; j++) {
-                            const score = tmpAddon.scores[j];
-
-                            score.idx = generateId(0, 5, 's');
-                            scoreSet.add(score.idx);
-                            if (tmpAddon.isSelectableMultiple) {
-                                delete score.isActiveMul;
-                                delete score.isActiveMulMinus;
-                            } else {
-                                delete score.isActive;
-                            }
-                            delete score.setValue;
-                            deleteDiscount(score);
-                        }
-                    }
-                }
-                if (typeof choice.addons === 'undefined') choice.addons = [];
-                choice.addons.push(tmpAddon);
-                if (tmpAddon.isSelectable) {
-                    const idx = choice.addons.length - 1;
-                    const addon = choice.addons[idx];
-
-                    choiceMap.set(addon.id, {choice: choice.addons[idx] as SelectableAddon, row: row});
-                }
-            }
-        }
-    }
-
-    function copyRequireds() {
-        if (choice.requireds && choice.requireds.length > 0) {
-            if (typeof app.tmpRequired === 'undefined') app.tmpRequired = [];
-            app.tmpRequired.length = 0;
-            for (let i = 0; i < choice.requireds.length; i++) {
-                const required = JSON.parse(JSON.stringify(choice.requireds[i]));
-                app.tmpRequired.push(required);
-            }
-            snackbarVariables.labelText = 'Copied to clipboard.';
-            snackbarVariables.isOpen = true;
-        } else {
-            snackbarVariables.labelText = 'Nothing to copy.';
-            snackbarVariables.isOpen = true;
-        }
-    }
-
-    function pasteRequired() {
-        if (typeof app.tmpRequired === 'undefined' || app.tmpRequired.length === 0) {
-            snackbarVariables.labelText = 'The clipboard is empty.';
-            snackbarVariables.isOpen = true;
-        } else {
-            for (var i = 0; i < app.tmpRequired.length; i++) {
-                const tmpRequired = JSON.parse(JSON.stringify(app.tmpRequired[i]));
-                if (typeof choice.requireds === 'undefined') choice.requireds = [];
-                choice.requireds.push(tmpRequired);
-            }
-        }
-    }
-
-    function copyGroups() {
-        if (choice.groups && choice.groups.length > 0) {
-            if (typeof app.tmpGroup === 'undefined') app.tmpGroup = [];
-            app.tmpGroup.length = 0;
-            for (let i = 0; i < choice.groups.length; i++) {
-                app.tmpGroup.push(choice.groups[i]);
-            }
-            snackbarVariables.labelText = 'Copied to clipboard.';
-            snackbarVariables.isOpen = true;
-        } else {
-            snackbarVariables.labelText = 'Nothing to copy.';
-            snackbarVariables.isOpen = true;
-        }
-    }
-
-    function pasteGroup() {
-        if (typeof app.tmpGroup === 'undefined' || app.tmpGroup.length === 0) {
-            snackbarVariables.labelText = 'The clipboard is empty.';
-            snackbarVariables.isOpen = true;
-        } else {
-            for (var i = 0; i < app.tmpGroup.length; i++) {
-                const group = groupMap.get(app.tmpGroup[i]);
-                if (typeof group !== 'undefined') {
-                    if (typeof choice.groups === 'undefined') choice.groups = [];
-                    choice.groups.push(app.tmpGroup[i]);
-
-                    const elementIndex = group.elements.indexOf(choice.id);
-                    if (elementIndex === -1) group.elements.push(choice.id);
-                }
-            }
-        }
-    }
-
-    function copyDesignGroups() {
-        if (choice.objectDesignGroups && choice.objectDesignGroups.length > 0) {
-            if (typeof app.tmpDesignGroup === 'undefined') app.tmpDesignGroup = [];
-            app.tmpDesignGroup.length = 0;
-            for (let i = 0; i < choice.objectDesignGroups.length; i++) {
-                app.tmpDesignGroup.push(choice.objectDesignGroups[i]);
-            }
-            snackbarVariables.labelText = 'Copied to clipboard.';
-            snackbarVariables.isOpen = true;
-        } else {
-            snackbarVariables.labelText = 'Nothing to copy.';
-            snackbarVariables.isOpen = true;
-        }
-    }
-
-    function pasteDesignGroup() {
-        if (typeof app.tmpDesignGroup === 'undefined' || app.tmpDesignGroup.length === 0) {
-            snackbarVariables.labelText = 'The clipboard is empty.';
-            snackbarVariables.isOpen = true;
-        } else {
-            for (var i = 0; i < app.tmpDesignGroup.length; i++) {
-                const dGroup = objectDesignMap.get(app.tmpDesignGroup[i]);
-                if (typeof dGroup !== 'undefined') {
-                    if (typeof choice.objectDesignGroups === 'undefined') choice.objectDesignGroups = [];
-                    choice.objectDesignGroups.push(app.tmpDesignGroup[i]);
-
-                    const elementIndex = dGroup.elements.indexOf(choice.id);
-                    if (elementIndex === -1) dGroup.elements.push(choice.id);
-                }
-            }
-        }
-    }
-
-    function choiceContext(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        e.preventDefault();
-        target.blur();
-        if (menuVariables.isOpen) {
-            menuVariables.isOpen = false;
-            removeAnchor();
-        }
-        menuVariables.anchor = target.parentElement;
-        menuVariables.copy = () => copyObject();
-        menuVariables.paste = () => pasteObject(row, choice.index);
-        menuVariables.clear = () => clearClipboard(1);
-        menuVariables.export = () => exportData(choice, 'choice');
-        menuVariables.parent = row;
-        menuVariables.importType = 'choice';
-        menuVariables.importNum = choice.index + 1;
-        tick().then(() => {
-            menuVariables.isOpen = true;
-        });
-    }
-    
-    function requiredContext(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        e.preventDefault();
-        target.blur();
-        if (menuVariables.isOpen) {
-            menuVariables.isOpen = false;
-            removeAnchor();
-        }
-        menuVariables.anchor = target.parentElement;
-        menuVariables.copy = () => copyRequireds();
-        menuVariables.paste = () => pasteRequired();
-        menuVariables.clear = () => clearClipboard(2);
-        menuVariables.export = () => exportData(choice.requireds, 'req');
-        menuVariables.parent = choice;
-        menuVariables.importType = 'req';
-        menuVariables.importNum = choice.requireds.length;
-        tick().then(() => {
-            menuVariables.isOpen = true;
-        });
-    }
-
-    function scoreContext(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        e.preventDefault();
-        target.blur();
-        if (menuVariables.isOpen) {
-            menuVariables.isOpen = false;
-            removeAnchor();
-        }
-        menuVariables.anchor = target.parentElement;
-        menuVariables.copy = () => copyScores();
-        menuVariables.paste = () => pasteScore();
-        menuVariables.clear = () => clearClipboard(3);
-        menuVariables.export = () => exportData(choice.scores, 'score');
-        menuVariables.parent = choice;
-        menuVariables.importType = 'score';
-        menuVariables.importNum = choice.scores.length;
-        tick().then(() => {
-            menuVariables.isOpen = true;
-        });
-    }
-
-    function addonContext(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        e.preventDefault();
-        target.blur();
-        if (menuVariables.isOpen) {
-            menuVariables.isOpen = false;
-            removeAnchor();
-        }
-        menuVariables.anchor = target.parentElement;
-        menuVariables.copy = () => copyAddons();
-        menuVariables.paste = () => pasteAddon();
-        menuVariables.clear = () => clearClipboard(4);
-        menuVariables.export = () => exportData(choice.addons, 'addon');
-        menuVariables.parent = choice;
-        menuVariables.importType = 'addon';
-        menuVariables.importNum = choice.addons.length;
-        tick().then(() => {
-            menuVariables.isOpen = true;
-        });
-    }
-
-    function groupContext(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        e.preventDefault();
-        target.blur();
-        if (menuVariables.isOpen) {
-            menuVariables.isOpen = false;
-            removeAnchor();
-        }
-        menuVariables.anchor = target.parentElement;
-        menuVariables.copy = () => copyGroups();
-        menuVariables.paste = () => pasteGroup();
-        menuVariables.clear = () => clearClipboard(5);
-        tick().then(() => {
-            menuVariables.isOpen = true;
-        });
-    }
-
-    function dGroupContext(e: MouseEvent) {
-        const target = e.currentTarget as HTMLElement;
-        e.preventDefault();
-        target.blur();
-        if (menuVariables.isOpen) {
-            menuVariables.isOpen = false;
-            removeAnchor();
-        }
-        menuVariables.anchor = target.parentElement;
-        menuVariables.copy = () => copyDesignGroups();
-        menuVariables.paste = () => pasteDesignGroup();
-        menuVariables.clear = () => clearClipboard(6);
-        tick().then(() => {
-            menuVariables.isOpen = true;
-        });
-    }
-
     function cloneObject() {
         const id = generateId(0, app.objectIdLength, 'choice');
         const clone: Choice = JSON.parse(JSON.stringify(choice));
@@ -2747,25 +2455,6 @@
                 }
             }
         }
-    }
-
-    function copyObject() {
-        if (typeof app.tmpChoice === 'undefined') app.tmpChoice = [];
-        const tmpChoice = JSON.parse(JSON.stringify(choice));
-
-        tmpChoice.isActive = false;
-        delete tmpChoice.forcedActivated;
-        delete tmpChoice.appliedDisChoices;
-        if (typeof tmpChoice.scores !== 'undefined' && tmpChoice.scores.length > 0) {
-            for (let i = 0; i < tmpChoice.scores.length; i++) {
-                const tmpScore = tmpChoice.scores[i];
-                deleteDiscount(tmpScore);
-            }
-        }
-        app.tmpChoice.length = 0;
-        app.tmpChoice.push(tmpChoice);
-        snackbarVariables.labelText = 'Copied to clipboard.';
-        snackbarVariables.isOpen = true;
     }
 
     function deleteGroup(num: number) {

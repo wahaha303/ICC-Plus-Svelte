@@ -1,4 +1,4 @@
-<div class="row-{row.id}-bg text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!bCreatorMode && !isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
+<div class="row-{row.id}-bg text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!bCreatorMode && !isEnabled ? ' hidden' : ''}" class:row-edit-button__wrapper={app.useChoiceEditBtn && bCreatorMode} style={rowBody} bind:clientWidth={width}>
     {#if bCreatorMode && (row.isEditModeOn || row.isSimpleEditMode)}
         <Card class="mt-n3">
             <CardContent class="p-0 mb-4">
@@ -299,12 +299,12 @@
             </CardContent>
         </Card>
     {:else if isEnabled}
-        <div class="row gx-0 row-{row.id} row-{row.id}-header{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" class:row-edit-button__wrapper={app.useChoiceEditBtn && bCreatorMode} style={row.title !== '' ? rowBackground : ''}>
-            {#if app.useChoiceEditBtn && bCreatorMode}
-                <div class="row-edit-button" style="width: auto;">
-                    <IconButton onclickcapture={() => row.isSimpleEditMode = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
-                </div>
-            {/if}
+        {#if app.useChoiceEditBtn && bCreatorMode}
+            <div class="row-edit-button" style="width: auto; margin-right: {rowStyle.rowMargin}%;">
+                <IconButton onclickcapture={() => row.isSimpleEditMode = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
+            </div>
+        {/if}
+        <div class="row gx-0 row-{row.id} row-{row.id}-header{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" style={row.title !== '' ? rowBackground : ''}>
             {#if row.template >= 4 || row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx))}

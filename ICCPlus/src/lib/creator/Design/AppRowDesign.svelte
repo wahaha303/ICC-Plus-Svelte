@@ -57,7 +57,7 @@
                         <div class="row">
                             <div class="col-lg-4 gy-2">
                                 <div class="col-12 px-3">Margin and Padding</div>
-                                <Textfield class="mb-4" bind:value={() => styling.rowMargin ?? 0, (e) => styling.rowMargin = e} label="Text Margin" type="number" suffix="px" variant="filled" />
+                                <Textfield class="mb-4" bind:value={() => styling.rowMargin ?? 0, (e) => styling.rowMargin = e} label="Text Margin" type="number" suffix="%" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.rowBodyMarginSides ?? 0, (e) => styling.rowBodyMarginSides = e} label="Row Left and Right Margin" type="number" suffix="%" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.rowBodyMarginTop ?? 0, (e) => styling.rowBodyMarginTop = e} label="Row Top Margin" type="number" suffix="px" variant="filled" />
                                 <Textfield class="mb-4" bind:value={() => styling.rowBodyMarginBottom ?? 0, (e) => styling.rowBodyMarginBottom = e} label="Row Bottom Margin" type="number" suffix="px" variant="filled" />

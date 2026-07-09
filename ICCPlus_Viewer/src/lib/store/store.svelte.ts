@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.23';
+export const appVersion = '2.9.24';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2546,7 +2546,7 @@ function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choi
         if (typeof point === 'undefined') continue;
         if (typeof score.discounts === 'undefined') continue;
 
-        const scoreVal = score.discountIsOn && score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        let scoreVal = score.discountIsOn && score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         let disVal = score.value;
         let actVal = score.value;
         const actNum: number[] = [];
@@ -2560,9 +2560,15 @@ function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choi
             const dc = score.discounts[j];
 
             if (dc.state !== FULL || dc.id === localChoice.id) {
-                if (dc.state === ACTIVE) {
+                const inCount = dc.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+
+                if (inCount && typeof score.discountScore !== 'undefined') {
+                    scoreVal = score.discountScore;
+                }
+
+                if (dc.state === ACTIVE || inCount) {
                     actVal = calcStackDiscount(actVal, dc.operator, dc.value);
-                    if (dc.useLowLimit) actVal = Math.max(actVal, dc.lowLimit)
+                    if (dc.useLowLimit) actVal = Math.max(actVal, dc.lowLimit);
                     actNum.push(j);
                 }
                 dc.state = INACTIVE;
@@ -2665,7 +2671,6 @@ function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choic
 
         for (let j = 0; j < score.discounts.length; j++) {
             const dc = score.discounts[j];
-
             if (dc.id === localChoice.id) {
                 dc.state = FULL;
             } else {
@@ -2743,6 +2748,7 @@ function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choic
                 isDiscounted = true;
             }
         }
+
         if (isDiscounted) {
             disVal = point.allowFloat ? disVal : Math.floor(disVal);
             if (score.discountScore !== disVal) {
@@ -2762,6 +2768,7 @@ function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choic
     }
 }
 export function deselectDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
+    const countNum: number[] = [];
     for (let i = 0; i < targetChoice.scores.length; i++) {
         const score = targetChoice.scores[i];
         const point = pointTypeMap.get(score.id);
@@ -2772,7 +2779,8 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
         if (idx === -1) continue;
 
         const discount = score.discounts[idx];
-        const scoreVal = score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        const inCount = discount.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+        const scoreVal = (score.appliedDiscount || inCount) && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         let disVal = score.value;
         let actVal = score.value;
         let actNum: number[] = [];
@@ -2780,10 +2788,28 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
         let stackNum: number[] = [];
         let nonStackVal = score.value;
         let nonStackNum = DISABLED;
-        
+
         if (discount.stack > 1) {
             discount.stack -= 1;
-            if (discount.state === INACTIVE || discount.state === FULL) continue;
+            if (discount.state === INACTIVE || (discount.state === FULL && !targetChoice.isSelectableMultiple)) continue;
+            if (!discount.stackable) {
+                if (discount.count === DISABLED) continue;
+                const leng = discount.count * discount.stack;
+
+                if (typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.appliedDisChoices.length > leng) {
+                    for (let j = leng; j < localChoice.appliedDisChoices.length; j++) {
+                        const id = localChoice.appliedDisChoices[j];
+
+                        if (id === targetChoice.id) {
+                            discount.state = FULL;
+                            countNum.push(j);
+                        }
+                    }
+                } else {
+                    continue;
+                }
+            }
+            if (countNum.length === 0 && discount.state === FULL) continue;
         } else {
             score.discounts.splice(idx, 1);
             if (discount.state === INACTIVE || discount.state === FULL) {
@@ -2796,7 +2822,8 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
             const dc = score.discounts[j];
 
             if (dc.state === ACTIVE) {
-                for (let k = 0; k < dc.stack; k++) {
+                const num = dc.stackable ? dc.stack : 1;
+                for (let k = 0; k < num; k++) {
                     actVal = calcStackDiscount(actVal, dc.operator, dc.value);
                     if (dc.useLowLimit) actVal = Math.max(actVal, dc.lowLimit);
                 }
@@ -2870,10 +2897,16 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
         }
         disVal = point.allowFloat ? disVal : Math.floor(disVal);
         score.discountScore = disVal;
-        
-        if (targetChoice.isActive) {
+
+        if (targetChoice.isActive && scoreVal !== disVal) {
             score.tmpDisScore = scoreVal - disVal;
             score.isChangeDiscount = true;
+        }
+    }
+    for (let i = countNum.length - 1; i >= 0; i--) {
+        const idx = countNum[i];
+        if (typeof localChoice.appliedDisChoices !== 'undefined') {
+            localChoice.appliedDisChoices.splice(idx, 1);
         }
     }
 }
@@ -3032,7 +3065,7 @@ export function expDiscount(point: PointType, score: Score) {
     score.discountScore = disVal;
 }
 export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolean) {
-    let isPositve = true;
+    let isPositive = true;
     const scoreMap = new Map<string, number>();
     const acMap = new SvelteMap<string, ActivatedMap>([...activatedMap].map(([key, value]) => [key, {...value}]));
     const tChoice = acMap.get(localChoice.id);
@@ -3063,7 +3096,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
         const point = pointTypeMap.get(score.id);
         if (typeof point === 'undefined') continue;
 
-        if (score.useExpression && !score.setValue) {
+        if (score.useExpression) {
             if (score.isRandom && score.expMinValue && score.expMaxValue) {
                 try {
                     const minReplaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
@@ -3127,7 +3160,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     console.error(e);
                 }
             }
-        } else if (score.isRandom && !score.setValue) {
+        } else if (score.isRandom) {
             setScoreValue(point, score, localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable, localChoice.multipleUseVariable);
         }
 
@@ -3140,11 +3173,22 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
         const data = scoreMap.get(score.id);
 
         if (typeof data !== 'undefined') {
-            if (point.belowZeroNotAllowed) isPositve = isPositve && (isSel ? data - scoreVal >= 0 : data + scoreVal >= 0);
-            scoreMap.set(score.id, data - scoreVal);
+            const val = isSel ? data - scoreVal : data + scoreVal;
+            scoreMap.set(score.id, val);
         } else {
-            if (point.belowZeroNotAllowed) isPositve = isPositve && (isSel ? point.startingSum - scoreVal >= 0 : point.startingSum + scoreVal >= 0);
-            scoreMap.set(score.id, point.startingSum - scoreVal);
+            const val = isSel ? point.startingSum - scoreVal : point.startingSum + scoreVal;
+            scoreMap.set(score.id, val);
+        }
+    }
+
+    for (const [id, val] of scoreMap) {
+        const point = pointTypeMap.get(id);
+
+        if (typeof point !== 'undefined') {
+            if (point.belowZeroNotAllowed && val < 0) {
+                isPositive = false;
+                break;
+            }
         }
     }
 
@@ -3195,7 +3239,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     }
                 }
 
-                isPositve = isPositve && pointVal >= 0;
+                isPositive = isPositive && pointVal >= 0;
             }
         }
     }
@@ -3247,7 +3291,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     }
                 }
 
-                isPositve = isPositve && pointVal >= 0;
+                isPositive = isPositive && pointVal >= 0;
             }
         }
     }
@@ -3299,12 +3343,12 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                     }
                 }
 
-                isPositve = isPositve && pointVal >= 0;
+                isPositive = isPositive && pointVal >= 0;
             }
         }
     }
 
-    return isPositve;
+    return isPositive;
 }
 async function checkAddons(localChoice: Choice, localRow: Row, options: ChoiceOptions) {
     if (!localChoice.addons || localChoice.addons.length === 0) return true;
@@ -3947,7 +3991,7 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
     
     const idx = dChoice.appliedDisChoices.indexOf(localChoice.id);
     if (idx === DISABLED) return;
-    
+
     dChoice.appliedDisChoices.splice(idx, 1);
     const dList = new Set(dChoice.appliedDisChoices);
     if (dChoice.isDisChoices) {
@@ -3957,7 +4001,7 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                 if (typeof tRow !== 'undefined') {
                     for (let j = 0; j < tRow.objects.length; j++) {
                         const tChoice = tRow.objects[j];
-                        if (!dList.has(tChoice.id)) {
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
                             emptyDiscount(dChoice, tChoice);
                             dList.add(tChoice.id);
                         }
@@ -3972,7 +4016,9 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                     if (typeof cMap !== 'undefined') {
                         const tChoice = cMap.choice;
 
-                        if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                            emptyDiscount(dChoice, tChoice);
+                        }
                     }
                 }
             }
@@ -3987,7 +4033,9 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                         if (typeof cMap !== 'undefined') {
                             const tChoice = cMap.choice;
 
-                            if (!dList.has(tChoice.id)) emptyDiscount(dChoice, tChoice);
+                            if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                                emptyDiscount(dChoice, tChoice);
+                            }
                         }
                     }
                 }
@@ -3998,14 +4046,22 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
 
 function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
     if (!dChoice.discountCount) return;
+
+    let count = dChoice.discountCount * (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable ? dChoice.multipleUseVariable : 1);
     
     if (typeof dChoice.appliedDisChoices === 'undefined') dChoice.appliedDisChoices = [];
-    
-    if (dChoice.appliedDisChoices.indexOf(localChoice.id) !== DISABLED) return;
-    dChoice.appliedDisChoices.push(localChoice.id);
 
-    if (dChoice.appliedDisChoices.length < dChoice.discountCount) return;
-    
+    if (!localChoice.isSelectableMultiple && dChoice.appliedDisChoices.indexOf(localChoice.id) !== DISABLED) return;
+
+    if (localChoice.isSelectableMultiple && dChoice.countPerSelection) {
+        if (dChoice.appliedDisChoices.length < count && dChoice.appliedDisChoices.filter(id => id === localChoice.id).length < localChoice.multipleUseVariable) dChoice.appliedDisChoices.push(localChoice.id);
+    } else {
+        if (dChoice.appliedDisChoices.indexOf(localChoice.id) !== DISABLED) return;
+        dChoice.appliedDisChoices.push(localChoice.id);
+    }
+
+    if (dChoice.appliedDisChoices.length < count) return;
+
     const dList = new Set(dChoice.appliedDisChoices);
     if (dChoice.isDisChoices) {
         if (typeof dChoice.discountRows !== 'undefined') {
@@ -4014,8 +4070,9 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                 if (typeof tRow !== 'undefined') {
                     for (let j = 0; j < tRow.objects.length; j++) {
                         const tChoice = tRow.objects[j];
-                        if (!dList.has(tChoice.id)) {
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
                             fillDiscount(dChoice, tChoice);
+                            dList.add(tChoice.id);
                         }
                     }
                 }
@@ -4028,7 +4085,9 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                     if (typeof cMap !== 'undefined') {
                         const tChoice = cMap.choice;
 
-                        fillDiscount(dChoice, tChoice);
+                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                            fillDiscount(dChoice, tChoice);
+                        }
                     }
                 }
             }
@@ -4043,7 +4102,7 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                         if (typeof cMap !== 'undefined') {
                             const tChoice = cMap.choice;
 
-                            if (!dList.has(tChoice.id)) {
+                            if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
                                 fillDiscount(dChoice, tChoice);
                             }
                         }
@@ -4106,11 +4165,30 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
             const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
 
             if (aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
-                const mul = aChoice.multipleUseVariable;
-
                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                    let mul = aChoice.multipleUseVariable;
                     let isChangedMul = false;
                     let totalScore = 0;
+
+                    if (aScore.discounts) {
+                        for (let k = 0; k < aScore.discounts.length; k++) {
+                            const dc = aScore.discounts[k];
+                            if (dc.state !== INACTIVE) {
+                                const dMap = choiceMap.get(dc.id);
+
+                                if (typeof dMap !== 'undefined') {
+                                    const dChoice = dMap.choice;
+
+                                    if (typeof dChoice.appliedDisChoices !== 'undefined' && dChoice.countPerSelection) {
+                                        const count = dChoice.appliedDisChoices.filter(id => id === aChoice.id).length;
+                                        if (count === 0) continue;
+                                        mul = mul - count;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     for (let k = mul - 1; k >= 0; k--) {
                         if (!aChoice.isActive || !aScore.isActiveMul) break;
                         if (!aScore.isActiveMul[k]) continue;
@@ -4119,7 +4197,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                             if (aChoice.forcedActivated) {
                                 aChoice.numMultipleTimesMinus--;
                                 await selectedOneLess(aChoice, aRow, newOptions);
-                                
+
                                 const tmpAct = tmpActivatedMap.get(aChoice.id);
                                 if (typeof tmpAct !== 'undefined') {
                                     tmpAct.multiple += 1;
@@ -4473,11 +4551,30 @@ export async function selectUpdateScore(localChoice: Choice | SelectableAddon | 
             const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
             
             if (aScore.appliedDiscount && aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
-                const mul = aChoice.multipleUseVariable;
-
                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
+                    let mul = aChoice.multipleUseVariable;
                     let isChangedMul = false;
                     let totalScore = 0;
+
+                    if (aScore.discounts) {
+                        for (let k = 0; k < aScore.discounts.length; k++) {
+                            const dc = aScore.discounts[k];
+                            if (dc.state !== INACTIVE) {
+                                const dMap = choiceMap.get(dc.id);
+
+                                if (typeof dMap !== 'undefined') {
+                                    const dChoice = dMap.choice;
+
+                                    if (typeof dChoice.appliedDisChoices !== 'undefined' && dChoice.countPerSelection) {
+                                        const count = dChoice.appliedDisChoices.filter(id => id === aChoice.id).length;
+                                        if (count === 0) continue;
+                                        mul = mul - count;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     for (let k = mul - 1; k >= 0; k--) {
                         if (aChoice.isActive && aScore.isActiveMul && aScore.isActiveMul[k]) {
                             let tmpScore = aScore.multiplyByTimes ? aScore.tmpDisScore * (k + 1) : aScore.tmpDisScore;
@@ -5010,7 +5107,7 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
         const score = localChoice.scores[i];
         let isActive = false;
         if (options.isMultiple) {
-            if (!score[key]) score[key] = [];
+            if (typeof score[key] === 'undefined') score[key] = [];
             isActive = options.isPos ? !!score[key][options.selNum] : !score[key][options.selNum];
         } else {
             isActive = !!score.isActive;
@@ -5019,19 +5116,26 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
             const point = pointTypeMap.get(score.id);
             if (typeof point !== 'undefined') {
                 let val = score.value;
-                if (score.appliedDiscount && typeof score.discountScore !== 'undefined' && typeof score.discounts !== 'undefined') {
-                    val = score.discountScore;
+                if (typeof score.discountScore !== 'undefined' && typeof score.discounts !== 'undefined') {
+                    if (score.appliedDiscount) val = score.discountScore;
                     for (let j = 0; j < score.discounts.length; j++) {
                         const dc = score.discounts[j];
 
-                        if (dc.state === ACTIVE) {
+                        if (dc.state === ACTIVE || (dc.state === FULL && localChoice.isSelectableMultiple)) {
                             const cMap = choiceMap.get(dc.id);
 
                             if (typeof cMap !== 'undefined') {
                                 const dChoice = cMap.choice;
 
-                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined') {
-                                    if (!options.isMultiple || options.selNum === 0) countSet.add(dChoice);
+                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.appliedDisChoices !== 'undefined') {
+                                    const inCount = localChoice.isSelectableMultiple && dChoice.countPerSelection && dChoice.appliedDisChoices.filter(id => id === localChoice.id).length === options.selNum + 1;
+
+                                    if (inCount) {
+                                        score.appliedDiscount = true;
+                                        val = score.discountScore;
+                                    }
+
+                                    if (!options.isMultiple || options.selNum === 0 || inCount) countSet.add(dChoice);
                                 }
                             }
                         }
@@ -5085,7 +5189,7 @@ function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: 
         const score = localChoice.scores[i];
         let isInactive = false;
         if (options.isMultiple) {
-            if (!score[key]) score[key] = [];
+            if (typeof score[key] === 'undefined') score[key] = [];
             isInactive = !score[key][options.selNum];
         } else {
             isInactive = !score.isActive;
@@ -5901,9 +6005,11 @@ function deselectEffectProc(localChoice: Choice | SelectableAddon) {
     }
 }
 
-function selectEffectProc(localChoice: Choice | SelectableAddon) {
-    if (localChoice.setBgmIsOn) {
-        if (localChoice.bgmId) {
+function selectEffectProc(localChoice: Choice | SelectableAddon, isLoad: boolean = false) {
+    if (localChoice.setBgmIsOn && localChoice.bgmId) {
+        const play = () => {
+            if (!localChoice.bgmId) return;
+
             if (bgmVariables.bgmWaitTimer !== 0) {
                 window.clearTimeout(bgmVariables.bgmWaitTimer);
                 bgmVariables.bgmWaitTimer = 0;
@@ -5913,6 +6019,16 @@ function selectEffectProc(localChoice: Choice | SelectableAddon) {
             } else {
                 initYoutubePlayer(localChoice);
             }
+        }
+
+        if (isLoad) {
+            if (tempEffectTimer !== 0) {
+                window.clearTimeout(tempEffectTimer);
+                tempEffectTimer = 0;
+            }
+            tempEffectTimer = window.setTimeout(play, 100);
+        } else {
+            play();
         }
     }
 
@@ -7786,13 +7902,7 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
 
     selectModifyPoint(localChoice);
 
-    if (tempEffectTimer !== 0) {
-        window.clearTimeout(tempEffectTimer);
-        tempEffectTimer = 0;
-    }
-    tempEffectTimer = window.setTimeout(() => {
-        selectEffectProc(localChoice);
-    }, 100);
+    selectEffectProc(localChoice, true);
 
     selectHideContent(localChoice);
 
@@ -8116,13 +8226,7 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
         if (!wasActive) {
             setVariables(localChoice, true);
 
-            if (tempEffectTimer !== 0) {
-                window.clearTimeout(tempEffectTimer);
-                tempEffectTimer = 0;
-            }
-            tempEffectTimer = window.setTimeout(() => {
-                selectEffectProc(localChoice);
-            }, 100);
+            selectEffectProc(localChoice, true);
 
             selectHideContent(localChoice);
 
@@ -8716,8 +8820,24 @@ const StylingSchema = z.preprocess((val) => {
     if (val === '') return {};
     return val;
 }, filterStylingSchema.merge(textStylingSchema).merge(objectImageStylingSchema).merge(rowImageStylingSchema).merge(addonImageStylingSchema).merge(objectStylingSchema).merge(rowStylingSchema).merge(addonStylingSchema).merge(multiChoiceStylingSchema).merge(pointBarStylingSchema).merge(backpackStylingSchema).passthrough());
+const RequiredSchema = z.object({
+    required: z.boolean(),
+    requireds: z.array(z.any()),
+    orRequired: z.array(z.any()),
+    id: z.string(),
+    type: z.string(),
+    reqId: z.string(),
+    reqId1: z.string(),
+    reqId2: z.string(),
+    reqId3: z.string(),
+    reqPoints: z.coerce.number(),
+    showRequired: z.boolean(),
+    afterText: z.string(),
+    beforeText: z.string(),
+}).passthrough();
 const AddonSchema = z.object({
-    template: z.coerce.number().optional()
+    template: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const ScoreSchema = z.object({
     value: z.coerce.number().optional(),
@@ -8725,7 +8845,8 @@ const ScoreSchema = z.object({
     maxValue: z.coerce.number().optional(),
     discountScore: z.coerce.number().optional(),
     discountScoreCal: z.coerce.number().optional(),
-    tmpDisScore: z.coerce.number().optional()
+    tmpDisScore: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const ChoiceSchema = z.object({
     index: z.coerce.number().optional(),
@@ -8746,7 +8867,8 @@ const ChoiceSchema = z.object({
     bgmFadeOutSec: z.coerce.number().optional(),
     fadeTransitionTime: z.coerce.number().optional(),
     divideWithThis: z.coerce.number().optional(),
-    activatedFrom: z.coerce.number().optional()
+    activatedFrom: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const RowSchema = z.object({
     index: z.coerce.number().optional(),
@@ -8760,7 +8882,8 @@ const RowSchema = z.object({
     styling: StylingSchema.optional(),
     objectImgObjectFillHeight: z.coerce.number().optional(),
     randomMin: z.coerce.number().optional(),
-    randomMax: z.coerce.number().optional()
+    randomMax: z.coerce.number().optional(),
+    requireds: z.array(RequiredSchema).optional(),
 }).passthrough();
 const PointTypeSchema = z.object({
     startingSum: z.coerce.number().optional(),
@@ -8776,6 +8899,9 @@ const RowDesignGroupSchema = z.object({
 const ObjectDesignGroupSchema = z.object({
     styling: StylingSchema.optional()
 }).passthrough();
+const globalRequirementSchema = z.object({
+    requireds: z.array(RequiredSchema).optional()
+}).passthrough();
 export const AppSchema = z.object({
     curVolume: z.coerce.number().optional(),
     fadeTransitionTime: z.coerce.number().optional(),
@@ -8787,6 +8913,7 @@ export const AppSchema = z.object({
     objectDesignGroups: z.array(ObjectDesignGroupSchema).optional(),
     rows: z.array(RowSchema).optional(),
     pointTypes: z.array(PointTypeSchema).optional(),
+    globalRequirements: z.array(globalRequirementSchema).optional(),
     backpack: z.array(RowSchema).optional(),
     styling: StylingSchema.optional()
 }).passthrough() as z.ZodObject<any>;
@@ -9143,6 +9270,10 @@ export function initializeApp(tempApp: any) {
                                 if (kObj.sfxOnSelect && typeof kObj.sfxIdOnSelect === 'undefined') kObj.sfxIdOnSelect = kObj.sfxId;
                                 if (kObj.sfxOnDeselect && typeof kObj.sfxIdOnDeselect === 'undefined') kObj.sfxIdOnDeselect = kObj.sfxId;
                                 delete kObj.sfxId;
+                            }
+
+                            if (!kObj.addonJustify) {
+                                kObj.addonJustify = typeof tempApp.defaultAddonJustify !== 'undefined' ? tempApp.defaultAddonJustify : defaultApp.defaultAddonJustify;
                             }
 
                             if (typeof kObj.image) {

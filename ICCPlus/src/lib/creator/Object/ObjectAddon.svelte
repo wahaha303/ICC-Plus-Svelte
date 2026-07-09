@@ -6,19 +6,19 @@
             </Wrapper>
             <div class="d-flex">
                 {#if addon.isSelectable}
-                    <Wrapper text="Create Score">
-                        <IconButton onclickcapture={createNewScore}><i class="mdi mdi-numeric-9-plus-box"></i></IconButton>
+                    <Wrapper text="L: Create Score<br>R: Context Menu">
+                        <IconButton onclickcapture={createNewScore} oncontextmenu={(e) => scoreContext(e, addon)}><i class="mdi mdi-numeric-9-plus-box"></i></IconButton>
                     </Wrapper>
                 {/if}
-                <Wrapper text="Create Requirement">
-                    <IconButton onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'; dlgVariables.isWord = false;}}><i class="mdi mdi-key-plus"></i></IconButton>
+                <Wrapper text="L: Create Requirement<br>R: Context Menu">
+                    <IconButton onclickcapture={() => {dlgVariables.data = addon; dlgVariables.currentDialog = 'appRequirement'; dlgVariables.isWord = false;}} oncontextmenu={(e) => requiredContext(e, addon)}><i class="mdi mdi-key-plus"></i></IconButton>
                 </Wrapper>
                 {#if addon.isSelectable}
-                    <Wrapper text="Add to Group">
+                    <Wrapper text="L: Add to Group<br>R: Context Menu">
                         <IconButton onclickcapture={() => {
                             if (typeof addon.groups === 'undefined') addon.groups = [];
                             addon.groups.push('');
-                        }}><i class="mdi mdi-group"></i></IconButton>
+                        }} oncontextmenu={(e) => groupContext(e, addon)}><i class="mdi mdi-group"></i></IconButton>
                     </Wrapper>
                 {/if}
                 <Wrapper text="Copy Addon">
@@ -1690,7 +1690,7 @@
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba, winWidth, objectWidthToNum, imgDialog, generateId, scoreSet, getPointTypes, getPointTypeLabel, getRowLabel, getChoiceLabel, getGroups, getGroupLabel, getBackpackRows, getRows, getBackpackChoices, getChoices, getVariables, objectWidths, getWords, selectableAddonItems, choiceMap, selectedOneMore, deselectObject, selectObject, checkDupId, closestByClassPrefix, selectedOneLess, getBackpackSelectables, getSelectables, tmpActivatedMap, widthToNum, groupMap } from '$lib/store/store.svelte';
+    import { app, checkRequirements, dlgVariables, getStyling, replaceText, sanitizeArg, snackbarVariables, hexToRgba, winWidth, objectWidthToNum, imgDialog, generateId, scoreSet, getPointTypes, getPointTypeLabel, getRowLabel, getChoiceLabel, getGroups, getGroupLabel, getBackpackRows, getRows, getBackpackChoices, getChoices, getVariables, objectWidths, getWords, selectableAddonItems, choiceMap, selectedOneMore, deselectObject, selectObject, checkDupId, closestByClassPrefix, selectedOneLess, getBackpackSelectables, getSelectables, tmpActivatedMap, widthToNum, groupMap, scoreContext, requiredContext, groupContext } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon, SelectableAddon, ChoiceOptions, BgStyles, Filters } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import Tiptap from '$lib/store/Tiptap.svelte';

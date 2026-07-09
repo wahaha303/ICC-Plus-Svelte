@@ -198,7 +198,7 @@
         Cutting down to 40sih percent quality will make little visible difference in most cases, but shave off up to 60-70 percent of the image file size.`
     }, {
         title: 'What is an Expression, and what kinds of formulas can be used?',
-        text: `An Expression is a formula that can be used to calculate a score. When an Expression is used, the calculation is performed based on the moment the corresponding Choice is selected. Even if the values used in the formula change afterward, the score will not be updated.
+        text: `An Expression is a formula that can be used to calculate a score. When an Expression is used, the calculation is performed based on the moment the corresponding Choice is selected.
 
         The following types of formulas can be used in an Expression:
 
@@ -224,6 +224,27 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.24 / ${getDate('2026-07-09T14:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where row header edit button was clipped by the border.
+
+        <span style="color: green">Choice</span>
+        - Added option to count each selection separately in multi-selectable choices.
+        - Fixed issue where discount did not work correctly for multi-selectable choices.
+        - Fixed issue where design was not updated when discount changed score sign.
+        - Fixed issue where choice could not be selected when repeated use of the same score resulted in a non-negative total score.
+        - Fixed issue where effects were not applied correctly when loading choices with effects.
+
+        <span style="color: green">Addon</span>
+        - Added right-click context menu for selectable addons.
+        - Fixed issue where empty value was set for addon justify.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where rows were not properly assigned to groups.
+        - Fixed issue where some requirements from projects created in the legacy version did not work correctly.
+        `
+    }, {
+        open: false,
         title: `v2.9.23 / ${getDate('2026-06-22T11:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where choices with custom word/image could not be deselected.

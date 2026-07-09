@@ -351,6 +351,7 @@
             row.groups.push(group.id);
             for (let i = 0; i < row.objects.length; i++) {
                 const choice = row.objects[i];
+                if (typeof choice.groups === 'undefined') choice.groups = [];
                 if (!choice.groups.includes(group.id)) {
                     choice.groups.push(group.id);
                     group.elements.push(choice.id);
@@ -358,6 +359,9 @@
                 if (choice.addons) {
                     for (let j = 0; j < choice.addons.length; j++) {
                         const addon = choice.addons[j];
+                        if (!addon.isSelectable) continue;
+
+                        if (typeof addon.groups === 'undefined') addon.groups = [];
                         if (!addon.groups.includes(group.id)) {
                             addon.groups.push(group.id);
                             group.elements.push(addon.id);
