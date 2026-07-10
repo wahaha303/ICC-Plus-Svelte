@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.26 / ${getDate('2026-07-10T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where expression was re-evaluated when deselecting choice with expression score.
+        `
+    }, {
+        open: false,
         title: `v2.9.25 / ${getDate('2026-07-10T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where "Force Other Choice to Be Active" option did not work properly in multi-selectable choice.

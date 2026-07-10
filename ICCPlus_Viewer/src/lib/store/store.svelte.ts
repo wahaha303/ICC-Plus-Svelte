@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.25';
+export const appVersion = '2.9.26';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3096,72 +3096,74 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
         const point = pointTypeMap.get(score.id);
         if (typeof point === 'undefined') continue;
 
-        if (score.useExpression) {
-            if (score.isRandom && score.expMinValue && score.expMaxValue) {
-                try {
-                    const minReplaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
-                        const vScore = scoreMap.get(vStr);
-                        if (typeof vScore !== 'undefined') {
-                            return `${vScore}`;
-                        } else {
-                            const vPoint = pointTypeMap.get(vStr);
-                            if (typeof vPoint !== 'undefined') {
-                                return `${vPoint.startingSum}`;
+        if (isSel) {
+            if (score.useExpression) {
+                if (score.isRandom && score.expMinValue && score.expMaxValue) {
+                    try {
+                        const minReplaced = score.expMinValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vScore = scoreMap.get(vStr);
+                            if (typeof vScore !== 'undefined') {
+                                return `${vScore}`;
+                            } else {
+                                const vPoint = pointTypeMap.get(vStr);
+                                if (typeof vPoint !== 'undefined') {
+                                    return `${vPoint.startingSum}`;
+                                }
                             }
-                        }
-                        throw new Error(`Undefined variable: "${vStr}"`);
-                    });
-                    const maxReplaced = score.expMaxValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
-                        const vScore = scoreMap.get(vStr);
-                        if (typeof vScore !== 'undefined') {
-                            return `${vScore}`;
-                        } else {
-                            const vPoint = pointTypeMap.get(vStr);
-                            if (typeof vPoint !== 'undefined') {
-                                return `${vPoint.startingSum}`;
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        const maxReplaced = score.expMaxValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vScore = scoreMap.get(vStr);
+                            if (typeof vScore !== 'undefined') {
+                                return `${vScore}`;
+                            } else {
+                                const vPoint = pointTypeMap.get(vStr);
+                                if (typeof vPoint !== 'undefined') {
+                                    return `${vPoint.startingSum}`;
+                                }
                             }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        const minValue = evaluate(minReplaced);
+                        const maxValue = evaluate(maxReplaced);
+                        score.value = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+                        score.value = point.allowFloat ? score.value : Math.floor(score.value);
+                        score.setValue = true;
+                        if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
+                            if (typeof score.mulValue === 'undefined') score.mulValue = [];
+                            score.mulValue.splice(localChoice.multipleUseVariable, 1, score.value);
                         }
-                        throw new Error(`Undefined variable: "${vStr}"`);
-                    });
-                    const minValue = evaluate(minReplaced);
-                    const maxValue = evaluate(maxReplaced);
-                    score.value = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
-                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
-                    score.setValue = true;
-                    if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
-                        if (typeof score.mulValue === 'undefined') score.mulValue = [];
-                        score.mulValue.splice(localChoice.multipleUseVariable, 1, score.value);
+                    } catch (e) {
+                        console.error(e);
                     }
-                } catch (e) {
-                    console.error(e);
-                }
-            } else if (score.expValue) {
-                try {
-                    const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
-                        const vScore = scoreMap.get(vStr);
-                        if (typeof vScore !== 'undefined') {
-                            return `${vScore}`;
-                        } else {
-                            const vPoint = pointTypeMap.get(vStr);
-                            if (typeof vPoint !== 'undefined') {
-                                return `${vPoint.startingSum}`;
+                } else if (score.expValue) {
+                    try {
+                        const replaced = score.expValue.replace(/\{([^{}]+)\}/g, (_, vStr) => {
+                            const vScore = scoreMap.get(vStr);
+                            if (typeof vScore !== 'undefined') {
+                                return `${vScore}`;
+                            } else {
+                                const vPoint = pointTypeMap.get(vStr);
+                                if (typeof vPoint !== 'undefined') {
+                                    return `${vPoint.startingSum}`;
+                                }
                             }
+                            throw new Error(`Undefined variable: "${vStr}"`);
+                        });
+                        score.value = evaluate(replaced);
+                        score.value = point.allowFloat ? score.value : Math.floor(score.value);
+                        score.setValue = true;
+                        if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
+                            if (typeof score.mulValue === 'undefined') score.mulValue = [];
+                            score.mulValue.splice(localChoice.multipleUseVariable, 1, score.value);
                         }
-                        throw new Error(`Undefined variable: "${vStr}"`);
-                    });
-                    score.value = evaluate(replaced);
-                    score.value = point.allowFloat ? score.value : Math.floor(score.value);
-                    score.setValue = true;
-                    if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
-                        if (typeof score.mulValue === 'undefined') score.mulValue = [];
-                        score.mulValue.splice(localChoice.multipleUseVariable, 1, score.value);
+                    } catch (e) {
+                        console.error(e);
                     }
-                } catch (e) {
-                    console.error(e);
                 }
+            } else if (score.isRandom) {
+                setScoreValue(point, score, localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable, localChoice.multipleUseVariable);
             }
-        } else if (score.isRandom) {
-            setScoreValue(point, score, localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable, localChoice.multipleUseVariable);
         }
 
         let scoreVal = score.discountIsOn && typeof score.discountScore !== 'undefined' && score.appliedDiscount ? score.discountScore : score.value;
