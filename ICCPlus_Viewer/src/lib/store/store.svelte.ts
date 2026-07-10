@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.24';
+export const appVersion = '2.9.25';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5328,7 +5328,7 @@ async function deselectActivateOther(localChoice: Choice | SelectableAddon, opti
     }
 }
 
-async function selectActivateOther(localChoice: Choice | SelectableAddon, options: ChoiceOptions, wasActive?: boolean) {
+async function selectActivateOther(localChoice: Choice | SelectableAddon, options: ChoiceOptions) {
     if (!localChoice.activateOtherChoice || typeof localChoice.activateThisChoice === 'undefined') return;
     const newOptions = {...options};
     newOptions.isOverDlg = false;
@@ -5346,7 +5346,7 @@ async function selectActivateOther(localChoice: Choice | SelectableAddon, option
             if (typeof cMap !== 'undefined') {
                 const fRow = cMap.row;
                 const fChoice = cMap.choice;
-                if (isMul || !wasActive) selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
             } else {
                 const groupData = groupMap.get(item[0]);
                 if (typeof groupData !== 'undefined') {
@@ -5356,7 +5356,7 @@ async function selectActivateOther(localChoice: Choice | SelectableAddon, option
                         if (typeof cMap !== 'undefined') {
                             const fRow = cMap.row;
                             const fChoice = cMap.choice;
-                            if (isMul || !wasActive) selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                            selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
                         }
                     }
                 }
@@ -7042,7 +7042,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                         }
                     }
 
-                    selectActivateOther(localChoice, options, wasActive);
+                    selectActivateOther(localChoice, options);
 
                     selectDeactivateOther(localChoice, options);
                 }

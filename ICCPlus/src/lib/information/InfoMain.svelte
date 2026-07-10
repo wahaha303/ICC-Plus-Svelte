@@ -224,12 +224,18 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.25 / ${getDate('2026-07-10T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where "Force Other Choice to Be Active" option did not work properly in multi-selectable choice.
+        `
+    }, {
+        open: false,
         title: `v2.9.24 / ${getDate('2026-07-09T14:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where row header edit button was clipped by the border.
 
         <span style="color: green">Choice</span>
-        - Added option to count each selection separately in multi-selectable choices.
+        - Added option to count each selection separately in multi-selectable choices when applying discounts.
         - Fixed issue where discount did not work correctly for multi-selectable choices.
         - Fixed issue where design was not updated when discount changed score sign.
         - Fixed issue where choice could not be selected when repeated use of the same score resulted in a non-negative total score.

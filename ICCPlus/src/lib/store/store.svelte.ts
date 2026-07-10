@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.24';
+export const appVersion = '2.9.25';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5641,7 +5641,7 @@ async function deselectActivateOther(localChoice: Choice | SelectableAddon, opti
     }
 }
 
-async function selectActivateOther(localChoice: Choice | SelectableAddon, options: ChoiceOptions, wasActive?: boolean) {
+async function selectActivateOther(localChoice: Choice | SelectableAddon, options: ChoiceOptions) {
     if (!localChoice.activateOtherChoice || typeof localChoice.activateThisChoice === 'undefined') return;
     const newOptions = {...options};
     newOptions.isOverDlg = false;
@@ -5659,7 +5659,7 @@ async function selectActivateOther(localChoice: Choice | SelectableAddon, option
             if (typeof cMap !== 'undefined') {
                 const fRow = cMap.row;
                 const fChoice = cMap.choice;
-                if (isMul || !wasActive) selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
             } else {
                 const groupData = groupMap.get(item[0]);
                 if (typeof groupData !== 'undefined') {
@@ -5669,7 +5669,7 @@ async function selectActivateOther(localChoice: Choice | SelectableAddon, option
                         if (typeof cMap !== 'undefined') {
                             const fRow = cMap.row;
                             const fChoice = cMap.choice;
-                            if (isMul || !wasActive) selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                            selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
                         }
                     }
                 }
@@ -7356,7 +7356,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                         }
                     }
 
-                    selectActivateOther(localChoice, options, wasActive);
+                    selectActivateOther(localChoice, options);
 
                     selectDeactivateOther(localChoice, options);
                 }
@@ -11717,6 +11717,7 @@ export function closestByClassPrefix(el: HTMLElement, prefix: string, endpoint: 
 
     return false;
 }
+
 function copyObject(localChoice: Choice) {
     if (typeof app.tmpChoice === 'undefined') app.tmpChoice = [];
     const tmpChoice = JSON.parse(JSON.stringify(localChoice));
@@ -11735,6 +11736,7 @@ function copyObject(localChoice: Choice) {
     snackbarVariables.labelText = 'Copied to clipboard.';
     snackbarVariables.isOpen = true;
 }
+
 function copyScores(data: Choice | SelectableAddon) {
     if (data.scores && data.scores.length > 0) {
         if (typeof app.tmpScore === 'undefined') app.tmpScore = [];
@@ -11920,6 +11922,7 @@ function pasteDesignGroup(localChoice: Choice) {
         }
     }
 }
+
 export function choiceContext(e: MouseEvent, localRow: Row, localChoice: Choice) {
     const target = e.currentTarget as HTMLElement;
     e.preventDefault();
