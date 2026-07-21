@@ -291,6 +291,7 @@
     parentElement?: HTMLDivElement;
     onfocuslost?: () => void;
     isSearch?: boolean;
+    showIdOnly?: boolean;
   };
   let {
     use = [],
@@ -345,6 +346,7 @@
     parentElement,
     onfocuslost,
     isSearch = false,
+    showIdOnly = false,
     ...restProps
   }: OwnProps &
     SmuiAttrs<'div', keyof OwnProps> & {
@@ -425,7 +427,7 @@
   $effect(() => {
     if (previousValue !== value) {
       // If the value changed from outside, update the text.
-      text = getOptionLabel(value);
+      text = showIdOnly ? value : getOptionLabel(value);
       previousValue = value;
     } else if (combobox && value !== text) {
       // An update came from the user.
@@ -486,6 +488,7 @@
 
     loadingState += 1;
     errorState = false;
+    if (typeof text === 'undefined') text = '';
     try {
       const searchResult = await search(text);
       if (searchResult !== false) {

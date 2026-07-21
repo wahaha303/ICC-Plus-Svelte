@@ -1,5 +1,16 @@
 {#if required.type === 'id'}
-    <Textfield bind:value={required.reqId} label={required.required ? 'Selected Id' : 'Not Selected Id'} variant="filled" />
+    <Autocomplete
+        combobox
+        options={getSelectables()}
+        getOptionLabel={getChoiceLabel}
+        bind:value={required.reqId}
+        label={required.required ? 'Selected Id' : 'Not Selected Id'}
+        toggle={true}
+        showMenuWithNoInput={true}
+        showIdOnly={true}
+        textfield$variant="filled"
+        class="w-100"
+    />
 {:else if required.type === 'points'}
     <Autocomplete
         options={getPointTypes()}
@@ -169,7 +180,7 @@
     import Select, { Option } from '$lib/custom/select';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { groupMap, rowMap, getGroupLabel, getPointTypeLabel, getRowLabel, getRows, getPointTypes, getGroups, getGlobalRequirement, getWords, getGlobalReqLabel, dlgVariables } from '$lib/store/store.svelte';
+    import { groupMap, rowMap, getGroupLabel, getPointTypeLabel, getRowLabel, getRows, getPointTypes, getGroups, getGlobalRequirement, getWords, getGlobalReqLabel, dlgVariables, getSelectables, getChoiceLabel } from '$lib/store/store.svelte';
     import type { Requireds } from '$lib/store/types';
 
     const { required }: { required: Requireds; } = $props();

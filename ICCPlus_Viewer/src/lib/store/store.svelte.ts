@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.26';
+export const appVersion = '2.9.27';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2538,7 +2538,7 @@ export function deleteDiscount(score: Score) {
     delete score.hideDisIcon;
     delete score.discounts;
 }
-function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
+async function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
     const countSet = new Set<Choice | SelectableAddon>();
     for (let i = 0; i < targetChoice.scores.length; i++) {
         const score = targetChoice.scores[i];
@@ -2560,7 +2560,7 @@ function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choi
             const dc = score.discounts[j];
 
             if (dc.state !== FULL || dc.id === localChoice.id) {
-                const inCount = dc.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+                const inCount = dc.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable >= localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
 
                 if (inCount && typeof score.discountScore !== 'undefined') {
                     scoreVal = score.discountScore;
@@ -2648,12 +2648,15 @@ function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choi
         }
     }
     if (countSet.size > 0) {
-        countSet.forEach((dChoice) => {
-            removeCount(targetChoice, dChoice);
-        });
+        const arr = Array.from(countSet);
+        for (let i = 0; i < arr.length; i++) {
+            const dChoice = arr[i];
+
+            await removeCount(targetChoice, dChoice);
+        }
     }
 }
-function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
+async function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
     for (let i = 0; i < targetChoice.scores.length; i++) {
         const score = targetChoice.scores[i];
         const point = pointTypeMap.get(score.id);
@@ -2767,7 +2770,7 @@ function fillDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choic
         }
     }
 }
-export function deselectDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
+export async function deselectDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
     const countNum: number[] = [];
     for (let i = 0; i < targetChoice.scores.length; i++) {
         const score = targetChoice.scores[i];
@@ -2779,8 +2782,8 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
         if (idx === -1) continue;
 
         const discount = score.discounts[idx];
-        const inCount = discount.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
-        const scoreVal = (score.appliedDiscount || inCount) && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        const inCount = discount.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable >= localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+        let scoreVal = (score.appliedDiscount || inCount) && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         let disVal = score.value;
         let actVal = score.value;
         let actNum: number[] = [];
@@ -2812,10 +2815,11 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
             if (countNum.length === 0 && discount.state === FULL) continue;
         } else {
             score.discounts.splice(idx, 1);
-            if (discount.state === INACTIVE || discount.state === FULL) {
+            if (discount.state === INACTIVE || (discount.state === FULL && !inCount)) {
                 if (score.discounts.length === 0) deleteDiscount(score);
                 continue;
             }
+            if (!inCount) scoreVal = score.value;
         }
 
         for (let j = 0; j < score.discounts.length; j++) {
@@ -2838,7 +2842,7 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
                 } else {
                     let dcVal = calcStackDiscount(score.value, dc.operator, dc.value);
                     if (dc.useLowLimit) dcVal = Math.max(dcVal, dc.lowLimit);
-                    if (nonStackVal > dcVal) {
+                    if (nonStackVal > dcVal || nonStackNum === DISABLED) {
                         nonStackVal = dcVal;
                         nonStackNum = j;
                     }
@@ -2895,10 +2899,9 @@ export function deselectDiscount(localChoice: Choice | SelectableAddon, targetCh
                 delete score.appliedDiscount;
             }
         }
-        disVal = point.allowFloat ? disVal : Math.floor(disVal);
-        score.discountScore = disVal;
-
         if (targetChoice.isActive && scoreVal !== disVal) {
+            disVal = point.allowFloat ? disVal : Math.floor(disVal);
+            score.discountScore = disVal;
             score.tmpDisScore = scoreVal - disVal;
             score.isChangeDiscount = true;
         }
@@ -3471,6 +3474,7 @@ export function cleanActivated(isReset: boolean = true) {
         cRow.isEditModeOn = false;
         cRow.currentChoices = 0;
         cRow.index = idx;
+        isActivating = false;
         delete cRow.isSimpleEditMode;
         delete cRow.templateStack;
         delete cRow.widthStack;
@@ -3494,6 +3498,7 @@ export function cleanActivated(isReset: boolean = true) {
 
             cChoice.isActive = false;
             cChoice.multipleUseVariable = 0;
+            if (typeof cChoice.initMultipleTimesMinus !== 'undefined') cChoice.numMultipleTimesMinus = cChoice.initMultipleTimesMinus;
             delete cChoice.forcedActivated;
             delete cChoice.activatedFrom;
             delete cChoice.numDiscountChoices;
@@ -3880,14 +3885,22 @@ async function deselectForceActivate(localChoice: Choice | SelectableAddon, fCho
                     for (let i = 0; i < num; i++) {
                         if (!localChoice.isAllowDeselect) fChoice.numMultipleTimesMinus -= 1;
                         if (!localChoice.isNotDeactivate) {
-                            await selectedOneLess(fChoice, fRow, options);
+                            if (fChoice.isDeselectDelayed || fChoice.isFadeTransition) {
+                                selectedOneLess(fChoice, fRow, options);
+                            } else {
+                                await selectedOneLess(fChoice, fRow, options);
+                            }
                         }
                     }
                 } else if (num < 0) {
                     for (let i = 0; i > (num * -1); i++) {
                         if (!localChoice.isAllowDeselect) fChoice.numMultipleTimesPluss += 1;
                         if (!localChoice.isNotDeactivate) {
-                            await selectedOneMore(fChoice, fRow, options);
+                            if (fChoice.isDeselectDelayed || fChoice.isFadeTransition) {
+                                selectedOneMore(fChoice, fRow, options);
+                            } else {
+                                await selectedOneMore(fChoice, fRow, options);
+                            }
                         }
                     }
                 }
@@ -3898,15 +3911,27 @@ async function deselectForceActivate(localChoice: Choice | SelectableAddon, fCho
                 if (fChoice.activatedFrom <= 0 || options.linkedObjects.indexOf(localChoice.id) !== -1) {
                     delete fChoice.activatedFrom;
                     delete fChoice.forcedActivated;
-                    if (!localChoice.isNotDeactivate) deselectObject(fChoice, fRow, options);
+                    if (!localChoice.isNotDeactivate) {
+                        if (fChoice.isDeselectDelayed || fChoice.isFadeTransition) {
+                            deselectObject(fChoice, fRow, options);
+                        } else {
+                            await deselectObject(fChoice, fRow, options);
+                        }
+                    }
                 }
             } else {
                 delete fChoice.forcedActivated;
-                if (!localChoice.isNotDeactivate && fChoice.isActive) deselectObject(fChoice, fRow, options);
+                if (!localChoice.isNotDeactivate && fChoice.isActive) {
+                    if (fChoice.isDeselectDelayed || fChoice.isFadeTransition) {
+                        deselectObject(fChoice, fRow, options);
+                    } else {
+                        await deselectObject(fChoice, fRow, options);
+                    }
+                }
             }
         }
     } else {
-        deselectTempActivate(localChoice, fChoice, num);
+        await deselectTempActivate(localChoice, fChoice, num);
     }
 }
 
@@ -3988,7 +4013,7 @@ async function selectForceRandomActivate(localChoice: Choice | SelectableAddon, 
     }
 }
 
-function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
+async function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
     if (typeof dChoice.appliedDisChoices === 'undefined') return;
     
     const idx = dChoice.appliedDisChoices.indexOf(localChoice.id);
@@ -3996,6 +4021,7 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
 
     dChoice.appliedDisChoices.splice(idx, 1);
     const dList = new Set(dChoice.appliedDisChoices);
+    const nList = new Set();
     if (dChoice.isDisChoices) {
         if (typeof dChoice.discountRows !== 'undefined') {
             for (let i = 0; i < dChoice.discountRows.length; i++) {
@@ -4004,8 +4030,8 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                     for (let j = 0; j < tRow.objects.length; j++) {
                         const tChoice = tRow.objects[j];
                         if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
-                            emptyDiscount(dChoice, tChoice);
-                            dList.add(tChoice.id);
+                            await emptyDiscount(dChoice, tChoice);
+                            nList.add(tChoice.id);
                         }
                     }
                 }
@@ -4013,14 +4039,12 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
         }
         if (typeof dChoice.discountChoices !== 'undefined') {
             for (let i = 0; i < dChoice.discountChoices.length; i++) {
-                if (!dList.has(dChoice.discountChoices[i])) {
-                    const cMap = choiceMap.get(dChoice.discountChoices[i]);
-                    if (typeof cMap !== 'undefined') {
-                        const tChoice = cMap.choice;
+                const cMap = choiceMap.get(dChoice.discountChoices[i]);
+                if (typeof cMap !== 'undefined') {
+                    const tChoice = cMap.choice;
 
-                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
-                            emptyDiscount(dChoice, tChoice);
-                        }
+                    if (!nList.has(tChoice.id) && !dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                        await emptyDiscount(dChoice, tChoice);
                     }
                 }
             }
@@ -4036,7 +4060,7 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
                             const tChoice = cMap.choice;
 
                             if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
-                                emptyDiscount(dChoice, tChoice);
+                                await emptyDiscount(dChoice, tChoice);
                             }
                         }
                     }
@@ -4046,7 +4070,7 @@ function removeCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
     }
 }
 
-function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
+async function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
     if (!dChoice.discountCount) return;
 
     let count = dChoice.discountCount * (dChoice.isSelectableMultiple && dChoice.isMultipleUseVariable ? dChoice.multipleUseVariable : 1);
@@ -4065,6 +4089,7 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
     if (dChoice.appliedDisChoices.length < count) return;
 
     const dList = new Set(dChoice.appliedDisChoices);
+    const nList = new Set();
     if (dChoice.isDisChoices) {
         if (typeof dChoice.discountRows !== 'undefined') {
             for (let i = 0; i < dChoice.discountRows.length; i++) {
@@ -4073,8 +4098,8 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                     for (let j = 0; j < tRow.objects.length; j++) {
                         const tChoice = tRow.objects[j];
                         if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
-                            fillDiscount(dChoice, tChoice);
-                            dList.add(tChoice.id);
+                            await fillDiscount(dChoice, tChoice);
+                            nList.add(tChoice.id);
                         }
                     }
                 }
@@ -4082,14 +4107,12 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
         }
         if (typeof dChoice.discountChoices !== 'undefined') {
             for (let i = 0; i < dChoice.discountChoices.length; i++) {
-                if (!dList.has(dChoice.discountChoices[i])) {
-                    const cMap = choiceMap.get(dChoice.discountChoices[i]);
-                    if (typeof cMap !== 'undefined') {
-                        const tChoice = cMap.choice;
+                const cMap = choiceMap.get(dChoice.discountChoices[i]);
+                if (typeof cMap !== 'undefined') {
+                    const tChoice = cMap.choice;
 
-                        if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
-                            fillDiscount(dChoice, tChoice);
-                        }
+                    if (!nList.has(tChoice.id) && !dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
+                        await fillDiscount(dChoice, tChoice);
                     }
                 }
             }
@@ -4105,7 +4128,7 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
                             const tChoice = cMap.choice;
 
                             if (!dList.has(tChoice.id) || (tChoice.isSelectableMultiple && dChoice.countPerSelection)) {
-                                fillDiscount(dChoice, tChoice);
+                                await fillDiscount(dChoice, tChoice);
                             }
                         }
                     }
@@ -4115,7 +4138,7 @@ function addCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Selec
     }
 }
 
-function updateCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
+async function updateCount(localChoice: Choice | SelectableAddon, dChoice: Choice | SelectableAddon) {
     if (typeof dChoice.appliedDisChoices === 'undefined') return;
 
     let totalNum = 0;
@@ -4135,7 +4158,7 @@ function updateCount(localChoice: Choice | SelectableAddon, dChoice: Choice | Se
         }
     }
 
-    if (appliedNum === totalNum) removeCount(localChoice, dChoice);
+    if (appliedNum === totalNum) await removeCount(localChoice, dChoice);
 }
 
 async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localRow: Row, tmpScores: TempScore, count: number, changedScores = new Set<string>(), scoreUpdate: string[] = [], options: ChoiceOptions) {
@@ -4258,7 +4281,7 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
                                 if (typeof cMap !== 'undefined') {
                                     const dChoice = cMap.choice;
 
-                                    addSet.add(dChoice);
+                                    if (!deselectQue.has(dChoice.id)) addSet.add(dChoice);
                                 }
                             }
                         }
@@ -4498,18 +4521,26 @@ async function deselectUpdateScore(localChoice: Choice | SelectableAddon, localR
             }
         }
         if (removeSet.size > 0) {
-            removeSet.forEach((dChoice) => {
-                if (!addSet.has(dChoice)) updateCount(aChoice, dChoice);
-            });
+            const arr = Array.from(removeSet);
+
+            for (let i = 0; i < arr.length; i++) {
+                const dChoice = arr[i];
+
+                if (!addSet.has(dChoice)) await updateCount(aChoice, dChoice);
+            }
         }
         if (addSet.size > 0) {
-            addSet.forEach((dChoice) => {
-                addCount(aChoice, dChoice);
-            });
+            const arr = Array.from(addSet);
+
+            for (let i = 0; i < arr.length; i++) {
+                const dChoice = arr[i];
+
+                await addCount(aChoice, dChoice);
+            }
         }
         if (isChanged) {
             scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
-            deselectUpdateScore(aChoice, aRow, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
+            await deselectUpdateScore(aChoice, aRow, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
         }
     }
     if (count === 0) {
@@ -4891,18 +4922,26 @@ export async function selectUpdateScore(localChoice: Choice | SelectableAddon | 
             }
         }
         if (removeSet.size > 0) {
-            removeSet.forEach((dChoice) => {
-                if (!addSet.has(dChoice)) updateCount(aChoice, dChoice);
-            });
+            const arr = Array.from(removeSet);
+
+            for (let i = 0; i < arr.length; i++) {
+                const dChoice = arr[i];
+
+                if (!addSet.has(dChoice)) await updateCount(aChoice, dChoice);
+            }
         }
         if (addSet.size > 0) {
-            addSet.forEach((dChoice) => {
-                addCount(aChoice, dChoice);
-            });
+            const arr = Array.from(addSet);
+
+            for (let i = 0; i < arr.length; i++) {
+                const dChoice = arr[i];
+
+                await addCount(aChoice, dChoice);
+            }
         }
         if (isChanged) {
             scoreUpdate.length === 0 ? scoreUpdate.push(`Scores Updated On: ${aChoice.title}`) : scoreUpdate.push(`, ${aChoice.title}`);
-            selectUpdateScore(aChoice, aRow, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
+            await selectUpdateScore(aChoice, aRow, thisTmpScores, count + 1, changedScores, scoreUpdate, options);
         }
     }
     if (count === 0) {
@@ -4917,7 +4956,9 @@ export async function selectUpdateScore(localChoice: Choice | SelectableAddon | 
     }
 }
 
+let isActivating = false;
 export async function activateTempChoices(options: ChoiceOptions) {
+    if (isActivating) return;
     let isActivated = false;
     for (const [id, val] of tmpActivatedMap) {
         if (deselectQue.has(id)) continue;
@@ -4933,11 +4974,22 @@ export async function activateTempChoices(options: ChoiceOptions) {
             newOption.fromTemp = true;
 
             if (val.multiple === 0) {
-                await selectObject(aChoice, aRow, newOption);
+                if (aChoice.isSelectDelayed || aChoice.isFadeTransition) {
+                    selectObject(aChoice, aRow, newOption);
+                } else {
+                    await selectObject(aChoice, aRow, newOption);
+                }
+                if (aChoice.isActive) isActivated = true;
             } else {
-                await selectedOneMore(aChoice, aRow, newOption);
+                const num = aChoice.multipleUseVariable;
+                for (let i = 0; i < val.multiple; i++) {
+                    if (aChoice.isSelectDelayed || aChoice.isFadeTransition) {
+                        selectedOneMore(aChoice, aRow, newOption);
+                    }
+                    await selectedOneMore(aChoice, aRow, newOption);
+                }
+                if (aChoice.multipleUseVariable > num) isActivated = true;
             }
-            if (aChoice.isActive) isActivated = true;
         }
     }
 
@@ -5012,7 +5064,7 @@ function delayProc(ms: number) {
     return new Promise(res => setTimeout(res, ms));
 }
 
-function deselectDiscountOther(localChoice: Choice | SelectableAddon) {
+async function deselectDiscountOther(localChoice: Choice | SelectableAddon) {
     if (!localChoice.discountOther) return;
     if (typeof localChoice.discountOperator === 'undefined' || typeof localChoice.discountValue === 'undefined') return;
 
@@ -5024,7 +5076,7 @@ function deselectDiscountOther(localChoice: Choice | SelectableAddon) {
                 if (typeof dRow !== 'undefined') {
                     for (let j = 0; j < dRow.objects.length; j++) {
                         const dChoice = dRow.objects[j];
-                        deselectDiscount(localChoice, dChoice);
+                        await deselectDiscount(localChoice, dChoice);
                         dList.add(dChoice.id);
                     }
                 }
@@ -5035,7 +5087,7 @@ function deselectDiscountOther(localChoice: Choice | SelectableAddon) {
                 if (!dList.has(localChoice.discountChoices[i])) {
                     const cMap = choiceMap.get(localChoice.discountChoices[i]);
                     if (typeof cMap !== 'undefined') {
-                        deselectDiscount(localChoice, cMap.choice);
+                        await deselectDiscount(localChoice, cMap.choice);
                     }
                 }
             }
@@ -5048,7 +5100,7 @@ function deselectDiscountOther(localChoice: Choice | SelectableAddon) {
                     for (let j = 0; j < groupData.elements.length; j++) {
                         const cMap = choiceMap.get(groupData.elements[j]);
                         if (typeof cMap !== 'undefined') {
-                            deselectDiscount(localChoice, cMap.choice);
+                            await deselectDiscount(localChoice, cMap.choice);
                         }
                     }
                 }
@@ -5102,7 +5154,7 @@ function selectDiscountOther(localChoice: Choice | SelectableAddon) {
     }
 }
 
-function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
+async function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
     const countSet = new Set<Choice | SelectableAddon>();
     const key = options.isPos ? 'isActiveMul' : 'isActiveMulMinus';
     for (let i = 0; i < localChoice.scores.length; i++) {
@@ -5129,8 +5181,8 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
                             if (typeof cMap !== 'undefined') {
                                 const dChoice = cMap.choice;
 
-                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.appliedDisChoices !== 'undefined') {
-                                    const inCount = localChoice.isSelectableMultiple && dChoice.countPerSelection && dChoice.appliedDisChoices.filter(id => id === localChoice.id).length === options.selNum + 1;
+                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.appliedDisChoices !== 'undefined' && deselectQue.has(dChoice.id)) {
+                                    const inCount = localChoice.isSelectableMultiple && dChoice.countPerSelection && options.selNum + 1 >= dChoice.appliedDisChoices.filter(id => id === localChoice.id).length;
 
                                     if (inCount) {
                                         score.appliedDiscount = true;
@@ -5178,13 +5230,17 @@ function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores
     }
 
     if (countSet.size > 0) {
-        countSet.forEach((dChoice) => {
-            removeCount(localChoice, dChoice);
-        });
+        const arr = Array.from(countSet);
+
+        for (let i = 0; i < arr.length; i++) {
+            const dChoice = arr[i];
+
+            await removeCount(localChoice, dChoice);
+        }
     }
 }
 
-function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
+async function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: SvelteMap<string, number>, options: {isMultiple: boolean, isPos: boolean, selNum: number}) {
     const countSet = new Set<Choice | SelectableAddon>();
     const key = options.isPos ? 'isActiveMul' : 'isActiveMulMinus';
     for (let i = 0; i < localChoice.scores.length; i++) {
@@ -5246,16 +5302,22 @@ function selectCalculateScore(localChoice: Choice | SelectableAddon, tmpScores: 
             }
         }
     }
-    
+
     if (countSet.size > 0) {
-        countSet.forEach((dChoice) => {
-            addCount(localChoice, dChoice);
-        });
+        const arr = Array.from(countSet);
+
+        for (let i = 0; i < arr.length; i++) {
+            const dChoice = arr[i];
+
+            await addCount(localChoice, dChoice);
+        }
     }
 }
 
 async function deselectActivateOther(localChoice: Choice | SelectableAddon, options: ChoiceOptions) {
     if (!localChoice.activateOtherChoice || typeof localChoice.activateThisChoice === 'undefined') return;
+    const isAct = isActivating;
+    if (!isAct) isActivating = true;
     const selNum = Math.abs(localChoice.multipleUseVariable - 1);
     const forceAct = new Map<string, {choice: Choice | SelectableAddon, row: Row, num: number}>();
     if (localChoice.isActivateRandom) {
@@ -5326,18 +5388,25 @@ async function deselectActivateOther(localChoice: Choice | SelectableAddon, opti
     }
 
     for (const [_, val] of forceAct) {
-        deselectForceActivate(localChoice, val.choice, val.row, val.num, options);
+        if (val.choice.isDeselectDelayed || val.choice.isFadeTransition) {
+            deselectForceActivate(localChoice, val.choice, val.row, val.num, options);
+        } else {
+            await deselectForceActivate(localChoice, val.choice, val.row, val.num, options);
+        }
     }
+    if (!isAct) isActivating = false;
 }
 
 async function selectActivateOther(localChoice: Choice | SelectableAddon, options: ChoiceOptions) {
     if (!localChoice.activateOtherChoice || typeof localChoice.activateThisChoice === 'undefined') return;
+    const isAct = isActivating;
+    if (!isAct) isActivating = true;
     const newOptions = {...options};
     newOptions.isOverDlg = false;
     newOptions.isOverImg = false;
     newOptions.isForced = true;
     if (localChoice.isActivateRandom) {
-        selectForceRandomActivate(localChoice, newOptions);
+        await selectForceRandomActivate(localChoice, newOptions);
     } else {
         const list = localChoice.activateThisChoice.split(',');
         for (let i = 0; i < list.length; i++) {
@@ -5348,7 +5417,11 @@ async function selectActivateOther(localChoice: Choice | SelectableAddon, option
             if (typeof cMap !== 'undefined') {
                 const fRow = cMap.row;
                 const fChoice = cMap.choice;
-                selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                if (fChoice.isSelectDelayed || fChoice.isFadeTransition) {
+                    selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                } else {
+                    await selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                }
             } else {
                 const groupData = groupMap.get(item[0]);
                 if (typeof groupData !== 'undefined') {
@@ -5358,13 +5431,18 @@ async function selectActivateOther(localChoice: Choice | SelectableAddon, option
                         if (typeof cMap !== 'undefined') {
                             const fRow = cMap.row;
                             const fChoice = cMap.choice;
-                            selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                            if (fChoice.isSelectDelayed || fChoice.isFadeTransition) {
+                                selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                            } else {
+                                await selectForceActivate(localChoice, fChoice, fRow, forceNum, newOptions);
+                            }
                         }
                     }
                 }
             }
         }
     }
+    if (!isAct) isActivating = false;
 }
 
 async function selectDeactivateOther(localChoice : Choice | SelectableAddon, options: ChoiceOptions) {
@@ -6486,21 +6564,21 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
 
     const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
 
-    const deselectProcess = async() => {
+    const deselectProcess = async () => {
         playSfxOnDeselect(localChoice);
         const tmpScores = new SvelteMap<string, number>();
         
-        deselectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
+        await deselectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
 
-        deselectActivateOther(localChoice, options);
+        await deselectActivateOther(localChoice, options);
 
-        deselectDiscountOther(localChoice);
+        await deselectDiscountOther(localChoice);
 
         localChoice.isActive = false;
         if (countCheck) localRow.currentChoices -= 1;
         activatedMap.delete(localChoice.id);
 
-        deselectMissingReq(localChoice.id, options);
+        await deselectMissingReq(localChoice.id, options);
 
         deselectModifyPoint(localChoice);
 
@@ -6536,7 +6614,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         }
         
         delete localChoice.tempSlots;
-        deselectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
+        await deselectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
         activateTempChoices(options);
         delete localChoice.appliedDisChoices;
         if (localChoice.isAutoActive) tmpActivatedMap.set(localChoice.id, {multiple: 0});
@@ -6654,6 +6732,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
         options.linkedObjects.splice(0);
     }
     deselectQue.delete(localChoice.id);
+
 }
 
 export async function selectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
@@ -6755,7 +6834,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
     if (selectable) {
         const pointCheck = checkPoints(localChoice, true);
         if (pointCheck) {
-            const selectProcess = () => {
+            const selectProcess = async () => {
                 playSfxOnSelect(localChoice);
                 const tmpScores = new SvelteMap<string, number>();
 
@@ -6774,7 +6853,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
 
                 selectDiscountOther(localChoice);
 
-                selectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
+                await selectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
 
                 if (localChoice.duplicateRow) {
                     if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
@@ -6784,11 +6863,11 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
 
                 addAllowedChoice(localChoice, options, ADD);
 
-                selectActivateOther(localChoice, options);
+                await selectActivateOther(localChoice, options);
 
-                selectDeactivateOther(localChoice, options);
+                await selectDeactivateOther(localChoice, options);
 
-                deselectMissingReq(localChoice.id, options);
+                await deselectMissingReq(localChoice.id, options);
 
                 selectModifyPoint(localChoice);
 
@@ -6826,7 +6905,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
                     cleanActivated();
                 }
 
-                selectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
+                await selectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
                 activateTempChoices(options);
                 
                 if (!checkRequirements(localChoice.requireds) && localChoice.isActive) {
@@ -6907,8 +6986,9 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
 
             if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
                 tmpAct.activatedFrom += 1;
+                tmpAct.multiple += 1;
             } else {
-                tmpActivatedMap.set(localChoice.id, {multiple: 0, activatedFrom: 1});
+                tmpActivatedMap.set(localChoice.id, {multiple: 1, activatedFrom: 1});
             }
         }
     }
@@ -6997,7 +7077,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
     if (selectable) {
         const pointCheck = checkPoints(localChoice, true);
         if (pointCheck) {
-            const selectProcess = () => {
+            const selectProcess = async () => {
                 playSfxOnSelect(localChoice);
                 const tmpScores = new SvelteMap<string, number>();
                 const wasActive = localChoice.isActive;
@@ -7033,7 +7113,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
 
                 if (isPos) selectDiscountOther(localChoice);
 
-                selectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});
+                await selectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});
 
                 addAllowedChoice(localChoice, options, ADD);
 
@@ -7044,12 +7124,12 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                         }
                     }
 
-                    selectActivateOther(localChoice, options);
+                    await selectActivateOther(localChoice, options);
 
-                    selectDeactivateOther(localChoice, options);
+                    await selectDeactivateOther(localChoice, options);
                 }
 
-                deselectMissingReq(localChoice.id, options);
+                await deselectMissingReq(localChoice.id, options);
 
                 if (!wasActive) {
                     setVariables(localChoice, true);
@@ -7083,7 +7163,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                     }
                 }
 
-                selectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
+                await selectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
                 activateTempChoices(options);
 
                 if (!checkRequirements(localChoice.requireds) && localChoice.isActive) {
@@ -7217,18 +7297,18 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
         }
     }
 
-    const deselectProcess = async() => {
+    const deselectProcess = async () => {
         playSfxOnDeselect(localChoice);
         const tmpScores = new SvelteMap<string, number>();
         const isPos = localChoice.multipleUseVariable > 0;
         const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
-        deselectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});
+        await deselectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});
         
         if (isPos) {
-            deselectActivateOther(localChoice, options);
+            await deselectActivateOther(localChoice, options);
 
-            deselectDiscountOther(localChoice);
+            await deselectDiscountOther(localChoice);
         }
 
         localChoice.multipleUseVariable -= 1;
@@ -7245,7 +7325,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
             activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
         }
 
-        deselectMissingReq(localChoice.id, options);
+        await deselectMissingReq(localChoice.id, options);
 
         addAllowedChoice(localChoice, options, SUBTRACT);
 
@@ -7280,7 +7360,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
             }
         }
 
-        deselectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
+        await deselectUpdateScore(localChoice, localRow, tmpScores, 0, undefined, undefined, options);
         activateTempChoices(options);
 
         if (!localChoice.isActive && localChoice.parentId) {
@@ -7409,7 +7489,7 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
     deselectQue.delete(localChoice.id);
 }
 
-function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
+async function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpScores: TempScore, count: number, changedScores = new Set<string>()) {
     const activated = Array.from(activatedMap.keys());
 
     for (let i = 0; i < activated.length; i++) {
@@ -7430,12 +7510,12 @@ function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpS
 
             const point = pointTypeMap.get(aScore.id);
             if (typeof point === 'undefined') continue;
-            
+
             const isActive = aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable ? true : aScore.isActive;
-            
+
             if (aScore.appliedDiscount && aScore.isChangeDiscount && isActive && typeof aScore.tmpDisScore !== 'undefined') {
                 const mul = aChoice.multipleUseVariable;
-                
+
                 if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && typeof aChoice.numMultipleTimesMinus !== 'undefined') {
                     let isChangedMul = false;
                     let totalScore = 0;
@@ -7639,19 +7719,33 @@ function updateScores(localChoice: Choice | SelectableAddon, localRow: Row, tmpS
             }
         }
         if (removeSet.size > 0) {
-            removeSet.forEach((dChoice) => {
-                if (!addSet.has(dChoice)) updateCount(aChoice, dChoice);
-            });
+            const arr = Array.from(removeSet);
+
+            for (let i = 0; i < arr.length; i++) {
+                const dChoice = arr[i];
+
+                if (!addSet.has(dChoice)) await updateCount(aChoice, dChoice);
+            }
         }
         if (addSet.size > 0) {
-            addSet.forEach((dChoice) => {
-                addCount(aChoice, dChoice);
-            });
+            const arr = Array.from(addSet);
+
+            for (let i = 0; i < arr.length; i++) {
+                const dChoice = arr[i];
+
+                if (aChoice.isSelectableMultiple && aChoice.isMultipleUseVariable && dChoice.countPerSelection && typeof dChoice.discountCount !== 'undefined') {
+                    for (let j = 0; j < Math.min(aChoice.multipleUseVariable, dChoice.discountCount); j++) {
+                        await addCount(aChoice, dChoice);
+                    }
+                } else {
+                    await addCount(aChoice, dChoice);
+                }
+            }
         }
-        if (isChanged) updateScores(aChoice, aRow, thisTmpScores, ++count, changedScores);
+        if (isChanged) await updateScores(aChoice, aRow, thisTmpScores, ++count, changedScores);
     }
 }
-function selectObjectL(str: string, activatedIds: Set<string>) {
+async function selectObjectL(str: string, activatedIds: Set<string>) {
     let cStr = str.split('/IMG#');
     const strImg = cStr.length > 1 ? cStr[1].replace(/\/CHAR#/g, ',') : '';
     cStr = cStr[0].split('/WORD#');
@@ -7662,7 +7756,6 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
     const strRS = cStr.length > 1 ? cStr[1] : '';
     const strId = cStr[0];
     const cMap = choiceMap.get(strId);
-
     if (typeof cMap === 'undefined') return;
 
     const localRow = cMap.row;
@@ -7702,10 +7795,9 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
     localChoice.isActive = true;
     activatedMap.set(localChoice.id, {multiple: 0});
     if (countCheck) localRow.currentChoices += 1;
-
     selectDiscountOther(localChoice);
 
-    selectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
+    await selectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
 
     if (localChoice.duplicateRow) {
         if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
@@ -7766,11 +7858,8 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
                             }
                             rChoice.forcedActivated = true;
                         }
-
-                        if (!rChoice.isSelectableMultiple) {
-                            if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
-                            rChoice.activatedFrom += 1;
-                        }
+                        if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
+                        rChoice.activatedFrom += 1;
                     }
                 }
             } else {
@@ -7798,11 +7887,8 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
                             }
                             rChoice.forcedActivated = true;
                         }
-
-                        if (!rChoice.isSelectableMultiple) {
-                            if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
-                            rChoice.activatedFrom += 1;
-                        }
+                        if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
+                        rChoice.activatedFrom += 1;
                     }
                 }
             }
@@ -7816,7 +7902,6 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
                 const cMap = choiceMap.get(item[0]);
                 if (typeof cMap !== 'undefined') {
                     const fChoice = cMap.choice;
-                    
                     if (!localChoice.isAllowDeselect) {
                         if (fChoice.isSelectableMultiple && fChoice.isMultipleUseVariable) {
                             if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
@@ -7841,11 +7926,8 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
                         }
                         fChoice.forcedActivated = true;
                     }
-
-                    if (!fChoice.isSelectableMultiple) {
-                        if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
-                        fChoice.activatedFrom += 1;
-                    }
+                    if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                    fChoice.activatedFrom += 1;
                 } else {
                     const groupData = groupMap.get(item[0]);
                     if (typeof groupData !== 'undefined') {
@@ -7879,11 +7961,8 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
                                     }
                                     fChoice.forcedActivated = true;
                                 }
-                                
-                                if (!fChoice.isSelectableMultiple) {
-                                    if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
-                                    fChoice.activatedFrom += 1;
-                                }
+                                if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                                fChoice.activatedFrom += 1;
                             }
                         }
                     }
@@ -7895,8 +7974,13 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
                 const cMap = choiceMap.get(item[0]);
                 if (typeof cMap !== 'undefined') {
                     const fChoice = cMap.choice;
+                    const tmpAct = tmpActivatedMap.get(fChoice.id);
 
-                    tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: fChoice.activatedFrom});
+                    if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
+                        tmpAct.activatedFrom += 1;
+                    } else {
+                        tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: 1});
+                    }
                 }
             }
         }
@@ -7948,9 +8032,9 @@ function selectObjectL(str: string, activatedIds: Set<string>) {
         tmpActivatedMap.delete(localChoice.id);
     }
 
-    updateScores(localChoice, localRow, tmpScores, 0);
+    await updateScores(localChoice, localRow, tmpScores, 0);
 }
-function selectedOneMoreL(str: string, activatedIds: Set<string>) {
+async function selectedOneMoreL(str: string, activatedIds: Set<string>) {
     let cStr = str.split('/IMG#');
     const strImg = cStr.length > 1 ? cStr[1].replace(/\/CHAR#/g, ',') : '';
     cStr = cStr[0].split('/WORD#');
@@ -7961,189 +8045,173 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
     const strRS = cStr.length > 1 ? cStr[1] : '';
     const strId = cStr[0].split('/ON#');
     const cMap = choiceMap.get(strId[0]);
+    if (typeof cMap === 'undefined') return;
 
-    if (typeof cMap !== 'undefined') {
-        const localChoice = cMap.choice;
-        const localRow = cMap.row;
-        const strRSMap = new Map<number, number>();
-        const isChoice = typeof localChoice.parentId === 'undefined';
-        const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
+    const localChoice = cMap.choice;
+    const localRow = cMap.row;
+    const strRSMap = new Map<number, number>();
+    const isChoice = typeof localChoice.parentId === 'undefined';
+    const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
 
-        if (strRS) {
-            const rStr = strRS.split('/AND#');
-            for (let i = 0; i < rStr.length; i++) {
-                const sStr = rStr[i].split(':');
-                const index = Number(sStr[0]);
-                const value = Number(sStr[1]);
+    if (strRS) {
+        const rStr = strRS.split('/AND#');
+        for (let i = 0; i < rStr.length; i++) {
+            const sStr = rStr[i].split(':');
+            const index = Number(sStr[0]);
+            const value = Number(sStr[1]);
 
-                if (!Number.isNaN(index)) {
-                    strRSMap.set(index, Number.isNaN(value) ? 0 : value);
-                }
+            if (!Number.isNaN(index)) {
+                strRSMap.set(index, Number.isNaN(value) ? 0 : value);
             }
         }
+    }
 
-        for (let i = 0; i < localChoice.scores.length; i++) {
-            const score = localChoice.scores[i];
-            const point = pointTypeMap.get(score.id);
-            if (typeof point !== 'undefined' && !score.setValue){
-                if (strRSMap.size > 0 && strRSMap.has(i)) {
-                    score.value = strRSMap.get(i)!;
-                    score.setValue = true;
-                } else {
-                    setScoreValue(point, score, true, localChoice.multipleUseVariable);
-                }
+    for (let i = 0; i < localChoice.scores.length; i++) {
+        const score = localChoice.scores[i];
+        const point = pointTypeMap.get(score.id);
+        if (typeof point !== 'undefined' && !score.setValue){
+            if (strRSMap.size > 0 && strRSMap.has(i)) {
+                score.value = strRSMap.get(i)!;
+                score.setValue = true;
+            } else {
+                setScoreValue(point, score, true, localChoice.multipleUseVariable);
             }
         }
+    }
 
-        const tmpScores = new SvelteMap<string, number>();
-        const wasActive = localChoice.isActive;
-        const isPos = localChoice.multipleUseVariable >= 0;
-        const selNum = Math.abs(localChoice.multipleUseVariable);
+    const tmpScores = new SvelteMap<string, number>();
+    const wasActive = localChoice.isActive;
+    const isPos = localChoice.multipleUseVariable >= 0;
+    const selNum = Math.abs(localChoice.multipleUseVariable);
 
-        if (!localChoice.isActive) {
-            localChoice.isActive = true;
-            if (countCheck) localRow.currentChoices += 1;
-        }
-        localChoice.multipleUseVariable++;
-        activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
+    if (!localChoice.isActive) {
+        localChoice.isActive = true;
+        if (countCheck) localRow.currentChoices += 1;
+    }
+    localChoice.multipleUseVariable++;
+    activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
+    if (isPos) {
+        selectDiscountOther(localChoice);
+    }
 
-        if (isPos) {
-            selectDiscountOther(localChoice);
-        }
+    await selectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});
 
-        selectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});
-
-        if (isPos) {
-            if (localChoice.duplicateRow) {
-                if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
-                    duplicateRow(localChoice, localRow);
-                }
+    if (isPos) {
+        if (localChoice.duplicateRow) {
+            if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
+                duplicateRow(localChoice, localRow);
             }
-            
-            if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
-                if (localChoice.isActivateRandom && typeof localChoice.numActivateRandom !== 'undefined') {
-                    if (typeof localChoice.activatedRandomMul === 'undefined') localChoice.activatedRandomMul = [];
-                    if (strRnd === '') {
-                        if (localChoice.multipleUseVariable === 1) {
-                            let rList = localChoice.activateThisChoice.split(',').filter(item => activatedIds.has(item.split('/ON#')[0]));
-                            let tmpSet = new Set<string>();
-
-                            for (let i = 0; i < rList.length; i++) {
-                                const cMap = choiceMap.get(rList[i]);
+        }
         
-                                if (typeof cMap !== 'undefined') {
-                                    const rChoice = cMap.choice;
-        
-                                    if (!checkRequirements(rChoice.requireds)) {
-                                        const tmp = rList[i];
-        
-                                        rList.splice(i, 1);
-                                        rList.push(tmp);
-                                    }
-                                }
-                            }
-        
-                            for (let i = rList.length - 1; i >= 0; i--) {
-                                tmpSet.add(rList[i]);
-                            }
-        
-                            rList = [...tmpSet].reverse();
-                            let tmpNum = 0;
-                            let nList = [];
-        
-                            for (let i = 0; i < localChoice.numActivateRandom; i++) {
-                                nList[i] = rList.length / (localChoice.numActivateRandom * (i + 1)) < 1 ? rList.length % (localChoice.numActivateRandom * (i + 1)) : localChoice.numActivateRandom;
-                                localChoice.activatedRandomMul.push(rList.slice(tmpNum, nList[i] + tmpNum));
+        if (localChoice.activateOtherChoice && typeof localChoice.activateThisChoice !== 'undefined') {
+            if (localChoice.isActivateRandom && typeof localChoice.numActivateRandom !== 'undefined') {
+                if (typeof localChoice.activatedRandomMul === 'undefined') localChoice.activatedRandomMul = [];
+                if (strRnd === '') {
+                    if (localChoice.multipleUseVariable === 1) {
+                        let rList = localChoice.activateThisChoice.split(',').filter(item => activatedIds.has(item.split('/ON#')[0]));
+                        let tmpSet = new Set<string>();
 
-                                for (let j = 0; j < nList[i] - tmpNum; j++) {
-                                    const rStr = localChoice.activatedRandomMul[i][j].split('/ON#');
-                                    const tNum = rStr.length > 1 ? parseInt(rStr[1]) : 0;
-                                    const cMap = choiceMap.get(rStr[0]);
-
-                                    if (typeof cMap !== 'undefined') {
-                                        const rChoice = cMap.choice;
-
-                                        if (!localChoice.isAllowDeselect) {
-                                            if (rChoice.isSelectableMultiple && rChoice.isMultipleUseVariable) {
-                                                for (let k = 0; k < Math.abs(tNum); k++) {
-                                                    if (tNum > 0 && typeof rChoice.numMultipleTimesMinus !== 'undefined') {
-                                                        rChoice.numMultipleTimesMinus++;
-                                                    } else if (tNum < 0 && typeof rChoice.numMultipleTimesPluss !== 'undefined') {
-                                                        rChoice.numMultipleTimesPluss--;
-                                                    }
-                                                }
-                                            }
-                                            rChoice.forcedActivated = true;
-                                        }
-
-                                        if (!rChoice.isSelectableMultiple) {
-                                            if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
-                                            rChoice.activatedFrom += 1;
-                                        }
-                                    }
-                                }
-                                tmpNum += nList[i];
-                            }
-                        }
-                    } else {
-                        const tmpNum = (localChoice.multipleUseVariable - 1) * localChoice.numActivateRandom;
-                        const tmpList = strRnd.splice(tmpNum, tmpNum + localChoice.numActivateRandom);
-
-                        localChoice.activatedRandomMul.push(tmpList);
-
-                        for (let i = 0; i < localChoice.activatedRandomMul[localChoice.multipleUseVariable - 1].length; i++) {
-                            const rStr = localChoice.activatedRandomMul[localChoice.multipleUseVariable - 1][i].split('/RON#');
-                            const tNum = rStr.length > 1 ? parseInt(rStr[1]) : 0;
-                            const cMap = choiceMap.get(rStr[0]);
-                            
+                        for (let i = 0; i < rList.length; i++) {
+                            const cMap = choiceMap.get(rList[i]);
+    
                             if (typeof cMap !== 'undefined') {
                                 const rChoice = cMap.choice;
+    
+                                if (!checkRequirements(rChoice.requireds)) {
+                                    const tmp = rList[i];
+    
+                                    rList.splice(i, 1);
+                                    rList.push(tmp);
+                                }
+                            }
+                        }
+    
+                        for (let i = rList.length - 1; i >= 0; i--) {
+                            tmpSet.add(rList[i]);
+                        }
+    
+                        rList = [...tmpSet].reverse();
+                        let tmpNum = 0;
+                        const nList = [];
+    
+                        for (let i = 0; i < localChoice.numActivateRandom; i++) {
+                            nList[i] = rList.length / (localChoice.numActivateRandom * (i + 1)) < 1 ? rList.length % (localChoice.numActivateRandom * (i + 1)) : localChoice.numActivateRandom;
+                            localChoice.activatedRandomMul.push(rList.slice(tmpNum, nList[i] + tmpNum));
 
-                                if (!localChoice.isAllowDeselect && activatedIds.has(rChoice.id)) {
-                                    if (rChoice.isSelectableMultiple && rChoice.isMultipleUseVariable) {
-                                        for (let j = 0; j < Math.abs(tNum); j++) {
-                                            if (tNum > 0 && typeof rChoice.numMultipleTimesMinus !== 'undefined') {
-                                                rChoice.numMultipleTimesMinus++;
-                                            } else if (tNum < 0 && typeof rChoice.numMultipleTimesPluss !== 'undefined') {
-                                                rChoice.numMultipleTimesPluss--;
+                            for (let j = 0; j < nList[i] - tmpNum; j++) {
+                                const rStr = localChoice.activatedRandomMul[i][j].split('/ON#');
+                                const tNum = rStr.length > 1 ? parseInt(rStr[1]) : 0;
+                                const cMap = choiceMap.get(rStr[0]);
+
+                                if (typeof cMap !== 'undefined') {
+                                    const rChoice = cMap.choice;
+
+                                    if (!localChoice.isAllowDeselect) {
+                                        if (rChoice.isSelectableMultiple && rChoice.isMultipleUseVariable) {
+                                            for (let k = 0; k < Math.abs(tNum); k++) {
+                                                if (tNum > 0 && typeof rChoice.numMultipleTimesMinus !== 'undefined') {
+                                                    rChoice.numMultipleTimesMinus++;
+                                                } else if (tNum < 0 && typeof rChoice.numMultipleTimesPluss !== 'undefined') {
+                                                    rChoice.numMultipleTimesPluss--;
+                                                }
                                             }
                                         }
+                                        rChoice.forcedActivated = true;
                                     }
-                                    rChoice.forcedActivated = true;
-                                }
-
-                                if (!rChoice.isSelectableMultiple) {
                                     if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
                                     rChoice.activatedFrom += 1;
                                 }
                             }
+                            tmpNum += nList[i];
                         }
                     }
                 } else {
-                    const list = localChoice.activateThisChoice.split(',');
-                    const aList = list.filter(item => activatedIds.has(item.split('/ON#')[0]));
-                    const nList = list.filter(item => !activatedIds.has(item.split('/ON#')[0]));
-                    for (let i = 0; i < aList.length; i++) {
-                        const item = aList[i].split('/ON#');
-                        const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
-                        const cMap = choiceMap.get(item[0]);
+                    const tmpNum = (localChoice.multipleUseVariable - 1) * localChoice.numActivateRandom;
+                    const tmpList = strRnd.splice(tmpNum, tmpNum + localChoice.numActivateRandom);
+
+                    localChoice.activatedRandomMul.push(tmpList);
+
+                    for (let i = 0; i < localChoice.activatedRandomMul[localChoice.multipleUseVariable - 1].length; i++) {
+                        const rStr = localChoice.activatedRandomMul[localChoice.multipleUseVariable - 1][i].split('/RON#');
+                        const tNum = rStr.length > 1 ? parseInt(rStr[1]) : 0;
+                        const cMap = choiceMap.get(rStr[0]);
+                        
                         if (typeof cMap !== 'undefined') {
-                            const fChoice = cMap.choice;
-                            
-                            if (!localChoice.isAllowDeselect) {
-                                if (fChoice.isSelectableMultiple && fChoice.isMultipleUseVariable) {
-                                    if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
-                                        for (let j = 0; j < Math.abs(localChoice.multipleUseVariable); j++) {
-                                            for (let k = 0; k < Math.abs(forceNum); k++) {
-                                                if (forceNum > 0 && typeof fChoice.numMultipleTimesMinus !== 'undefined') {
-                                                    fChoice.numMultipleTimesMinus++;
-                                                } else if (forceNum < 0 && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
-                                                    fChoice.numMultipleTimesPluss--;
-                                                }
-                                            }
+                            const rChoice = cMap.choice;
+
+                            if (!localChoice.isAllowDeselect && activatedIds.has(rChoice.id)) {
+                                if (rChoice.isSelectableMultiple && rChoice.isMultipleUseVariable) {
+                                    for (let j = 0; j < Math.abs(tNum); j++) {
+                                        if (tNum > 0 && typeof rChoice.numMultipleTimesMinus !== 'undefined') {
+                                            rChoice.numMultipleTimesMinus++;
+                                        } else if (tNum < 0 && typeof rChoice.numMultipleTimesPluss !== 'undefined') {
+                                            rChoice.numMultipleTimesPluss--;
                                         }
-                                    } else {
-                                        for (let j = 0; j < Math.abs(forceNum); j++) {
+                                    }
+                                }
+                                rChoice.forcedActivated = true;
+                            }
+                            if (typeof rChoice.activatedFrom === 'undefined') rChoice.activatedFrom = 0;
+                            rChoice.activatedFrom += 1;
+                        }
+                    }
+                }
+            } else {
+                const list = localChoice.activateThisChoice.split(',');
+                const aList = list.filter(item => activatedIds.has(item.split('/ON#')[0]));
+                const nList = list.filter(item => !activatedIds.has(item.split('/ON#')[0]));
+                for (let i = 0; i < aList.length; i++) {
+                    const item = aList[i].split('/ON#');
+                    const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                    const cMap = choiceMap.get(item[0]);
+                    if (typeof cMap !== 'undefined') {
+                        const fChoice = cMap.choice;
+                        
+                        if (!localChoice.isAllowDeselect) {
+                            if (fChoice.isSelectableMultiple && fChoice.isMultipleUseVariable) {
+                                if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
+                                    for (let j = 0; j < Math.abs(localChoice.multipleUseVariable); j++) {
+                                        for (let k = 0; k < Math.abs(forceNum); k++) {
                                             if (forceNum > 0 && typeof fChoice.numMultipleTimesMinus !== 'undefined') {
                                                 fChoice.numMultipleTimesMinus++;
                                             } else if (forceNum < 0 && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
@@ -8151,37 +8219,34 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
                                             }
                                         }
                                     }
+                                } else {
+                                    for (let j = 0; j < Math.abs(forceNum); j++) {
+                                        if (forceNum > 0 && typeof fChoice.numMultipleTimesMinus !== 'undefined') {
+                                            fChoice.numMultipleTimesMinus++;
+                                        } else if (forceNum < 0 && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
+                                            fChoice.numMultipleTimesPluss--;
+                                        }
+                                    }
                                 }
-                                fChoice.forcedActivated = true;
                             }
-
-                            if (!fChoice.isSelectableMultiple) {
-                                if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
-                                fChoice.activatedFrom += 1;
-                            }
-                        } else {
-                            const groupData = groupMap.get(item[0]);
-                            if (typeof groupData !== 'undefined') {
-                                const groupEle = groupData.elements;
-                                for (let j = 0; j < groupEle.length; j++) {
-                                    const cMap = choiceMap.get(groupEle[j]);
-                                    if (typeof cMap !== 'undefined') {
-                                        const fChoice = cMap.choice;
-                                        
-                                        if (!localChoice.isAllowDeselect) {
-                                            if (fChoice.isSelectableMultiple && fChoice.isMultipleUseVariable) {
-                                                if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
-                                                    for (let k = 0; k < Math.abs(localChoice.multipleUseVariable); k++) {
-                                                        for (let l = 0; l < Math.abs(forceNum); l++) {
-                                                            if (forceNum > 0 && typeof fChoice.numMultipleTimesMinus !== 'undefined') {
-                                                                fChoice.numMultipleTimesMinus++;
-                                                            } else if (forceNum < 0 && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
-                                                                fChoice.numMultipleTimesPluss--;
-                                                            }
-                                                        }
-                                                    }
-                                                } else {
-                                                    for (let k = 0; k < Math.abs(forceNum); k++) {
+                            fChoice.forcedActivated = true;
+                        }
+                        if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                        fChoice.activatedFrom += 1;
+                    } else {
+                        const groupData = groupMap.get(item[0]);
+                        if (typeof groupData !== 'undefined') {
+                            const groupEle = groupData.elements;
+                            for (let j = 0; j < groupEle.length; j++) {
+                                const cMap = choiceMap.get(groupEle[j]);
+                                if (typeof cMap !== 'undefined') {
+                                    const fChoice = cMap.choice;
+                                    
+                                    if (!localChoice.isAllowDeselect) {
+                                        if (fChoice.isSelectableMultiple && fChoice.isMultipleUseVariable) {
+                                            if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
+                                                for (let k = 0; k < Math.abs(localChoice.multipleUseVariable); k++) {
+                                                    for (let l = 0; l < Math.abs(forceNum); l++) {
                                                         if (forceNum > 0 && typeof fChoice.numMultipleTimesMinus !== 'undefined') {
                                                             fChoice.numMultipleTimesMinus++;
                                                         } else if (forceNum < 0 && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
@@ -8189,88 +8254,97 @@ function selectedOneMoreL(str: string, activatedIds: Set<string>) {
                                                         }
                                                     }
                                                 }
+                                            } else {
+                                                for (let k = 0; k < Math.abs(forceNum); k++) {
+                                                    if (forceNum > 0 && typeof fChoice.numMultipleTimesMinus !== 'undefined') {
+                                                        fChoice.numMultipleTimesMinus++;
+                                                    } else if (forceNum < 0 && typeof fChoice.numMultipleTimesPluss !== 'undefined') {
+                                                        fChoice.numMultipleTimesPluss--;
+                                                    }
+                                                }
                                             }
-                                            fChoice.forcedActivated = true;
                                         }
-
-                                        if (!fChoice.isSelectableMultiple) {
-                                            if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
-                                            fChoice.activatedFrom += 1;
-                                        }
+                                        fChoice.forcedActivated = true;
                                     }
+                                    if (typeof fChoice.activatedFrom === 'undefined') fChoice.activatedFrom = 0;
+                                    fChoice.activatedFrom += 1;
                                 }
                             }
                         }
                     }
-                    for (let i = 0; i < nList.length; i++) {
-                        const item = nList[i].split('/ON#');
-                        const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
-                        const cMap = choiceMap.get(item[0]);
-                        if (typeof cMap !== 'undefined') {
-                            const fChoice = cMap.choice;
+                }
+                for (let i = 0; i < nList.length; i++) {
+                    const item = nList[i].split('/ON#');
+                    const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                    const cMap = choiceMap.get(item[0]);
+                    if (typeof cMap !== 'undefined') {
+                        const fChoice = cMap.choice;
+                        const tmpAct = tmpActivatedMap.get(fChoice.id);
 
-                            tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: fChoice.activatedFrom});
+                        if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
+                            tmpAct.activatedFrom += 1;
+                        } else {
+                            tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: 1});
                         }
                     }
                 }
             }
         }
-
-        if (localChoice.addToAllowChoice && typeof localChoice.idOfAllowChoice !== 'undefined' && typeof localChoice.numbAddToAllowChoice !== 'undefined') {
-            for (let i = 0; i < localChoice.idOfAllowChoice.length; i++) {
-                const aRow = rowMap.get(localChoice.idOfAllowChoice[i]);
-                if (typeof aRow !== 'undefined') {
-                    aRow.allowedChoices += localChoice.numbAddToAllowChoice;
-                }
-            }
-        }
-
-        if (!wasActive) {
-            setVariables(localChoice, true);
-
-            selectEffectProc(localChoice, true);
-
-            selectHideContent(localChoice);
-
-            if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
-                const word = wordMap.get(localChoice.idOfTheTextfieldWord);
-                if (typeof word !== 'undefined') {
-                    if (localChoice.customTextfieldIsOn) {
-                        word.replaceText = strWord;
-                        localChoice.wordChangeSelect = strWord;
-                    } else {
-                        word.replaceText = localChoice.wordChangeSelect || '';
-                    }
-                }
-            }
-
-            if (localChoice.isImageUpload) {
-                localChoice.defaultImage = localChoice.image;
-                localChoice.image = strImg;
-            }
-
-            if (localChoice.backpackBtnRequirement) {
-                app.btnBackpackIsOn += 1;
-            }
-
-            if (localChoice.showAllAddons) {
-                app.showAllAddons += 1;
-            }
-        }
-
-        const tmpAct = tmpActivatedMap.get(localChoice.id) 
-        if (typeof tmpAct !== 'undefined') {
-            tmpAct.multiple -= 1;
-            if (tmpAct.multiple === 0) {
-                tmpActivatedMap.delete(localChoice.id);
-            }
-        }
-
-        updateScores(localChoice, localRow, tmpScores, 0);
     }
+
+    if (localChoice.addToAllowChoice && typeof localChoice.idOfAllowChoice !== 'undefined' && typeof localChoice.numbAddToAllowChoice !== 'undefined') {
+        for (let i = 0; i < localChoice.idOfAllowChoice.length; i++) {
+            const aRow = rowMap.get(localChoice.idOfAllowChoice[i]);
+            if (typeof aRow !== 'undefined') {
+                aRow.allowedChoices += localChoice.numbAddToAllowChoice;
+            }
+        }
+    }
+
+    if (!wasActive) {
+        setVariables(localChoice, true);
+
+        selectEffectProc(localChoice, true);
+
+        selectHideContent(localChoice);
+
+        if (localChoice.textfieldIsOn && typeof localChoice.idOfTheTextfieldWord !== 'undefined') {
+            const word = wordMap.get(localChoice.idOfTheTextfieldWord);
+            if (typeof word !== 'undefined') {
+                if (localChoice.customTextfieldIsOn) {
+                    word.replaceText = strWord;
+                    localChoice.wordChangeSelect = strWord;
+                } else {
+                    word.replaceText = localChoice.wordChangeSelect || '';
+                }
+            }
+        }
+
+        if (localChoice.isImageUpload) {
+            localChoice.defaultImage = localChoice.image;
+            localChoice.image = strImg;
+        }
+
+        if (localChoice.backpackBtnRequirement) {
+            app.btnBackpackIsOn += 1;
+        }
+
+        if (localChoice.showAllAddons) {
+            app.showAllAddons += 1;
+        }
+    }
+
+    const tmpAct = tmpActivatedMap.get(localChoice.id) 
+    if (typeof tmpAct !== 'undefined') {
+        tmpAct.multiple -= 1;
+        if (tmpAct.multiple === 0) {
+            tmpActivatedMap.delete(localChoice.id);
+        }
+    }
+
+    await updateScores(localChoice, localRow, tmpScores, 0);
 }
-function selectedOneLessL(localChoice: Choice | SelectableAddon, localRow: Row) {
-    
+async function selectedOneLessL(localChoice: Choice | SelectableAddon, localRow: Row) {
     const tmpScores = new SvelteMap<string, number>();
     const selNum = Math.abs(localChoice.multipleUseVariable - 1);
 
@@ -8320,9 +8394,9 @@ function selectedOneLessL(localChoice: Choice | SelectableAddon, localRow: Row) 
         }
     }
 
-    updateScores(localChoice, localRow, tmpScores, 0);
+    await updateScores(localChoice, localRow, tmpScores, 0);
 }
-function activateProc(str: string) {
+async function activateProc(str: string) {
     const strList = str.split(',');
     const actList = new Set(strList.map(item => item.split('/ON#')[0]));
 
@@ -8352,13 +8426,13 @@ function activateProc(str: string) {
                     tmpNum = tmpNum - aChoice.multipleUseVariable;
                     for (let j = 0; j < Math.abs(tmpNum); j++) {
                         if (tmpNum > 0) { 
-                            selectedOneMoreL(strList[i], actList);
+                            await selectedOneMoreL(strList[i], actList);
                         } else {
-                            selectedOneLessL(aChoice, cMap.row);
+                            await selectedOneLessL(aChoice, cMap.row);
                         }
                     }
                 } else {
-                    if (!aChoice.isActive) selectObjectL(strList[i], actList);
+                    if (!aChoice.isActive) await selectObjectL(strList[i], actList);
                 }
             } else {
                 const variable = variableMap.get(baseId[0]);
@@ -8370,8 +8444,8 @@ function activateProc(str: string) {
             }
         }
     }
-    activateTempChoices({linkedObjects: []});
-    deselectMissingReq('', {linkedObjects: []});
+    await activateTempChoices({linkedObjects: []});
+    await deselectMissingReq('', {linkedObjects: []});
 }
 export function loadActivated(str: string) {
     cleanActivated(false);
@@ -8823,19 +8897,19 @@ const StylingSchema = z.preprocess((val) => {
     return val;
 }, filterStylingSchema.merge(textStylingSchema).merge(objectImageStylingSchema).merge(rowImageStylingSchema).merge(addonImageStylingSchema).merge(objectStylingSchema).merge(rowStylingSchema).merge(addonStylingSchema).merge(multiChoiceStylingSchema).merge(pointBarStylingSchema).merge(backpackStylingSchema).passthrough());
 const RequiredSchema = z.object({
-    required: z.boolean(),
-    requireds: z.array(z.any()),
-    orRequired: z.array(z.any()),
-    id: z.string(),
-    type: z.string(),
-    reqId: z.string(),
-    reqId1: z.string(),
-    reqId2: z.string(),
-    reqId3: z.string(),
-    reqPoints: z.coerce.number(),
-    showRequired: z.boolean(),
-    afterText: z.string(),
-    beforeText: z.string(),
+    required: z.boolean().optional(),
+    requireds: z.array(z.any()).optional(),
+    orRequired: z.array(z.any()).optional(),
+    id: z.string().optional(),
+    type: z.string().optional(),
+    reqId: z.string().optional(),
+    reqId1: z.string().optional(),
+    reqId2: z.string().optional(),
+    reqId3: z.string().optional(),
+    reqPoints: z.coerce.number().optional(),
+    showRequired: z.boolean().optional(),
+    afterText: z.string().optional(),
+    beforeText: z.string().optional(),
 }).passthrough();
 const AddonSchema = z.object({
     template: z.coerce.number().optional(),
