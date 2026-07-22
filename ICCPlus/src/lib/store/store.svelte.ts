@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.27';
+export const appVersion = '2.9.28';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2875,7 +2875,7 @@ async function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice
             if (dc.state !== FULL || dc.id === localChoice.id) {
                 const inCount = dc.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable >= localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
 
-                if (inCount && typeof score.discountScore !== 'undefined') {
+                if ((inCount || dc.state === ACTIVE) && typeof score.discountScore !== 'undefined') {
                     scoreVal = score.discountScore;
                 }
 
@@ -3095,8 +3095,9 @@ export async function deselectDiscount(localChoice: Choice | SelectableAddon, ta
         if (idx === -1) continue;
 
         const discount = score.discounts[idx];
-        const inCount = discount.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable >= localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
-        let scoreVal = (score.appliedDiscount || inCount) && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        const checkMul = targetChoice.isSelectableMultiple && localChoice.useDiscountCount && localChoice.countPerSelection
+        const inCount = discount.state === FULL && checkMul && typeof localChoice.appliedDisChoices !== 'undefined' && targetChoice.multipleUseVariable >= localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+        let scoreVal = (score.appliedDiscount || discount.state === ACTIVE || inCount) && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         let disVal = score.value;
         let actVal = score.value;
         let actNum: number[] = [];
@@ -3132,7 +3133,7 @@ export async function deselectDiscount(localChoice: Choice | SelectableAddon, ta
                 if (score.discounts.length === 0) deleteDiscount(score);
                 continue;
             }
-            if (!inCount) scoreVal = score.value;
+            if (checkMul && discount.state === FULL && !inCount) scoreVal = score.value;
         }
 
         for (let j = 0; j < score.discounts.length; j++) {
@@ -3259,7 +3260,7 @@ export function selectDiscount(localChoice: Choice | SelectableAddon, targetChoi
             hideIcon: !!localChoice.hideScoreIcon,
             hideValue: !!localChoice.hideScoreValue,
         }
-        const scoreVal = score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
+        let scoreVal = score.appliedDiscount && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         const idx = score.discounts.findIndex(item => item.id === localChoice.id);
         let disVal = calcStackDiscount(score.value, discount.operator, discount.value);
         if (discount.useLowLimit) disVal = Math.max(disVal, discount.lowLimit);
@@ -5277,32 +5278,32 @@ export async function activateTempChoices(options: ChoiceOptions) {
         if (deselectQue.has(id)) continue;
 
         const cMap = choiceMap.get(id);
-        if (typeof cMap !== 'undefined') {
-            const aRow = cMap.row;
-            const aChoice = cMap.choice;
-            const newOption = {...options};
+        if (typeof cMap === 'undefined') continue;
 
-            newOption.isForced = true;
-            newOption.isAllowDeselect = val.isAllowDeselect;
-            newOption.fromTemp = true;
+        const aRow = cMap.row;
+        const aChoice = cMap.choice;
+        const newOption = {...options};
 
-            if (val.multiple === 0) {
-                if (aChoice.isSelectDelayed || aChoice.isFadeTransition) {
-                    selectObject(aChoice, aRow, newOption);
-                } else {
-                    await selectObject(aChoice, aRow, newOption);
-                }
-                if (aChoice.isActive) isActivated = true;
+        newOption.isForced = true;
+        newOption.isAllowDeselect = val.isAllowDeselect;
+        newOption.fromTemp = true;
+
+        if (val.multiple === 0) {
+            if (aChoice.isSelectDelayed || aChoice.isFadeTransition) {
+                selectObject(aChoice, aRow, newOption);
             } else {
-                const num = aChoice.multipleUseVariable;
-                for (let i = 0; i < val.multiple; i++) {
-                    if (aChoice.isSelectDelayed || aChoice.isFadeTransition) {
-                        selectedOneMore(aChoice, aRow, newOption);
-                    }
-                    await selectedOneMore(aChoice, aRow, newOption);
-                }
-                if (aChoice.multipleUseVariable > num) isActivated = true;
+                await selectObject(aChoice, aRow, newOption);
             }
+            if (aChoice.isActive) isActivated = true;
+        } else {
+            const num = aChoice.multipleUseVariable;
+            for (let i = 0; i < val.multiple; i++) {
+                if (aChoice.isSelectDelayed || aChoice.isFadeTransition) {
+                    selectedOneMore(aChoice, aRow, newOption);
+                }
+                await selectedOneMore(aChoice, aRow, newOption);
+            }
+            if (aChoice.multipleUseVariable > num) isActivated = true;
         }
     }
 
@@ -5821,7 +5822,7 @@ async function deselectMissingReq(localID: string, options: ChoiceOptions) {
         const aRow = cMap.row;
         const aChoice = cMap.choice;
         if (aChoice.id === localID) continue;
-        
+
         if (!checkRequirements(aChoice.requireds)) {
             if (aChoice.forcedActivated) {
                 delete aChoice.forcedActivated;
@@ -7273,7 +7274,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
                     }
                     app.fadeTransitionIsOn = false;
                 }
-                selectProcess();
+                await selectProcess();
             }
             if (options.linkedObjects.indexOf(localChoice.id) === 0) {
                 options.linkedObjects.splice(0);
@@ -7554,7 +7555,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                             }
                             app.fadeTransitionIsOn = false;
                         }
-                        selectProcess();
+                        await selectProcess();
                     }
                     if (options.linkedObjects.indexOf(localChoice.id) === 0) {
                         options.linkedObjects.splice(0);

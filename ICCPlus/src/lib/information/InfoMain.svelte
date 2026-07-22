@@ -224,6 +224,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.28 / ${getDate('2026-07-22T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where score recalculation did not work properly when discount was deselected.
+        - Fixed issue where forcing selection of multi-selectable choices sometimes failed to work correctly.
+        `
+    }, {
+        open: false,
         title: `v2.9.27 / ${getDate('2026-07-21T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where discount was not applied correctly for multi-selectable choices.

@@ -1,7 +1,7 @@
 {
   "name": "iccplus_viewer",
   "private": true,
-  "version": "2.9.27",
+  "version": "2.9.28",
   "type": "module",
   "scripts": {
     "dev": "vite",
