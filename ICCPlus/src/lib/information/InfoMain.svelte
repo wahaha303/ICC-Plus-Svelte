@@ -224,6 +224,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.9.29 / ${getDate('2026-07-23T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where discount remained applied after deselecting discounted choice.
+
+        <span style="color: green">Requirement</span>
+        - Fixed issue where entered ID was not displayed when reopening edit mode after entering ID not present in auto-suggestions.
+        `
+    }, {
+        open: false,
         title: `v2.9.28 / ${getDate('2026-07-22T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where score recalculation did not work properly when discount was deselected.

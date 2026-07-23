@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.9.28';
+export const appVersion = '2.9.29';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -2536,6 +2536,7 @@ export function deleteDiscount(score: Score) {
     delete score.replaceText;
     delete score.hideDisValue;
     delete score.hideDisIcon;
+    delete score.discountNum;
     delete score.discounts;
 }
 async function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice: Choice | SelectableAddon) {
@@ -2560,7 +2561,7 @@ async function emptyDiscount(localChoice: Choice | SelectableAddon, targetChoice
             const dc = score.discounts[j];
 
             if (dc.state !== FULL || dc.id === localChoice.id) {
-                const inCount = dc.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable >= localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+                const inCount = dc.state === FULL && targetChoice.isSelectableMultiple && typeof localChoice.appliedDisChoices !== 'undefined' && localChoice.useDiscountCount && localChoice.countPerSelection && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
 
                 if ((inCount || dc.state === ACTIVE) && typeof score.discountScore !== 'undefined') {
                     scoreVal = score.discountScore;
@@ -2783,7 +2784,7 @@ export async function deselectDiscount(localChoice: Choice | SelectableAddon, ta
 
         const discount = score.discounts[idx];
         const checkMul = targetChoice.isSelectableMultiple && localChoice.useDiscountCount && localChoice.countPerSelection
-        const inCount = discount.state === FULL && checkMul && typeof localChoice.appliedDisChoices !== 'undefined' && targetChoice.multipleUseVariable >= localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
+        const inCount = discount.state === FULL && checkMul && typeof localChoice.appliedDisChoices !== 'undefined' && targetChoice.multipleUseVariable === localChoice.appliedDisChoices.filter(id => id === targetChoice.id).length;
         let scoreVal = (score.appliedDiscount || discount.state === ACTIVE || inCount) && typeof score.discountScore !== 'undefined' ? score.discountScore : score.value;
         let disVal = score.value;
         let actVal = score.value;
@@ -3047,6 +3048,9 @@ export function selectDiscount(localChoice: Choice | SelectableAddon, targetChoi
             if (targetChoice.isActive) {
                 score.tmpDisScore = scoreVal - disVal;
                 score.isChangeDiscount = true;
+                if (targetChoice.isSelectableMultiple && targetChoice.multipleUseVariable && !localChoice.countPerSelection) {
+                    score.discountNum = targetChoice.multipleUseVariable;
+                }
             }
         }
     }
@@ -4605,6 +4609,11 @@ export async function selectUpdateScore(localChoice: Choice | SelectableAddon | 
                                         mul = mul - count;
                                         break;
                                     }
+                                    if (dc.state === ACTIVE && typeof aScore.discountNum !== 'undefined' && !dChoice.countPerSelection) {
+                                        mul = mul - aScore.discountNum;
+                                        delete aScore.discountNum;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -5110,7 +5119,7 @@ async function deselectDiscountOther(localChoice: Choice | SelectableAddon) {
     }
 }
 
-function selectDiscountOther(localChoice: Choice | SelectableAddon) {
+async function selectDiscountOther(localChoice: Choice | SelectableAddon) {
     if (!localChoice.discountOther) return;
     if (typeof localChoice.discountOperator === 'undefined' || typeof localChoice.discountValue === 'undefined') return;
 
@@ -5122,7 +5131,7 @@ function selectDiscountOther(localChoice: Choice | SelectableAddon) {
                 if (typeof dRow !== 'undefined') {
                     for (let j = 0; j < dRow.objects.length; j++) {
                         const dChoice = dRow.objects[j];
-                        selectDiscount(localChoice, dChoice);
+                        await selectDiscount(localChoice, dChoice);
                         dList.add(dChoice.id);
                     }
                 }
@@ -5133,7 +5142,7 @@ function selectDiscountOther(localChoice: Choice | SelectableAddon) {
                 if (!dList.has(localChoice.discountChoices[i])) {
                     const cMap = choiceMap.get(localChoice.discountChoices[i]);
                     if (typeof cMap !== 'undefined') {
-                        selectDiscount(localChoice, cMap.choice);
+                        await selectDiscount(localChoice, cMap.choice);
                     }
                 }
             }
@@ -5146,7 +5155,7 @@ function selectDiscountOther(localChoice: Choice | SelectableAddon) {
                     for (let j = 0; j < groupData.elements.length; j++) {
                         const cMap = choiceMap.get(groupData.elements[j]);
                         if (typeof cMap !== 'undefined') {
-                            selectDiscount(localChoice, cMap.choice);
+                            await selectDiscount(localChoice, cMap.choice);
                         }
                     }
                 }
@@ -5182,15 +5191,15 @@ async function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmp
                             if (typeof cMap !== 'undefined') {
                                 const dChoice = cMap.choice;
 
-                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.appliedDisChoices !== 'undefined' && deselectQue.has(dChoice.id)) {
-                                    const inCount = localChoice.isSelectableMultiple && dChoice.countPerSelection && options.selNum + 1 >= dChoice.appliedDisChoices.filter(id => id === localChoice.id).length;
+                                if (dChoice.useDiscountCount && typeof dChoice.discountCount !== 'undefined' && typeof dChoice.appliedDisChoices !== 'undefined') {
+                                    const inCount = localChoice.isSelectableMultiple && dChoice.countPerSelection && options.selNum + 1 === dChoice.appliedDisChoices.filter(id => id === localChoice.id).length;
 
-                                    if (inCount) {
+                                    if (inCount && deselectQue.has(dChoice.id)) {
                                         score.appliedDiscount = true;
                                         val = score.discountScore;
                                     }
 
-                                    if (!options.isMultiple || options.selNum === 0 || inCount) countSet.add(dChoice);
+                                    if (!options.isMultiple || options.selNum === 0 || (inCount && deselectQue.has(dChoice.id))) countSet.add(dChoice);
                                 }
                             }
                         }
@@ -6852,7 +6861,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
                 tmpActivatedMap.delete(localChoice.id);
                 if (countCheck) origRow.currentChoices += 1;
 
-                selectDiscountOther(localChoice);
+                await selectDiscountOther(localChoice);
 
                 await selectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
 
@@ -7112,7 +7121,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                     }
                 }
 
-                if (isPos) selectDiscountOther(localChoice);
+                if (isPos) await selectDiscountOther(localChoice);
 
                 await selectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});
 
@@ -7796,7 +7805,7 @@ async function selectObjectL(str: string, activatedIds: Set<string>) {
     localChoice.isActive = true;
     activatedMap.set(localChoice.id, {multiple: 0});
     if (countCheck) localRow.currentChoices += 1;
-    selectDiscountOther(localChoice);
+    await selectDiscountOther(localChoice);
 
     await selectCalculateScore(localChoice, tmpScores, {isMultiple: false, isPos: false, selNum: DISABLED});
 
@@ -8092,7 +8101,7 @@ async function selectedOneMoreL(str: string, activatedIds: Set<string>) {
     localChoice.multipleUseVariable++;
     activatedMap.set(localChoice.id, {multiple: localChoice.multipleUseVariable});
     if (isPos) {
-        selectDiscountOther(localChoice);
+        await selectDiscountOther(localChoice);
     }
 
     await selectCalculateScore(localChoice, tmpScores, {isMultiple: true, isPos: isPos, selNum: selNum});

@@ -294,13 +294,14 @@
     showIdOnly?: boolean;
   };
   let {
+    showIdOnly = false,
     use = [],
     class: className = '',
     options = [],
     value = $bindable(),
     getOptionDisabled = () => false,
     getOptionLabel = (option: any) => (option == null ? '' : `${option}`),
-    text = $bindable(getOptionLabel(value)),
+    text = $bindable(getLabel(value)),
     label,
     disabled = false,
     toggle = false,
@@ -346,7 +347,6 @@
     parentElement,
     onfocuslost,
     isSearch = false,
-    showIdOnly = false,
     ...restProps
   }: OwnProps &
     SmuiAttrs<'div', keyof OwnProps> & {
@@ -427,7 +427,7 @@
   $effect(() => {
     if (previousValue !== value) {
       // If the value changed from outside, update the text.
-      text = showIdOnly ? value : getOptionLabel(value);
+      text = getLabel(value);
       previousValue = value;
     } else if (combobox && value !== text) {
       // An update came from the user.
@@ -772,5 +772,8 @@
       visibleCounter = Math.min(visibleCounter + 12, matches.length);
     }
   }
-  
+
+  function getLabel(str: any): string {
+    return showIdOnly ? String(str) : getOptionLabel(str);
+  }
 </script>
