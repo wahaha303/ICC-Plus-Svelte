@@ -42,7 +42,7 @@
     import FormField from '@smui/form-field';
     import Switch from '@smui/switch';
     import Textfield from '$lib/custom/textfield';
-	import { activatedMap, choiceMap, getSelectedObjectId, loadActivated } from '$lib/store/store.svelte';
+	import { activatedMap, choiceMap, getSelectedObjectId, loadActivated, replaceText } from '$lib/store/store.svelte';
 
     let { open, onclose }: { open: boolean; onclose: () => void } = $props();
     let idList = $state('');
@@ -71,26 +71,28 @@
             for (let i = 0; i < idArray.length; i++) {
                 let cMap = choiceMap.get(idArray[i]);
 
-                if (typeof cMap !== 'undefined') {
-                    const row = cMap.row;
-                    const choice = cMap.choice;
+                if (typeof cMap === 'undefined') continue;
+                const row = cMap.row;
+                const choice = cMap.choice;
+                if (choice.isNotBuild) continue;
 
-                    if (choice.title !== '') {
-                        if (row.id !== prevRowId) {
-                            if (prevRowId !== '') titles.push('\n');
-                            titles.push(`**${row.title !== '' ? row.title : row.debugTitle || ''}**\n`);
-                            if (choice.isSelectableMultiple) {
-                                titles.push(`${choice.title}(x${choice.multipleUseVariable})`);
-                            } else {
-                                titles.push(`${choice.title}`);
-                            }
-                            prevRowId = row.id;
+                const title = [choice.showDebugTitle && choice.debugTitle, choice.title].filter(Boolean).join(' ');
+
+                if (title) {
+                    if (row.id !== prevRowId) {
+                        if (prevRowId !== '') titles.push('\n');
+                        titles.push(`**${row.title !== '' ? row.title : row.debugTitle || ''}**\n`);
+                        if (choice.isSelectableMultiple) {
+                            titles.push(`${title}(x${choice.multipleUseVariable})`);
                         } else {
-                            if (choice.isSelectableMultiple) {
-                                titles.push(`, ${choice.title}(x${choice.multipleUseVariable})`);
-                            } else {
-                                titles.push(`, ${choice.title}`);
-                            }
+                            titles.push(`${title}`);
+                        }
+                        prevRowId = row.id;
+                    } else {
+                        if (choice.isSelectableMultiple) {
+                            titles.push(`, ${title}(x${choice.multipleUseVariable})`);
+                        } else {
+                            titles.push(`, ${title}`);
                         }
                     }
                 }
@@ -100,15 +102,17 @@
             for (let i = 0; i < idArray.length; i++) {
                 let cMap = choiceMap.get(idArray[i]);
 
-                if (typeof cMap !== 'undefined') {
-                    const choice = cMap.choice;
+                if (typeof cMap === 'undefined') continue;
+                const choice = cMap.choice;
+                if (choice.isNotBuild) continue;
 
-                    if (choice.title !== '') {
-                        if (choice.isSelectableMultiple) {
-                            titles.push(`${choice.title}(x${choice.multipleUseVariable})`);
-                        } else {
-                            titles.push(`${choice.title}`);
-                        }
+                const title = [choice.showDebugTitle && choice.debugTitle, choice.title].filter(Boolean).join(' ');
+
+                if (title) {
+                    if (choice.isSelectableMultiple) {
+                        titles.push(`${title}(x${choice.multipleUseVariable})`);
+                    } else {
+                        titles.push(`${title}`);
                     }
                 }
             }
@@ -116,7 +120,7 @@
         }
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = titleText;
-        
-        return tempDiv.textContent;
+
+        return replaceText(tempDiv.textContent);
     }
 </script>

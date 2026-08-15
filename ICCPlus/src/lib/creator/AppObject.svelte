@@ -145,7 +145,7 @@
                                             {/each}
                                         </Select>
                                     </div>
-                                    {#each choice.addons as addon, i}
+                                    {#each choice.addons as addon, i (addon)}
                                         <div class="col-12 p-0">
                                             <ObjectAddon row={row} choice={choice} addon={addon} isEditModeOn={true} index={i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv}/>
                                             <Button disabled={addon.isActive} onclickcapture={() => deleteAddon(i)} class="w-100 mt-1" variant="raised">
@@ -404,6 +404,14 @@
                                                 {/snippet}
                                             </FormField>
                                             <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.isNotBuild ?? false, (e) => choice.isNotBuild = e} onchange={() => {
+                                                    if (!choice.isNotBuild) delete choice.isNotBuild;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Shown in Build Form
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
                                                 <Checkbox bind:checked={() => choice.isNotSearchable ?? false, (e) => choice.isNotSearchable = e} onchange={() => {
                                                     if (!choice.isNotSearchable) delete choice.isNotSearchable;
                                                 }} />
@@ -515,6 +523,14 @@
                                                     {/snippet}
                                                 </FormField>
                                             {/if}
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.showDebugTitle ?? false, (e) => choice.showDebugTitle = e} onchange={() => {
+                                                    if (!choice.showDebugTitle) delete choice.showDebugTitle;
+                                                }} />
+                                                {#snippet label()}
+                                                    Show Debug Title in Build Form
+                                                {/snippet}
+                                            </FormField>
                                         </div>
                                         {/if}
                                     </AcdContent>
@@ -1649,7 +1665,7 @@
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="d-column row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
+            <div class="d-column choice row-{row.id} choice-{choice.id} {isActive ? 'choice-selected' : 'choice-unselected'} {isEnabled ? 'choice-enabled' : 'choice-disabled'} {(isActive && filterStyle.selOverlayOnImage) || (!isEnabled && filterStyle.reqOverlayOnImage) || (!isActive && backgroundStyle.isObjectBackgroundOverlay) ? 'bg-overlay ' : ''}w-100" style={objectBackground} onclickcapture={activateObject}>
                 {#if choice.template >= 4 || choice.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx) || row.choicesShareTemplate}
                     <div class="d-column{sAddons ? '' : ' flex-fill'} w-100 p-0 align-items-center" style={sAddons ? objectFilter : undefined}>
                         {#if row.resultShowRowTitle || isSearch}
@@ -1721,7 +1737,7 @@
                         {#if nAddons}
                             <div class="d-column flex-fill p-0 w-100">
                                 <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                    {#each nAddons as addon, i}
+                                    {#each nAddons as addon, i (addon)}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
                                     {/each}
                                 </div>
@@ -1734,7 +1750,7 @@
                     {#if sAddons}
                         <div class="d-column flex-fill p-0 w-100">
                             <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                {#each sAddons as addon, i}
+                                {#each sAddons as addon, i (addon)}
                                     <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                 {/each}
                             </div>
@@ -1797,7 +1813,7 @@
                                         {#if nAddons}
                                             <div class="d-column flex-fill p-0 w-100">
                                                 <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                                    {#each nAddons as addon, i}
+                                                    {#each nAddons as addon, i (addon)}
                                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
                                                     {/each}
                                                 </div>
@@ -1813,7 +1829,7 @@
                                 <div class="d-column flex-fill text-center w-100">
                                     {#if nAddons}
                                         <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                            {#each nAddons as addon, i}
+                                            {#each nAddons as addon, i (addon)}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
                                             {/each}
                                         </div>
@@ -1827,7 +1843,7 @@
                         {#if sAddons}
                             <div class="d-column flex-fill p-0 w-100">
                                 <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                    {#each sAddons as addon, i}
+                                    {#each sAddons as addon, i (addon)}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                     {/each}
                                 </div>
@@ -1880,7 +1896,7 @@
                                         {#if nAddons}
                                             <div class="d-column flex-fill p-0 w-100">
                                                 <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                                    {#each nAddons as addon, i}
+                                                    {#each nAddons as addon, i (addon)}
                                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
                                                     {/each}
                                                 </div>
@@ -1905,7 +1921,7 @@
                                 <div class="d-column flex-fill text-center w-100">
                                     {#if nAddons}
                                         <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                            {#each nAddons as addon, i}
+                                            {#each nAddons as addon, i (addon)}
                                                 <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 'n' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} />
                                             {/each}
                                         </div>
@@ -1919,7 +1935,7 @@
                         {#if sAddons}
                             <div class="d-column flex-fill p-0 w-100">
                                     <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
-                                    {#each sAddons as addon, i}
+                                    {#each sAddons as addon, i (addon)}
                                         <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
                                     {/each}
                                 </div>
@@ -2705,7 +2721,7 @@
         const objectWidth = row.overrideWidth ? row.objectWidth : (choice.objectWidth || row.objectWidth);
         const objectWidthNum = objectWidthToNum(objectWidth);
         const objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
-        if ($winWidth > 1280) {
+        if ($winWidth > 1280 || row.preserveWidth) {
             return objectWidth;
         } else if ($winWidth > app.smallerScreenPx) {
             if (app.objectsPerRow === 'default') return fixedWidth(objectWidth);
@@ -2783,7 +2799,7 @@
         options.isOverImg = false;
         options.linkedObjects = [];
         if (target && choice.addons && choice.addons.length > 0) {
-            if (closestByClassPrefix(target, 'addon-', 'addon')) return;
+            if (closestByClassPrefix(target, 'addon-selectable', 'addon')) return;
         }
 
         if (row.isResultRow || row.isGroupRow) {
@@ -2797,7 +2813,7 @@
         if (choice.isSelectableMultiple) {
             if (choice.allowSelectByClick && choice.multipleUseVariable === 0) {
                 if (target) {
-                    if (closestByClassPrefix(target, 'multi-', 'choice-')) return;
+                    if (closestByClassPrefix(target, 'multi-', 'choice')) return;
                 }
                 selectedOneMore(choice, origRow, options);
             }
@@ -2836,6 +2852,7 @@
     }
 
     function copyTooltip(e: Event) {
+        if (!choice.imageSourceTooltip) return;
         navigator.clipboard.writeText(choice.imageSourceTooltip).then(() => {
             snackbarVariables.labelText = 'Tooltip copied to clipboard.';
             snackbarVariables.isOpen = true;

@@ -142,6 +142,7 @@
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
 	import { onMount } from 'svelte';
 	import { Editor } from '@tiptap/core';
+    import { TableKit } from '@tiptap/extension-table'
     import { BackgroundColor, Color, FontSize, LineHeight } from '@tiptap/extension-text-style';
     import type { Addon, Choice, Row } from './types';
     import { SanitizeExtensions, CustomParagraph, CustomImage, CustomHeading, CustomTextStyle, CustomBulletList, CustomOrderList, CustomListItem, CustomStrong, CustomItalic, CustomStrike, CustomUnderline, CustomCode, CustomDiv } from './SanitizeExtensions';
@@ -372,6 +373,9 @@
                 CustomUnderline,
                 CustomCode,
                 CustomDiv,
+                TableKit.configure({
+                    table: { resizable: true },
+                }),
                 ...SanitizeExtensions,
             ],
 			content: data[dataProp],
@@ -457,15 +461,15 @@
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        doc.querySelectorAll('li').forEach((li) => {
-            li.childNodes.forEach((node) => {
+        for (const li of doc.querySelectorAll('li')) {
+            for (const node of li.childNodes) {
                 if (node.nodeType === Node.TEXT_NODE && node.textContent) {
                     node.textContent = node.textContent.replace(/\n/g, '__KEEP_NEWLINE__');
                 }
-            });
-        });
+            }
+        }
 
-        doc.querySelectorAll('ul, ol').forEach((list) => {
+        for (const list of doc.querySelectorAll('ul, ol')) {
             list.innerHTML = list.innerHTML.replace(/\n/g, '');
 
             const next = list.nextSibling;
@@ -483,7 +487,7 @@
                     }
                 }
             }
-        });
+        }
 
         let result = doc.body.innerHTML;
 

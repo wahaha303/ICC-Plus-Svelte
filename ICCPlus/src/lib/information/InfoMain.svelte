@@ -224,6 +224,40 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.0 / ${getDate('2026-08-15T11:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Added option to retain configured choices per row on smaller screens.
+        - Fixed issue where page froze when clearing selected choices on row with an auto-active choice and Deselect Choices if Row Doesn't Meet Requirements enabled.
+
+        <span style="color: green">Choice</span>
+        - Added option to show debug title in build form.
+        - Added option to hide choice title in build form.
+        - Fixed issue where slider did not work properly for multi-selectable choices.
+        - Fixed issue where force-activated choice remained active after deselecting the choice that activated it.
+        - Fixed issue where variables were updated after score calculation.
+        - Fixed issue where Deactivate Other Choices did not work properly when deactivating itself.
+
+        <span style="color: green">Addon</span>
+        - Added CSS classes to Addons for use with custom CSS based on each condition.
+        - Fixed issue where the previous addon's tooltip remained displayed when the displayed addon changed.
+
+        <span style="color: green">Score</span>
+        - Organized score options into collapsible sections.
+        - Added option to prevent recalculation caused by choice itself.
+        - Fixed issue where score recalculation did not work properly for multi-selectable choices.
+
+        <span style="color: green">Point Bar</span>
+        - Fixed issue where positive and negative point colors were not applied correctly.
+
+        <span style="color: green">Global Settings</span>
+        - Added option to hide menu for rows that do not meet requirements in Edit Mode.
+        - Fixed issue where pointer cursor was not applied on selectable addons.
+
+        <span style="color: green">Build Form</span>
+        - Fixed issue where word ID was displayed instead of replaced text when using a word in choice title.
+        `
+    }, {
+        open: false,
         title: `v2.9.29 / ${getDate('2026-07-23T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where discount remained applied after deselecting discounted choice.

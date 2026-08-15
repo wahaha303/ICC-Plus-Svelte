@@ -15,8 +15,8 @@
         {/if}
     </div>
     {#if data.useSlider}
-        <div class="px-5 w-100 multi-slider">
-            <Slider bind:value={sliderNum} min={data.numMultipleTimesMinus} max={data.numMultipleTimesPluss} step={1} class="mx-2" onpointerup={handleSliderUp} disabled={!plusEnabled && !minusEnabled} discrete />
+        <div class="px-5 w-100 multi-slider" class:disabled={!enabled} translate="no">
+            <Slider bind:value={sliderNum} min={data.numMultipleTimesMinus} max={data.numMultipleTimesPluss} step={1} class="mx-2" onpointerup={handleSliderUp} discrete />
         </div>
     {/if}
 {/if}
@@ -101,6 +101,21 @@
     }
 
     async function handleSliderUp() {
+        const blur = () => {
+            if (document.activeElement) {
+                (document.activeElement as HTMLElement).blur();
+            }
+        }
+        if (!plusEnabled && sliderNum > multipleNum) {
+            sliderNum = multipleNum;
+            blur();
+            return;
+        }
+        if (!minusEnabled && sliderNum < multipleNum) {
+            sliderNum = multipleNum;
+            blur();
+            return;
+        }
         const loop = sliderNum - multipleNum;
         for (let i = 0; i < Math.abs(loop); i++) {
             if (loop > 0) {
@@ -109,9 +124,7 @@
                 await selectedOneLess();
             }
         }
-        if (document.activeElement) {
-            (document.activeElement as HTMLElement).blur();
-        }
+        blur();
     }
 
     function clickNumber(e: Event) {

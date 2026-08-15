@@ -11,12 +11,12 @@
                 <Checkbox bind:checked={() => data.privateBackgroundIsOn ?? false, (e) => data.privateBackgroundIsOn = e} onchange={() => {
                     if (data.privateBackgroundIsOn) {
                         let temp = JSON.parse(JSON.stringify(backgroundStyling));
-                        Object.keys(backgroundStyling).forEach(key => {
+                        for (const key of Object.keys(backgroundStyling)) {
                             if (app.styling.hasOwnProperty(key)) {
                                 let val = app.styling[key as keyof StyleType];
                                 if (typeof val !== 'undefined') temp[key as keyof StyleType] = val;
                             }
-                        });
+                        }
                         if (isChoice) {
                             temp.backgroundImage = '';
                             temp.rowBackgroundImage = '';
@@ -24,11 +24,11 @@
                         data.styling = {...(data.styling || {}), ...temp};
                         styling = data.styling!;
                     } else {
-                        Object.keys(backgroundStyling).forEach(key => {
+                        for (const key of Object.keys(backgroundStyling)) {
                             if (data.styling && app.styling.hasOwnProperty(key)) {
                                 delete data.styling[key as keyof StyleType];
                             }
-                        });
+                        }
                     }
                 }} />
                 {#snippet label()}

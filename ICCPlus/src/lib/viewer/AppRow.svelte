@@ -1,6 +1,6 @@
-<div class="row-{row.id}-bg text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
+<div class="row-bg row-{row.id}-bg row-bg-{row.id} text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!isEnabled ? ' hidden' : ''}" style={rowBody} bind:clientWidth={width}>
     {#if isEnabled}
-        <div class="row gx-0 row-{row.id} row-{row.id}-header{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" style={row.title !== '' ? rowBackground : ''}>
+        <div class="row gx-0 row-header row-{row.id} row-{row.id}-header row-header-{row.id}{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" style={row.title !== '' ? rowBackground : ''}>
             {#if row.template >= 4 || row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx))}
@@ -417,7 +417,7 @@
                     pNum = actRow.pointNum;
                 }
 
-                Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                for (const [id, val] of activatedMap) {
                     const cMap = choiceMap.get(id);
                     if (typeof cMap !== 'undefined') {
                         const aRow = cMap.row;
@@ -441,7 +441,7 @@
                             }
                         }
                     }
-                });
+                }
 
                 activatedMap.set(row.id, {multiple: 0, isRowButton: true, rndPoint: row.pointTypeRandom, pointNum: pNum + rnd});
                 tmpScores.set(point.id, rnd);

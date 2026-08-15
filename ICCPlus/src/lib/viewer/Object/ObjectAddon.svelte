@@ -1,6 +1,6 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="text-center addon{addon.isSelectable ? ` addon-${addon.id}` : ''}{overlay ? ' bg-overlay' : ''}  {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(e) : undefined}>
+<div class="text-center addon {addonClass}{overlay ? ' bg-overlay' : ''} {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(e) : undefined}>
     {#if addon.template >= 4 || addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
         <div>
             {#if (addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)) && addon.image && !row.addonImageRemoved}
@@ -263,7 +263,7 @@
 <script lang="ts">
     import DOMPurify from 'dompurify';
     import ObjectRequired from './ObjectRequired.svelte';
-    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables, winWidth, objectWidthToNum, selectedOneMore, selectedOneLess, choiceMap, closestByClassPrefix, deselectObject, selectObject, widthToNum } from '$lib/store/store.svelte';
+    import { app, checkRequirements, getStyling, replaceText, sanitizeArg, hexToRgba, snackbarVariables, winWidth, objectWidthToNum, selectedOneMore, selectedOneLess, choiceMap, closestByClassPrefix, deselectObject, selectObject, widthToNum, fixedWidth } from '$lib/store/store.svelte';
     import type { Choice, Row, Addon, BgStyles, Filters, SelectableAddon, ChoiceOptions } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import ObjectScore from './ObjectScore.svelte';
@@ -302,6 +302,25 @@
             return isEnabled;
         }
         return true;
+    });
+    let addonClass = $derived.by(() => {
+        const result: string[] = []
+        if (addon.isSelectable) {
+            result.push('addon-selectable');
+            result.push(`addon-${addon.id}`);
+
+            if (addon.isActive) {
+                result.push('addon-selected');
+            } else {
+                result.push('addon-unselected');
+            }
+        }
+        if (isEnabled && addonEnabled) {
+            result.push('addon-enabled');
+        } else {
+            result.push('addon-disabled');
+        }
+        return result.join(' ');
     });
 
     let addonBackground = $derived.by(() => {
@@ -598,7 +617,8 @@
         const objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
         if ($winWidth > 1280) {
             return addonWidth;
-        } else if ($winWidth > 720) {
+        } else if ($winWidth > app.smallerScreenPx) {
+            if (app.objectsPerRow === 'default') return fixedWidth(addonWidth);
             switch(addonWidthNum) {
                 case 1: return 'col-12';
                 case 2: return 'col-6';
@@ -613,6 +633,7 @@
     }
 
     function copyTooltip(e: Event) {
+        if (!addon.imageSourceTooltip) return;
         navigator.clipboard.writeText(addon.imageSourceTooltip).then(() => {
             snackbarVariables.labelText = 'Tooltip copied to clipboard.';
             snackbarVariables.isOpen = true;

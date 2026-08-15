@@ -11,20 +11,20 @@
                 <Checkbox bind:checked={() => data.privateRowIsOn ?? false, (e) => data.privateRowIsOn = e} onchange={() => {
                     if (data.privateRowIsOn) {
                         let temp = JSON.parse(JSON.stringify(rowStyling));
-                        Object.keys(rowStyling).forEach(key => {
+                        for (const key of Object.keys(rowStyling)) {
                             if (app.styling.hasOwnProperty(key)) {
                                 let val = app.styling[key as keyof StyleType];
                                 if (typeof val !== 'undefined') temp[key as keyof StyleType] = val;
                             }
-                        });
+                        }
                         data.styling = {...(data.styling || {}), ...temp};
                         styling = data.styling!;
                     } else {
-                        Object.keys(rowStyling).forEach(key => {
+                        for (const key of Object.keys(rowStyling)) {
                             if (data.styling && app.styling.hasOwnProperty(key)) {
                                 delete data.styling[key as keyof StyleType];
                             }
-                        });
+                        }
                     }
                 }} />
                 {#snippet label()}

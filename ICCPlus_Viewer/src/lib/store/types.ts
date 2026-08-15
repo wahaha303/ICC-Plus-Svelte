@@ -625,7 +625,8 @@ export type ChoiceFunc = {
     sfxOnSelect?: boolean,
     sfxOnDeselect?: boolean,
     isCountDisabled?: boolean,
-    deselectWhenNoAddon?: boolean
+    deselectWhenNoAddon?: boolean,
+    showDebugTitle?: boolean,
 };
 export type BaseAddon = {
     [key: string]: any;
@@ -767,6 +768,8 @@ export type Row = {
     choicesShareTemplate?: boolean,
     defaultTemplate?: number,
     defaultWidth?: string,
+    overrideWidth?: boolean,
+    preserveWidth?: boolean,
     templateStack?: {
         id: string,
         data: number
@@ -1038,6 +1041,7 @@ export type App = {
     smallerScreenPx: number,
     enableHalfRow: boolean,
     minimizeTemplate: boolean,
+    hideRowMenu: boolean,
     viewerConfig: ViewerConfig
 } & DefaultSettings;
 export type RowMap = {

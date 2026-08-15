@@ -11,21 +11,21 @@
                 <Checkbox bind:checked={() => data.privateAddonIsOn ?? false, (e) => data.privateAddonIsOn = e} onchange={() => {
                     if (data.privateAddonIsOn) {
                         let temp = JSON.parse(JSON.stringify(addonStyling));
-                        Object.keys(addonStyling).forEach(key => {
+                        for (const key of Object.keys(addonStyling)) {
                             if (app.styling.hasOwnProperty(key)) {
                                 let val = app.styling[key as keyof StyleType];
                                 if (typeof val !== 'undefined') temp[key as keyof StyleType] = val;
                             }
-                        });
+                        }
                         data.styling = {...(data.styling || {}), ...temp};
                         data.styling!.useAddonDesign = true;
                         styling = data.styling!;
                     } else {
-                        Object.keys(addonStyling).forEach(key => {
+                        for (const key of Object.keys(addonStyling)) {
                             if (data.styling && app.styling.hasOwnProperty(key)) {
                                 delete data.styling[key as keyof StyleType];
                             }
-                        });
+                        }
                     }
                 }} />
                 {#snippet label()}

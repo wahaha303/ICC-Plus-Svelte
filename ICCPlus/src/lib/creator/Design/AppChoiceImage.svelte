@@ -10,20 +10,20 @@
                 <Checkbox bind:checked={() => data.privateObjectImageIsOn?? false, (e) => data.privateObjectImageIsOn = e} onchange={() => {
                     if (data.privateObjectImageIsOn) {
                         let temp = JSON.parse(JSON.stringify(objectImageStyling));
-                        Object.keys(objectImageStyling).forEach(key => {
+                        for (const key of Object.keys(objectImageStyling)) {
                             if (app.styling.hasOwnProperty(key)) {
                                 let val = app.styling[key as keyof StyleType];
                                 if (typeof val !== 'undefined') temp[key as keyof StyleType] = val;
                             }
-                        });
+                        }
                         data.styling = {...(data.styling || {}), ...temp};
                         styling = data.styling!;
                     } else {
-                        Object.keys(objectImageStyling).forEach(key => {
+                        for (const key of Object.keys(objectImageStyling)) {
                             if (data.styling && app.styling.hasOwnProperty(key)) {
                                 delete data.styling[key as keyof StyleType];
                             }
-                        });
+                        }
                     }
                 }}/>
                 {#snippet label()}

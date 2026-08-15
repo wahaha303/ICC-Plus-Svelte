@@ -1,4 +1,4 @@
-<div class="row-{row.id}-bg text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!bCreatorMode && !isEnabled ? ' hidden' : ''}" class:row-edit-button__wrapper={app.useChoiceEditBtn && bCreatorMode} style={rowBody} bind:clientWidth={width}>
+<div class="row-bg row-{row.id}-bg row-bg-{row.id} text-center{rowBodyBgColor && rowBodyBgColor.isBackgroundOverlay ? ' bg-overlay' : ''}{!bCreatorMode && !isEnabled ? ' hidden' : ''}" class:row-edit-button__wrapper={app.useChoiceEditBtn && bCreatorMode} style={rowBody} bind:clientWidth={width}>
     {#if bCreatorMode && (row.isEditModeOn || row.isSimpleEditMode)}
         <Card class="mt-n3">
             <CardContent class="p-0 mb-4">
@@ -143,6 +143,14 @@
                                 }} color="secondary" class="switch-scale" />
                                 {#snippet label()}
                                     Always use row's choices per row
+                                {/snippet}
+                            </FormField>
+                            <FormField class="ml-4 mb-3">
+                                <Switch bind:checked={() => row.preserveWidth ?? false, (e) => {row.preserveWidth = e}} onSMUISwitchChange={() => {
+                                    if (!row.preserveWidth) delete row.preserveWidth;
+                                }} color="secondary" class="switch-scale" />
+                                {#snippet label()}
+                                    Keep choices per row on small screens
                                 {/snippet}
                             </FormField>
                             {#if row.isResultRow || row.isGroupRow}
@@ -304,7 +312,7 @@
                 <IconButton onclickcapture={() => row.isSimpleEditMode = true} size="button"><i class="mdi mdi-wrench"></i></IconButton>
             </div>
         {/if}
-        <div class="row gx-0 row-{row.id} row-{row.id}-header{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" style={row.title !== '' ? rowBackground : ''}>
+        <div class="row gx-0 row-{row.id} row-header row-{row.id}-header row-header-{row.id}{backgroundStyle.isRowBackgroundOverlay ? ' bg-overlay' : ''}" style={row.title !== '' ? rowBackground : ''}>
             {#if row.template >= 4 || row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
                 <div class="col-12 m-0 p-0">
                     {#if (row.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx))}
@@ -458,7 +466,7 @@
 	import IconButton from '@smui/icon-button';
     import Textfield from '$lib/custom/textfield';
     import { Wrapper } from '$lib/custom/tooltip';
-    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices, imgDialog, selectObject } from '$lib/store/store.svelte';
+    import { app, checkDupId, groupMap, getStyling, objectWidths, rowMap, checkRequirements, pointTypeMap, rowDesignMap, sanitizeArg, checkActivated, globalReqMap, replaceText, choiceMap, objectWidthToNum, generateId, activatedMap, dlgVariables, variableMap, getGroups, winWidth, getGroupLabel, hexToRgba, pasteObject, snackbarVariables, menuVariables, clearClipboard, removeAnchor, exportData, selectUpdateScore, selectedOneMore, selectedOneLess, tmpActivatedMap, deselectObject, activateTempChoices, imgDialog, selectObject, fixedWidth } from '$lib/store/store.svelte';
     import type { Choice, SelectableAddon, ChoiceOptions, Row } from '$lib/store/types';
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     import { tick } from 'svelte';
@@ -920,9 +928,10 @@
         let objectWidth = row.objectWidth;
         let objectWidthNum = objectWidthToNum(objectWidth);
         let objectsPerRowNum = app.objectsPerRow === 'col-6' ? 2 : app.objectsPerRow === 'col-4' ? 3 : 4;
-        if ($winWidth > 1280) {
+        if ($winWidth > 1280 || row.preserveWidth) {
             return objectWidth;
-        } else if ($winWidth > 720) {
+        } else if ($winWidth > app.smallerScreenPx) {
+            if (app.objectsPerRow === 'default') return fixedWidth(objectWidth);
             switch(objectWidthNum) {
                 case 1: return 'col-12';
                 case 2: return 'col-6';
@@ -959,7 +968,7 @@
                     pNum = actRow.pointNum;
                 }
 
-                Array.from(activatedMap.entries()).forEach(([id, val]) => {
+                for (const [id, val] of activatedMap) {
                     const cMap = choiceMap.get(id);
                     if (typeof cMap !== 'undefined') {
                         const aRow = cMap.row;
@@ -983,7 +992,7 @@
                             }
                         }
                     }
-                });
+                }
 
                 activatedMap.set(row.id, {multiple: 0, isRowButton: true, rndPoint: row.pointTypeRandom, pointNum: pNum + rnd});
                 tmpScores.set(point.id, rnd);

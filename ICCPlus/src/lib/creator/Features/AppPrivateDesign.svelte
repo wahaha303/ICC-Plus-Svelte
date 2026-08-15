@@ -169,28 +169,28 @@
         const bgKeys = isRow ? ['bgColorIsOn', 'backgroundColor', 'isBackgroundRepeat', 'isBackgroundFitIn', 'backgroundImage'] : ['bgColorIsOn', 'backgroundColor', 'rowBgColorIsOn', 'rowBgColor', 'isBackgroundRepeat', 'isBackgroundFitIn', 'backgroundImage', 'isRowBackgroundRepeat', 'isRowBackgroundFitIn', 'rowBackgroundImage'];
 
         if (!isRow) {
-            Object.keys(rowStyling).forEach((key) => {
+            for (const key of Object.keys(rowStyling)) {
                 if (key in style) {
                     delete style[key];
                 }
-            });
-            Object.keys(rowImageStyling).forEach((key) => {
+            }
+            for (const key of Object.keys(rowImageStyling)) {
                 if (key in style) {
                     delete style[key];
                 }
-            });
+            }
         }
 
-        Object.keys(pointBarStyling).forEach((key) => {
+        for (const key of Object.keys(pointBarStyling)) {
             if (key in style) {
                 delete style[key];
             }
-        });
-        Object.keys(backpackStyling).forEach((key) => {
+        }
+        for (const key of Object.keys(backpackStyling)) {
             if (key in style) {
                 delete style[key];
             }
-        });
+        }
 
         for (let i = 0; i < bgKeys.length; i++) {
             const key = bgKeys[i];

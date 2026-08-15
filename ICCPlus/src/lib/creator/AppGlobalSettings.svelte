@@ -278,6 +278,14 @@
                             </div>
                             <div class="col-12">
                                 <FormField>
+                                    <Switch bind:checked={() => app.hideRowMenu ?? false, (e) => app.hideRowMenu = e} color="secondary" class="switch-scale" />
+                                    {#snippet label()}
+                                        Hide Row Menu When Requirements Are Not Met
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                            <div class="col-12">
+                                <FormField>
                                     <Switch bind:checked={() => app.showMusicPlayer ?? false, (e) => app.showMusicPlayer = e} color="secondary" class="switch-scale" onSMUISwitchChange={() => {
                                         if (app.showMusicPlayer) {
                                             const player = get(musicPlayer);

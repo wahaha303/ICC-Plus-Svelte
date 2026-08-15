@@ -58,9 +58,11 @@
 
     let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}'; font-size: ${app.styling.barTextSize}px;`);
     let pointSumText = $derived.by(() => {
+        let pointPos = point.pointPrivateColorIsOn ? point.privateColor : app.styling.barPointPos;
+        let pointNeg = point.pointPrivateColorIsOn ? point.privateNegativeColor : app.styling.barPointNeg;
         if (point.startingSum >= 0) {
-            if (typeof app.styling.barPointPos !== 'undefined') return `color: ${hexToRgba(app.styling.barPointPos)};`;
-        } else if (typeof app.styling.barPointNeg !== 'undefined') return `color: ${hexToRgba(app.styling.barPointNeg)};`;
+            if (pointPos) return `color: ${hexToRgba(pointPos)};`;
+        } else if (pointNeg) return `color: ${hexToRgba(pointNeg)};`;
         
         return '';
     });

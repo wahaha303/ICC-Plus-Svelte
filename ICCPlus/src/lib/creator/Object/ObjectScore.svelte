@@ -16,105 +16,6 @@
                 <IconButton onclickcapture={moveScoreDown}><i class="mdi mdi-chevron-down"></i></IconButton>
             </Wrapper>
         </div>
-        <div class:disabled={choice.isActive} class="row gx-3">
-            {#if choice.isSelectableMultiple && choice.isMultipleUseVariable}
-                <FormField class="col-12">
-                    <Checkbox bind:checked={() => score.multiplyByTimes ?? false, (e) => score.multiplyByTimes = e} onchange={() => {
-                        if (!score.multiplyByTimes) {
-                            delete score.multiplyByTimes;
-                            delete score.displayMulScore;
-                        }
-                    }} />
-                    {#snippet label()}
-                        Muliply by number of selections
-                    {/snippet}
-                </FormField>
-                {#if score.multiplyByTimes}
-                    <FormField class="col-12">
-                        <Checkbox bind:checked={() => score.displayMulScore ?? false, (e) => score.displayMulScore = e} onchange={() => {
-                            if (!score.displayMulScore) {
-                                delete score.displayMulScore;
-                            }
-                        }} />
-                        {#snippet label()}
-                            Display multiplied score
-                        {/snippet}
-                    </FormField>
-                {/if}
-            {/if}
-            <FormField class={col6}>
-                <Checkbox bind:checked={() => score.isNotRecalculatable ?? false, (e) => score.isNotRecalculatable = e} onchange={() => {
-                    if (!score.isNotRecalculatable) {
-                        delete score.isNotDiscountable;
-                    }
-                }} />
-                {#snippet label()}
-                    No Recalculation
-                {/snippet}
-            </FormField>
-            <FormField class={col6}>
-                <Checkbox bind:checked={() => score.isNotDiscountable ?? false, (e) => score.isNotDiscountable = e} onchange={() => {
-                    if (!score.isNotDiscountable) {
-                        delete score.isNotDiscountable;
-                    }
-                }} />
-                {#snippet label()}
-                    No Discount
-                {/snippet}
-            </FormField>
-            <FormField class={col6}>
-                <Checkbox bind:checked={() => score.isRandom ?? false, (e) => score.isRandom = e} onchange={() => {
-                    if (score.isRandom) {
-                        score.minValue = 0;
-                        score.maxValue = 0;
-                        if (!score.setValue) score.setValue = false;
-                        if (score.useExpression) {
-                            score.expMinValue = '';
-                            score.expMaxValue = '';
-                        }
-                    } else {
-                        delete score.isRandom;
-                        delete score.minValue;
-                        delete score.maxValue;
-                        if (score.useExpression) {
-                            delete score.expMinValue;
-                            delete score.expMaxValue;
-                        } else {
-                            delete score.setValue;
-                        }
-                    }
-                }} />
-                {#snippet label()}
-                    Enable Random
-                {/snippet}
-            </FormField>
-            <Wrapper innerClass={col6} text="Point IDs must be wrapped in curly braces. (e.g. {'{point ID}'} * 2)">
-                <FormField>
-                    <Checkbox bind:checked={() => score.useExpression ?? false, (e) => score.useExpression = e} onchange={() => {
-                        if (score.useExpression) {
-                            score.expValue = '';
-                            if (!score.setValue) score.setValue = false;
-                            if (score.isRandom) {
-                                score.expMinValue = '';
-                                score.expMaxValue = '';
-                            }
-                        } else {
-                            delete score.useExpression;
-                            delete score.expValue;
-                            if (score.isRandom) {
-                                delete score.expMinValue;
-                                delete score.expMaxValue;
-                            } else {
-                                delete score.setValue;
-                            }
-                        }
-                    }} />
-                    {#snippet label()}
-                        Use Expression
-                    {/snippet}
-                </FormField>
-            </Wrapper>
-        </div>
         <div class="row gx-3">
             <div class:disabled={choice.isActive} class={col6}>
                 <Autocomplete
@@ -127,31 +28,11 @@
                     textfield$variant="filled"
                     class="col-12 my-1"
                 />
-                {#if score.isRandom}
-                    {#if score.useExpression}
-                        <Textfield class="mb-1" bind:value={() => score.expMinValue ?? '', (e) => score.expMinValue = e} label="Min Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
-                        <Textfield class="mb-1" bind:value={() => score.expMaxValue ?? '', (e) => score.expMaxValue = e} label="Max Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
-                    {:else}
-                        <Textfield class="mb-1" bind:value={() => score.minValue ?? 0, (e) => score.minValue = e} onchange={() => {
-                            if (score.minValue && !pointType?.allowFloat) {
-                                score.minValue = Math.floor(score.minValue);
-                            }
-                        }} label="Minimum Value" type="number" variant="filled" />
-                        <Textfield class="mb-1" bind:value={() => score.maxValue ?? 0, (e) => score.maxValue = e} onchange={() => {
-                            if (score.maxValue && !pointType?.allowFloat) {
-                                score.maxValue = Math.floor(score.maxValue);
-                            }
-                        }} label="Maximum Value" type="number" variant="filled" />
-                    {/if}
-                {:else if score.useExpression}
-                    <Textfield class="mb-1" bind:value={() => score.expValue ?? '', (e) => score.expValue = e} label="Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
-                {:else}
-                    <Textfield class="mb-1" bind:value={score.value} onchange={() => {
-                        if (!pointType?.allowFloat) {
-                            score.value = Math.floor(score.value);
-                        }
-                    }} label="Value" type="number" variant="filled" />
-                {/if}
+                <Textfield class="mb-1{score.useExpression || score.isRandom ? ' disabled' : ''}" bind:value={score.value} onchange={() => {
+                    if (!pointType?.allowFloat) {
+                        score.value = Math.floor(score.value);
+                    }
+                }} label="Value" type="number" variant="filled" />
             </div>
             <div class={col6}>
                 <Textfield class="my-1" bind:value={score.beforeText} label="Text Before" variant="filled" />
@@ -188,6 +69,152 @@
                 </div>
             {/each}
         </div>
+        <Accordion>
+            <Panel class="bordered-panel {panelFunction ? ' on-top' : ''}" bind:open={panelFunction} variant="unelevated" conditionalRender={true}>
+                <Header class="p-0">
+                    Functions:
+                </Header>
+                <AcdContent style="overflow:visible">
+                    {#if panelFunction}
+                    <div class:disabled={choice.isActive} class="row gy-3">
+                        <FormField class="col-12 m-1 p-0">
+                            <Checkbox bind:checked={() => score.useExpression ?? false, (e) => score.useExpression = e} onchange={() => {
+                                if (score.useExpression) {
+                                    score.expValue = '';
+                                    if (!score.setValue) score.setValue = false;
+                                    if (score.isRandom) {
+                                        score.expMinValue = '';
+                                        score.expMaxValue = '';
+                                    }
+                                } else {
+                                    delete score.useExpression;
+                                    delete score.expValue;
+                                    if (score.isRandom) {
+                                        delete score.expMinValue;
+                                        delete score.expMaxValue;
+                                    } else {
+                                        delete score.setValue;
+                                    }
+                                }
+                            }} />
+                            {#snippet label()}
+                                Use Expression
+                            {/snippet}
+                        </FormField>
+                        {#if score.useExpression}
+                            <div class="col-12 m-1">Point IDs must be wrapped in curly braces. (e.g. {'{point ID}'} * 2)</div>
+                            {#if !score.isRandom}
+                                <Textfield class="mb-1" bind:value={() => score.expValue ?? '', (e) => score.expValue = e} label="Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
+                            {/if}
+                            <div class="b-line"></div>
+                        {/if}
+                        <FormField class="col-12 m-1 p-0">
+                            <Checkbox bind:checked={() => score.isRandom ?? false, (e) => score.isRandom = e} onchange={() => {
+                                if (score.isRandom) {
+                                    score.minValue = 0;
+                                    score.maxValue = 0;
+                                    if (!score.setValue) score.setValue = false;
+                                    if (score.useExpression) {
+                                        score.expMinValue = '';
+                                        score.expMaxValue = '';
+                                    }
+                                } else {
+                                    delete score.isRandom;
+                                    delete score.minValue;
+                                    delete score.maxValue;
+                                    if (score.useExpression) {
+                                        delete score.expMinValue;
+                                        delete score.expMaxValue;
+                                    } else {
+                                        delete score.setValue;
+                                    }
+                                }
+                            }} />
+                            {#snippet label()}
+                                Use Random Value
+                            {/snippet}
+                        </FormField>
+                        {#if score.isRandom}
+                            <div class="px-2">
+                            {#if score.useExpression}
+                                <Textfield class="mb-1" bind:value={() => score.expMinValue ?? '', (e) => score.expMinValue = e} label="Min Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
+                                <Textfield class="mb-1" bind:value={() => score.expMaxValue ?? '', (e) => score.expMaxValue = e} label="Max Expression" input$placeholder="{'{point ID}'} * 2" variant="filled" />
+                            {:else}
+                                <Textfield class="mb-1" bind:value={() => score.minValue ?? 0, (e) => score.minValue = e} onchange={() => {
+                                    if (score.minValue && !pointType?.allowFloat) {
+                                        score.minValue = Math.floor(score.minValue);
+                                    }
+                                }} label="Minimum Value" type="number" variant="filled" />
+                                <Textfield class="mb-1" bind:value={() => score.maxValue ?? 0, (e) => score.maxValue = e} onchange={() => {
+                                    if (score.maxValue && !pointType?.allowFloat) {
+                                        score.maxValue = Math.floor(score.maxValue);
+                                    }
+                                }} label="Maximum Value" type="number" variant="filled" />
+                            {/if}
+                            </div>
+                            <div class="b-line"></div>
+                        {/if}
+                        {#if choice.isSelectableMultiple && choice.isMultipleUseVariable}
+                            <FormField class="col-12 m-1 p-0">
+                                <Checkbox bind:checked={() => score.multiplyByTimes ?? false, (e) => score.multiplyByTimes = e} onchange={() => {
+                                    if (!score.multiplyByTimes) {
+                                        delete score.multiplyByTimes;
+                                        delete score.displayMulScore;
+                                    }
+                                }} />
+                                {#snippet label()}
+                                    Muliply by number of selections
+                                {/snippet}
+                            </FormField>
+                            {#if score.multiplyByTimes}
+                                <FormField class="col-12 m-1 p-0">
+                                    <Checkbox bind:checked={() => score.displayMulScore ?? false, (e) => score.displayMulScore = e} onchange={() => {
+                                        if (!score.displayMulScore) {
+                                            delete score.displayMulScore;
+                                        }
+                                    }} />
+                                    {#snippet label()}
+                                        Display multiplied score
+                                    {/snippet}
+                                </FormField>
+                                <div class="b-line"></div>
+                            {/if}
+                        {/if}
+                        <FormField class="col-12 m-1 p-0">
+                            <Checkbox bind:checked={() => score.isNotRecalculateSelf ?? false, (e) => score.isNotRecalculateSelf = e} onchange={() => {
+                                if (!score.isNotRecalculateSelf) {
+                                    delete score.isNotRecalculateSelf;
+                                }
+                            }} />
+                            {#snippet label()}
+                                Will Be Not Recalculated by This Choice
+                            {/snippet}
+                        </FormField>
+                        <FormField class="col-12 m-1 p-0">
+                            <Checkbox bind:checked={() => score.isNotRecalculatable ?? false, (e) => score.isNotRecalculatable = e} onchange={() => {
+                                if (!score.isNotRecalculatable) {
+                                    delete score.isNotRecalculatable;
+                                }
+                            }} />
+                            {#snippet label()}
+                                Will Be Not Recalculated by Other Choices
+                            {/snippet}
+                        </FormField>
+                        <FormField class="col-12 m-1 p-0">
+                            <Checkbox bind:checked={() => score.isNotDiscountable ?? false, (e) => score.isNotDiscountable = e} onchange={() => {
+                                if (!score.isNotDiscountable) {
+                                    delete score.isNotDiscountable;
+                                }
+                            }} />
+                            {#snippet label()}
+                                Will Be Not Discounted
+                            {/snippet}
+                        </FormField>
+                    </div>
+                    {/if}
+                </AcdContent>
+            </Panel>
+        </Accordion>
     </div>
 {:else if isPointtypeActivated() && checkRequirements(score.requireds)}
     <div class="row m-0">
@@ -209,6 +236,7 @@
 {/if}
 
 <script lang="ts">
+    import Accordion, { Panel, Header, Content as AcdContent} from '$lib/custom/accordion';
     import Autocomplete from '$lib/custom/autocomplete/Autocomplete.svelte';
     import Button, { Label } from '@smui/button';
     import Checkbox from '@smui/checkbox';
@@ -226,6 +254,7 @@
     let { isEditModeOn = false, score, row, choice, addon, num = 0 }: { isEditModeOn?: boolean; score: Score; row?: Row; choice: Choice; addon?: Addon; num?: number } = $props();
     let data = $derived(addon ? addon : choice);
     let width = $state(0);
+    let panelFunction = $state(false);
     let col6 = $derived.by(() => {
         if (width > 300) return 'col-6';
         else return 'col-12';

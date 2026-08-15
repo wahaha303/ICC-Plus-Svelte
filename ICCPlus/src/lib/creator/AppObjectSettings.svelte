@@ -218,26 +218,26 @@
     function removeInvalidStyles(data: any) {
         const bgKeys = ['bgColorIsOn', 'backgroundColor', 'rowBgColorIsOn', 'rowBgColor', 'isBackgroundRepeat', 'isBackgroundFitIn', 'backgroundImage', 'isRowBackgroundRepeat', 'isRowBackgroundFitIn', 'rowBackgroundImage'];
 
-        Object.keys(rowStyling).forEach((key) => {
+        for (const key of Object.keys(rowStyling)) {
             if (key in data) {
                 delete data[key];
             }
-        });
-        Object.keys(rowImageStyling).forEach((key) => {
+        }
+        for (const key of Object.keys(rowImageStyling)) {
             if (key in data) {
                 delete data[key];
             }
-        });
-        Object.keys(pointBarStyling).forEach((key) => {
+        }
+        for (const key of Object.keys(pointBarStyling)) {
             if (key in data) {
                 delete data[key];
             }
-        });
-        Object.keys(backpackStyling).forEach((key) => {
+        }
+        for (const key of Object.keys(backpackStyling)) {
             if (key in data) {
                 delete data[key];
             }
-        });
+        }
 
         for (let i = 0; i < bgKeys.length; i++) {
             const key = bgKeys[i];

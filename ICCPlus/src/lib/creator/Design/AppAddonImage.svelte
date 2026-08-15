@@ -10,21 +10,21 @@
                 <Checkbox bind:checked={() => data.privateAddonImageIsOn ?? false, (e) => data.privateAddonImageIsOn = e} onchange={() => {
                     if (data.privateAddonImageIsOn) {
                         let temp = JSON.parse(JSON.stringify(addonImageStyling));
-                        Object.keys(addonImageStyling).forEach(key => {
+                        for (const key of Object.keys(addonImageStyling)) {
                             if (app.styling.hasOwnProperty(key)) {
                                 let val = app.styling[key as keyof StyleType];
                                 if (typeof val !== 'undefined') temp[key as keyof StyleType] = val;
                             }
-                        });
+                        }
                         data.styling = {...(data.styling || {}), ...temp};
                         data.styling!.useAddonImage = true;
                         styling = data.styling!;
                     } else {
-                        Object.keys(addonImageStyling).forEach(key => {
+                        for (const key of Object.keys(addonImageStyling)) {
                             if (data.styling && app.styling.hasOwnProperty(key)) {
                                 delete data.styling[key as keyof StyleType];
                             }
-                        });
+                        }
                     }
                 }}/>
                 {#snippet label()}

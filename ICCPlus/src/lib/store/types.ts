@@ -420,6 +420,7 @@ export type Score = {
     isActiveMulMinus?: boolean[],
     hideValue?: boolean,
     isNotRecalculatable?: boolean,
+    isNotRecalculateSelf?: boolean,
     isNotDiscountable?: boolean,
     isRandom?: boolean,
     minValue?: number,
@@ -471,6 +472,7 @@ export type ChoiceFunc = {
     selectOnce?: boolean,
     notDeselectedByClean?: boolean,
     isNotResult?: boolean,
+    isNotBuild?: boolean,
     isImageUpload?: boolean,
     cleanACtivatedOnSelect?: boolean,
     activateOtherChoice?: boolean,
@@ -627,7 +629,8 @@ export type ChoiceFunc = {
     sfxOnSelect?: boolean,
     sfxOnDeselect?: boolean,
     isCountDisabled?: boolean,
-    deselectWhenNoAddon?: boolean
+    deselectWhenNoAddon?: boolean,
+    showDebugTitle?: boolean,
 };
 export type BaseAddon = {
     [key: string]: any;
@@ -636,6 +639,7 @@ export type BaseAddon = {
     text: string,
     template: number,
     image: string,
+    imageSourceTooltip?: string,
     requireds: Requireds[],
     parentId?: string,
     showAddon?: boolean,
@@ -673,6 +677,7 @@ export type Choice = {
     text: string,
     debugTitle: string,
     image: string,
+    imageSourceTooltip?: string,
     template: number,
     objectWidth: string,
     isActive: boolean,
@@ -772,6 +777,7 @@ export type Row = {
     defaultTemplate?: number,
     defaultWidth?: string,
     overrideWidth?: boolean,
+    preserveWidth?: boolean,
     templateStack?: {
         id: string,
         data: number
@@ -1043,6 +1049,7 @@ export type App = {
     smallerScreenPx: number,
     enableHalfRow: boolean,
     minimizeTemplate: boolean,
+    hideRowMenu: boolean,
     viewerConfig: ViewerConfig
 } & DefaultSettings;
 export type RowMap = {

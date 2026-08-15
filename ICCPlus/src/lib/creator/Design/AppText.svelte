@@ -10,20 +10,20 @@
                 <Checkbox bind:checked={() => data.privateTextIsOn ?? false, (e) => data.privateTextIsOn = e} onchange={() => {
                     if (data.privateTextIsOn) {
                         let temp = JSON.parse(JSON.stringify(textStyling));
-                        Object.keys(textStyling).forEach(key => {
+                        for (const key of Object.keys(textStyling)) {
                             if (app.styling.hasOwnProperty(key)) {
                                 let val = app.styling[key as keyof StyleType];
                                 if (typeof val !== 'undefined') temp[key as keyof StyleType] = val;
                             }
-                        });
+                        }
                         data.styling = {...(data.styling || {}), ...temp};
                         styling = data.styling!;
                     } else {
-                        Object.keys(textStyling).forEach(key => {
+                        for (const key of Object.keys(textStyling)) {
                             if (data.styling && app.styling.hasOwnProperty(key)) {
                                 delete data.styling[key as keyof StyleType];
                             }
-                        });
+                        }
                     }
                 }} />
                 {#snippet label()}

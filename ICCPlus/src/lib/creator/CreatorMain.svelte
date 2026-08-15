@@ -132,51 +132,53 @@
                     </div>
                 {/if}
                 {#each app.rows as row, i}
-                    <div class={rowWidthClass(row)}>
-                        {#if bCreatorMode}
-                            <div class="p-2 col-12">
-                                <Card>
-                                    <CardContent class="toolbar toolbar--row justify-space-between px-3 py-2">
-                                        <div class="toolbar__title">{@html (typeof row.debugTitle !== 'undefined' ? row.debugTitle : '') + (row.title !== '' ? ' ' + row.title : '')}</div>
-                                        <div class="d-row">
-                                            <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
-                                                <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclickcapture={() => {row.isEditModeOn = !row.isEditModeOn;}} />
-                                            </Wrapper>
-                                            {#if app.useToolbarBtn}
-                                                <Wrapper text="L: Insert Row Above<br>R: Paste Row Above">
-                                                    <IconButton class="mdi mdi-folder-arrow-up" onclickcapture={() => createNewRow(i)} oncontextmenu={(e: MouseEvent) => {
-                                                        pasteAction(e, i);
-                                                    }} />
+                    {#if !app.hideRowMenu || checkRequirements(row.requireds)}
+                        <div class={rowWidthClass(row)}>
+                            {#if bCreatorMode}
+                                <div class="p-2 col-12">
+                                    <Card>
+                                        <CardContent class="toolbar toolbar--row justify-space-between px-3 py-2">
+                                            <div class="toolbar__title">{@html (typeof row.debugTitle !== 'undefined' ? row.debugTitle : '') + (row.title !== '' ? ' ' + row.title : '')}</div>
+                                            <div class="d-row">
+                                                <Wrapper text={row.isEditModeOn ? 'Preview' : 'Edit Row'}>
+                                                    <IconButton class={row.isEditModeOn ? 'mdi mdi-arrow-left' : 'mdi mdi-wrench'} onclickcapture={() => {row.isEditModeOn = !row.isEditModeOn;}} />
                                                 </Wrapper>
-                                            {/if}
-                                            <Wrapper text="Delete Row">
-                                                <IconButton class="mdi mdi-delete-forever" onclickcapture={() => {deleteRow(row, i);}} />
-                                            </Wrapper>
-                                            <Wrapper text="L: Clone Row<br>R: Context Menu">
-                                                <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneRow(row, i)} oncontextmenu={(e) => rowContext(e, row, i)} />
-                                            </Wrapper>
-                                            <Wrapper text="Move Row Up">
-                                                <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveRowUp(i)} />
-                                            </Wrapper>
-                                            <Wrapper text="Move Row Down">
-                                                <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveRowDown(i)} />
-                                            </Wrapper>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        {/if}
-                        <AppRow row={row} bCreatorMode={bCreatorMode} windowWidth={width} mainDiv={mainDiv} />
-                        {#if bCreatorMode && !app.useToolbarBtn}
-                            <div class="p-2 col-12">
-                                <Wrapper text="L: Create New Row<br>R: Paste Row">
-                                    <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclickcapture={() => createNewRow(i + 1)} oncontextmenu={(e: MouseEvent) => pasteAction(e, i + 1)} aria-label="Create New Row">
-                                        <i class="mdi mdi-plus-thick"></i>
-                                    </button>
-                                </Wrapper>
-                            </div>
-                        {/if}
-                    </div>
+                                                {#if app.useToolbarBtn}
+                                                    <Wrapper text="L: Insert Row Above<br>R: Paste Row Above">
+                                                        <IconButton class="mdi mdi-folder-arrow-up" onclickcapture={() => createNewRow(i)} oncontextmenu={(e: MouseEvent) => {
+                                                            pasteAction(e, i);
+                                                        }} />
+                                                    </Wrapper>
+                                                {/if}
+                                                <Wrapper text="Delete Row">
+                                                    <IconButton class="mdi mdi-delete-forever" onclickcapture={() => {deleteRow(row, i);}} />
+                                                </Wrapper>
+                                                <Wrapper text="L: Clone Row<br>R: Context Menu">
+                                                    <IconButton class="mdi mdi-content-copy" onclickcapture={() => cloneRow(row, i)} oncontextmenu={(e) => rowContext(e, row, i)} />
+                                                </Wrapper>
+                                                <Wrapper text="Move Row Up">
+                                                    <IconButton class="mdi mdi-chevron-up" onclickcapture={() => moveRowUp(i)} />
+                                                </Wrapper>
+                                                <Wrapper text="Move Row Down">
+                                                    <IconButton class="mdi mdi-chevron-down" onclickcapture={() => moveRowDown(i)} />
+                                                </Wrapper>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            {/if}
+                            <AppRow row={row} bCreatorMode={bCreatorMode} windowWidth={width} mainDiv={mainDiv} />
+                            {#if bCreatorMode && !app.useToolbarBtn}
+                                <div class="p-2 col-12">
+                                    <Wrapper text="L: Create New Row<br>R: Paste Row">
+                                        <button type="button" class="create-box col-12" style="min-height: 100px; font-size: 40px;" onclickcapture={() => createNewRow(i + 1)} oncontextmenu={(e: MouseEvent) => pasteAction(e, i + 1)} aria-label="Create New Row">
+                                            <i class="mdi mdi-plus-thick"></i>
+                                        </button>
+                                    </Wrapper>
+                                </div>
+                            {/if}
+                        </div>
+                    {/if}
                 {/each}
             </div>
         </div>
@@ -260,7 +262,7 @@
     import Slider from '@smui/slider';
     import Tooltip, { Wrapper } from '$lib/custom/tooltip';
     import TopAppBar, { Row as AppBarRow, Section as AppBarSection } from '@smui/top-app-bar';
-    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateId, dlgVariables, tmpActivatedMap, bgmVariables, toggleTheme, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog, imgDialog, winWidth } from '$lib/store/store.svelte';
+    import { app, currentComponent, rowMap, choiceMap, activatedMap, cleanActivated, generateId, dlgVariables, tmpActivatedMap, bgmVariables, toggleTheme, scoreSet, checkPointEnable, groupMap, objectDesignMap, rowDesignMap, hexToRgba, useAltMenu, snackbarVariables, menuVariables, removeAnchor, clearClipboard, deleteDiscount, exportData, importData, musicPlayer, wordDialog, imgDialog, winWidth, checkRequirements } from '$lib/store/store.svelte';
     import type { Row, Choice, SelectableAddon } from '$lib/store/types';
     import AppBuildForm from './AppBuildForm.svelte';
     import AppDesign from './AppDesign.svelte';
@@ -1048,5 +1050,4 @@
         isChangingVol = false;
         (document.activeElement as HTMLElement)?.blur();
     }
-    
 </script>

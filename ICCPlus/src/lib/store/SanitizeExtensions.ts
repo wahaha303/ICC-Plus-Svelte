@@ -13,7 +13,7 @@ import Code from '@tiptap/extension-code'
 
 
 const BUILTIN_TAGS = new Set([
-  'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img', 'p', 'span', 'div'
+  'blockquote', 'pre', 'ul', 'ol', 'li', 'strong', 'em', 'strike', 'code', 'br', 'img', 'p', 'span', 'div', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'caption', 'colgroup', 'col',
 ])
 
 const inlineTags = new Set([
