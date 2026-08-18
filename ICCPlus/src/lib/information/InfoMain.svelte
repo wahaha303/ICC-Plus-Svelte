@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.1 / ${getDate('2026-08-18T14:00:00Z')}`,
+        text: `<span style="color: green">Global Settings</span>
+        - Fixed issue where some features did not work when the Hide Row Menu option was enabled.
+        `
+    }, {
+        open: false,
         title: `v2.10.0 / ${getDate('2026-08-15T11:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Added option to retain configured choices per row on smaller screens.
