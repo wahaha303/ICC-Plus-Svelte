@@ -354,7 +354,11 @@ export const pointBarStyling = {
     barPointPos: '#FF0000FF',
     barPointNeg: '#FF0000FF',
     barIconColor: '#0000008A',
-    barBackgroundColor: '#FFFFFFFF'
+    barBackgroundColor: '#FFFFFFFF',
+    barBacktroundImage: '',
+    isBarBgRepeat: false,
+    isBarBgFitIn: false,
+    isBarBgOverlay: false,
 }
 export const backpackStyling = {
     useBackpackDesign: false,
