@@ -18,26 +18,63 @@
             <CardContent>
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                        <div class="col-lg-3 col-sm-6 col-12 gy-2 mb-3">
                             <div class="col-12">Bar Text Color</div>
                             <ColorPicker bind:hex={() => styling.barTextColor ?? '#000000', (e) => styling.barTextColor = e} components={ChromeVariant} sliderDirection="horizontal"/>
                         </div>
-                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                        <div class="col-lg-3 col-sm-6 col-12 gy-2 mb-3">
                             <div class="col-12">Bar Points Color Positive</div>
                             <ColorPicker bind:hex={() => styling.barPointPos ?? '#000000', (e) => styling.barPointPos = e} components={ChromeVariant} sliderDirection="horizontal"/>
                         </div>
-                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                        <div class="col-lg-3 col-sm-6 col-12 gy-2 mb-3">
                             <div class="col-12">Bar Points Color Negative</div>
                             <ColorPicker bind:hex={() => styling.barPointNeg ?? '#000000', (e) => styling.barPointNeg = e} components={ChromeVariant} sliderDirection="horizontal"/>
                         </div>
-                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
-                            <div class="col-12">Bar Background Color</div>
-                            <ColorPicker bind:hex={() => styling.barBackgroundColor ?? '#000000', (e) => styling.barBackgroundColor = e} components={ChromeVariant} sliderDirection="horizontal"/>
-                        </div>
-                        <div class="col-lg-2 col-sm-6 col-12 gy-2 mb-3">
+                        <div class="col-lg-3 col-sm-6 col-12 gy-2 mb-3">
                             <div class="col-12">Bar Icon Color</div>
                             <ColorPicker bind:hex={() => styling.barIconColor ?? '#000000', (e) => styling.barIconColor = e} components={ChromeVariant} sliderDirection="horizontal"/>
                         </div>
+                        <div class="text-center col-lg-4 col-sm-6 col-12 gy-2 mb-3">
+                            <div class="col-12">Bar Background Color</div>
+                            <ColorPicker bind:hex={() => styling.barBackgroundColor ?? '#000000', (e) => styling.barBackgroundColor = e} components={ChromeVariant} sliderDirection="horizontal"/>
+                        </div>
+                        <div class="text-center col-lg-4 col-sm-6 col-12 px-5 gy-2 mb-3">
+                            <div class="col-12">Bar Background Image</div>
+                            {#if styling.barBackgroundImage}
+                                <button type="button" onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'barBackgroundImage'}} class="btn--image-background">
+                                    <img src={styling.barBackgroundImage} alt="Bar Background" loading="lazy" class="btn--image" style="max-height: 140px;" />
+                                </button>
+                            {/if}
+                            <Button onclickcapture={() => {currentDialog = 'appImageUpload'; imgProp = 'barBackgroundImage'}} variant="raised">
+                                <Label>Change Image</Label>
+                            </Button>
+                        </div>
+                        {#if styling.barBackgroundImage}
+                            <div class="col-lg-4 col-sm-6 col-12">
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isBarBgOverlay ?? false, (e) => styling.isBarBgOverlay = e} />
+                                    {#snippet label()}
+                                        Overlay color on image?
+                                    {/snippet}
+                                </FormField>
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isBarBgRepeat ?? false, (e) => styling.isBarBgRepeat = e} onchange={() => {
+                                        if (styling.isBarBgRepeat) styling.isBarBgFitIn = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it repeat?
+                                    {/snippet}
+                                </FormField>
+                                <FormField class="w-100">
+                                    <Checkbox bind:checked={() => styling.isBarBgFitIn ?? false, (e) => styling.isBarBgFitIn = e} onchange={() => {
+                                        if (styling.isBarBgFitIn) styling.isBarBgRepeat = false;
+                                    }} />
+                                    {#snippet label()}
+                                        Does it fit in?
+                                    {/snippet}
+                                </FormField>
+                            </div>
+                        {/if}
                         <div class="col-lg-6 col-12 gy-2">
                             <div class="col-12 px-3">Style of text inside the point-bar</div>
                             <Textfield class="mb-4" bind:value={() => styling.barTextPadding ?? 0, (e) => styling.barTextPadding = e} label="Bar Text Padding" type="number" suffix="px" variant="filled" />
@@ -75,6 +112,9 @@
         </Button>
     </Actions>
 </Dialog>
+{#if currentDialog === 'appImageUpload'}
+    <ImageUpload open={currentDialog === 'appImageUpload'} onclose={() => (currentDialog = 'none')} imgObject={styling} imgProp={imgProp} canHaveURL={true} />
+{/if}
 <script lang="ts">
     import Button, { Label } from '@smui/button';
     import Card, { Content as CardContent } from '@smui/card';
@@ -84,12 +124,14 @@
     import FormField from '@smui/form-field';
     import Textfield from '$lib/custom/textfield/Textfield.svelte';
     import Select, { Option } from '$lib/custom/select';
-    import Switch from '@smui/switch';
-    import { app, textFonts, pointBarStyling } from '$lib/store/store.svelte';
-    import type { Choice, Row, Styling, pointBarStyling as StyleType } from '$lib/store/types';
+    import ImageUpload from '$lib/store/ImageUpload.svelte';
+    import { app, textFonts } from '$lib/store/store.svelte';
+    import type { Styling } from '$lib/store/types';
 
     let { open, onclose }: { open: boolean; onclose: () => void; } = $props();
-    const borderStyles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset', 'hidden'];
+
+    let currentDialog = $state<'none' | 'appImageUpload'>('none');
+    let imgProp = $state('');
     let isTransparent = $state(false);
     let dialogStyle = $derived(isTransparent ? 'opacity: 0.2' : '');
     let styling = $state<Styling>(app.styling);

@@ -815,6 +815,7 @@ export type PointType = {
     pointPrivateColorIsOn?: boolean,
     privateColor?: string,
     privateNegativeColor?: string,
+    treatZeroAsNegative?: boolean,
     imageIsURL?: boolean,
     allowFloat?: boolean,
     decimalPlaces?: number,

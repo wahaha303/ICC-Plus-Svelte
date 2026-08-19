@@ -49,7 +49,7 @@
     let isTransparent = $state(false);
     let dialogStyle = $derived(isTransparent ? 'opacity: 0.2' : '');
 
-    const placeholder = `Row: row-Row ID\nRow Background: row-bg, row-Row ID-bg, row-bg-Row ID\nRow Header: row-header, row-Row ID-header, row-header-Row ID\nRow Button: row-button\nChoice: choice, choice-Choice ID\nEnabled Choice: choice-enabled\nDisabled Choice: choice-disabled\nSelected Choice: choice-selected\nUnselected Choice: choice-unselected\nAddon: addon\nSelectable Addon: addon-selectable, addon-Addon ID\nEnabled Addon: addon-enabled\nDisabled Addon: addon-disabled\nSelected Addon: addon-selected\nUnselected Addon: addon-unselected`;
+    const placeholder = `Row: row-Row ID\nRow Background: row-bg, row-Row ID-bg, row-bg-Row ID\nRow Header: row-header, row-Row ID-header, row-header-Row ID\nRow Button: row-button\nChoice: choice, choice-Choice ID\nEnabled Choice: choice-enabled\nDisabled Choice: choice-disabled\nSelected Choice: choice-selected\nUnselected Choice: choice-unselected\nAddon: addon\nSelectable Addon: addon-selectable, addon-Addon ID\nEnabled Addon: addon-enabled\nDisabled Addon: addon-disabled\nSelected Addon: addon-selected\nUnselected Addon: addon-unselecte\nPoint Bar: pointBar`;
 
     onMount(() => {
         if (typeof app.customCSS !== 'undefined') {

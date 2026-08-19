@@ -11,6 +11,18 @@
         <div class="row gx-0 p-4">
             <div class="col-12">
                 <FormField>
+                    <Switch bind:checked={() => currentPoint.treatZeroAsNegative ?? false, (e) => currentPoint.treatZeroAsNegative = e} onSMUISwitchChange={() => {
+                        if (!currentPoint.treatZeroAsNegative) {
+                            delete currentPoint.treatZeroAsNegative;
+                        }
+                    }} color="secondary" class="switch-scale" />
+                    {#snippet label()}
+                        Treat zero as negative for colors and icons.
+                    {/snippet}
+                </FormField>
+            </div>
+            <div class="col-12">
+                <FormField>
                     <Switch bind:checked={() => currentPoint.pointColorsIsOn ?? false, (e) => currentPoint.pointColorsIsOn = e} onSMUISwitchChange={() => {
                         if (currentPoint.pointColorsIsOn) {
                             currentPoint.positiveColor = hex;

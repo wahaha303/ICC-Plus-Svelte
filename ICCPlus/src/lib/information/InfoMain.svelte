@@ -224,6 +224,18 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.2 / ${getDate('2026-08-19T14:00:00Z')}`,
+        text: `<span style="color: green">Point Type</span>
+        - Added option to treat 0 as negative for colors and icons.
+
+        <span style="color: green">Point Bar</span>
+        - Fixed issue where HTML code could not be applied to before text and after text.
+
+        <span style="color: green">Design</span>
+        - Added option to set background image for point bar.
+        `
+    }, {
+        open: false,
         title: `v2.10.1 / ${getDate('2026-08-18T14:00:00Z')}`,
         text: `<span style="color: green">Global Settings</span>
         - Fixed issue where some features did not work when the Hide Row Menu option was enabled.

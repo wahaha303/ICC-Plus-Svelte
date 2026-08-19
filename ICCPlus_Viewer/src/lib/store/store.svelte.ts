@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.1';
+export const appVersion = '2.10.2';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3211,7 +3211,7 @@ export function checkPoints(localChoice: Choice | SelectableAddon, isSel: boolea
                 const dChoice = dMap.choice;
                 if (!dChoice.countPerSelection || typeof dChoice.appliedDisChoices === 'undefined') continue;
 
-                if (dChoice.appliedDisChoices.filter(id => id === localChoice.id).length = localChoice.multipleUseVariable) {
+                if (dChoice.appliedDisChoices.filter(id => id === localChoice.id).length === localChoice.multipleUseVariable) {
                     scoreVal = score.discountScore;
                     break;
                 }

@@ -418,10 +418,11 @@
         return isMaxNegative ? `${maxVal} ~ ${minVal}` : `${minVal} ~ ${maxVal}`;
     });
     let checkNegative = $derived.by(() => {
+        const isZeroNegative = pointType?.treatZeroAsNegative;
         if (score.appliedDiscount && typeof score.discountScore !== 'undefined' && discountTexts.show) {
-            return score.discountScore < 0;
+            return isZeroNegative ? score.discountScore <= 0 : score.discountScore < 0;
         }
-        return score.value < 0;
+        return isZeroNegative ? score.value <= 0 : score.value < 0;
     });
     let scoreFullText = $derived.by(() => {
         let result = '';

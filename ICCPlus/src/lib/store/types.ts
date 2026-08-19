@@ -342,7 +342,11 @@ export type pointBarStyling = {
     barPointPos?: string,
     barPointNeg?: string,
     barIconColor?: string,
-    barBackgroundColor?: string
+    barBackgroundColor?: string,
+    barBackgroundImage?: string,
+    isBarBgRepeat?: boolean,
+    isBarBgFitIn?: boolean,
+    isBarBgOverlay?: boolean,
 };
 export type backpackStyling = {
     useBackpackDesign?: boolean,
@@ -823,6 +827,7 @@ export type PointType = {
     pointPrivateColorIsOn?: boolean,
     privateColor?: string,
     privateNegativeColor?: string,
+    treatZeroAsNegative?: boolean,
     imageIsURL?: boolean,
     allowFloat?: boolean,
     decimalPlaces?: number,

@@ -1,7 +1,7 @@
 {
   "name": "iccplus",
   "private": true,
-  "version": "2.10.1",
+  "version": "2.10.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -64,7 +64,7 @@
     "@tiptap/starter-kit": "^3.29.2",
     "bootstrap": "^5.3.7",
     "cropperjs": "^1.6.2",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.4.13",
     "html-to-image": "^1.11.13",
     "js-beautify": "^1.15.4",
     "jszip": "^3.10.1",

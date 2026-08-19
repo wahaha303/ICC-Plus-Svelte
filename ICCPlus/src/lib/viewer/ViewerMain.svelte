@@ -101,7 +101,7 @@
             </TopAppBar>
         {/if}
         {#if pointBarIsOn}
-            <TopAppBar class="pointBar" style={pointBar} variant="fixed" color="secondary" >
+            <TopAppBar class="pointBar{app.styling.isBarBgOverlay ? ' bg-overlay' : ''}" style={pointBar} variant="fixed" color="secondary" >
                 <AppBarRow class="justify-space-around">
                     <AppBarSection class="py-0 justify-center">
                         {#if app.importedChoicesIsOpen}
@@ -219,7 +219,35 @@
     let fileInput = $state<HTMLInputElement>();
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
-    let pointBar = $derived(`background-color: ${hexToRgba(app.styling.barBackgroundColor)}; margin:${app.styling.barMargin}px; padding:${app.styling.barPadding}px; ${pointBarPosition}`);
+    let pointBar = $derived.by(() => {
+        const styles: string[] = [];
+
+        if (app.styling.barBackgroundImage) {
+            styles.push(`background-image: url('${app.styling.barBackgroundImage}');`);
+        }
+
+        if (app.styling.isBarBgRepeat) {
+            styles.push(`background-repeat: repeat;`);
+        } else if (app.styling.isBarBgFitIn) {
+            styles.push(`background-size: 100% 100%;`);
+        }
+
+        if (typeof app.styling.barBackgroundColor !== 'undefined') {
+            styles.push(`background-color: ${hexToRgba(app.styling.barBackgroundColor)};`);
+        }
+
+        if (typeof app.styling.barMargin !== 'undefined') {
+            styles.push(`margin: ${app.styling.barMargin}px;`);
+        }
+
+        if (typeof app.styling.barPadding !== 'undefined') {
+            styles.push(`padding: ${app.styling.barPadding}px;`)
+        }
+
+        styles.push(`${pointBarPosition}`);
+
+        return styles.join(' ');
+    });
     let pointBarText = $derived(`color: ${hexToRgba(app.styling.barTextColor)}; margin: ${app.styling.barTextMargin}px; padding: ${app.styling.barTextPadding}px; font-family: '${app.styling.barTextFont}'; font-size: ${app.styling.barTextSize}px;`);
     let pointBarIcon = $derived(`color: ${hexToRgba(app.styling.barIconColor)};`);
     let background = $derived.by(() => {

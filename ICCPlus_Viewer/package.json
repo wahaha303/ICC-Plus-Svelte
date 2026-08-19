@@ -1,7 +1,7 @@
 {
   "name": "iccplus_viewer",
   "private": true,
-  "version": "2.10.1",
+  "version": "2.10.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -48,7 +48,7 @@
     "@smui/top-app-bar": "^8.0.3",
     "bootstrap": "^5.3.7",
     "cropperjs": "^1.6.2",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.4.14",
     "html-to-image": "^1.11.13",
     "patch-package": "^8.0.0",
     "propper": "^1.0.4",

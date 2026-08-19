@@ -92,7 +92,7 @@
             </TopAppBar>
         {/if}
         {#if pointBarIsOn}
-            <TopAppBar class="pointBar" style={pointBar} color="secondary" variant="fixed" >
+            <TopAppBar class="pointBar{app.styling.isBarBgOverlay ? ' bg-overlay' : ''}" style={pointBar} color="secondary" variant="fixed" >
                 <AppBarRow class="justify-space-around">
                     <AppBarSection class="py-0 justify-center">
                         {#if app.importedChoicesIsOpen}
@@ -363,25 +363,36 @@
     
     let pointBarIsOn = $derived(app.pointTypes.length > 0 || app.backpack.length > 0 || app.importedChoicesIsOpen);
     let pointBar = $derived.by(() => {
-        const styles: string[] = [];;
+        const styles: string[] = [];
 
         if (useAltMenu.value) {
             styles.push(`max-width: 100%;`);
         } else {
             styles.push(`max-width: calc(100% - 56px);`);
         }
-        
+
+        if (app.styling.barBackgroundImage) {
+            styles.push(`background-image: url('${app.styling.barBackgroundImage}');`);
+        }
+
+        if (app.styling.isBarBgRepeat) {
+            styles.push(`background-repeat: repeat;`);
+        } else if (app.styling.isBarBgFitIn) {
+            styles.push(`background-size: 100% 100%;`);
+        }
+
         if (typeof app.styling.barBackgroundColor !== 'undefined') {
             styles.push(`background-color: ${hexToRgba(app.styling.barBackgroundColor)};`);
         }
 
         if (typeof app.styling.barMargin !== 'undefined') {
-            styles.push(`margin:${app.styling.barMargin}px;`);
+            styles.push(`margin: ${app.styling.barMargin}px;`);
         }
 
         if (typeof app.styling.barPadding !== 'undefined') {
-            styles.push(`padding:${app.styling.barPadding}px;`)
+            styles.push(`padding: ${app.styling.barPadding}px;`)
         }
+
         styles.push(`${pointBarPosition}`);
 
         return styles.join(' ');
