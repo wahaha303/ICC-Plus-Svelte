@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.2';
+export const appVersion = '2.10.3';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4187,7 +4187,7 @@ export async function cleanActivated(isReset: boolean = true) {
     if (isReset) {
         await activateTempChoices({linkedObjects: []});
         if (reactivateCode.length > 0) {
-            activateProc(reactivateCode.join(','));
+            await activateProc(reactivateCode.join(','));
         }
     }
 }
@@ -8973,7 +8973,7 @@ async function activateProc(str: string) {
 }
 export async function loadActivated(str: string) {
     await cleanActivated(false);
-    activateProc(str);
+    await activateProc(str);
 }
 export function duplicateRow(localChoice: Choice | SelectableAddon, localRow: Row) {
     if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
@@ -9717,7 +9717,7 @@ export async function loadFromDisk(valueTypeFiles: FileList | null) {
                     const parsed = AppSchema.safeParse(cleanedData);
 
                     if (parsed.success) {
-                        initializeApp(parsed.data);
+                        await initializeApp(parsed.data);
                         snackbarVariables.labelText = 'Data loaded successfully.';
                         snackbarVariables.isOpen = true;
                     } else {
@@ -9764,7 +9764,7 @@ export async function loadFromDisk(valueTypeFiles: FileList | null) {
                         const parsed = AppSchema.safeParse(cleanedData);
 
                         if (parsed.success) {
-                            initializeApp(parsed.data);
+                            await initializeApp(parsed.data);
                             replaceImages(imgMap);
                             snackbarVariables.labelText = 'Data loaded successfully.';
                             snackbarVariables.isOpen = true;
@@ -11334,7 +11334,7 @@ export async function initializeApp(tempApp: any) {
         for (let i = 0; i < app.soundEffects.length; i++) {
             const sfx = app.soundEffects[i];
 
-            loadSfx(sfx.id, sfx.audio);
+            await loadSfx(sfx.id, sfx.audio);
             sfxMap.set(sfx.id, sfx);
         }
     }

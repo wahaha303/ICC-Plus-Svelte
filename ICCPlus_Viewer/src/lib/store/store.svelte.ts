@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.2';
+export const appVersion = '2.10.3';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -3874,7 +3874,7 @@ export async function cleanActivated(isReset: boolean = true) {
     if (isReset) {
         await activateTempChoices({linkedObjects: []});
         if (reactivateCode.length > 0) {
-            activateProc(reactivateCode.join(','));
+            await activateProc(reactivateCode.join(','));
         }
     }
 }
@@ -8660,7 +8660,7 @@ async function activateProc(str: string) {
 }
 export async function loadActivated(str: string) {
     await cleanActivated(false);
-    activateProc(str);
+    await activateProc(str);
 }
 export function duplicateRow(localChoice: Choice | SelectableAddon, localRow: Row) {
     if (typeof localChoice.duplicateRowId !== 'undefined' && typeof localChoice.duplicateRowPlace !== 'undefined') {
@@ -9418,7 +9418,7 @@ function compareVersion(oldVersion: string | null = '1.18.9', currentVersion: st
 
     return 0;
 }
-export function initializeApp(tempApp: any) {
+export async function initializeApp(tempApp: any) {
     const keys = Object.keys(tempApp);
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
@@ -10326,13 +10326,13 @@ export function initializeApp(tempApp: any) {
         for (let i = 0; i < app.soundEffects.length; i++) {
             const sfx = app.soundEffects[i];
 
-            loadSfx(sfx.id, sfx.audio);
+            await loadSfx(sfx.id, sfx.audio);
             sfxMap.set(sfx.id, sfx);
         }
     }
     
     if (app.activated.length > 0) {
-        loadActivated(app.activated.join(','));
+        await loadActivated(app.activated.join(','));
     }
 }
 async function waitForImagesToLoad(container: HTMLElement): Promise<void> {

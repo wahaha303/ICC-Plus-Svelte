@@ -224,6 +224,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.3 / ${getDate('2026-08-23T14:00:00Z')}`,
+        text: `<span style="color: green">Save / Load</span>
+        - Fixed issue where images didn't load when loading ZIP files.
+        - Fixed issue where currently selected choices weren't saved properly when exporting project as ZIP file.
+        `
+    }, {
+        open: false,
         title: `v2.10.2 / ${getDate('2026-08-19T14:00:00Z')}`,
         text: `<span style="color: green">Point Type</span>
         - Added option to treat 0 as negative for colors and icons.

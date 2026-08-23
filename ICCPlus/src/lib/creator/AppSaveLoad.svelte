@@ -497,6 +497,7 @@
     function exportZip() {
         try {
             const zip = new JsZip();
+            app.activated = getSelectedObjectId().split(',');
             const tempApp: App = removeNulls(JSON.parse(JSON.stringify(app)));
 
             imageSeparation(zip, tempApp);
@@ -546,6 +547,8 @@
             const doc = parser.parseFromString(html, 'text/html');
             const indEl = doc.getElementById('indicator');
             const sizeEl = doc.getElementById('projectSize');
+
+            app.activated = getSelectedObjectId().split(',');
             const tempApp: App = removeNulls(JSON.parse(JSON.stringify(app)));
             const title = tempApp.viewerConfig.title;
             

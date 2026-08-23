@@ -150,7 +150,7 @@
                     const parsed = AppSchema.safeParse(cleanedData);
                     
                     if (parsed.success) {
-                        initializeApp(parsed.data);
+                        await initializeApp(parsed.data);
                         if (app.preloadExternalImages && externalImages.size > 0) {
                             await loadImagesSequentially(externalImages);
                         }
@@ -182,7 +182,7 @@
                     boxEl.style.height = '0';
                 }
                 const json = JSON.parse(JSON.stringify(app));
-                initializeApp(json);
+                await initializeApp(json);
                 if (app.preloadExternalImages && externalImages.size > 0) {
                     await loadImagesSequentially(externalImages);
                 }
@@ -225,14 +225,14 @@
                 }
 				if (xhr.status === 200) {
 					const json = JSON.parse(xhr.responseText);
-					initializeApp(json);
+					await initializeApp(json);
 
 					if (app.preloadExternalImages && app.externalImages.size > 0) {
 						await loadImagesSequentially(app.externalImages);
 					}
 				} else {
                     const json = JSON.parse(JSON.stringify(app));
-					initializeApp(json);
+					await initializeApp(json);
 				}
 				setTimeout(() => {
                     const styleEl = document.createElement('style');
