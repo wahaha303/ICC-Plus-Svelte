@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.4 / ${getDate('2026-08-30T11:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where page froze when using discount count option with multiple selectable choices.
+        `
+    }, {
+        open: false,
         title: `v2.10.3 / ${getDate('2026-08-23T14:00:00Z')}`,
         text: `<span style="color: green">Save / Load</span>
         - Fixed issue where images didn't load when loading ZIP files.

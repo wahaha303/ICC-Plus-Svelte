@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.3';
+export const appVersion = '2.10.4';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -4219,7 +4219,7 @@ async function updateCount(localChoice: Choice | SelectableAddon, dChoice: Choic
         if (typeof score.discounts === 'undefined' || score.discounts.length === 0) continue;
 
         if (localChoice.isSelectableMultiple && localChoice.isMultipleUseVariable) {
-            for (let j = localChoice.multipleUseVariable - 1; j >= 0; j++) {
+            for (let j = localChoice.multipleUseVariable - 1; j >= 0; j--) {
                 if (!score.isActiveMul) break;
                 if (!score.isActiveMul[j]) continue;
 
