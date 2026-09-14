@@ -819,7 +819,10 @@ export type PointType = {
     imageIsURL?: boolean,
     allowFloat?: boolean,
     decimalPlaces?: number,
-    category?: number
+    category?: number,
+    useScoreText?: boolean,
+    scoreBeforeText?: string,
+    scoreAfterText?: string
 };
 export type Variable = {
     id: string,

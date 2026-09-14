@@ -8,6 +8,7 @@
         toggle={true}
         showMenuWithNoInput={true}
         showIdOnly={true}
+        selectOnExactMatch={false}
         textfield$variant="filled"
         class="w-100"
     />

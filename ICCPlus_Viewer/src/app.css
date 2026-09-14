@@ -169,6 +169,9 @@ img {
 .mdc-text-field__input {
     cursor: text;
 }
+.mdc-text-field--textarea {
+    overflow: clip;
+}
 .mdc-button {
     width: 100%;
 }

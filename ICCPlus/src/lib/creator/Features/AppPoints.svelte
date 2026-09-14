@@ -101,6 +101,21 @@
                                                         {/snippet}
                                                     </FormField>
                                                 {/if}
+                                                <FormField>
+                                                    <Switch bind:checked={() => point.useScoreText ?? false, (e) => point.useScoreText = e} onSMUISwitchChange={() => {
+                                                        if (point.useScoreText) {
+                                                            point.scoreBeforeText = '';
+                                                            point.scoreAfterText = '';
+                                                        } else {
+                                                            delete point.useScoreText;
+                                                            delete point.scoreBeforeText;
+                                                            delete point.scoreAfterText;
+                                                        }
+                                                    }} color="secondary" class="switch-scale" />
+                                                    {#snippet label()}
+                                                        Set default score text for this point type.
+                                                    {/snippet}
+                                                </FormField>
                                             </div>
                                         </div>
                                         <div class="col-12 my-2">
@@ -148,6 +163,14 @@
                                         <div class="col-sm-4 col-12 my-2">
                                             <Textfield bind:value={point.afterText} label="Text After Number" variant="filled" />
                                         </div>
+                                        {#if point.useScoreText}
+                                            <div class="col-sm-6 col-12 my-2">
+                                                <Textfield bind:value={point.scoreBeforeText} label="Text Before Score" variant="filled" />
+                                            </div>
+                                            <div class="col-sm-6 col-12 my-2">
+                                                <Textfield bind:value={point.scoreAfterText} label="Text After Score" variant="filled" />
+                                            </div>
+                                        {/if}
                                     </div>
                                 </div>
                             </div>

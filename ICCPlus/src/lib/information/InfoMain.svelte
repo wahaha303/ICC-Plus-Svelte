@@ -224,6 +224,20 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.5 / ${getDate('2026-09-14T13:00:00Z')}`,
+        text: `<span style="color: green">Requirement</span>
+        - Fixed issue where deselecting choice ID in input field inserted undefined.
+        - Fixed issue where selecting choice ID from list after entering exact choice ID in input field deselected choice.
+        - Fixed issue where pressing Enter Key in input field did not close list.
+
+        <span style="color: green">Point Type</span>
+        - Added option to use before/after text in score.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where pressing Page Up/Page Down keys in text input field caused input field to move out of view.
+        `
+    }, {
+        open: false,
         title: `v2.10.4 / ${getDate('2026-08-30T11:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where page froze when using discount count option with multiple selectable choices.

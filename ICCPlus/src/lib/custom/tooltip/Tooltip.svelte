@@ -6,15 +6,17 @@
 >
   <div class="mdc-tooltip__surface">
     {#key tooltipVariables.text}
-      {@html tooltipVariables.text}
+      {@html DOMPurify.sanitize(tooltipVariables.text, sanitizeArg)}
     {/key}
   </div>
 </div>
 
 <script lang="ts">
+  import DOMPurify from 'dompurify';
   import { onDestroy } from 'svelte';
   import { createPopper, type Instance } from '@popperjs/core';
   import { tooltipVariables } from './store.svelte';
+  import { sanitizeArg } from '$lib/store/store.svelte';
 
   let el = $state<HTMLElement>();
   let popper: Instance | null = null;

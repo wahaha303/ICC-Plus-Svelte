@@ -25,6 +25,7 @@
                     label="Point Type"
                     toggle={true}
                     showMenuWithNoInput={true}
+                    onblur={changePointType}
                     textfield$variant="filled"
                     class="col-12 my-1"
                 />
@@ -496,6 +497,7 @@
     let iconAfterTextL = $derived(imageSidePlacement && !imageOnSide);
     let iconAfterTextR = $derived(imageSidePlacement && imageOnSide);
     let scoreWholeText = $derived(`${scoreBeforeText} ${scoreValueText} ${scoreAfterText}`);
+    let oldId = score.id;
 
     function moveScoreDown() {
         if (data.scores && num < data.scores!.length - 1) {
@@ -521,7 +523,7 @@
     }
 
     function getPointTypeLabel(str: string) {
-        let point = pointTypeMap.get(str);
+        const point = pointTypeMap.get(str);
         if (typeof point !== 'undefined') {
             return `${point.id} | ${point.name}`;
         }
@@ -549,5 +551,22 @@
             return true;
         }
         return false;
+    }
+
+    function changePointType() {
+        if (!score.id) {
+            oldId = score.id;
+            return;
+        }
+        if (score.id === oldId) return;
+
+        oldId = score.id;
+
+        if (typeof pointType === 'undefined') return;
+
+        if (!pointType.useScoreText) return;
+
+        score.beforeText = pointType.scoreBeforeText || '';
+        score.afterText = pointType.scoreAfterText || '';
     }
 </script>

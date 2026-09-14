@@ -429,7 +429,7 @@
       // If the value changed from outside, update the text.
       text = getLabel(value);
       previousValue = value;
-    } else if (combobox && value !== text) {
+    } else if (combobox && value !== text && selectOnExactMatch) {
       // An update came from the user.
       value = text;
       previousValue = value;
@@ -562,7 +562,7 @@
       if (setText) {
         text = '';
       }
-      value = undefined;
+      value = showIdOnly ? '' : undefined;
       if (!setText) {
         previousValue = undefined;
       }
@@ -608,7 +608,7 @@
   }
 
   function handleTextfieldKeydown(e: KeyboardEvent) {
-    if (combobox && !matches.length) {
+    if (combobox && !matches.length && !showIdOnly) {
       return;
     }
 
@@ -643,7 +643,7 @@
         focusedIndex = -1;
       } else if (text != '') {
         performSearch();
-        if (isSearch) {
+        if (isSearch || showIdOnly) {
           tick().then(() => {  
             sResult = matches;
             blur();
@@ -686,6 +686,11 @@
       if (value == null) text = '';
       else if (text == '') deselectOption(value);
     }
+
+    if (combobox && !selectOnExactMatch) {
+      value = text;
+      previousValue = value;
+    }
   }
 
   function isInputFocused() {
@@ -720,7 +725,7 @@
       if (inputEl) {
         inputEl.blur();
       }
-      
+
       if (isOpen) {
         isOpen = false;
       }

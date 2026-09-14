@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.4';
+export const appVersion = '2.10.5';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
