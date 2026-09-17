@@ -224,6 +224,13 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.6 / ${getDate('2026-09-17T13:00:00Z')}`,
+        text: `<span style="color: green">UI</span>
+        - Fixed issue where color picker failed to reopen after clicking unset button in text editor.
+        - Fixed issue where text editor submenu was obscured by other UI elements
+        `
+    }, {
+        open: false,
         title: `v2.10.5 / ${getDate('2026-09-14T13:00:00Z')}`,
         text: `<span style="color: green">Requirement</span>
         - Fixed issue where deselecting choice ID in input field inserted undefined.

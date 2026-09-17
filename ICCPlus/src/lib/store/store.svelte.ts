@@ -10,7 +10,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.5';
+export const appVersion = '2.10.6';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -7238,6 +7238,7 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
 }
 
 export async function selectObject(localChoice: Choice | SelectableAddon, localRow: Row, options: ChoiceOptions) {
+    console.log(localChoice.id);
     const isChoice = typeof localChoice.parentId === 'undefined';
     const countCheck = isChoice ? !localChoice.isCountDisabled : localChoice.countAsChoice;
     const tmpAdd = () => {
@@ -11840,7 +11841,7 @@ export function hexToRgba(hex?: string) {
     return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
 }
 export function rgbToHex(rgb?: string): string | null {
-    if (typeof rgb === 'undefined') return null;
+    if (!rgb) return null;
     if (/^#([0-9a-f]{3}){1,2}$/i.test(rgb)) {
         return rgb.toLowerCase();
     }
