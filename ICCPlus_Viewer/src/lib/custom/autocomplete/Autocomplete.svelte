@@ -509,6 +509,9 @@
   }
 
   function selectOption(option: any, setText = true) {
+    if (!multiple && value && option !== value) {
+      deselectOption(value);
+    }
     const event = dispatch(getElement(), 'SMUIAutocompleteSelected', option, {
       bubbles: true,
       cancelable: true,

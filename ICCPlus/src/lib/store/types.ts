@@ -462,6 +462,7 @@ export type Score = {
     expMinValue?: string,
     expMaxValue?: string,
     mulValue?: number[],
+    removeSpace?: boolean,
 };
 export type ChoiceFunc = {
     hideMultipleCounter?: boolean,

@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.6';
+export const appVersion = '2.10.7';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -10047,8 +10047,10 @@ export async function initializeApp(tempApp: any) {
         if (typeof iPoint.id === 'undefined' || iPoint.id === '') iPoint.id = generateId(0, 4, 'point');
         iPoint.id = checkDupId(iPoint.id, pointTypeMap);
         if (typeof iPoint.initValue === 'undefined') iPoint.initValue = iPoint.startingSum;
-        if (typeof iPoint.isNotShownObjects === 'undefined' && iPoint.activatedId !== '') iPoint.isNotShownObjects = true;
-        if (typeof iPoint.isNotShownPointBar === 'undefined' && iPoint.activatedId !== '') iPoint.isNotShownPointBar = true;
+        if (typeof tempApp.appVersion === 'undefined') {
+            if (typeof iPoint.isNotShownObjects === 'undefined' && iPoint.activatedId !== '') iPoint.isNotShownObjects = true;
+            if (typeof iPoint.isNotShownPointBar === 'undefined' && iPoint.activatedId !== '') iPoint.isNotShownPointBar = true;
+        }
         pointTypeMap.set(iPoint.id, iPoint);
     }
 

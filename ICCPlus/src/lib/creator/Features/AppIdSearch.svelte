@@ -13,12 +13,25 @@
                     <div class="row">
                         You can use CTRL + F to find ID or Title.
                         {#each app.rows as row}
-                            <div class="col-12 p-2 list__title">
+                            <div class="col-12 p-2">
                                 <b>{@html DOMPurify.sanitize(`${row.debugTitle || ''} ${row.title} / ${row.id}`, sanitizeArg)}</b>
-                                <div class="row">
+                                <div class="row g-0">
                                     {#each row.objects as choice}
-                                        <div class="col-lg-2 col-sm-4 p-2 list__title">
-                                            {@html DOMPurify.sanitize(`${choice.debugTitle || ''} ${choice.title} / ${choice.id}`, sanitizeArg)}
+                                        <div class="col-lg-2 col-sm-4 p-2">
+                                            <div class="row g-0">
+                                                <div class="col-12 p-0">
+                                                    {@html DOMPurify.sanitize(`${choice.debugTitle || ''} ${choice.title} / ${choice.id}`, sanitizeArg)}
+                                                </div>
+                                                {#if choice.addons}
+                                                    {#each choice.addons as addon}
+                                                        {#if addon.isSelectable}
+                                                            <div class="col-12 p-0">
+                                                                <i>{@html DOMPurify.sanitize(`${addon.title} / ${addon.id}`, sanitizeArg)}</i>
+                                                            </div>
+                                                        {/if}
+                                                    {/each}
+                                                {/if}
+                                            </div>
                                         </div>
                                     {/each}
                                 </div>
@@ -82,6 +95,16 @@
                 const choice = row.objects[j];
 
                 result.push(fields.map(item => escapeCsv(choice[item])).join(','));
+
+                if (choice.addons) {
+                    for (let k = 0; k < choice.addons.length; k++) {
+                        const addon = choice.addons[k];
+
+                        if (addon.isSelectable) {
+                            result.push(fields.map(item => escapeCsv(addon[item])).join(','));
+                        }
+                    }
+                }
             }
             result.push('');
         }

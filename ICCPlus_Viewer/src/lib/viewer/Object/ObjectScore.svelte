@@ -190,8 +190,8 @@
     let scoreFullText = $derived.by(() => {
         let result = '';
         if (scoreBeforeText) result += scoreBeforeText;
-        if (scoreValueText) result += (result ? ' ' : '') + scoreValueText;
-        if (scoreAfterText) result += (result ? ' ' : '') + scoreAfterText;
+        if (scoreValueText) result += (result && !score.removeSpace ? ' ' : '') + scoreValueText;
+        if (scoreAfterText) result += (result && !score.removeSpace ? ' ' : '') + scoreAfterText;
 
         return result;
     });

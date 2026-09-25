@@ -188,7 +188,7 @@
                                 }
                             }} />
                             {#snippet label()}
-                                Will Be Not Recalculated by This Choice
+                                Not Recalculated by This Choice
                             {/snippet}
                         </FormField>
                         <FormField class="col-12 m-1 p-0">
@@ -198,7 +198,7 @@
                                 }
                             }} />
                             {#snippet label()}
-                                Will Be Not Recalculated by Other Choices
+                                Not Recalculated by Other Choices
                             {/snippet}
                         </FormField>
                         <FormField class="col-12 m-1 p-0">
@@ -208,7 +208,17 @@
                                 }
                             }} />
                             {#snippet label()}
-                                Will Be Not Discounted
+                                Not Discounted
+                            {/snippet}
+                        </FormField>
+                        <FormField class="col-12 m-1 p-0">
+                            <Checkbox bind:checked={() => score.removeSpace ?? false, (e) => score.removeSpace = e} onchange={() => {
+                                if (!score.removeSpace) {
+                                    delete score.removeSpace;
+                                }
+                            }} />
+                            {#snippet label()}
+                                Remove space between text
                             {/snippet}
                         </FormField>
                     </div>
@@ -428,8 +438,8 @@
     let scoreFullText = $derived.by(() => {
         let result = '';
         if (scoreBeforeText) result += scoreBeforeText;
-        if (scoreValueText) result += (result ? ' ' : '') + scoreValueText;
-        if (scoreAfterText) result += (result ? ' ' : '') + scoreAfterText;
+        if (scoreValueText) result += (result && !score.removeSpace ? ' ' : '') + scoreValueText;
+        if (scoreAfterText) result += (result && !score.removeSpace ? ' ' : '') + scoreAfterText;
 
         return result;
     });
