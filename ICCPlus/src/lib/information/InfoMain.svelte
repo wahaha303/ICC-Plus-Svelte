@@ -224,6 +224,19 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.8 / ${getDate('2026-09-26T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where Change choices per row could not change addons per row.
+
+        <span style="color: green">Point Type</span>
+        - Fixed issue where the other Not Shown option was automatically enabled when reopening a project with only one Not Shown option enabled and a value entered in Id Needed to Show.
+
+        <span style="color: green">ID / Name list</span>
+        - Fixed issue where line break appeared between ID and Title.
+        - Fixed issue where text overlapped text in adjacent column when text became too long.
+        `
+    }, {
+        open: false,
         title: `v2.10.7 / ${getDate('2026-09-25T13:00:00Z')}`,
         text: `<span style="color: green">Score</span>
         - Added option to remove spacing between text.
@@ -231,12 +244,8 @@
         <span style="color: green">Choice</span>
         - Fixed issue where previous Group remained selected when deleting text without deselecting Group and selecting another Group.
 
-        <span style="color: green">Point Type</span>
-        - Fixed issue where the other Not Shown option was automatically enabled when reopening a project with only one Not Shown option enabled and a value entered in Id Needed to Show.
-
         <span style="color: green">ID / Name list</span>
         - Fixed issue where Selectable Addon was not displayed.
-        
         `
     }, {
         open: false,

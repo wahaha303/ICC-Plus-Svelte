@@ -774,6 +774,10 @@ img {
 .indicator > div {
 	max-width:120px;
 }
+.break-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 #dnd-action-dragged-el {
     opacity: 0.5 !important;
     font-size: 1rem !important;

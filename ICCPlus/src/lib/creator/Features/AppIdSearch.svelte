@@ -13,20 +13,20 @@
                     <div class="row">
                         You can use CTRL + F to find ID or Title.
                         {#each app.rows as row}
-                            <div class="col-12 p-2">
-                                <b>{@html DOMPurify.sanitize(`${row.debugTitle || ''} ${row.title} / ${row.id}`, sanitizeArg)}</b>
+                            <div class="col-12 p-2 break-text">
+                                <b>{@html DOMPurify.sanitize(`${row.debugTitle || ''} ${removeParagraph(row.title)} / ${row.id}`, sanitizeArg)}</b>
                                 <div class="row g-0">
                                     {#each row.objects as choice}
                                         <div class="col-lg-2 col-sm-4 p-2">
                                             <div class="row g-0">
                                                 <div class="col-12 p-0">
-                                                    {@html DOMPurify.sanitize(`${choice.debugTitle || ''} ${choice.title} / ${choice.id}`, sanitizeArg)}
+                                                    {@html DOMPurify.sanitize(`${choice.debugTitle || ''} ${removeParagraph(choice.title)} / ${choice.id}`, sanitizeArg)}
                                                 </div>
                                                 {#if choice.addons}
                                                     {#each choice.addons as addon}
                                                         {#if addon.isSelectable}
-                                                            <div class="col-12 p-0">
-                                                                <i>{@html DOMPurify.sanitize(`${addon.title} / ${addon.id}`, sanitizeArg)}</i>
+                                                            <div class="col-12 p-2">
+                                                                {@html DOMPurify.sanitize(`${removeParagraph(addon.title)} / ${addon.id}`, sanitizeArg)}
                                                             </div>
                                                         {/if}
                                                     {/each}
@@ -119,5 +119,13 @@
         a.click();
 
         URL.revokeObjectURL(url);
+    }
+
+    function removeParagraph(str: string) {
+        if (/^<p>[\s\S]*<\/p>$/.test(str)) {
+            return str.slice(3, -4);
+        }
+
+        return str;
     }
 </script>

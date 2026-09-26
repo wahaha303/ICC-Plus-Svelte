@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.7';
+export const appVersion = '2.10.8';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -10047,7 +10047,7 @@ export async function initializeApp(tempApp: any) {
         if (typeof iPoint.id === 'undefined' || iPoint.id === '') iPoint.id = generateId(0, 4, 'point');
         iPoint.id = checkDupId(iPoint.id, pointTypeMap);
         if (typeof iPoint.initValue === 'undefined') iPoint.initValue = iPoint.startingSum;
-        if (typeof tempApp.appVersion === 'undefined') {
+        if (typeof tempApp.version === 'undefined') {
             if (typeof iPoint.isNotShownObjects === 'undefined' && iPoint.activatedId !== '') iPoint.isNotShownObjects = true;
             if (typeof iPoint.isNotShownPointBar === 'undefined' && iPoint.activatedId !== '') iPoint.isNotShownPointBar = true;
         }
@@ -10632,23 +10632,27 @@ export function revertTemplate(target: Row | Choice | Addon, id: string) {
     }
 }
 export function applyWidth(target: Row | Choice | SelectableAddon, id: string, width: string) {
+    const key = target.isSelectable ? 'addonWidth' : 'objectWidth';
+
     if (typeof target.widthStack === 'undefined') {
         target.widthStack = [];
-        target.defaultWidth = typeof target.objectWidth !== 'undefined' ? target.objectWidth : 'col-md-3';
+        target.defaultWidth = typeof target[key] !== 'undefined' ? target[key] : 'col-md-3';
     }
     target.widthStack.push({ id: id, data: width });
-    target.objectWidth = width;
+    target[key] = width;
 }
 export function revertWidth(target: Row | Choice | SelectableAddon, id: string) {
+    const key = target.isSelectable ? 'addonWidth' : 'objectWidth';
+
     if (typeof target.widthStack !== 'undefined') {
         const idx = target.widthStack.findIndex(item => item.id === id);
         if (idx !== -1) target.widthStack.splice(idx, 1);
 
         const leng = target.widthStack.length;
         if (leng > 0) {
-            target.objectWidth = target.widthStack[leng - 1].data;
+            target[key] = target.widthStack[leng - 1].data;
         } else {
-            target.objectWidth = typeof target.defaultWidth !== 'undefined' ? target.defaultWidth : 'col-md-3';
+            target[key] = typeof target.defaultWidth !== 'undefined' ? target.defaultWidth : 'col-md-3';
             delete target.widthStack;
         }
     }
