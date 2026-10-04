@@ -349,12 +349,14 @@
                                                     <div class="col-12 m-1">The point type used here should only be used for this choice.</div>
                                                     <div class:disabled={choice.isActive} class="col-12 m-1 px-2">
                                                         <Autocomplete
+                                                            combobox
                                                             options={getPointTypes()}
                                                             getOptionLabel={getPointTypeLabel}
                                                             bind:value={choice.multipleScoreId}
                                                             label="Point Type"
                                                             toggle={true}
                                                             showMenuWithNoInput={true}
+                                                            selectOnExactMatch={false}
                                                             textfield$variant="filled"
                                                             class="w-100 p-0"
                                                         />
@@ -382,6 +384,14 @@
                                                 }} />
                                                 {#snippet label()}
                                                     Cannot Be Deselected Manually
+                                                {/snippet}
+                                            </FormField>
+                                            <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => choice.notDeselectedByReq ?? false, (e) => choice.notDeselectedByReq = e} onchange={() => {
+                                                    if (!choice.notDeselectedByReq) delete choice.notDeselectedByReq;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Deselected by Requirement
                                                 {/snippet}
                                             </FormField>
                                             <FormField class="{choice.isAutoActive ? 'disabled ' : ''}col-12 m-1 p-0">
@@ -901,22 +911,26 @@
                                                 </div>
                                                 <div class="col-12 m-1 px-2">
                                                     <Autocomplete
+                                                        combobox
                                                         options={isBackpack ? getBackpackRows() : getRows()}
                                                         getOptionLabel={getRowLabel}
                                                         bind:value={choice.duplicateRowId}
                                                         label="Source Row (to be duplicated)"
                                                         toggle={true}
                                                         showMenuWithNoInput={true}
+                                                        selectOnExactMatch={false}
                                                         textfield$variant="filled"
                                                         class="w-100 p-0"
                                                     />
                                                     <Autocomplete
+                                                        combobox
                                                         options={isBackpack ? getBackpackRows() : getRows()}
                                                         getOptionLabel={getRowLabel}
                                                         bind:value={choice.duplicateRowPlace}
                                                         label="Target Placement (insert after)"
                                                         toggle={true}
                                                         showMenuWithNoInput={true}
+                                                        selectOnExactMatch={false}
                                                         textfield$variant="filled"
                                                         class="w-100 p-0"
                                                     />
@@ -1093,23 +1107,27 @@
                                                 <div class="col-12 m-1 px-2">
                                                     {#if choice.scrollToObject}
                                                         <Autocomplete
+                                                            combobox
                                                             options={isBackpack ? getBackpackChoices() : getChoices()}
                                                             getOptionLabel={getChoiceLabel}
                                                             bind:value={choice.scrollObjectId}
                                                             label="Target Choice"
                                                             toggle={true}
                                                             showMenuWithNoInput={true}
+                                                            selectOnExactMatch={false}
                                                             textfield$variant="filled"
                                                             class="w-100 p-0"
                                                         />
                                                     {:else}
                                                         <Autocomplete
+                                                            combobox
                                                             options={isBackpack ? getBackpackRows() : getRows()}
                                                             getOptionLabel={getRowLabel}
                                                             bind:value={choice.scrollRowId}
                                                             label="Target Row"
                                                             toggle={true}
                                                             showMenuWithNoInput={true}
+                                                            selectOnExactMatch={false}
                                                             textfield$variant="filled"
                                                             class="w-100 p-0"
                                                         />
@@ -1331,7 +1349,9 @@
                                                         delete choice.useSfx;
                                                         delete choice.sfxId;
                                                         delete choice.sfxOnSelect;
+                                                        delete choice.sfxIdOnSelect;
                                                         delete choice.sfxOnDeselect;
+                                                        delete choice.sfxIdOnDeselect;
                                                     }
                                                 }} />
                                                 {#snippet label()}
@@ -1343,6 +1363,7 @@
                                                     <Checkbox bind:checked={() => choice.sfxOnSelect ?? false, (e) => choice.sfxOnSelect = e} onchange={() => {
                                                         if (!choice.sfxOnSelect) {
                                                             delete choice.sfxOnSelect;
+                                                            delete choice.sfxIdOnSelect;
                                                         }
                                                     }} />
                                                     {#snippet label()}
@@ -1352,12 +1373,14 @@
                                                 {#if choice.sfxOnSelect}
                                                     <div class="col-12 m-1 px-2">
                                                         <Autocomplete
+                                                            combobox
                                                             options={getSoundEffects()}
                                                             getOptionLabel={getSfxLabel}
                                                             bind:value={choice.sfxIdOnSelect}
                                                             label="Sound Effect"
                                                             toggle={true}
                                                             showMenuWithNoInput={true}
+                                                            selectOnExactMatch={false}
                                                             textfield$variant="filled"
                                                             class="w-100 p-0"
                                                         />
@@ -1367,6 +1390,7 @@
                                                     <Checkbox bind:checked={() => choice.sfxOnDeselect ?? false, (e) => choice.sfxOnDeselect = e} onchange={() => {
                                                         if (!choice.sfxOnDeselect) {
                                                             delete choice.sfxOnDeselect;
+                                                            delete choice.sfxIdOnDeselect;
                                                         }
                                                     }} />
                                                     {#snippet label()}
@@ -2070,7 +2094,7 @@
         const result = [];
         for (let i = 0; i < list.length; i++) {
             const addon = list[i];
-            const isEnabled = checkRequirements(addon.requireds);
+            const isEnabled = addon.isActive || checkRequirements(addon.requireds);
             if (addon.isSelectable !== true && (!row.unmetAddonRemoved || isEnabled) && (app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || isEnabled))) result.push(addon);
         }
         return result.length === 0 ? null : result;
@@ -2136,7 +2160,7 @@
         else return 'col-12';
     })
     let isEnabled = $derived.by(() => {
-        return checkRequirements(choice.requireds);
+        return choice.isActive || checkRequirements(choice.requireds);
     });
     let isShown = $derived.by(() => {
         if (isSearch) return true;

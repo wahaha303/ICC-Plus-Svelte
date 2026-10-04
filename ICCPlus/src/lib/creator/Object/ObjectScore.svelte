@@ -19,12 +19,14 @@
         <div class="row gx-3">
             <div class:disabled={choice.isActive} class={col6}>
                 <Autocomplete
+                    combobox
                     options={getPointTypes()}
                     getOptionLabel={getPointTypeLabel}
                     bind:value={score.id}
                     label="Point Type"
                     toggle={true}
                     showMenuWithNoInput={true}
+                    selectOnExactMatch={false}
                     onblur={changePointType}
                     textfield$variant="filled"
                     class="col-12 my-1"

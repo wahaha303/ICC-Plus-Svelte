@@ -312,12 +312,14 @@
                                                 <div class="col-12 m-1">The point type used here should only be used for this addon.</div>
                                                 <div class:disabled={addon.isActive} class="col-12 m-1 px-2">
                                                     <Autocomplete
+                                                        combobox
                                                         options={getPointTypes()}
                                                         getOptionLabel={getPointTypeLabel}
                                                         bind:value={addon.multipleScoreId}
                                                         label="Point Type"
                                                         toggle={true}
                                                         showMenuWithNoInput={true}
+                                                        selectOnExactMatch={false}
                                                         textfield$variant="filled"
                                                         class="w-100 p-0"
                                                     />
@@ -752,22 +754,26 @@
                                             </div>
                                             <div class="col-12 m-1 px-2">
                                                 <Autocomplete
+                                                    combobox
                                                     options={isBackpack ? getBackpackRows() : getRows()}
                                                     getOptionLabel={getRowLabel}
                                                     bind:value={addon.duplicateRowId}
                                                     label="Source Row (to be duplicated)"
                                                     toggle={true}
                                                     showMenuWithNoInput={true}
+                                                    selectOnExactMatch={false}
                                                     textfield$variant="filled"
                                                     class="w-100 p-0"
                                                 />
                                                 <Autocomplete
+                                                    combobox
                                                     options={isBackpack ? getBackpackRows() : getRows()}
                                                     getOptionLabel={getRowLabel}
                                                     bind:value={addon.duplicateRowPlace}
                                                     label="Target Placement (insert after)"
                                                     toggle={true}
                                                     showMenuWithNoInput={true}
+                                                    selectOnExactMatch={false}
                                                     textfield$variant="filled"
                                                     class="w-100 p-0"
                                                 />
@@ -944,23 +950,27 @@
                                             <div class="col-12 m-1 px-2">
                                                 {#if addon.scrollToObject}
                                                     <Autocomplete
+                                                        combobox
                                                         options={isBackpack ? getBackpackChoices() : getChoices()}
                                                         getOptionLabel={getChoiceLabel}
                                                         bind:value={addon.scrollObjectId}
                                                         label="Target Choice"
                                                         toggle={true}
                                                         showMenuWithNoInput={true}
+                                                        selectOnExactMatch={false}
                                                         textfield$variant="filled"
                                                         class="w-100 p-0"
                                                     />
                                                 {:else}
                                                     <Autocomplete
+                                                        combobox
                                                         options={isBackpack ? getBackpackRows() : getRows()}
                                                         getOptionLabel={getRowLabel}
                                                         bind:value={addon.scrollRowId}
                                                         label="Target Row"
                                                         toggle={true}
                                                         showMenuWithNoInput={true}
+                                                        selectOnExactMatch={false}
                                                         textfield$variant="filled"
                                                         class="w-100 p-0"
                                                     />
@@ -1227,12 +1237,14 @@
                                                 <CustomChipInput acValue={addon.pointTypeToMultiply ?? []} acOptions={getPointTypes()} inputLabel="Target Point Type" getLabel={getPointTypeLabel} selectProp={addon} />
                                                     {#if addon.multiplyPointtypeIsId}
                                                         <Autocomplete
+                                                            combobox
                                                             options={getPointTypes()}
                                                             getOptionLabel={getPointTypeLabel}
                                                             bind:value={addon.multiplyWithThis}
                                                             label="Multiplied by"
                                                             toggle={true}
                                                             showMenuWithNoInput={true}
+                                                            selectOnExactMatch={false}
                                                             textfield$variant="filled"
                                                             class="w-100 p-0"
                                                         />
@@ -1347,11 +1359,13 @@
                                             </FormField>
                                             <div class="col-12 m-1 px-2">
                                                 <Autocomplete
+                                                    combobox
                                                     options={getWords()}
                                                     bind:value={addon.idOfTheTextfieldWord}
                                                     label="Word ID"
                                                     toggle={true}
                                                     showMenuWithNoInput={true}
+                                                    selectOnExactMatch={false}
                                                     textfield$variant="filled"
                                                     class="w-100 p-0"
                                                 />
@@ -1415,9 +1429,9 @@
 {:else}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div class="text-center addon {addonClass}{overlay ? ' bg-overlay' : ''} {addonWidthClass()}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(e) : undefined}>
+    <div class="text-center {addonWidthClass()}">
         {#if addon.template >= 4 || addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
-            <div>
+            <div class="addon {addonClass}{overlay ? ' bg-overlay' : ''}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(e) : undefined}>
                 {#if (addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)) && addon.image && !row.addonImageRemoved}
                     {#if addon.imageSourceTooltip}
                         <img use:tooltip={addon.imageSourceTooltip} oncontextmenu={copyTooltip} src={addon.image} style={addonImage} alt="" loading={preloadImages ? 'eager' : 'lazy'}>
@@ -1517,7 +1531,7 @@
                 {/if}
             </div>
         {:else}
-            <div class="row m-0 p-0 w-100">
+            <div class="row addon {addonClass}{overlay ? ' bg-overlay' : ''}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(e) : undefined}>
                 {#if addon.template === 2}
                     <div class="col p-0 text-center" style="max-width: {addonImageBoxWidth}%">
                         {#if addon.image && !row.addonImageRemoved}

@@ -647,7 +647,7 @@
       } else if (text != '') {
         performSearch();
         if (isSearch || showIdOnly) {
-          tick().then(() => {  
+          tick().then(() => {
             sResult = matches;
             blur();
           });
@@ -690,7 +690,7 @@
       else if (text == '') deselectOption(value);
     }
 
-    if (combobox && !selectOnExactMatch) {
+    if (combobox && !selectOnExactMatch && text !== getLabel(value)) {
       value = text;
       previousValue = value;
     }

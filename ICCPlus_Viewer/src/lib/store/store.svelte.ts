@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.8';
+export const appVersion = '2.10.9';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -811,6 +811,7 @@ export const lastPages = $state<LastPages>({
 let optimizedSearchables = $derived([...app.rows.flatMap(row => row.objects).filter(choice => !choice.isNotSelectable && !choice.isNotSearchable).map(({ id }) => id), ...app.rows.flatMap(row => row.objects).flatMap(obj => obj.addons ?? []).filter(addon => addon.isSelectable && !addon.isNotSelectable && !addon.isNotSearchable).map(({ id }) => id)]);
 let optimizedSoundEffects = $derived(app.soundEffects.map(({id}) => id));
 let tempEffectTimer = 0;
+let delayAbortController = new AbortController();
 export function getSearchables() {
     return optimizedSearchables;
 }
@@ -1096,14 +1097,29 @@ function getDB(): Promise<IDBDatabase> {
 export let buildAbortController: AbortController | null = null;
 function delay(ms: number, signal?: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => resolve(), ms);
-
-        if (signal) {
-            signal.addEventListener('abort', () => {
-                clearTimeout(timer);
-                reject(new DOMException('Aborted', 'AbortError'));
-            });
+        if (signal?.aborted) {
+            reject(new DOMException('Aborted', 'AbortError'));
+            return;
         }
+
+        let timer: ReturnType<typeof setTimeout>;
+
+        const cleanup = () => {
+            clearTimeout(timer);
+            signal?.removeEventListener('abort', onAbort);
+        };
+
+        const onAbort = () => {
+            cleanup();
+            reject(new DOMException('Aborted', 'AbortError'));
+        };
+
+        timer = setTimeout(() => {
+            signal?.removeEventListener('abort', onAbort);
+            resolve();
+        }, ms);
+
+        signal?.addEventListener('abort', onAbort, { once: true });
     });
 }
 export async function buildAutoSave() {
@@ -3507,6 +3523,7 @@ export function setScoreValue(point: PointType, score: Score, isMul: boolean = f
         }
     }
 }
+
 export async function cleanActivated(isReset: boolean = true) {
     const autoActiveSet = new Set<string>();
 
@@ -3627,6 +3644,7 @@ export async function cleanActivated(isReset: boolean = true) {
         }
     }
 
+    cancelDelayProc();
     tmpActivatedMap.clear();
     deselectQue.clear();
     deactivateSelf.clear();
@@ -5242,7 +5260,12 @@ function openImgDialog(localChoice: Choice | SelectableAddon, options: {isDesele
 }
 
 function delayProc(ms: number) {
-    return new Promise(res => setTimeout(res, ms));
+    return delay(ms, delayAbortController.signal);
+}
+
+function cancelDelayProc() {
+    delayAbortController.abort();
+    delayAbortController = new AbortController();
 }
 
 function deselectDiscountOther(localChoice: Choice | SelectableAddon) {
@@ -5698,6 +5721,7 @@ async function deselectMissingReq(localID: string, options: ChoiceOptions) {
         const aRow = cMap.row;
         const aChoice = cMap.choice;
         if (aChoice.id === localID) continue;
+        if (aChoice.notDeselectedByReq) continue;
 
         if (!checkRequirements(aChoice.requireds)) {
             if (aChoice.forcedActivated) {
@@ -6566,7 +6590,8 @@ function selectScroll(localChoice: Choice | SelectableAddon, options: ChoiceOpti
                             const sRow = cMap.row;
                             const idx = app.useToolbarBtn || !options.bCreatorMode || currentComponent.value === 'appCyoaViewer' ? sRow.index : sRow.index + 1;
                             const sIdx = currentComponent.value === 'appCyoaViewer' ? 0 : 1;
-                            const divs = options.mainDiv?.children[idx]?.children[sIdx]?.children[1]?.children;
+                            const tIdx = currentComponent.value === 'appCyoaViewer' || !app.useChoiceEditBtn ? 1 : 2;
+                            const divs = options.mainDiv?.children[idx]?.children[sIdx].children[tIdx].children;
                             if (typeof divs !== 'undefined') {
                                 if (options.isBackpack) {
                                     const thisWindow = document.getElementById('backpackDialog');
@@ -6710,7 +6735,7 @@ function checkSelectable(localChoice: Choice | SelectableAddon, localRow: Row, a
                 const aChoice = cMap.choice;
 
                 if (typeof aChoice.parentId === 'undefined' ? !aChoice.isCountDisabled : aChoice.countAsChoice) {
-                    if (!aChoice.forcedActivated && !aChoice.selectOnce && aChoice.id !== localChoice.parentId) {
+                    if (!aChoice.forcedActivated && !aChoice.selectOnce && !aChoice.notDeselectedByReq && aChoice.id !== localChoice.parentId) {
                         if (aChoice.isSelectableMultiple) {
                             let counter = aChoice.multipleUseVariable;
                             for (let i = 0; i < counter; i++) {
@@ -6859,8 +6884,16 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
             return;
         }
         localChoice.deselectDelayTimer = true;
-        await delayProc(localChoice.deselectDelayTime);
-        delete localChoice.deselectDelayTimer;
+        try {
+            await delayProc(localChoice.deselectDelayTime);
+        } catch (e) {
+            if (e instanceof DOMException && e.name === 'AbortError') {
+                return;
+            }
+            throw e;
+        } finally {
+            delete localChoice.deselectDelayTimer;
+        }
     }
 
     if (!options.isOverDlg) {
@@ -6908,12 +6941,19 @@ export async function deselectObject(localChoice: Choice | SelectableAddon, loca
 
             app.fadeTransitionIsOn = true;
 
-            await delayProc(app.fadeTransitionTime * 1000);
-
-            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+            try {
+                await delayProc(app.fadeTransitionTime * 1000);
+            } catch (e) {
+                if (e instanceof DOMException && e.name === 'AbortError') {
+                    return;
+                }
+                throw e;
+            } finally {
+                if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                    app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                }
+                app.fadeTransitionIsOn = false;
             }
-            app.fadeTransitionIsOn = false;
         }
         await deselectProcess();
     }
@@ -7002,7 +7042,7 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
                 const aChoice = cMap.choice;
 
                 if (typeof aChoice.parentId === 'undefined' ? !aChoice.isCountDisabled : aChoice.countAsChoice) {
-                    if (!aChoice.forcedActivated && !aChoice.selectOnce && aChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(aChoice.id) === -1) {
+                    if (!aChoice.forcedActivated && !aChoice.selectOnce && !aChoice.notDeselectedByReq && aChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(aChoice.id) === -1) {
                         if (aChoice.isSelectableMultiple) {
                             let counter = aChoice.multipleUseVariable;
                             for (let i = 0; i < counter; i++) {
@@ -7117,8 +7157,16 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
             if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
                 if (localChoice.selectDelayTimer) return;
                 localChoice.selectDelayTimer = true;
-                await delayProc(localChoice.selectDelayTime);
-                delete localChoice.selectDelayTimer;
+                try {
+                    await delayProc(localChoice.selectDelayTime);
+                } catch (e) {
+                    if (e instanceof DOMException && e.name === 'AbortError') {
+                        return;
+                    }
+                    throw e;
+                } finally {
+                    delete localChoice.selectDelayTimer;
+                }
             }
 
             if (localChoice.customTextfieldIsOn) {
@@ -7149,13 +7197,20 @@ export async function selectObject(localChoice: Choice | SelectableAddon, localR
                     }
 
                     app.fadeTransitionIsOn = true;
-                    
-                    await delayProc(app.fadeTransitionTime * 1000);
 
-                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                    try {
+                        await delayProc(app.fadeTransitionTime * 1000);
+                    } catch (e) {
+                        if (e instanceof DOMException && e.name === 'AbortError') {
+                            return;
+                        }
+                        throw e;
+                    } finally {
+                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                        }
+                        app.fadeTransitionIsOn = false;
                     }
-                    app.fadeTransitionIsOn = false;
                 }
                 await selectProcess();
             }
@@ -7253,7 +7308,7 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                 const aChoice = cMap.choice;
 
                 if (typeof aChoice.parentId === 'undefined' ? !aChoice.isCountDisabled : aChoice.countAsChoice) {
-                    if (!aChoice.forcedActivated && !aChoice.selectOnce && aChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(aChoice.id) === -1) {
+                    if (!aChoice.forcedActivated && !aChoice.selectOnce && !aChoice.notDeselectedByReq && aChoice.id !== localChoice.parentId && options.linkedObjects.indexOf(aChoice.id) === -1) {
                         if (aChoice.isSelectableMultiple) {
                             let counter = aChoice.multipleUseVariable;
                             for (let i = 0; i < counter; i++) {
@@ -7409,8 +7464,16 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                     if (localChoice.isSelectDelayed && typeof localChoice.selectDelayTime !== 'undefined') {
                         if (localChoice.selectDelayTimer) return;
                         localChoice.selectDelayTimer = true;
-                        await delayProc(localChoice.selectDelayTime);
-                        delete localChoice.selectDelayTimer;
+                        try {
+                            await delayProc(localChoice.selectDelayTime);
+                        } catch (e) {
+                            if (e instanceof DOMException && e.name === 'AbortError') {
+                                return;
+                            }
+                            throw e;
+                        } finally {
+                            delete localChoice.selectDelayTimer;
+                        }
                     }
                     if (localChoice.customTextfieldIsOn && !localChoice.isActive) {
                         const result = await openWordDialog(localChoice, {isWord: true, isForced: options.isForced});
@@ -7440,13 +7503,20 @@ export async function selectedOneMore(localChoice: Choice | SelectableAddon, loc
                             }
 
                             app.fadeTransitionIsOn = true;
-                            
-                            await delayProc(app.fadeTransitionTime * 1000);
 
-                            if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                                app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                            try {
+                                await delayProc(app.fadeTransitionTime * 1000);
+                            } catch (e) {
+                                if (e instanceof DOMException && e.name === 'AbortError') {
+                                    return;
+                                }
+                                throw e;
+                            } finally {
+                                if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                                    app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                                }
+                                app.fadeTransitionIsOn = false;
                             }
-                            app.fadeTransitionIsOn = false;
                         }
                         await selectProcess();
                     }
@@ -7623,8 +7693,16 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
                     return;
                 }
                 localChoice.deselectDelayTimer = true;
-                await delayProc(localChoice.deselectDelayTime);
-                delete localChoice.deselectDelayTimer;
+                try {
+                    await delayProc(localChoice.deselectDelayTime);
+                } catch (e) {
+                    if (e instanceof DOMException && e.name === 'AbortError') {
+                        return;
+                    }
+                    throw e;
+                } finally {
+                    delete localChoice.deselectDelayTimer;
+                }
             }
             if (!options.isOverDlg) {
                 if (localChoice.customTextfieldIsOn && localChoice.multipleUseVariable === localChoice.numMultipleTimesMinus! + 1) {
@@ -7671,12 +7749,19 @@ export async function selectedOneLess(localChoice: Choice | SelectableAddon, loc
 
                     app.fadeTransitionIsOn = true;
 
-                    await delayProc(app.fadeTransitionTime * 1000);
-
-                    if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
-                        app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                    try {
+                        await delayProc(app.fadeTransitionTime * 1000);
+                    } catch (e) {
+                        if (e instanceof DOMException && e.name === 'AbortError') {
+                            return;
+                        }
+                        throw e;
+                    } finally {
+                        if (typeof localChoice.fadeOutTransitionTime !== 'undefined') {
+                            app.fadeTransitionTime = localChoice.fadeOutTransitionTime / 1000;
+                        }
+                        app.fadeTransitionIsOn = false;   
                     }
-                    app.fadeTransitionIsOn = false;
                 }
                 await deselectProcess();
             }

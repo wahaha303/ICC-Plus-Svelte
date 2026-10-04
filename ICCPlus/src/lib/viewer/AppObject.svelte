@@ -305,7 +305,7 @@
         const result = [];
         for (let i = 0; i < list.length; i++) {
             const addon = list[i];
-            const isEnabled = checkRequirements(addon.requireds);
+            const isEnabled = addon.isActive || checkRequirements(addon.requireds);
             if (addon.isSelectable !== true && (!row.unmetAddonRemoved || isEnabled) && (app.showAllAddons > 0 || (!addon.hideAddon || choice.isActive) && (addon.showAddon || isEnabled))) result.push(addon);
         }
         return result.length === 0 ? null : result;
@@ -350,7 +350,7 @@
     let choiceImageBoxWidth = $derived(typeof objectImageStyle.objectImageBoxWidth !== 'undefined' ? objectImageStyle.objectImageBoxWidth : 50);
 
     let isEnabled = $derived.by(() => {
-        return checkRequirements(choice.requireds);
+        return choice.isActive || checkRequirements(choice.requireds);
     });
     let isShown = $derived.by(() => {
         if (isSearch) return true;

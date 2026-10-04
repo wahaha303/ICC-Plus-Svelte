@@ -224,6 +224,22 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.9 / ${getDate('2026-10-04T16:00:00Z')}`,
+        text: `<span style="color: green">Row</span>
+        - Fixed issue where Deselect Choices option failed to fully deselect multiple selectable choices.
+
+        <span style="color: green">Choice</span>
+        - Added option to Cannot Be Deselected by Requirement.
+        - Fixed issue where Scroll to Choice option did not work properly.
+
+        <span style="color: green">Addon</span>
+        - Fixed issue where addon extended beyond choice boundary when Addon design enabled.
+
+        <span style="color: green">Save / Load</span>
+        - Fixed issue where choice selection delay was not canceled when loading build during active delay.
+        `
+    }, {
+        open: false,
         title: `v2.10.8 / ${getDate('2026-09-26T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where Change choices per row could not change addons per row.

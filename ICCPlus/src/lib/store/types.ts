@@ -475,6 +475,7 @@ export type ChoiceFunc = {
     numMultipleTimesPluss?: number,
     isNotSelectable?: boolean,
     selectOnce?: boolean,
+    notDeselectedByReq?: boolean,
     notDeselectedByClean?: boolean,
     isNotResult?: boolean,
     isNotBuild?: boolean,

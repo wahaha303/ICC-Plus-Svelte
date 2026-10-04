@@ -778,7 +778,7 @@
     let rowButton = $derived(`padding-left: ${rowStyle.rowButtonYPadding}px; padding-right: ${rowStyle.rowButtonYPadding}px; padding-top: ${rowStyle.rowButtonXPadding}px; padding-bottom: ${rowStyle.rowButtonXPadding}px;`);
 
     $effect(() => {
-        if (row.deselectChoices && !isEnabled) {
+        async function deselectAll() {
             for (let i = 0; i < row.objects.length; i++) {
                 const choice = row.objects[i];
 
@@ -788,19 +788,22 @@
                             const mul = choice.multipleUseVariable;
                             if (mul > 0) {
                                 for (let j = 0; j < mul; j++) {
-                                    selectedOneLess(choice, row, deselectOptions);
+                                    await selectedOneLess(choice, row, deselectOptions);
                                 }
                             } else if (mul < 0) {
                                 for (let j = mul; j < 0; j++) {
-                                    selectedOneMore(choice, row, deselectOptions);
+                                    await selectedOneMore(choice, row, deselectOptions);
                                 }
                             }
                         }
                     } else {
-                        deselectObject(choice, row, deselectOptions);
+                        await deselectObject(choice, row, deselectOptions);
                     }
                 }
             }
+        }
+        if (row.deselectChoices && !isEnabled) {
+            deselectAll();
         }
     });
     
