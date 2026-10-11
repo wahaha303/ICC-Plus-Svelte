@@ -224,6 +224,20 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.10 / ${getDate('2026-10-11T13:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Added option to copy choice to another row and delete it in choice settings.
+
+        <span style="color: green">Addon</span>
+        - Added option to hide addon title in build form.
+        - Fixed issue where non-searchable option was not applied to Selectable addon.
+        - Fixed issue where non-visible in result row option was not applied to Selectable addon.
+
+        <span style="color: green">Point Type</span>
+        - Fixed issue where point types overlapped in display.
+        `
+    }, {
+        open: false,
         title: `v2.10.9 / ${getDate('2026-10-04T16:00:00Z')}`,
         text: `<span style="color: green">Row</span>
         - Fixed issue where Deselect Choices option failed to fully deselect multiple selectable choices.

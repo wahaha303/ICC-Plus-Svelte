@@ -369,6 +369,14 @@
                                             {/snippet}
                                         </FormField>
                                         <FormField class="col-12 m-1 p-0">
+                                                <Checkbox bind:checked={() => addon.isNotBuild ?? false, (e) => addon.isNotBuild = e} onchange={() => {
+                                                    if (!addon.isNotBuild) delete addon.isNotBuild;
+                                                }} />
+                                                {#snippet label()}
+                                                    Cannot Be Shown in Build Form
+                                                {/snippet}
+                                            </FormField>
+                                        <FormField class="col-12 m-1 p-0">
                                             <Checkbox bind:checked={() => addon.isNotSearchable ?? false, (e) => addon.isNotSearchable = e} onchange={() => {
                                                 if (!addon.isNotSearchable) delete addon.isNotSearchable;
                                             }} />

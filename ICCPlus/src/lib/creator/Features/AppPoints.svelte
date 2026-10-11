@@ -237,9 +237,9 @@
     let virtualizer = $state(createVirtualizer({
         count: pointCount(),
         getScrollElement: () => virtualListEl,
-        estimateSize: () => 576,
+        estimateSize: () => 680,
         overscan: 1,
-        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 576)
+        measureElement: (el) => Math.max(el.getBoundingClientRect().height, 680)
     }));
     let pCats = $derived(app.categories.filter(item => item.type === 'point').map(item => item.idx));
 
@@ -247,8 +247,8 @@
         virtualListEl = document.getElementById('dialog--point') as HTMLDivElement;
         $virtualizer.setOptions({
             getScrollElement: () => virtualListEl,
-            estimateSize: () => 576,
-            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 576)
+            estimateSize: () => 680,
+            measureElement: (el) => Math.max(el.getBoundingClientRect().height, 680)
         });
     });
 

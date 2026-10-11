@@ -1775,7 +1775,9 @@
                         <div class="d-column flex-fill p-0 w-100">
                             <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
                                 {#each sAddons as addon, i (addon)}
-                                    <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                    {#if !(row.isResultRow && addon.isNotResult) && !(isSearch && addon.isNotSearchable)}
+                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                    {/if}
                                 {/each}
                             </div>
                         </div>
@@ -1868,7 +1870,9 @@
                             <div class="d-column flex-fill p-0 w-100">
                                 <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
                                     {#each sAddons as addon, i (addon)}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                        {#if !(row.isResultRow && addon.isNotResult) && !(isSearch && addon.isNotSearchable)}
+                                            <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                        {/if}
                                     {/each}
                                 </div>
                             </div>
@@ -1960,7 +1964,9 @@
                             <div class="d-column flex-fill p-0 w-100">
                                     <div class="row flex-fill p-0 g-0 w-100{addonJustify}">
                                     {#each sAddons as addon, i (addon)}
-                                        <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                        {#if !(row.isResultRow && addon.isNotResult) && !(isSearch && addon.isNotSearchable)}
+                                            <ObjectAddon row={row} choice={choice} addon={addon} isEnabled={isEnabled} windowWidth={windowWidth} preloadImages={preloadImages} isFirst={firstAddonIndex.source === 's' && firstAddonIndex.index === i} isBackpack={isBackpack} bCreatorMode={bCreatorMode} mainDiv={mainDiv} index={i} list={sAddons as SelectableAddon[]} />
+                                        {/if}
                                     {/each}
                                 </div>
                             </div>

@@ -23,10 +23,17 @@
                         textfield$variant="filled"
                         class="w-100"
                     />
-                    <div class="col-12">
-                        <Button onclickcapture={copyToAnotherRow} variant="raised">
-                            <Label>Copy</Label>
-                        </Button>
+                    <div class="row gx-4 pt-2 pb-4">
+                        <div class="col-sm-6 col-12">
+                            <Button onclickcapture={copyToAnotherRow} variant="raised">
+                                <Label>Copy</Label>
+                            </Button>
+                        </div>
+                        <div class="col-sm-6 col-12">
+                            <Button onclickcapture={cropChoice} variant="raised">
+                                <Label>Copy and Delete</Label>
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 {#if app.styling.useAddonDesign && app.styling.addonImgObjectFillIsOn}
@@ -166,7 +173,6 @@
         name: 'Manage Multi Choice Design',
         text: 'Here you can change the color, size and font of the  choices that can be selected multiple times.'
     }];
-    const rowId = choiceMap.get(choice.id)?.row.id;
     let currentDialog = $state<'none' | 'appChoiceDesign' | 'appChoiceImage' | 'appAddonDesign' | 'appAddonImage' | 'appFilter' | 'appBackground' | 'appText' | 'appMultiChoice'>('none');
     let newRow = $state('');
     let valueTypeFiles: FileList | null = $state(null);
@@ -363,5 +369,24 @@
                 }
             }
         }
+    }
+
+    function cropChoice() {
+        if (newRow === '') return;
+
+        const row = choiceMap.get(choice.id)?.row;
+        if (typeof row === 'undefined') return;
+
+        const nRow = rowMap.get(newRow);
+        if (typeof nRow === 'undefined') return;
+
+        nRow.objects.push(choice);
+        row.objects.splice(choice.index, 1);
+
+        const idx = nRow.objects.length - 1;
+        const nChoice = nRow.objects[idx];
+        
+        nChoice.index = idx;
+        choiceMap.set(nChoice.id, {choice: nChoice, row: nRow});
     }
 </script>
