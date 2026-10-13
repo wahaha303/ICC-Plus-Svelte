@@ -699,23 +699,29 @@
     }
 
     function saveToDisk() {
-        app.activated = getSelectedObjectId().split(',');
-        const tempApp = JSON.parse(JSON.stringify(app));
-        tempApp.version = appVersion;
+        try {
+            app.activated = getSelectedObjectId().split(',');
+            const tempApp = JSON.parse(JSON.stringify(app));
+            tempApp.version = appVersion;
 
-        const saveData = JSON.stringify(tempApp);
-        const blob = new Blob([saveData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const filename = `project_${getTimestamp()}.json`;
-        
-        a.href = url;
-        a.download = filename;
-        a.click();
+            const saveData = JSON.stringify(tempApp);
+            const blob = new Blob([saveData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const filename = `project_${getTimestamp()}.json`;
+            
+            a.href = url;
+            a.download = filename;
+            a.click();
 
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        snackbarVariables.labelText = `The latest viewer version is ${appVersion}.`;
-        snackbarVariables.isOpen = true;
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            snackbarVariables.labelText = `The latest viewer version is ${appVersion}.`;
+            snackbarVariables.isOpen = true;
+        } catch (e) {
+            console.error('Failed to save the file: ', e);
+            snackbarVariables.labelText = `Failed to save the file. Please check the Console tab (F12) for details.`;
+            snackbarVariables.isOpen = true;
+        }
     }
 
     function saveApp(index: number) {

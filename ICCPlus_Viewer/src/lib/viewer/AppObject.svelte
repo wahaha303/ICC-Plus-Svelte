@@ -367,7 +367,22 @@
         }
         return !filterStyle.unselFilterVisibleIsOn;
     });
-    let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}${sAddons ? '' : ` align-content--${choice.addonJustify}`}` : '');
+    let addonJustify = $derived.by(() => {
+        const result: string[] = [];
+
+        if (choice.addonJustify) {
+            let justify = choice.addonJustify;
+            if (choice.addonJustify === 'fill') justify = 'start';
+
+            result.push(`justify-${justify}`);
+
+            if (!sAddons && choice.addonJustify !== 'fill') {
+                result.push(`align-content--${justify}`);
+            }
+        }
+
+        return ` ${result.join(' ')}`;
+    });
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived(objectStyle.objectHeight && !isSearch);
     let oriRow = $derived.by(() => {

@@ -2091,7 +2091,7 @@
         text: 'Toggle',
         value: '3'
     }];
-    const justifies = ['start', 'center', 'end', 'space-around', 'space-between'];
+    const justifies = ['start', 'center', 'end', 'space-around', 'space-between', 'fill'];
     const options: ChoiceOptions = {linkedObjects: [], mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     const nAddons = $derived.by(() => {
         const list = choice.addons;
@@ -2177,7 +2177,22 @@
         }
         return !filterStyle.unselFilterVisibleIsOn;
     });
-    let addonJustify = $derived(choice.addonJustify ? ` justify-${choice.addonJustify}${sAddons ? '' : ` align-content--${choice.addonJustify}`}` : '');
+    let addonJustify = $derived.by(() => {
+        const result: string[] = [];
+
+        if (choice.addonJustify) {
+            let justify = choice.addonJustify;
+            if (choice.addonJustify === 'fill') justify = 'start';
+
+            result.push(`justify-${justify}`);
+
+            if (!sAddons && choice.addonJustify !== 'fill') {
+                result.push(`align-content--${justify}`);
+            }
+        }
+
+        return ` ${result.join(' ')}`;
+    });
     let isActive = $derived(choice.isActive);
     let fullHeight = $derived((!row.isEditModeOn || !bCreatorMode) && objectStyle.objectHeight && !isSearch);
     let oriRow = $derived.by(() => {

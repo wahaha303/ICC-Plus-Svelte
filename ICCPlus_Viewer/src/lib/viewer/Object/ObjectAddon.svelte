@@ -1,6 +1,6 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="text-center {addonWidthClass()}">
+<div class="text-center d-column {addonWidthClass()}">
     {#if addon.template >= 4 || addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)}
         <div class="addon {addonClass}{overlay ? ' bg-overlay' : ''}" style={addonBackground} onclickcapture={addon.isSelectable ? (e) => activateObject(e) : undefined}>
             {#if (addon.template === 1 || (app.minimizeTemplate && windowWidth <= app.smallerScreenPx)) && addon.image && !row.addonImageRemoved}
@@ -304,7 +304,7 @@
         return true;
     });
     let addonClass = $derived.by(() => {
-        const result: string[] = []
+        const result: string[] = [];
         if (addon.isSelectable) {
             result.push('addon-selectable');
             result.push(`addon-${addon.id}`);
@@ -320,6 +320,7 @@
         } else {
             result.push('addon-disabled');
         }
+        result.push('flex-grow-1');
         return result.join(' ');
     });
 

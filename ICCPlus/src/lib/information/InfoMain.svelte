@@ -224,6 +224,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.11 / ${getDate('2026-10-13T14:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where copy and delete was not working properly.
+
+        <span style="color: green">Addon</span>
+        - Added option to make addon fill available space in addon justify.
+        `
+    }, {
+        open: false,
         title: `v2.10.10 / ${getDate('2026-10-11T13:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Added option to copy choice to another row and delete it in choice settings.

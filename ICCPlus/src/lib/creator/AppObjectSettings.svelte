@@ -11,7 +11,7 @@
     <Content>
         <div class="container-fluid">
             <div class="row">
-                <div class:disabled={choice.isActive} class="col-12 gy-2 pb-5">
+                <div class:disabled={curChoice.isActive} class="col-12 gy-2 pb-5">
                     <div class="col-12">Copy Choice Into Another Row</div>
                     <Autocomplete
                         options={[...getRows(), ...getBackpackRows()]}
@@ -38,36 +38,36 @@
                 </div>
                 {#if app.styling.useAddonDesign && app.styling.addonImgObjectFillIsOn}
                     <div class="col-12 gy-2">
-                        <Textfield bind:value={() => choice.addonImgObjectFillHeight ?? 0, (e) => choice.addonImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} suffix="px" onchange={() => {
-                            if (typeof choice.addonImgObjectFillHeight !== 'undefined' && choice.addonImgObjectFillHeight < 0) {
-                                choice.addonImgObjectFillHeight = 0;
+                        <Textfield bind:value={() => curChoice.addonImgObjectFillHeight ?? 0, (e) => curChoice.addonImgObjectFillHeight = e} label="Height of Image Container" type="number" input$min={0} suffix="px" onchange={() => {
+                            if (typeof curChoice.addonImgObjectFillHeight !== 'undefined' && curChoice.addonImgObjectFillHeight < 0) {
+                                curChoice.addonImgObjectFillHeight = 0;
                             }
                         }} class="w-100"/>
                     </div>
                 {/if}
                 <div class="col-12 gy-2">
                     <FormField class="ml-4 mb-2">
-                        <Switch bind:checked={() => choice.isPrivateStyling ?? false, (e) => choice.isPrivateStyling = e} onSMUISwitchChange={() => {
-                            if (choice.isPrivateStyling) {
-                                choice.styling = {};
+                        <Switch bind:checked={() => curChoice.isPrivateStyling ?? false, (e) => curChoice.isPrivateStyling = e} onSMUISwitchChange={() => {
+                            if (curChoice.isPrivateStyling) {
+                                curChoice.styling = {};
                             } else {
-                                delete choice.isPrivateStyling;
-                                delete choice.privateFilterIsOn;
-                                delete choice.privateTextIsOn;
-                                delete choice.privateObjectImageIsOn;
-                                delete choice.privateObjectIsOn;
-                                delete choice.privateAddonImageIsOn;
-                                delete choice.privateAddonIsOn;
-                                delete choice.privateBackgroundIsOn;
-                                delete choice.privateMultiChoiceIsOn;
-                                delete choice.styling;
+                                delete curChoice.isPrivateStyling;
+                                delete curChoice.privateFilterIsOn;
+                                delete curChoice.privateTextIsOn;
+                                delete curChoice.privateObjectImageIsOn;
+                                delete curChoice.privateObjectIsOn;
+                                delete curChoice.privateAddonImageIsOn;
+                                delete curChoice.privateAddonIsOn;
+                                delete curChoice.privateBackgroundIsOn;
+                                delete curChoice.privateMultiChoiceIsOn;
+                                delete curChoice.styling;
                             }
                         }} color="secondary" class="switch-scale" />
                         {#snippet label()}
                             Use private styling?
                         {/snippet}
                     </FormField>
-                    {#if choice.isPrivateStyling}
+                    {#if curChoice.isPrivateStyling}
                         <div class="row">
                             <div class="col-12 py-2">
                                 <div class="hide-file-ui">
@@ -103,21 +103,21 @@
     </Actions>
 </Dialog>
 {#if currentDialog === 'appChoiceDesign'}
-    <AppChoiceDesign open={currentDialog === 'appChoiceDesign'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppChoiceDesign open={currentDialog === 'appChoiceDesign'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {:else if currentDialog === 'appChoiceImage'}
-    <AppChoiceImage open={currentDialog === 'appChoiceImage'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppChoiceImage open={currentDialog === 'appChoiceImage'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {:else if currentDialog === 'appAddonDesign'}
-    <AppAddonDesign open={currentDialog === 'appAddonDesign'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppAddonDesign open={currentDialog === 'appAddonDesign'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {:else if currentDialog === 'appAddonImage'}
-    <AppAddonImage open={currentDialog === 'appAddonImage'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppAddonImage open={currentDialog === 'appAddonImage'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {:else if currentDialog === 'appFilter'}
-    <AppFilter open={currentDialog === 'appFilter'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppFilter open={currentDialog === 'appFilter'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {:else if currentDialog === 'appBackground'}
-    <AppBackground open={currentDialog === 'appBackground'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppBackground open={currentDialog === 'appBackground'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {:else if currentDialog === 'appText'}
-    <AppText open={currentDialog === 'appText'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppText open={currentDialog === 'appText'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {:else if currentDialog === 'appMultiChoice'}
-    <AppMultiChoice open={currentDialog === 'appMultiChoice'} onclose={() => (currentDialog = 'none')} data={choice} />
+    <AppMultiChoice open={currentDialog === 'appMultiChoice'} onclose={() => (currentDialog = 'none')} data={curChoice} />
 {/if}
 
 <script lang="ts">
@@ -175,6 +175,7 @@
     }];
     let currentDialog = $state<'none' | 'appChoiceDesign' | 'appChoiceImage' | 'appAddonDesign' | 'appAddonImage' | 'appFilter' | 'appBackground' | 'appText' | 'appMultiChoice'>('none');
     let newRow = $state('');
+    let curChoice = $state(choice);
     let valueTypeFiles: FileList | null = $state(null);
     let dialogStyle = $derived.by(() => {
         const styles: string[] = [];
@@ -204,7 +205,7 @@
                     if (parsed.success) {
                         initStyling(parsed.data, oldVersion);
                         removeInvalidStyles(parsed.data);
-                        choice.styling = parsed.data;
+                        curChoice.styling = parsed.data;
                         checkPrivateDesign(parsed.data);
                         snackbarVariables.labelText = 'Data loaded successfully.';
                         snackbarVariables.isOpen = true;
@@ -255,20 +256,20 @@
     }
 
     function checkPrivateDesign(data: any) {
-        choice.privateFilterIsOn = Object.keys(filterStyling).some(key => key in data);
-        choice.privateTextIsOn = Object.keys(textStyling).some(key => key in data);
-        choice.privateObjectImageIsOn = Object.keys(objectImageStyling).some(key => key in data);
-        choice.privateAddonImageIsOn = Object.keys(addonImageStyling).some(key => key in data);
-        choice.privateBackgroundIsOn = Object.keys(backgroundStyling).some(key => key in data);
-        choice.privateObjectIsOn = Object.keys(objectStyling).some(key => key in data);
-        choice.privateAddonIsOn = Object.keys(addonStyling).some(key => key in data);
-        choice.privateMultiChoiceIsOn = Object.keys(multiChoiceStyling).some(key => key in data);
+        curChoice.privateFilterIsOn = Object.keys(filterStyling).some(key => key in data);
+        curChoice.privateTextIsOn = Object.keys(textStyling).some(key => key in data);
+        curChoice.privateObjectImageIsOn = Object.keys(objectImageStyling).some(key => key in data);
+        curChoice.privateAddonImageIsOn = Object.keys(addonImageStyling).some(key => key in data);
+        curChoice.privateBackgroundIsOn = Object.keys(backgroundStyling).some(key => key in data);
+        curChoice.privateObjectIsOn = Object.keys(objectStyling).some(key => key in data);
+        curChoice.privateAddonIsOn = Object.keys(addonStyling).some(key => key in data);
+        curChoice.privateMultiChoiceIsOn = Object.keys(multiChoiceStyling).some(key => key in data);
     }
 
     function exportDesign() {
-        if (choice.styling) {
+        if (curChoice.styling) {
             const design: {version: string, styling: Styling} = {version: appVersion, styling: {}};        
-            design.styling = choice.styling;
+            design.styling = curChoice.styling;
 
             const saveData = JSON.stringify(design);
             const blob = new Blob([saveData], { type: 'application/json' });
@@ -289,7 +290,7 @@
             const nRow = rowMap.get(newRow);
 
             if (typeof nRow !== 'undefined') {
-                const clone: Choice = JSON.parse(JSON.stringify(choice));
+                const clone: Choice = JSON.parse(JSON.stringify(curChoice));
 
                 clone.id = generateId(0, app.objectIdLength, 'choice');
                 clone.index = nRow.objects.length;
@@ -374,19 +375,25 @@
     function cropChoice() {
         if (newRow === '') return;
 
-        const row = choiceMap.get(choice.id)?.row;
+        const row = choiceMap.get(curChoice.id)?.row;
         if (typeof row === 'undefined') return;
 
         const nRow = rowMap.get(newRow);
         if (typeof nRow === 'undefined') return;
 
-        nRow.objects.push(choice);
-        row.objects.splice(choice.index, 1);
+        const idx = curChoice.index;
+        nRow.objects.push(curChoice);
+        row.objects.splice(curChoice.index, 1);
 
-        const idx = nRow.objects.length - 1;
-        const nChoice = nRow.objects[idx];
-        
-        nChoice.index = idx;
+        for (let i = idx; i < row.objects.length; i++) {
+            row.objects[i].index = i;
+        }
+
+        const nIdx = nRow.objects.length - 1;
+        const nChoice = nRow.objects[nIdx];
+
+        nChoice.index = nIdx;
         choiceMap.set(nChoice.id, {choice: nChoice, row: nRow});
+        curChoice = nChoice;
     }
 </script>
