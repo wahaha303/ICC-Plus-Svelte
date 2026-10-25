@@ -1822,6 +1822,7 @@
         value: '3'
     }];
     const linkedObjects: string[] = [];
+    // svelte-ignore state_referenced_locally
     const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     let addonId = '';
     let width = $state(0);

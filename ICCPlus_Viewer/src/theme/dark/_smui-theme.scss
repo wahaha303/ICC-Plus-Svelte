@@ -1,13 +1,13 @@
 @use 'sass:color';
+@use '@smui/common/theme/color-palette';
 
-@use '@material/theme/color-palette';
+$background: #000;
 
-// Svelte Colors! (Dark Theme)
-@use '@material/theme/index' as theme with (
+@use '@smui/common/theme/index' as theme with (
   $primary: color.scale(#676778, $whiteness: -20%),
   $secondary: color.scale(#1976d2, $whiteness: -20%),
   $surface: color.adjust(color-palette.$grey-900, $blue: +4),
-  $background: #000,
+  $background: $background,
   $error: color-palette.$red-700
 );
 
@@ -18,7 +18,6 @@
   --mdc-switch-unselected-hover-handle-color: #a1a1a1;
   --mdc-switch-unselected-pressed-handle-color: #a1a1a1;
 }
-
 html,
 body {
   background-color: #000;

@@ -22,13 +22,13 @@
   ])}
 >
   <div class="d-row w-100 justify-content-between">
-    <Set
+    <ChipSet
       bind:chips
       class={classMap({
-        [chipSet$class]: true,
         'smui-chip-input__chip-set': true,
         'align-items-center': true,
-        'flex-nowrap': !isExpanded
+        'flex-nowrap': !isExpanded,
+        [chipSet$class]: true,
       })}
       input
       nonInteractive={disabled}
@@ -57,7 +57,7 @@
           </TrailingAction>
         </Chip>
       {/snippet}
-    </Set>
+      </ChipSet>
     {#if chips.length > 1}
       <div>
         <IconButton toggle pressed={isExpanded} onclick={() => isExpanded = !isExpanded} size="button">
@@ -70,8 +70,8 @@
   <Autocomplete
     bind:this={autocomplete}
     class={classMap({
-      [autocomplete$class]: true,
       'smui-chip-input__autocomplete': true,
+      [autocomplete$class]: true,
     })}
     combobox={autocomplete$combobox}
     showMenuWithNoInput={false}
@@ -95,8 +95,8 @@
   >
     <Textfield
       class={classMap({
-        [textfield$class]: true,
         'smui-chip-input__textfield': true,
+        [textfield$class]: true,
       })}
       {input}
       {floatingLabel}
@@ -123,8 +123,8 @@
     {#snippet loading()}
       <ListText
         class={classMap({
-          [loading$class]: true,
           'smui-chip-input__loading': true,
+          [loading$class]: true,
         })}
         {...prefixFilter(restProps, 'loading$')}
       >
@@ -150,7 +150,7 @@
   import Textfield, { Input } from '@smui/textfield';
   import FloatingLabel from '@smui/floating-label';
   import LineRipple from '@smui/line-ripple';
-  import Chip, { Set, TrailingAction, Text as ChipText } from '@smui/chips';
+  import Chip, { Set as ChipSet, TrailingAction, Text as ChipText } from '@smui/chips';
   import { Text as ListText } from '@smui/list';
   import IconButton, { Icon } from '@smui/icon-button';
 
@@ -260,8 +260,8 @@
   }: OwnProps &
     SmuiAttrs<'div', keyof OwnProps> & {
       [k in keyof ComponentProps<
-        typeof Set
-      > as `chipSet\$${k}`]?: ComponentProps<typeof Set>[k];
+        typeof ChipSet
+      > as `chipSet\$${k}`]?: ComponentProps<typeof ChipSet>[k];
     } & {
       [k in keyof ComponentProps<typeof Chip> as `chip\$${k}`]?: ComponentProps<
         typeof Chip

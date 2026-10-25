@@ -46,6 +46,8 @@ img {
     position:relative;
     background-position:center;
     background-attachment:fixed;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 .s-main {
     height: 100%;

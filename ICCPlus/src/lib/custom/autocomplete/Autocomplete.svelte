@@ -73,8 +73,8 @@
   </div>
   <Menu
     class={classMap({
-      [menu$class]: true,
       'smui-autocomplete__menu': true,
+      [menu$class]: true,
     })}
     id={menuId}
     managed
@@ -429,8 +429,9 @@
       // If the value changed from outside, update the text.
       text = getLabel(value);
       previousValue = value;
-    } else if (combobox && value !== text && selectOnExactMatch) {
+    } else if (combobox && value !== text) {
       // An update came from the user.
+      console.log(value, text);
       value = text;
       previousValue = value;
     }
@@ -509,9 +510,6 @@
   }
 
   function selectOption(option: any, setText = true) {
-    if (!multiple && value && option !== value) {
-      deselectOption(value);
-    }
     const event = dispatch(getElement(), 'SMUIAutocompleteSelected', option, {
       bubbles: true,
       cancelable: true,
@@ -565,7 +563,7 @@
       if (setText) {
         text = '';
       }
-      value = showIdOnly ? '' : undefined;
+      value = undefined;
       if (!setText) {
         previousValue = undefined;
       }
@@ -611,7 +609,7 @@
   }
 
   function handleTextfieldKeydown(e: KeyboardEvent) {
-    if (combobox && !matches.length && !showIdOnly) {
+    if (combobox && !matches.length) {
       return;
     }
 
@@ -646,8 +644,8 @@
         focusedIndex = -1;
       } else if (text != '') {
         performSearch();
-        if (isSearch || showIdOnly) {
-          tick().then(() => {
+        if (isSearch) {
+          tick().then(() => {  
             sResult = matches;
             blur();
           });
@@ -689,11 +687,6 @@
       if (value == null) text = '';
       else if (text == '') deselectOption(value);
     }
-
-    if (combobox && !selectOnExactMatch && text !== getLabel(value)) {
-      value = text;
-      previousValue = value;
-    }
   }
 
   function isInputFocused() {
@@ -728,7 +721,7 @@
       if (inputEl) {
         inputEl.blur();
       }
-
+      
       if (isOpen) {
         isOpen = false;
       }

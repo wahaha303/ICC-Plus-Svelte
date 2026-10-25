@@ -224,6 +224,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.12 / ${getDate('2026-10-25T14:00:00Z')}`,
+        text: `<span style="color: green">Row List / Choice List</span>
+        - Fixed issue where severe lag occurred while dragging items.
+
+        <span style="color: green">Miscellaneous</span>
+        - Fixed issue where unspaced text failed to wrap when exceeding screen boundaries.
+        `
+    }, {
+        open: false,
         title: `v2.10.11 / ${getDate('2026-10-13T14:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where copy and delete was not working properly.

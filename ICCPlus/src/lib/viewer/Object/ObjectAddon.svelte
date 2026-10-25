@@ -272,6 +272,7 @@
     let { addon, row, choice, isEnabled, windowWidth = 0, preloadImages = false, index, isFirst, isBackpack = false, mainDiv, list }: { addon: Addon | SelectableAddon; row: Row; choice: Choice; isEnabled?: boolean; windowWidth?: number; preloadImages?: boolean; index?: number; isFirst?: boolean; isBackpack?: boolean; mainDiv?: HTMLDivElement; list?: SelectableAddon[]; } = $props();
 
     const linkedObjects: string[] = [];
+    // svelte-ignore state_referenced_locally
     const options: ChoiceOptions = {linkedObjects: linkedObjects, mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
 
     let isActive = $derived(typeof choice !== 'undefined' ? choice.isActive : false);

@@ -16,7 +16,6 @@
 >
 
 <script lang="ts">
-  import { MDCSelectIconFoundation } from '@material/select';
   import type { Snippet } from 'svelte';
   import { onMount, getContext } from 'svelte';
   import type { SmuiAttrs } from '@smui/common';
@@ -27,6 +26,8 @@
     dispatch,
     SvelteEventManager,
   } from '@smui/common/internal';
+
+  import { MDCSelectIconFoundation } from '@material/select';
 
   type OwnProps = {
     /**
@@ -105,6 +106,7 @@
       }
 
       instance?.destroy();
+      instance = undefined;
       eventManager.clear();
     };
   });

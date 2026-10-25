@@ -175,6 +175,8 @@
     }];
     let currentDialog = $state<'none' | 'appChoiceDesign' | 'appChoiceImage' | 'appAddonDesign' | 'appAddonImage' | 'appFilter' | 'appBackground' | 'appText' | 'appMultiChoice'>('none');
     let newRow = $state('');
+
+    // svelte-ignore state_referenced_locally
     let curChoice = $state(choice);
     let valueTypeFiles: FileList | null = $state(null);
     let dialogStyle = $derived.by(() => {

@@ -2092,6 +2092,8 @@
         value: '3'
     }];
     const justifies = ['start', 'center', 'end', 'space-around', 'space-between', 'fill'];
+
+    // svelte-ignore state_referenced_locally
     const options: ChoiceOptions = {linkedObjects: [], mainDiv: mainDiv, bCreatorMode: bCreatorMode, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     const nAddons = $derived.by(() => {
         const list = choice.addons;

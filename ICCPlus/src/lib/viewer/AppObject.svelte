@@ -303,6 +303,7 @@
     import { tooltip } from '$lib/custom/tooltip/store.svelte';
     
     const { row, choice, windowWidth, preloadImages = false, isBackpack, mainDiv, isSearch = false }: { row: Row, choice: Choice, index: number, windowWidth: number, preloadImages?: boolean, isBackpack?: boolean, mainDiv?: HTMLDivElement, isSearch?: boolean } = $props();
+    // svelte-ignore state_referenced_locally
     const options: ChoiceOptions = {linkedObjects: [], mainDiv: mainDiv, bCreatorMode: false, isBackpack: isBackpack, isOverDlg: false, isOverImg: false};
     const nAddons = $derived.by(() => {
         const list = choice.addons;

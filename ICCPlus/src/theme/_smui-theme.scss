@@ -1,13 +1,13 @@
 @use 'sass:color';
+@use '@smui/common/theme/color-palette';
 
-@use '@material/theme/color-palette';
+$background: #fff;
 
-// Svelte Colors!
-@use '@material/theme/index' as theme with (
+@use '@smui/common/theme/index' as theme with (
   $primary: #676778,
   $secondary: #1976d2,
   $surface: #fff,
-  $background: #fff,
+  $background: $background,
   $error: color-palette.$red-900
 );
 

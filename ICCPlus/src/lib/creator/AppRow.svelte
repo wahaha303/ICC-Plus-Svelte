@@ -532,6 +532,8 @@
     let rowStyle = $derived(getStyling('privateRowIsOn', row));
     let textStyle = $derived(getStyling('privateTextIsOn', row));
     let width = $state(0);
+
+    // svelte-ignore state_referenced_locally
     let rowId = row.id;
     let rowImageBoxWidth = $derived(typeof rowImageStyle.rowImageBoxWidth !== 'undefined' ? rowImageStyle.rowImageBoxWidth : 50);
     let isEnabled = $derived(checkRequirements(row.requireds));
