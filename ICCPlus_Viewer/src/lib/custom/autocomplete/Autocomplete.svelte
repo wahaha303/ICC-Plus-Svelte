@@ -73,8 +73,8 @@
   </div>
   <Menu
     class={classMap({
-      [menu$class]: true,
       'smui-autocomplete__menu': true,
+      [menu$class]: true,
     })}
     id={menuId}
     managed
@@ -524,7 +524,7 @@
     if (isSearch) {
       text = getOptionLabel(option);
       performSearch();
-      tick().then(() => {  
+      tick().then(() => {
         sResult = matches;
         blur();
       });

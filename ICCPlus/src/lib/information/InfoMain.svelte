@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.13 / ${getDate('2026-10-26T10:00:00Z')}`,
+        text: `<span style="color: green">Score</span>
+        - Fixed issue where point type could not be set for score.
+        `
+    }, {
+        open: false,
         title: `v2.10.12 / ${getDate('2026-10-25T14:00:00Z')}`,
         text: `<span style="color: green">Row List / Choice List</span>
         - Fixed issue where severe lag occurred while dragging items.

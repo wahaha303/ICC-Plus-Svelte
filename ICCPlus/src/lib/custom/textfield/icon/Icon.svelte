@@ -4,10 +4,10 @@
   bind:this={element}
   use:useActions={use}
   class={classMap({
-    [className]: true,
     'mdc-text-field__icon': true,
     'mdc-text-field__icon--leading': leading,
     'mdc-text-field__icon--trailing': !leading,
+    [className]: true,
   })}
   aria-hidden={tabindex === -1 ? 'true' : 'false'}
   aria-disabled={role === 'button' ? (disabled ? 'true' : 'false') : undefined}
@@ -18,7 +18,6 @@
 >
 
 <script lang="ts">
-  import { MDCTextFieldIconFoundation } from '@material/textfield';
   import type { Snippet } from 'svelte';
   import { onMount, getContext } from 'svelte';
   import type { SmuiAttrs } from '@smui/common';
@@ -29,6 +28,8 @@
     dispatch,
     SvelteEventManager,
   } from '@smui/common/internal';
+
+  import { MDCTextFieldIconFoundation } from './mdc';
 
   type OwnProps = {
     /**
@@ -128,6 +129,7 @@
       }
 
       instance?.destroy();
+      instance = undefined;
       eventManager.clear();
     };
   });

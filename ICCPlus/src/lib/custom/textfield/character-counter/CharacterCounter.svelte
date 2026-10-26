@@ -4,8 +4,8 @@
   bind:this={element}
   use:useActions={use}
   class={classMap({
-    [className]: true,
     'mdc-text-field-character-counter': true,
+    [className]: true,
   })}
   {...restProps}
 >
@@ -13,12 +13,13 @@
 </div>
 
 <script lang="ts">
-  import { MDCTextFieldCharacterCounterFoundation } from '@material/textfield';
   import type { Snippet } from 'svelte';
   import { onMount, getContext } from 'svelte';
   import type { SmuiAttrs } from '@smui/common';
   import type { ActionArray } from '@smui/common/internal';
   import { classMap, useActions } from '@smui/common/internal';
+
+  import { MDCTextFieldCharacterCounterFoundation } from './mdc';
 
   type OwnProps = {
     /**
@@ -55,6 +56,7 @@
       setContent: (value) => {
         content = value;
       },
+      setCounterValue: (currentLength, maxLength) => {},
     });
 
     SMUITextfieldCharacterCounterMount &&
@@ -68,6 +70,7 @@
       }
 
       instance?.destroy();
+      instance = undefined;
     };
   });
 

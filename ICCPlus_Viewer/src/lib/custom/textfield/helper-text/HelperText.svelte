@@ -4,11 +4,11 @@
   bind:this={element}
   use:useActions={use}
   class={classMap({
-    [className]: true,
     'mdc-text-field-helper-text': true,
     'mdc-text-field-helper-text--persistent': persistent,
     'mdc-text-field-helper-text--validation-msg': validationMsg,
     ...internalClasses,
+    [className]: true,
   })}
   aria-hidden={persistent ? undefined : 'true'}
   {id}
@@ -23,12 +23,13 @@
 </script>
 
 <script lang="ts">
-  import { MDCTextFieldHelperTextFoundation } from '@material/textfield';
   import type { Snippet } from 'svelte';
   import { onMount, getContext } from 'svelte';
   import type { SmuiAttrs } from '@smui/common';
   import type { ActionArray } from '@smui/common/internal';
   import { classMap, useActions } from '@smui/common/internal';
+
+  import { MDCTextFieldHelperTextFoundation } from './mdc';
 
   type OwnProps = {
     /**
@@ -106,6 +107,7 @@
       }
 
       instance?.destroy();
+      instance = undefined;
     };
   });
 

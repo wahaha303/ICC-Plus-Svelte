@@ -14,9 +14,28 @@ const jsFile = appEntry.file;
 const cssFiles = appEntry.css || [];
 const legacyEntry = manifest['index-legacy.html'];
 const polyfillEntry = manifest['vite/legacy-polyfills-legacy'];
-
-const vendorChunk = Object.values(manifest).find(f => f.file.includes('chunk-vendors.') && f.file.endsWith('.js'));
 const vendorCss = Object.values(manifest).find(f => f.file.includes('chunk-vendors.') && f.file.endsWith('.css'));
+
+function getImportedChunks(manifest, entry) {
+    const seen = new Set();
+    const chunks = [];
+
+    function visit(chunk) {
+        for (const key of chunk.imports || []) {
+            if (seen.has(key)) continue;
+            seen.add(key);
+
+            const imported = manifest[key];
+            if (!imported) continue;
+
+            visit(imported);
+            chunks.push(imported);
+        }
+    }
+
+    visit(entry);
+    return chunks;
+}
 
 let coreJs = `var currentScript = document.currentScript || document.getElementsByTagName('script')[document.getElementsByTagName('script').length - 1];
 var basePath;
@@ -52,8 +71,10 @@ for (const css of cssFiles) {
     coreJs += `add('link', { rel: 'stylesheet', href: basePath + '${css}', crossorigin: '' });\n`;
 }
 
-if (vendorChunk) {
-    coreJs += `add('link', { rel: 'modulepreload', href: basePath + '${vendorChunk.file}', crossorigin: '' });\n`;
+for (const chunk of getImportedChunks(manifest, appEntry)) {
+    if (chunk.file?.endsWith('.js')) {
+        coreJs += `add('link', { rel: 'modulepreload', href: basePath + '${chunk.file}', crossorigin: '' });\n`;
+    }
 }
 
 coreJs += `add('script', { type: 'module', src: basePath + '${jsFile}', crossorigin: '' });

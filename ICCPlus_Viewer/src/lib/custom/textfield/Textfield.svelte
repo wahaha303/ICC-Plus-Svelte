@@ -242,13 +242,6 @@
 {/if}
 
 <script lang="ts">
-  import type {
-    MDCTextFieldIconFoundation,
-    MDCTextFieldHelperTextFoundation,
-    MDCTextFieldCharacterCounterFoundation,
-  } from '@material/textfield';
-  import { MDCTextFieldFoundation } from '@material/textfield';
-  import { events } from '@material/dom';
   import type { ComponentProps, Snippet } from 'svelte';
   import { onMount, onDestroy, getContext, setContext, tick } from 'svelte';
   import type {
@@ -257,6 +250,7 @@
     SmuiAttrs,
     SmuiElementPropMap,
   } from '@smui/common';
+  import { events } from '@material/dom';
   import type { ActionArray } from '@smui/common/internal';
   import {
     classMap,
@@ -272,6 +266,12 @@
   import LineRipple from '@smui/line-ripple';
   import NotchedOutline from '@smui/notched-outline';
 
+  import type {
+    MDCTextFieldIconFoundation,
+    MDCTextFieldHelperTextFoundation,
+    MDCTextFieldCharacterCounterFoundation,
+  } from '@material/textfield';
+  import { MDCTextFieldFoundation } from '@material/textfield';
   import HelperLine from './HelperLine.svelte';
   import Prefix from './Prefix.svelte';
   import Suffix from './Suffix.svelte';
@@ -509,7 +509,7 @@
   }
   // Done with the trickery.
 
-  let element: HTMLLabelElement | HTMLDivElement = $state(document.createElement('div'));
+  let element: HTMLLabelElement | HTMLDivElement;
   let instance: MDCTextFieldFoundation | undefined = $state();
   let eventManager = new SvelteEventManager();
   let internalClasses: { [k: string]: boolean } = $state({});
@@ -757,6 +757,7 @@
 
     return () => {
       instance?.destroy();
+      instance = undefined;
       eventManager.clear();
     };
   });

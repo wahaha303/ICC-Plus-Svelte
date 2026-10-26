@@ -26,6 +26,8 @@
     'mdc-select--activated': menuOpen,
     'mdc-data-table__pagination-rows-per-page-select':
       context === 'data-table:pagination',
+    'mdc-data-table__pagination-rows-per-page-select--outlined':
+      context === 'data-table:pagination' && variant === 'outlined',
     ...internalClasses,
     [className]: true,
   })}
@@ -60,14 +62,15 @@
     bind:this={selectAnchor}
     use:useActions={anchor$use}
     class={classMap({
-      [anchor$class]: true,
       'mdc-select__anchor': true,
+      [anchor$class]: true,
     })}
     aria-required={required ? 'true' : undefined}
     aria-disabled={disabled ? 'true' : undefined}
     aria-controls={menuId}
     aria-expanded={menuOpen ? 'true' : 'false'}
     aria-describedby={helperId}
+    aria-labelledby={inputId + '-smui-label'}
     role="combobox"
     tabindex="0"
     {...selectAnchorAttrs}
@@ -135,8 +138,8 @@
     <span
       use:useActions={selectedTextContainer$use}
       class={classMap({
-        [selectedTextContainer$class]: true,
         'mdc-select__selected-text-container': true,
+        [selectedTextContainer$class]: true,
       })}
       {...prefixFilter(restProps, 'selectedTextContainer$')}
     >
@@ -144,8 +147,8 @@
         use:useActions={selectedText$use}
         id={inputId + '-smui-selected-text'}
         class={classMap({
-          [selectedText$class]: true,
           'mdc-select__selected-text': true,
+          [selectedText$class]: true,
         })}
         role="button"
         aria-haspopup="listbox"
@@ -158,8 +161,8 @@
     <span
       use:useActions={dropdownIcon$use}
       class={classMap({
-        [dropdownIcon$class]: true,
         'mdc-select__dropdown-icon': true,
+        [dropdownIcon$class]: true,
       })}
       {...prefixFilter(restProps, 'dropdownIcon$')}
     >
@@ -192,9 +195,9 @@
 
   <Menu
     class={classMap({
-      [menu$class]: true,
       'mdc-select__menu': true,
       ...menuClasses,
+      [menu$class]: true,
     })}
     id={menuId}
     fullWidth
@@ -248,11 +251,6 @@
 </script>
 
 <script lang="ts">
-  import type {
-    MDCSelectIconFoundation,
-    MDCSelectHelperTextFoundation,
-  } from '@material/select';
-  import { MDCSelectFoundation } from '@material/select';
   import type { ComponentProps, Snippet } from 'svelte';
   import { onMount, onDestroy, getContext, setContext } from 'svelte';
   import { writable } from 'svelte/store';
@@ -280,6 +278,11 @@
   import LineRipple from '@smui/line-ripple';
   import NotchedOutline from '@smui/notched-outline';
 
+  import type {
+    MDCSelectIconFoundation,
+    MDCSelectHelperTextFoundation,
+  } from './mdc';
+  import { MDCSelectFoundation } from './mdc';
   import HelperText from './helper-text/HelperText.svelte';
 
   interface UninitializedValue extends Function {}
@@ -523,9 +526,9 @@
   let helperTextInstance: MDCSelectHelperTextFoundation | undefined = undefined;
 
   // Components
-  let floatingLabel: FloatingLabel | undefined = $state();
-  let lineRipple: LineRipple | undefined = $state();
-  let notchedOutline: NotchedOutline | undefined = $state();
+  let floatingLabel: FloatingLabel | undefined = undefined;
+  let lineRipple: LineRipple | undefined = undefined;
+  let notchedOutline: NotchedOutline | undefined = undefined;
 
   setContext('SMUI:list:role', '');
   setContext('SMUI:list:nav', false);
@@ -716,6 +719,7 @@
 
     return () => {
       instance?.destroy();
+      instance = undefined;
     };
   });
 
