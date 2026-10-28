@@ -20,8 +20,8 @@ if (window.addEventListener) {
   window.onbeforeunload = beforeunloadHandler;
 }
 
-const app = mount(App, {
+const svelteApp = mount(App, {
   target: document.getElementById('app')!,
 })
 
-export default app
+export default svelteApp

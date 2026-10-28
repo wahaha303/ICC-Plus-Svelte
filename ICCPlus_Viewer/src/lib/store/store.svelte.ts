@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.13';
+export const appVersion = '2.10.14';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -5375,7 +5375,11 @@ async function deselectCalculateScore(localChoice: Choice | SelectableAddon, tmp
             if (typeof point !== 'undefined') {
                 let val = score.value;
                 if (typeof score.discountScore !== 'undefined' && typeof score.discounts !== 'undefined') {
-                    if (score.appliedDiscount) val = score.discountScore;
+                    if (score.appliedDiscount) {
+                        val = score.discountScore;
+                    } else if (score.isChangeDiscount && typeof score.tmpDisScore !== 'undefined') {
+                        val = score.discountScore + score.tmpDisScore;
+                    }
                     for (let j = 0; j < score.discounts.length; j++) {
                         const dc = score.discounts[j];
 

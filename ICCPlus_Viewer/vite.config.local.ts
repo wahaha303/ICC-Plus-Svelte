@@ -16,7 +16,7 @@ export default defineConfig({
     outDir: 'dist/local',
     emptyOutDir: false,
     cssCodeSplit: true,
-    rollupOptions: {
+    rolldownOptions: {
       input: 'index.html',
       output: {
         format: 'iife',

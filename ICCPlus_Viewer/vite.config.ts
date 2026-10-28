@@ -38,15 +38,19 @@ export default defineConfig({
     assetsDir: 'assets',
     cssCodeSplit: true,
     manifest: true,
-    rollupOptions: {
+    rolldownOptions: {
       input: fileURLToPath(new URL('./index.html', import.meta.url)),
       output: {
-        entryFileNames: `js/app.[hash].js`,
-        chunkFileNames: `js/chunk-vendors.[hash].js`,
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+        entryFileNames: 'js/app.[hash].js',
+        chunkFileNames: 'js/[name].[hash].js',
+        codeSplitting: {
+          groups: [
+            {
+              name: 'chunk-vendors',
+              test: /node_modules/,
+              priority: 10,
+            }
+          ],
         },
         assetFileNames: (assetInfo) => {
           const name = assetInfo.names ? assetInfo.names[0] : undefined;

@@ -224,6 +224,15 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.14 / ${getDate('2026-10-28T10:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where points before discount were refunded when choice requiring discount choice was deselected.
+
+        <span style="color: green">Viewer</span>
+        - Fixed issue where local viewer did not work properly.
+        `
+    }, {
+        open: false,
         title: `v2.10.13 / ${getDate('2026-10-26T10:00:00Z')}`,
         text: `<span style="color: green">Score</span>
         - Fixed issue where point type could not be set for score.

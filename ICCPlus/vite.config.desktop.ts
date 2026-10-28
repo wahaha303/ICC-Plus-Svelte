@@ -15,15 +15,19 @@ export default defineConfig({
     assetsDir: 'assets',
     outDir: 'dist/desktop',
     cssCodeSplit: true,
-    rollupOptions: {
+    rolldownOptions: {
       input: 'index.html',
       output: {
         entryFileNames: 'js/app.d3103a3b.js',
-        chunkFileNames: 'js/chunk-vendors.ae283b72.js',
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+        chunkFileNames: 'js/[name].ae283b72.js',
+        codeSplitting: {
+          groups: [
+            {
+              name: 'chunk-vendors',
+              test: /node_modules/,
+              priority: 10,
+            }
+          ],
         },
         assetFileNames: (assetInfo) => {
           const name = assetInfo.names ? assetInfo.names[0] : undefined;
