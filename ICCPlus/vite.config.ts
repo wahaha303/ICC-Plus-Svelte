@@ -17,15 +17,6 @@ export default defineConfig({
         'android >= 7',
       ],
       additionalLegacyPolyfills: ['core-js/features/dom-collections'],
-      modernTargets: [
-        'chrome >= 64',
-        'firefox >= 67',
-        'safari >= 12',
-        'ios_saf >= 12',
-        'edge >= 79',
-        'android >= 64'
-      ],
-      modernPolyfills: true,
     }),
   ],
   resolve: {

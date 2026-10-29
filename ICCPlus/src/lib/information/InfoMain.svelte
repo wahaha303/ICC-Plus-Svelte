@@ -224,7 +224,7 @@
     }];
     const changelogList = [{
         open: true,
-        title: `v2.10.15 / ${getDate('2026-10-29T14:00:00Z')}`,
+        title: `v2.10.15 / ${getDate('2026-10-29T15:00:00Z')}`,
         text: `<span style="color: green">Viewer</span>
         - Fixed issue where viewer did not work properly on recently created Neocities accounts.
         `
