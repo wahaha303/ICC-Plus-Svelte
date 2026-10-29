@@ -15,6 +15,8 @@ const cssFiles = appEntry.css || [];
 const legacyEntry = manifest['index-legacy.html'];
 const polyfillEntry = manifest['vite/legacy-polyfills-legacy'];
 const vendorCss = Object.values(manifest).find(f => f.file.includes('chunk-vendors.') && f.file.endsWith('.css'));
+const modernDetectorCode = ["import './js/legacy_resolve_check.js?detector';", 'import.meta.url;', 'import("_").catch(() => 1);', '(async function*(){})().next();', 'window.__vite_is_modern_browser = true;'].join('');
+const modernFallbackCode = `!function(){if (window.__vite_is_modern_browser) return;console.warn('vite: loading legacy chunks, syntax error above and the same error below should be ignored');var n = document.createElement('script');n.src = basePath + ${JSON.stringify(polyfillEntry.file)};n.onload = function() {var entrySrc = basePath + ${JSON.stringify(legacyEntry.file)};function tryImport(retries) {if (window.System && typeof window.System.import === 'function') {window.System.import(entrySrc);} else if (retries > 0) {setTimeout(function() {tryImport(retries - 1);}, 100);} else {console.error('SystemJS failed to load.');}}tryImport(100);};document.body.appendChild(n);}();`;
 
 function getImportedChunks(manifest, entry) {
     const seen = new Set();
@@ -53,6 +55,7 @@ function add(tag, attrs = {}) {
         if (key === 'text') el.textContent = attrs[key];
         else el.setAttribute(key, attrs[key]);
     }
+    if (tag === 'script' && el.type === 'module') el.async = false;
     document.head.appendChild(el);
 }
 
@@ -77,9 +80,9 @@ for (const chunk of getImportedChunks(manifest, appEntry)) {
     }
 }
 
-coreJs += `add('script', { type: 'module', src: basePath + '${jsFile}', crossorigin: '' });
-add('script', { type: 'module', text: 'import.meta.url;import("_").catch(() => 1);(async function*(){})().next();window.__vite_is_modern_browser = true;' });
-add('script', { type: 'module', text: '!function(){if(window.__vite_is_modern_browser) return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e = document.getElementById("vite-legacy-polyfill");var n = document.createElement("script");n.src = e.src;n.onload = function(){System.import(document.getElementById("vite-legacy-entry").getAttribute("data-src"));};document.body.appendChild(n);}();' });
+coreJs += `add('script', { type: 'module', text: ${JSON.stringify(modernDetectorCode)} });
+add('script', { type: 'module', text: ${JSON.stringify(modernFallbackCode)} });
+add('script', { type: 'module', src: basePath + ${JSON.stringify(jsFile)}, crossorigin: '' });
 `;
 
 coreJs += `addEventListener('DOMContentLoaded', () => {
