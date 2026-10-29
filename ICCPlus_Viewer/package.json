@@ -1,7 +1,7 @@
 {
   "name": "iccplus_viewer",
   "private": true,
-  "version": "2.10.14",
+  "version": "2.10.15",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,7 +24,7 @@
     "smui-theme": "^9.0.6",
     "svelte-check": "^4.3.1",
     "terser": "^5.51.2",
-    "typescript": "^5.9.3",
+    "typescript": "5.9.3",
     "vite": "^8.3.5"
   },
   "dependencies": {
@@ -47,7 +47,7 @@
     "@smui/tooltip": "^9.0.6",
     "@smui/top-app-bar": "^9.0.6",
     "bootstrap": "^5.3.8",
-    "cropperjs": "^2.3.1",
+    "cropperjs": "1.7.0",
     "dompurify": "^3.4.17",
     "html-to-image": "^1.11.13",
     "patch-package": "^8.0.1",

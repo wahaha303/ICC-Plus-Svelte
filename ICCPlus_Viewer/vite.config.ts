@@ -26,6 +26,7 @@ export default defineConfig({
         'android >= 64'
       ],
       modernPolyfills: true,
+      renderModernChunks: true,
     }),
   ],
   resolve: {

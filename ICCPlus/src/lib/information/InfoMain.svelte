@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.15 / ${getDate('2026-10-29T13:00:00Z')}`,
+        text: `<span style="color: green">Viewer</span>
+        - Fixed issue where viewer did not work properly on recently created Neocities accounts.
+        `
+    }, {
+        open: false,
         title: `v2.10.14 / ${getDate('2026-10-28T10:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where points before discount were refunded when choice requiring discount choice was deselected.

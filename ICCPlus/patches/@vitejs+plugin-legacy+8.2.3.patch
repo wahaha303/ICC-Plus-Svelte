@@ -1,0 +1,13 @@
+diff --git a/node_modules/@vitejs/plugin-legacy/dist/index.js b/node_modules/@vitejs/plugin-legacy/dist/index.js
+index bc8330a..1e53a98 100644
+--- a/node_modules/@vitejs/plugin-legacy/dist/index.js
++++ b/node_modules/@vitejs/plugin-legacy/dist/index.js
+@@ -112,7 +112,7 @@ const detectModernBrowserVarName = "__vite_is_modern_browser";
+ * otherwise Safari will only throw the error for the first time that module is imported.
+ * https://github.com/vitejs/vite/issues/22008
+ */
+-const createDetectImportMetaResolveSupportModule = (chunkId) => `data:text/javascript,${chunkId != null ? `${JSON.stringify(chunkId)};` : ""}if(!import.meta.resolve)throw Error("import.meta.resolve not supported")`;
++const createDetectImportMetaResolveSupportModule = (chunkId) => chunkId != null ? `./legacy_resolve_check.js?${chunkId}` : './legacy_resolve_check.js?detector';
+ const detectModernBrowserDetector = `import.meta.url;import("_").catch(()=>1);(async function*(){})().next()`;
+ const detectModernBrowserCode = `import'${createDetectImportMetaResolveSupportModule(null)}';${detectModernBrowserDetector};window.${detectModernBrowserVarName}=true`;
+ const dynamicFallbackInlineCode = `!function(){if(window.${detectModernBrowserVarName})return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("${legacyPolyfillId}"),n=document.createElement("script");n.src=e.src,n.onload=function(){${systemJSInlineCode}},document.body.appendChild(n)}();`;
