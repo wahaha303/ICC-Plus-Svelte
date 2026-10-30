@@ -8,7 +8,7 @@ import { tick } from 'svelte';
 import { DISABLED, INACTIVE, ACTIVE, FULL, SUBTRACT, ADD } from './constants';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-export const appVersion = '2.10.15';
+export const appVersion = '2.10.16';
 export const filterStyling = {
     selFilterBlurIsOn: false,
     selFilterBlur: 0,
@@ -8268,18 +8268,21 @@ async function selectObjectL(str: string, activatedIds: Set<string>) {
                     }
                 }
             }
-            for (let i = 0; i < nList.length; i++) {
-                const item = nList[i].split('/ON#');
-                const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
-                const cMap = choiceMap.get(item[0]);
-                if (typeof cMap !== 'undefined') {
-                    const fChoice = cMap.choice;
-                    const tmpAct = tmpActivatedMap.get(fChoice.id);
 
-                    if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
-                        tmpAct.activatedFrom += 1;
-                    } else {
-                        tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: 1});
+            if (!localChoice.isAllowDeselect) {
+                for (let i = 0; i < nList.length; i++) {
+                    const item = nList[i].split('/ON#');
+                    const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                    const cMap = choiceMap.get(item[0]);
+                    if (typeof cMap !== 'undefined') {
+                        const fChoice = cMap.choice;
+                        const tmpAct = tmpActivatedMap.get(fChoice.id);
+
+                        if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
+                            tmpAct.activatedFrom += 1;
+                        } else {
+                            tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: 1});
+                        }
                     }
                 }
             }
@@ -8573,18 +8576,21 @@ async function selectedOneMoreL(str: string, activatedIds: Set<string>) {
                         }
                     }
                 }
-                for (let i = 0; i < nList.length; i++) {
-                    const item = nList[i].split('/ON#');
-                    const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
-                    const cMap = choiceMap.get(item[0]);
-                    if (typeof cMap !== 'undefined') {
-                        const fChoice = cMap.choice;
-                        const tmpAct = tmpActivatedMap.get(fChoice.id);
 
-                        if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
-                            tmpAct.activatedFrom += 1;
-                        } else {
-                            tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: 1});
+                if (!localChoice.isAllowDeselect) {
+                    for (let i = 0; i < nList.length; i++) {
+                        const item = nList[i].split('/ON#');
+                        const forceNum = item.length > 1 ? parseInt(item[1]) : 0;
+                        const cMap = choiceMap.get(item[0]);
+                        if (typeof cMap !== 'undefined') {
+                            const fChoice = cMap.choice;
+                            const tmpAct = tmpActivatedMap.get(fChoice.id);
+
+                            if (typeof tmpAct !== 'undefined' && typeof tmpAct.activatedFrom !== 'undefined') {
+                                tmpAct.activatedFrom += 1;
+                            } else {
+                                tmpActivatedMap.set(fChoice.id, {multiple: forceNum, isAllowDeselect: localChoice.isAllowDeselect || false, activatedFrom: 1});
+                            }
                         }
                     }
                 }

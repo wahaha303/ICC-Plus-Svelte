@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.16 / ${getDate('2026-10-30T15:00:00Z')}`,
+        text: `<span style="color: green">Choice</span>
+        - Fixed issue where deselected choices that were force-selected but allowed to be deselected became selected again when loading build.
+        `
+    }, {
+        open: false,
         title: `v2.10.15 / ${getDate('2026-10-29T15:00:00Z')}`,
         text: `<span style="color: green">Viewer</span>
         - Fixed issue where viewer did not work properly on recently created Neocities accounts.
