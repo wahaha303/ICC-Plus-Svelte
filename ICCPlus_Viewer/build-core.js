@@ -15,7 +15,7 @@ const cssFiles = appEntry.css || [];
 const legacyEntry = manifest['index-legacy.html'];
 const polyfillEntry = manifest['vite/legacy-polyfills-legacy'];
 const vendorCss = Object.values(manifest).find(f => f.file.includes('chunk-vendors.') && f.file.endsWith('.css'));
-const modernDetectorCode = ["import './js/legacy_resolve_check.js?detector';", 'import.meta.url;', 'import("_").catch(() => 1);', '(async function*(){})().next();', 'window.__vite_is_modern_browser = true;'].join('');
+const modernDetectorCode = `if (!import.meta.resolve)throw new Error('import.meta.resolve not supported');import.meta.url;import("_").catch(() => 1);(async function*(){})().next();window.__vite_is_modern_browser = true;`;
 const modernFallbackCode = `!function(){if (window.__vite_is_modern_browser) return;console.warn('vite: loading legacy chunks, syntax error above and the same error below should be ignored');var n = document.createElement('script');n.src = basePath + ${JSON.stringify(polyfillEntry.file)};n.onload = function() {var entrySrc = basePath + ${JSON.stringify(legacyEntry.file)};function tryImport(retries) {if (window.System && typeof window.System.import === 'function') {window.System.import(entrySrc);} else if (retries > 0) {setTimeout(function() {tryImport(retries - 1);}, 100);} else {console.error('SystemJS failed to load.');}}tryImport(100);};document.body.appendChild(n);}();`;
 
 function getImportedChunks(manifest, entry) {

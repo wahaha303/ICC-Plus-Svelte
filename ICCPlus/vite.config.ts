@@ -16,7 +16,11 @@ export default defineConfig({
         'edge >= 15',
         'android >= 7',
       ],
-      additionalLegacyPolyfills: ['core-js/features/dom-collections'],
+      additionalLegacyPolyfills: [
+        'core-js/features/dom-collections',
+        'whatwg-fetch',
+        'abortcontroller-polyfill/dist/polyfill-patch-fetch',
+      ],
     }),
   ],
   resolve: {

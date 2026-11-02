@@ -1,7 +1,7 @@
 {
   "name": "iccplus_viewer",
   "private": true,
-  "version": "2.10.16",
+  "version": "2.10.17",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -46,6 +46,7 @@
     "@smui/textfield": "^9.0.6",
     "@smui/tooltip": "^9.0.6",
     "@smui/top-app-bar": "^9.0.6",
+    "abortcontroller-polyfill": "^1.7.8",
     "bootstrap": "^5.3.8",
     "cropperjs": "1.7.0",
     "dompurify": "^3.4.17",
@@ -56,6 +57,7 @@
     "ress": "^6.0.0",
     "svelte": "^5.57.2",
     "svelte-material-ui": "^9.0.6",
+    "whatwg-fetch": "^3.6.20",
     "zod": "^4.6.7"
   }
 }

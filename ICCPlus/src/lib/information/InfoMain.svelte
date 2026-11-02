@@ -224,6 +224,12 @@
     }];
     const changelogList = [{
         open: true,
+        title: `v2.10.17 / ${getDate('2026-11-02T14:00:00Z')}`,
+        text: `<span style="color: green">Miscellaneous</span>
+        - Fixed issue where ICC Plus did not work properly in legacy browsers.
+        `
+    }, {
+        open: false,
         title: `v2.10.16 / ${getDate('2026-10-30T15:00:00Z')}`,
         text: `<span style="color: green">Choice</span>
         - Fixed issue where deselected choices that were force-selected but allowed to be deselected became selected again when loading build.

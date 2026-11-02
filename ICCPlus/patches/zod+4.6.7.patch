@@ -1,0 +1,13 @@
+diff --git a/node_modules/zod/v4/core/util.js b/node_modules/zod/v4/core/util.js
+index b53c7a0..22814cd 100644
+--- a/node_modules/zod/v4/core/util.js
++++ b/node_modules/zod/v4/core/util.js
+@@ -405,7 +405,7 @@ export const NUMBER_FORMAT_RANGES = /*@__PURE__*/ (() => ({
+     float32: [-3.4028234663852886e38, 3.4028234663852886e38],
+     float64: [-Number.MAX_VALUE, Number.MAX_VALUE],
+ }))();
+-export const BIGINT_FORMAT_RANGES = {
++export const BIGINT_FORMAT_RANGES = typeof BigInt === 'undefined' ? {} : {
+     int64: [/* @__PURE__*/ BigInt("-9223372036854775808"), /* @__PURE__*/ BigInt("9223372036854775807")],
+     uint64: [/* @__PURE__*/ BigInt(0), /* @__PURE__*/ BigInt("18446744073709551615")],
+ };
